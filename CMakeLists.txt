@@ -557,6 +557,7 @@ elseif (${GMIC_QT_HOST} STREQUAL "paintdotnet")
 elseif (${GMIC_QT_HOST} STREQUAL "digikam")
 
     include(GNUInstallDirs)
+    include(${CMAKE_INSTALL_FULL_LIBDIR}/cmake/DigikamPlugin/DigikamPluginConfig.cmake)
 
     find_package(DigikamCore CONFIG REQUIRED)
 
@@ -605,23 +606,8 @@ elseif (${GMIC_QT_HOST} STREQUAL "digikam")
 
     # --- Install rules ---------------------------------
 
-    get_target_property(QT_QMAKE_EXECUTABLE ${Qt5Core_QMAKE_EXECUTABLE} IMPORTED_LOCATION)
-
-    if(NOT QT_QMAKE_EXECUTABLE)
-        message(FATAL_ERROR "qmake is not found.")
-    endif()
-
-    # execute the command "qmake -query QT_INSTALL_PLUGINS" to get the path of plugins dir.
-    execute_process(COMMAND ${QT_QMAKE_EXECUTABLE} -query QT_INSTALL_PLUGINS
-                    OUTPUT_VARIABLE QT_PLUGINS_DIR
-                    OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-    if(NOT QT_PLUGINS_DIR)
-        message(FATAL_ERROR "Qt5 plugin directory cannot be detected.")
-    endif()
-
     install(TARGETS Editor_GmicQt_Plugin
-            DESTINATION ${QT_PLUGINS_DIR}/digikam/editor)
+            DESTINATION ${DPluginEditorInstallPath}/)
 
 else()
     message(FATAL_ERROR "GMIC_QT_HOST is not defined as gimp, krita, none, paintdotnet, or digikam")
