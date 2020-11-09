@@ -67,10 +67,10 @@ void convertCImgtoDImg(const cimg_library::CImg<float>& in, DImg& out, bool sixt
 {
     Q_ASSERT_X(in.spectrum() <= 4, "ImageConverter::convert()", QString("bad input spectrum (%1)").arg(in.spectrum()).toLatin1());
 
-    bool alpha = (in.spectrum() == 4 || in.spectrum() == 2);
+    bool alpha = ((in.spectrum() == 4) || (in.spectrum() == 2));
     out        = DImg(in.width(), in.height(), sixteenBit, alpha);
 
-    if (in.spectrum() == 4) // RGB + Alpha
+    if      (in.spectrum() == 4) // RGB + Alpha
     {
         qDebug() << "GMicQt: convert CImg to DImg: RGB+Alpha image" << "(" << (sixteenBit+1) * 8 << "bits)";
 
@@ -336,10 +336,10 @@ void gmic_qt_get_cropped_images(gmic_list<gmic_pixel_type>& images,
     QByteArray ba = name.toUtf8();
     gmic_image<char>::string(ba.constData()).move_to(imageNames[0]);
 
-    const int ix = static_cast<int>(entireImage ? 0 : std::floor(x * input_image->width()));
-    const int iy = static_cast<int>(entireImage ? 0 : std::floor(y * input_image->height()));
-    const int iw = entireImage ? input_image->width()  : std::min(static_cast<int>(input_image->width()  - ix), static_cast<int>(1 + std::ceil(width  * input_image->width())));
-    const int ih = entireImage ? input_image->height() : std::min(static_cast<int>(input_image->height() - iy), static_cast<int>(1 + std::ceil(height * input_image->height())));
+    const int ix = static_cast<int>(entireImage ? 0                     : std::floor(x * input_image->width()));
+    const int iy = static_cast<int>(entireImage ? 0                     : std::floor(y * input_image->height()));
+    const int iw = entireImage                  ? input_image->width()  : std::min(static_cast<int>(input_image->width()  - ix), static_cast<int>(1 + std::ceil(width  * input_image->width())));
+    const int ih = entireImage                  ? input_image->height() : std::min(static_cast<int>(input_image->height() - iy), static_cast<int>(1 + std::ceil(height * input_image->height())));
 
     convertDImgtoCImg(input_image->copy(ix, iy, iw, ih), images[0]);
 }
