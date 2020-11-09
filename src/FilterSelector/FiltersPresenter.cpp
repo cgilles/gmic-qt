@@ -29,6 +29,7 @@
 #include "FilterSelector/FavesModelReader.h"
 #include "FilterSelector/FavesModelWriter.h"
 #include "FilterSelector/FiltersModelReader.h"
+#include "FilterTextTranslator.h"
 #include "FiltersVisibilityMap.h"
 #include "Globals.h"
 #include "GmicStdlib.h"
@@ -53,10 +54,10 @@ void FiltersPresenter::setFiltersView(FiltersView * filtersView)
     _filtersView->disconnect(this);
   }
   _filtersView = filtersView;
-  connect(_filtersView, SIGNAL(filterSelected(QString)), this, SLOT(onFilterChanged(QString)));
-  connect(_filtersView, SIGNAL(faveRenamed(QString, QString)), this, SLOT(onFaveRenamed(QString, QString)));
-  connect(_filtersView, SIGNAL(faveRemovalRequested(QString)), this, SLOT(removeFave(QString)));
-  connect(_filtersView, SIGNAL(faveAdditionRequested(QString)), this, SIGNAL(faveAdditionRequested(QString)));
+  connect(_filtersView, &FiltersView::filterSelected, this, &FiltersPresenter::onFilterChanged);
+  connect(_filtersView, &FiltersView::faveRenamed, this, &FiltersPresenter::onFaveRenamed);
+  connect(_filtersView, &FiltersView::faveRemovalRequested, this, &FiltersPresenter::removeFave);
+  connect(_filtersView, &FiltersView::faveAdditionRequested, this, &FiltersPresenter::faveAdditionRequested);
 }
 
 void FiltersPresenter::rebuildFilterView()
@@ -176,13 +177,15 @@ void FiltersPresenter::addSelectedFilterAsNewFave(const QList<QString> & default
   fave.setDefaultValues(defaultValues);
   fave.setDefaultVisibilities(visibilityStates);
 
+  bool filterAlreadyHasAFave = false;
   if (_filtersModel.contains(_currentFilter.hash)) {
     const FiltersModel::Filter & filter = _filtersModel.getFilterFromHash(_currentFilter.hash);
-    fave.setName(_favesModel.uniqueName(filter.name(), QString()));
+    fave.setName(_favesModel.uniqueName(FilterTextTranslator::translate(filter.name()), QString()));
     fave.setCommand(filter.command());
     fave.setPreviewCommand(filter.previewCommand());
     fave.setOriginalHash(filter.hash());
     fave.setOriginalName(filter.name());
+    filterAlreadyHasAFave = filterExistsAsFave(filter.hash());
   } else {
     FavesModel::const_iterator faveIterator = _favesModel.findFaveFromHash(_currentFilter.hash);
     if (faveIterator != _favesModel.cend()) {
@@ -193,6 +196,7 @@ void FiltersPresenter::addSelectedFilterAsNewFave(const QList<QString> & default
       fave.setOriginalHash(originalFave.originalHash());
       fave.setOriginalName(originalFave.originalName());
     }
+    filterAlreadyHasAFave = true;
   }
 
   fave.build();
@@ -204,8 +208,11 @@ void FiltersPresenter::addSelectedFilterAsNewFave(const QList<QString> & default
   _filtersView->addFave(fave.name(), fave.hash());
   _filtersView->sortFaves();
   _filtersView->selectFave(fave.hash());
-  onFilterChanged(fave.hash());
   saveFaves();
+  onFilterChanged(fave.hash());
+  if (filterAlreadyHasAFave) {
+    editSelectedFaveName();
+  }
 }
 
 void FiltersPresenter::applySearchCriterion(const QString & text)
@@ -214,7 +221,7 @@ void FiltersPresenter::applySearchCriterion(const QString & text)
   if ((!text.isEmpty() && previousText.isEmpty()) || (text.isEmpty() && previousText.isEmpty())) {
     _filtersView->preserveExpandedFolders();
   }
-  QList<QString> keywords = text.split(QChar(' '), QString::SkipEmptyParts);
+  QList<QString> keywords = text.split(QChar(' '), QT_SKIP_EMPTY_PARTS);
 
   rebuildFilterViewWithSelection(keywords);
   if (text.isEmpty()) {
@@ -327,9 +334,9 @@ void FiltersPresenter::onFaveRenamed(const QString & hash, const QString & name)
   if (newName.isEmpty()) {
     if (_filtersModel.contains(fave.originalHash())) {
       const FiltersModel::Filter & originalFilter = _filtersModel.getFilterFromHash(fave.originalHash());
-      newName = _favesModel.uniqueName(originalFilter.name(), QString());
+      newName = _favesModel.uniqueName(FilterTextTranslator::translate(originalFilter.name()), QString());
     } else {
-      newName = _favesModel.uniqueName("Unknown filter", QString());
+      newName = _favesModel.uniqueName(tr("Unknown filter"), QString());
     }
   } else {
     newName = _favesModel.uniqueName(newName, QString());
@@ -350,6 +357,8 @@ void FiltersPresenter::onFaveRenamed(const QString & hash, const QString & name)
   _filtersView->updateFaveItem(hash, fave.hash(), fave.name());
   _filtersView->sortFaves();
   saveFaves();
+  setCurrentFilter(fave.hash());
+  emit faveNameChanged(newName);
 }
 
 void FiltersPresenter::toggleSelectionMode(bool on)
@@ -434,6 +443,16 @@ void FiltersPresenter::setCurrentFilter(const QString & hash)
   } else {
     _currentFilter.clear();
   }
+}
+
+bool FiltersPresenter::filterExistsAsFave(const QString filterHash)
+{
+  for (const FavesModel::Fave & fave : _favesModel) {
+    if (fave.originalHash() == filterHash) {
+      return true;
+    }
+  }
+  return false;
 }
 
 void FiltersPresenter::Filter::clear()

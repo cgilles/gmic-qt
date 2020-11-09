@@ -1,6 +1,6 @@
 /** -*- mode: c++ ; c-basic-offset: 2 -*-
  *
- *  @file PreviewMode.h
+ *  @file LanguageSettings.h
  *
  *  Copyright 2017 Sebastien Fourey
  *
@@ -22,24 +22,21 @@
  *  along with gmic_qt.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef GMIC_QT_PREVIEWMODE_H
-#define GMIC_QT_PREVIEWMODE_H
+#ifndef GMIC_QT_LANGUAGESETTINGS_H
+#define GMIC_QT_LANGUAGESETTINGS_H
 
-namespace GmicQt
-{
-enum PreviewMode
-{
-  FirstOutput,
-  SecondOutput,
-  ThirdOutput,
-  FourthOutput,
-  First2SecondOutput,
-  First2ThirdOutput,
-  First2FourthOutput,
-  AllOutputs,
-  UnspecifiedPreviewMode = 100
+#include <QMap>
+#include <QString>
+
+class LanguageSettings {
+public:
+  LanguageSettings() = delete;
+  static const QMap<QString, QString> & availableLanguages();
+  static QString configuredTranslator();
+  static QString systemDefaultAndAvailableLanguageCode();
+  static void installTranslators();
+
+private:
 };
-extern const PreviewMode DefaultPreviewMode;
-}
 
-#endif // GMIC_QT_PREVIEWMODE_H
+#endif // GMIC_QT_LANGUAGESETTINGS_H

@@ -36,6 +36,7 @@
 #include "FilterSelector/FiltersView/FilterTreeItem.h"
 #include "FilterSelector/FiltersView/FilterTreeItemDelegate.h"
 #include "FilterSelector/FiltersVisibilityMap.h"
+#include "FilterTextTranslator.h"
 #include "Globals.h"
 #include "ui_filtersview.h"
 
@@ -93,7 +94,7 @@ void FiltersView::enableModel()
     QString title = QString("_%1_").arg(headerItem->text());
     QFont font;
     QFontMetrics fm(font);
-#if QT_VERSION_GTE(5,11)
+#if QT_VERSION_GTE(5, 11)
     int w = fm.horizontalAdvance(title);
 #else
     int w = fm.width(title);
@@ -339,7 +340,11 @@ bool FiltersView::eventFilter(QObject * watched, QEvent * event)
       FilterTreeItem * item = selectedItem();
       if (item && item->isFave()) {
         QMessageBox::StandardButton button;
-        button = QMessageBox::question(this, tr("Remove fave"), QString(tr("Do you really want to remove the following fave?\n\n%1\n")).arg(item->text()));
+        button = QMessageBox::question(this,                                                                                      //
+                                       tr("Remove fave"),                                                                         //
+                                       QString(tr("Do you really want to remove the following fave?\n\n%1\n")).arg(item->text()), //
+                                       QMessageBox::Yes | QMessageBox::No,                                                        //
+                                       QMessageBox::Yes);
         if (button == QMessageBox::Yes) {
           emit faveRemovalRequested(item->hash());
           return true;
@@ -564,9 +569,10 @@ QStandardItem * FiltersView::createFolder(QStandardItem * parent, QList<QString>
   }
 
   // Look for already existing base folder in parent
+  QString translatedFirstFolderText = FilterTreeAbstractItem::removeWarningPrefix(FilterTextTranslator::translate(path.front()));
   for (int row = 0; row < parent->rowCount(); ++row) {
     auto folder = dynamic_cast<FilterTreeFolder *>(parent->child(row));
-    if (folder && (folder->text() == FilterTreeAbstractItem::removeWarningPrefix(path.front()))) {
+    if (folder && (folder->text() == translatedFirstFolderText)) {
       path.pop_front();
       return createFolder(folder, path);
     }
@@ -589,9 +595,10 @@ QStandardItem * FiltersView::getFolderFromPath(QStandardItem * parent, QList<QSt
   if (path.isEmpty()) {
     return parent;
   }
+  QString translatedFirstFolderText = FilterTreeAbstractItem::removeWarningPrefix(FilterTextTranslator::translate(path.front()));
   for (int row = 0; row < parent->rowCount(); ++row) {
     auto folder = dynamic_cast<FilterTreeFolder *>(parent->child(row));
-    if (folder && (folder->text() == FilterTreeAbstractItem::removeWarningPrefix(path.front()))) {
+    if (folder && (folder->text() == translatedFirstFolderText)) {
       path.pop_front();
       return getFolderFromPath(folder, path);
     }

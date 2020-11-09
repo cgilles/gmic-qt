@@ -31,16 +31,16 @@
 #include <QString>
 #include <QThread>
 #include <QTimer>
-#include <QTranslator>
 #include <cstring>
 #include "Common.h"
 #include "DialogSettings.h"
 #include "Globals.h"
 #include "HeadlessProcessor.h"
+#include "LanguageSettings.h"
 #include "Logger.h"
 #include "MainWindow.h"
 #include "Updater.h"
-#include "Widgets/LanguageSelectionWidget.h"
+#include "Widgets/InOutPanel.h"
 #include "Widgets/ProgressInfoWindow.h"
 #include "gmic.h"
 #ifdef _IS_MACOS_
@@ -51,16 +51,21 @@
 
 namespace GmicQt
 {
-const InputMode DefaultInputMode = Active;
-const OutputMode DefaultOutputMode = InPlace;
+InputMode DefaultInputMode = Active;
+OutputMode DefaultOutputMode = InPlace;
+PreviewMode DefaultPreviewMode = FirstOutput;
 const OutputMessageMode DefaultOutputMessageMode = Quiet;
-
 const QString & gmicVersionString()
 {
   static QString value = QString("%1.%2.%3").arg(gmic_version / 100).arg((gmic_version / 10) % 10).arg(gmic_version % 10);
   return value;
 }
 } // namespace GmicQt
+
+namespace
+{
+bool pluginProcessingValidAndAccepted = false;
+}
 
 int launchPlugin()
 {
@@ -115,14 +120,7 @@ int launchPlugin()
   QCoreApplication::setApplicationName(GMIC_QT_APPLICATION_NAME);
   QCoreApplication::setAttribute(Qt::AA_DontUseNativeMenuBar);
   DialogSettings::loadSettings(GmicQt::GuiApplication);
-
-  // Translate according to current locale or configured language
-  QString lang = LanguageSelectionWidget::configuredTranslator();
-  if (!lang.isEmpty() && (lang != "en")) {
-    auto translator = new QTranslator(&app);
-    translator->load(QString(":/translations/%1.qm").arg(lang));
-    QApplication::installTranslator(translator);
-  }
+  LanguageSettings::installTranslators();
   TIMING;
   MainWindow mainWindow;
   TIMING;
@@ -132,7 +130,9 @@ int launchPlugin()
     mainWindow.show();
   }
   TIMING;
-  return QApplication::exec();
+  int status = QApplication::exec();
+  pluginProcessingValidAndAccepted = mainWindow.isAccepted();
+  return status;
 }
 
 int launchPluginHeadlessUsingLastParameters()
@@ -153,21 +153,18 @@ int launchPluginHeadlessUsingLastParameters()
 
   DialogSettings::loadSettings(GmicQt::GuiApplication);
   Logger::setMode(DialogSettings::outputMessageMode());
-  // Translate according to current locale or configured language
-  QString lang = LanguageSelectionWidget::configuredTranslator();
-  if (!lang.isEmpty() && (lang != "en")) {
-    auto translator = new QTranslator(&app);
-    translator->load(QString(":/translations/%1.qm").arg(lang));
-    QCoreApplication::installTranslator(translator);
-  }
+  LanguageSettings::installTranslators();
 
   HeadlessProcessor processor;
   ProgressInfoWindow progressWindow(&processor);
   if (processor.command().isEmpty()) {
+    pluginProcessingValidAndAccepted = false;
     return 0;
   }
   processor.startProcessing();
-  return QApplication::exec();
+  int status = QApplication::exec();
+  pluginProcessingValidAndAccepted = processor.processingCompletedProperly();
+  return status;
 }
 
 int launchPluginHeadless(const char * command, GmicQt::InputMode input, GmicQt::OutputMode output)
@@ -194,5 +191,27 @@ int launchPluginHeadless(const char * command, GmicQt::InputMode input, GmicQt::
   idle.setSingleShot(true);
   QObject::connect(&idle, SIGNAL(timeout()), &headlessProcessor, SLOT(startProcessing()));
   idle.start();
-  return QCoreApplication::exec();
+  int status = QCoreApplication::exec();
+  pluginProcessingValidAndAccepted = headlessProcessor.processingCompletedProperly();
+  return status;
+}
+
+void disableOutputMode(GmicQt::OutputMode mode)
+{
+  InOutPanel::disableOutputMode(mode);
+}
+
+void disableInputMode(GmicQt::InputMode mode)
+{
+  InOutPanel::disableInputMode(mode);
+}
+
+void disablePreviewMode(GmicQt::PreviewMode mode)
+{
+  InOutPanel::disablePreviewMode(mode);
+}
+
+bool pluginDialogWasAccepted()
+{
+  return pluginProcessingValidAndAccepted;
 }

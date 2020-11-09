@@ -25,18 +25,17 @@
 #ifndef GMIC_QT_GMICPROCESSOR_H
 #define GMIC_QT_GMICPROCESSOR_H
 
+#include <QElapsedTimer>
 #include <QList>
 #include <QObject>
 #include <QSettings>
 #include <QSignalMapper>
 #include <QString>
 #include <QStringList>
-#include <QTime>
 #include <QTimer>
 #include <QVector>
 #include <deque>
 #include "InputOutputState.h"
-#include "PreviewMode.h"
 #include "gmic_qt.h"
 class FilterThread;
 class FilterSyncRunner;
@@ -107,6 +106,8 @@ public:
 
   void setGmicStatusQuotedParameters(const QString & v);
 
+  int completedFullImageProcessingCount() const;
+
 public slots:
   void cancel();
 
@@ -149,8 +150,9 @@ private:
   QString _gmicStatusQuotedParameters;
   QString _lastAppliedCommandEnv;
   GmicQt::InputOutputState _lastAppliedCommandInOutState;
-  QTime _filterExecutionTime;
+  QElapsedTimer _filterExecutionTime;
   std::deque<int> _lastFilterPreviewExecutionDurations;
+  int _completeFullImageProcessingCount;
 };
 
 #endif // GMIC_QT_GMICPROCESSOR_H

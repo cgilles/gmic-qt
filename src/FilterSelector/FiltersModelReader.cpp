@@ -34,9 +34,9 @@
 #include "Common.h"
 #include "FilterSelector/FiltersModel.h"
 #include "Globals.h"
+#include "LanguageSettings.h"
 #include "Logger.h"
 #include "Utils.h"
-#include "Widgets/LanguageSelectionWidget.h"
 #include "gmic_qt.h"
 #include "gmic.h"
 
@@ -49,7 +49,7 @@ void FiltersModelReader::parseFiltersDefinitions(QByteArray & stdlibArray)
   stdlib.open(QBuffer::ReadOnly | QBuffer::Text);
   QList<QString> filterPath;
 
-  QString language = LanguageSelectionWidget::configuredTranslator();
+  QString language = LanguageSettings::configuredTranslator();
   if (language.isEmpty()) {
     language = "void";
   }
@@ -195,7 +195,7 @@ void FiltersModelReader::parseFiltersDefinitions(QByteArray & stdlibArray)
   // Remove hidden filters from the model
   for (const QString & path : hiddenPaths) {
     const size_t count = _model.filterCount();
-    QList<QString> pathList = path.split("/", QString::SkipEmptyParts);
+    QList<QString> pathList = path.split("/", QT_SKIP_EMPTY_PARTS);
     _model.removePath(pathList);
     if (_model.filterCount() == count) {
       Logger::warning(QString("While hiding filter, name or path not found: \"%1\"").arg(path));
@@ -245,10 +245,10 @@ GmicQt::InputMode FiltersModelReader::symbolToInputMode(const QString & str)
     return GmicQt::ActiveAndBelow;
   case 'V':
   case 'v':
-    return GmicQt::AllVisibles;
+    return GmicQt::AllVisible;
   case 'I':
   case 'i':
-    return GmicQt::AllInvisibles;
+    return GmicQt::AllInvisible;
   default:
     Logger::warning(QString("'%1' is not recognized as a default input mode").arg(str));
     return GmicQt::UnspecifiedInputMode;

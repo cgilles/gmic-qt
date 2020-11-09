@@ -45,6 +45,7 @@
 #include "FilterSelector/FavesModelReader.h"
 #include "FilterSelector/FiltersPresenter.h"
 #include "FilterSelector/FiltersVisibilityMap.h"
+#include "FilterTextTranslator.h"
 #include "Globals.h"
 #include "GmicStdlib.h"
 #include "IconLoader.h"
@@ -55,6 +56,8 @@
 #include "Utils.h"
 #include "ui_mainwindow.h"
 #include "gmic.h"
+
+bool MainWindow::_isAccepted = false;
 
 //
 // TODO : Handle window maximization properly (Windows as well as some Linux desktops)
@@ -149,6 +152,11 @@ MainWindow::MainWindow(QWidget * parent) : QWidget(parent), ui(new Ui::MainWindo
   ui->verticalSplitter->setStretchFactor(0, 5);
   ui->verticalSplitter->setStretchFactor(0, 1);
 
+  if (!ui->inOutSelector->hasActiveControls()) {
+    ui->vSplitterLine->hide();
+    ui->inOutSelector->hide();
+  }
+
   QPalette p = QGuiApplication::palette();
   DialogSettings::UnselectedFilterTextColor = p.color(QPalette::Disabled, QPalette::WindowText);
 
@@ -175,6 +183,7 @@ MainWindow::MainWindow(QWidget * parent) : QWidget(parent), ui(new Ui::MainWindo
   QSize layersExtent = LayersExtentProxy::getExtent(ui->inOutSelector->inputMode());
   ui->previewWidget->setFullImageSize(layersExtent);
   _lastPreviewKeypointBurstUpdateTime = 0;
+  _isAccepted = false;
 
   TIMING;
   makeConnections();
@@ -479,7 +488,7 @@ void MainWindow::makeConnections()
   connect(_filtersPresenter, SIGNAL(filterSelectionChanged()), this, SLOT(onFilterSelectionChanged()));
 
   connect(ui->pbOk, SIGNAL(clicked(bool)), this, SLOT(onOkClicked()));
-  connect(ui->pbCancel, SIGNAL(clicked(bool)), this, SLOT(onCloseClicked()));
+  connect(ui->pbCancel, SIGNAL(clicked(bool)), this, SLOT(onCancelClicked()));
   connect(ui->pbApply, SIGNAL(clicked(bool)), this, SLOT(onApplyClicked()));
   connect(ui->tbResetParameters, SIGNAL(clicked(bool)), this, SLOT(onReset()));
 
@@ -499,8 +508,8 @@ void MainWindow::makeConnections()
 
   connect(ui->tbAddFave, SIGNAL(clicked(bool)), this, SLOT(onAddFave()));
   connect(_filtersPresenter, SIGNAL(faveAdditionRequested(QString)), this, SLOT(onAddFave()));
-  connect(ui->tbRemoveFave, SIGNAL(clicked(bool)), this, SLOT(onRemoveFave()));
-  connect(ui->tbRenameFave, SIGNAL(clicked(bool)), this, SLOT(onRenameFave()));
+  connect(ui->tbRemoveFave, &QToolButton::clicked, this, &MainWindow::onRemoveFave);
+  connect(ui->tbRenameFave, &QToolButton::clicked, this, &MainWindow::onRenameFave);
 
   connect(ui->inOutSelector, SIGNAL(inputModeChanged(GmicQt::InputMode)), this, SLOT(onInputModeChanged(GmicQt::InputMode)));
   connect(ui->inOutSelector, SIGNAL(previewModeChanged(GmicQt::PreviewMode)), ui->previewWidget, SLOT(sendUpdateRequest()));
@@ -514,11 +523,12 @@ void MainWindow::makeConnections()
 
   connect(ui->tbSelectionMode, SIGNAL(toggled(bool)), this, SLOT(onFiltersSelectionModeToggled(bool)));
 
-  connect(&_processor, SIGNAL(previewImageAvailable()), this, SLOT(onPreviewImageAvailable()));
-  connect(&_processor, SIGNAL(previewCommandFailed(QString)), this, SLOT(onPreviewError(QString)));
-  connect(&_processor, SIGNAL(fullImageProcessingFailed(QString)), this, SLOT(onFullImageProcessingError(QString)));
-  connect(&_processor, SIGNAL(fullImageProcessingDone()), this, SLOT(onFullImageProcessingDone()));
-  connect(&_processor, SIGNAL(aboutToSendImagesToHost()), ui->progressInfoWidget, SLOT(stopAnimationAndHide()));
+  connect(&_processor, &GmicProcessor::previewImageAvailable, this, &MainWindow::onPreviewImageAvailable);
+  connect(&_processor, &GmicProcessor::previewCommandFailed, this, &MainWindow::onPreviewError);
+  connect(&_processor, &GmicProcessor::fullImageProcessingFailed, this, &MainWindow::onFullImageProcessingError);
+  connect(&_processor, &GmicProcessor::fullImageProcessingDone, this, &MainWindow::onFullImageProcessingDone);
+  connect(&_processor, &GmicProcessor::aboutToSendImagesToHost, ui->progressInfoWidget, &ProgressInfoWidget::stopAnimationAndHide);
+  connect(_filtersPresenter, &FiltersPresenter::faveNameChanged, this, &MainWindow::setFilterName);
 }
 
 void MainWindow::onPreviewUpdateRequested()
@@ -623,6 +633,16 @@ void MainWindow::onParametersChanged()
   ui->previewWidget->sendUpdateRequest();
 }
 
+bool MainWindow::isAccepted()
+{
+  return _isAccepted;
+}
+
+void MainWindow::setFilterName(const QString & text)
+{
+  ui->filterName->setText(QString("<b>%1</b>").arg(text));
+}
+
 void MainWindow::processImage()
 {
   // Abort any already running thread
@@ -692,6 +712,7 @@ void MainWindow::onFullImageProcessingDone()
   ui->filterParams->setValues(_processor.gmicStatus(), false);
   ui->filterParams->setVisibilityStates(_processor.parametersVisibilityStates());
   if ((_pendingActionAfterCurrentProcessing == OkAction || _pendingActionAfterCurrentProcessing == CloseAction)) {
+    _isAccepted = (_pendingActionAfterCurrentProcessing == OkAction);
     close();
   } else {
     // Extent cache has been cleared by the GmicProcessor
@@ -729,17 +750,20 @@ void MainWindow::onApplyClicked()
 void MainWindow::onOkClicked()
 {
   if (_filtersPresenter->currentFilter().isNoApplyFilter()) {
+    _isAccepted = _processor.completedFullImageProcessingCount();
     close();
+    return;
   }
   if (_okButtonShouldApply) {
     _pendingActionAfterCurrentProcessing = OkAction;
     processImage();
   } else {
+    _isAccepted = _processor.completedFullImageProcessingCount();
     close();
   }
 }
 
-void MainWindow::onCloseClicked()
+void MainWindow::onCancelClicked()
 {
   TIMING;
   if (_processor.isProcessing() && confirmAbortProcessingOnCloseRequest()) {
@@ -1018,9 +1042,13 @@ void MainWindow::activateFilter(bool resetZoom)
     } else {
       ui->previewWidget->setKeypoints(ui->filterParams->keypoints());
     }
-    ui->filterName->setText(QString("<b>%1</b>").arg(filter.name));
+    setFilterName(FilterTextTranslator::translate((filter.name)));
     ui->inOutSelector->enable();
-    ui->inOutSelector->show();
+    if (ui->inOutSelector->hasActiveControls()) {
+      ui->inOutSelector->show();
+    } else {
+      ui->inOutSelector->hide();
+    }
 
     GmicQt::InputOutputState inOutState = ParametersCache::getInputOutputState(filter.hash);
     if (inOutState.inputMode == GmicQt::UnspecifiedInputMode) {

@@ -60,4 +60,12 @@ template <typename T> inline void unused(const T &, ...) {}
 
 #define QT_VERSION_GTE(MAJOR, MINOR) (((QT_VERSION_MAJOR == MAJOR) && (QT_VERSION_MINOR >= MINOR)) || (QT_VERSION_MAJOR > MAJOR))
 
+#if QT_VERSION_GTE(5, 14)
+#define QT_SKIP_EMPTY_PARTS Qt::SkipEmptyParts
+#define QT_KEEP_EMPTY_PARTS Qt::KeepEmptyParts
+#else
+#define QT_SKIP_EMPTY_PARTS QString::SkipEmptyParts
+#define QT_KEEP_EMPTY_PARTS QString::KeepEmptyParts
+#endif
+
 #endif // GMIC_QT_COMMON_H

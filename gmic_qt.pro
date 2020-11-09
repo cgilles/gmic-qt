@@ -19,6 +19,9 @@
 # Possible values are "on" or "off"
 !defined(LTO,var) { LTO=on }
 
+# Possible values are "on" or "off"
+!defined(TEST_FILTERS_QM,var) { TEST_FILTERS_QM=off }
+
 #
 #
 #
@@ -129,8 +132,6 @@ message("CImg version is" $$CIMG_VERSION)
    error("Version numbers of files 'gmic.h' (" $$GMIC_VERSION ") and 'CImg.h' (" $$CIMG_VERSION ") mismatch")
 }
 
-
-
 !isEmpty(PRERELEASE) {
   message( Prerelease date is $$PRERELEASE )
   DEFINES += gmic_prerelease="\\\"$$PRERELEASE\\\""
@@ -222,12 +223,7 @@ openmp:equals(COMPILER,"clang") {
     QMAKE_LFLAGS_RELEASE += -fopenmp=libomp
 }
 
-win32:equals(LTO,"on") {
-    message("Link Time Optimizer disabled (windows platform)")
-    LTO = off
-}
-
-!win32:CONFIG(release, debug|release):gcc|clang:equals(LTO,"on") {
+CONFIG(release, debug|release):gcc|clang:equals(LTO,"on") {
     message("Link Time Optimizer enabled")
     QMAKE_CXXFLAGS_RELEASE += -flto
     QMAKE_LFLAGS_RELEASE += -flto
@@ -276,6 +272,7 @@ HEADERS +=  \
   src/FilterSyncRunner.h \
   src/FilterThread.h \
   src/gmic_qt.h \
+  src/FilterTextTranslator.h \
   src/Globals.h \
   src/GmicStdlib.h \
   src/GmicProcessor.h \
@@ -289,9 +286,9 @@ HEADERS +=  \
   src/KeypointList.h \
   src/LayersExtentProxy.h \
   src/Logger.h \
+  src/LanguageSettings.h \
   src/MainWindow.h \
   src/ParametersCache.h \
-  src/PreviewMode.h \
   src/TimeLogger.h \
   src/Updater.h \
   src/Utils.h \
@@ -350,6 +347,7 @@ SOURCES += \
   src/FilterSyncRunner.cpp \
   src/FilterThread.cpp \
   src/gmic_qt.cpp \
+  src/FilterTextTranslator.cpp \
   src/Globals.cpp \
   src/GmicStdlib.cpp \
   src/GmicProcessor.cpp \
@@ -361,10 +359,10 @@ SOURCES += \
   src/InputOutputState.cpp \
   src/KeypointList.cpp \
   src/LayersExtentProxy.cpp \
+  src/LanguageSettings.cpp \
   src/Logger.cpp \
   src/MainWindow.cpp \
   src/ParametersCache.cpp \
-  src/PreviewMode.cpp \
   src/TimeLogger.cpp \
   src/Updater.cpp \
   src/Utils.cpp \
@@ -407,8 +405,11 @@ FORMS +=  ui/inoutpanel.ui \
           ui/filtersview.ui
 
 RESOURCES += gmic_qt.qrc translations.qrc
-equals( HOST, "none") {
+equals(HOST, "none") {
  RESOURCES += standalone.qrc
+}
+equals(TEST_FILTERS_QM, "on") {
+ RESOURCES += wip_translations.qrc
 }
 
 TRANSLATIONS = \
