@@ -1,0 +1,2324 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../highslide/highslide.css"/>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+    <title>G'MIC - GREYC's Magic for Image Computing: A Full-Featured Open-Source Framework for Image Processing - Reference Documentation</title>
+    <script src="../jquery-3.5.1.min.js"></script>
+    <script>var jQuery_3_5_1 = $.noConflict(true);</script>
+    <script>jQuery_3_5_1(function(){ jQuery_3_5_1("#include_header").load("../header1.html"); });</script>
+    <script>jQuery_3_5_1(function(){ jQuery_3_5_1("#include_footer").load("../footer.html"); });</script>
+
+  </head>
+
+  <body>
+    <div id="include_header"></div>
+
+    <div class="section_title"><p>Categories</p></div><div class="section_content">
+
+    <a id="top"></a>
+OULALALA
+
+    <h1 class="h1_reference"><a id="_3d_meshes"></a>3D Meshes:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="add3d.html#top"><span class="native_command">add3d</span></a></td>
+        <td><a href="animate3d.html#top">animate3d</a></td>
+        <td><a href="apply_camera3d.html#top">apply_camera3d</a></td>
+        <td><a href="apply_matrix3d.html#top">apply_matrix3d</a></td>
+        <td><a href="array3d.html#top">array3d</a></td>
+      </tr>
+      <tr>
+        <td><a href="arrow3d.html#top">arrow3d</a></td>
+        <td><a href="axes3d.html#top">axes3d</a></td>
+        <td><a href="boundingbox3d.html#top">boundingbox3d</a></td>
+        <td><a href="box3d.html#top">box3d</a></td>
+        <td><a href="center3d.html#top">center3d</a></td>
+      </tr>
+      <tr>
+        <td><a href="circle3d.html#top">circle3d</a></td>
+        <td><a href="circles3d.html#top">circles3d</a></td>
+        <td><a href="color3d.html#top"><span class="native_command">color3d</span></a></td>
+        <td><a href="colorcube3d.html#top">colorcube3d</a></td>
+        <td><a href="cone3d.html#top">cone3d</a></td>
+      </tr>
+      <tr>
+        <td><a href="cubes3d.html#top">cubes3d</a></td>
+        <td><a href="cup3d.html#top">cup3d</a></td>
+        <td><a href="cylinder3d.html#top">cylinder3d</a></td>
+        <td><a href="delaunay3d.html#top">delaunay3d</a></td>
+        <td><a href="distribution3d.html#top">distribution3d</a></td>
+      </tr>
+      <tr>
+        <td><a href="div3d.html#top"><span class="native_command">div3d</span></a></td>
+        <td><a href="double3d.html#top"><span class="native_command">double3d</span></a></td>
+        <td><a href="elevation3d.html#top"><span class="native_command">elevation3d</span></a></td>
+        <td><a href="empty3d.html#top">empty3d</a></td>
+        <td><a href="extrude3d.html#top">extrude3d</a></td>
+      </tr>
+      <tr>
+        <td><a href="focale3d.html#top"><span class="native_command">focale3d</span></a></td>
+        <td><a href="gaussians3d.html#top">gaussians3d</a></td>
+        <td><a href="gmic3d.html#top">gmic3d</a></td>
+        <td><a href="gyroid3d.html#top">gyroid3d</a></td>
+        <td><a href="histogram3d.html#top">histogram3d</a></td>
+      </tr>
+      <tr>
+        <td><a href="image6cube3d.html#top">image6cube3d</a></td>
+        <td><a href="imageblocks3d.html#top">imageblocks3d</a></td>
+        <td><a href="imagecube3d.html#top">imagecube3d</a></td>
+        <td><a href="imageplane3d.html#top">imageplane3d</a></td>
+        <td><a href="imagepyramid3d.html#top">imagepyramid3d</a></td>
+      </tr>
+      <tr>
+        <td><a href="imagerubik3d.html#top">imagerubik3d</a></td>
+        <td><a href="imagesphere3d.html#top">imagesphere3d</a></td>
+        <td><a href="isoline3d.html#top"><span class="native_command">isoline3d</span></a></td>
+        <td><a href="isosurface3d.html#top"><span class="native_command">isosurface3d</span></a></td>
+        <td><a href="label3d.html#top">label3d</a></td>
+      </tr>
+      <tr>
+        <td><a href="label_points3d.html#top">label_points3d</a></td>
+        <td><a href="lathe3d.html#top">lathe3d</a></td>
+        <td><a href="light3d.html#top"><span class="native_command">light3d</span></a></td>
+        <td><a href="line3d.html#top">line3d</a></td>
+        <td><a href="lissajous3d.html#top">lissajous3d</a></td>
+      </tr>
+      <tr>
+        <td><a href="mode3d.html#top"><span class="native_command">mode3d</span></a></td>
+        <td><a href="moded3d.html#top"><span class="native_command">moded3d</span></a></td>
+        <td><a href="mul3d.html#top"><span class="native_command">mul3d</span></a></td>
+        <td><a href="normalize3d.html#top">normalize3d</a></td>
+        <td><a href="opacity3d.html#top"><span class="native_command">opacity3d</span></a></td>
+      </tr>
+      <tr>
+        <td><a href="parametric3d.html#top">parametric3d</a></td>
+        <td><a href="pca_patch3d.html#top">pca_patch3d</a></td>
+        <td><a href="plane3d.html#top">plane3d</a></td>
+        <td><a href="point3d.html#top">point3d</a></td>
+        <td><a href="pointcloud3d.html#top">pointcloud3d</a></td>
+      </tr>
+      <tr>
+        <td><a href="pose3d.html#top">pose3d</a></td>
+        <td><a href="primitives3d.html#top">primitives3d</a></td>
+        <td><a href="projections3d.html#top">projections3d</a></td>
+        <td><a href="pyramid3d.html#top">pyramid3d</a></td>
+        <td><a href="quadrangle3d.html#top">quadrangle3d</a></td>
+      </tr>
+      <tr>
+        <td><a href="random3d.html#top">random3d</a></td>
+        <td><a href="reverse3d.html#top"><span class="native_command">reverse3d</span></a></td>
+        <td><a href="rotate3d.html#top"><span class="native_command">rotate3d</span></a></td>
+        <td><a href="rotation3d.html#top">rotation3d</a></td>
+        <td><a href="sierpinski3d.html#top">sierpinski3d</a></td>
+      </tr>
+      <tr>
+        <td><a href="size3d.html#top">size3d</a></td>
+        <td><a href="skeleton3d.html#top">skeleton3d</a></td>
+        <td><a href="snapshot3d.html#top">snapshot3d</a></td>
+        <td><a href="specl3d.html#top"><span class="native_command">specl3d</span></a></td>
+        <td><a href="specs3d.html#top"><span class="native_command">specs3d</span></a></td>
+      </tr>
+      <tr>
+        <td><a href="sphere3d.html#top"><span class="native_command">sphere3d</span></a></td>
+        <td><a href="spherical3d.html#top">spherical3d</a></td>
+        <td><a href="spline3d.html#top">spline3d</a></td>
+        <td><a href="split3d.html#top"><span class="native_command">split3d</span></a></td>
+        <td><a href="sprite3d.html#top">sprite3d</a></td>
+      </tr>
+      <tr>
+        <td><a href="sprites3d.html#top">sprites3d</a></td>
+        <td><a href="star3d.html#top">star3d</a></td>
+        <td><a href="streamline3d.html#top"><span class="native_command">streamline3d</span></a></td>
+        <td><a href="sub3d.html#top"><span class="native_command">sub3d</span></a></td>
+        <td><a href="superformula3d.html#top">superformula3d</a></td>
+      </tr>
+      <tr>
+        <td><a href="tensors3d.html#top">tensors3d</a></td>
+        <td><a href="text3d.html#top">text3d</a></td>
+        <td><a href="text_pointcloud3d.html#top">text_pointcloud3d</a></td>
+        <td><a href="texturize3d.html#top">texturize3d</a></td>
+        <td><a href="torus3d.html#top">torus3d</a></td>
+      </tr>
+      <tr>
+        <td><a href="triangle3d.html#top">triangle3d</a></td>
+        <td><a href="volume3d.html#top">volume3d</a></td>
+        <td><a href="weird3d.html#top">weird3d</a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="_3d_rendering"></a>3D Rendering:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="colordepth.html#top">colordepth</a></td>
+        <td><a href="colordepth_volume.html#top">colordepth_volume</a></td>
+        <td><a href="display_volume.html#top">display_volume</a></td>
+        <td><a href="jeje_boundingbox3d.html#top">jeje_boundingbox3d</a></td>
+        <td><a href="make_axis.html#top">make_axis</a></td>
+      </tr>
+      <tr>
+        <td><a href="render_volume.html#top">render_volume</a></td>
+        <td><a href="title.html#top">title</a></td>
+        <td><a href="view3d.html#top">view3d</a></td>
+        <td><a href="xlabel.html#top">xlabel</a></td>
+        <td><a href="ylabel.html#top">ylabel</a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="arrays_tiles_and_frames"></a>Arrays, Tiles and Frames:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="array.html#top">array</a></td>
+        <td><a href="array_fade.html#top">array_fade</a></td>
+        <td><a href="array_mirror.html#top">array_mirror</a></td>
+        <td><a href="array_random.html#top">array_random</a></td>
+        <td><a href="frame_blur.html#top">frame_blur</a></td>
+      </tr>
+      <tr>
+        <td><a href="frame_cube.html#top">frame_cube</a></td>
+        <td><a href="frame_fuzzy.html#top">frame_fuzzy</a></td>
+        <td><a href="frame_painting.html#top">frame_painting</a></td>
+        <td><a href="frame_pattern.html#top">frame_pattern</a></td>
+        <td><a href="frame_round.html#top">frame_round</a></td>
+      </tr>
+      <tr>
+        <td><a href="frame_seamless.html#top">frame_seamless</a></td>
+        <td><a href="frame_x.html#top">frame_x</a></td>
+        <td><a href="frame_xy.html#top">frame_xy</a></td>
+        <td><a href="frame_xyz.html#top">frame_xyz</a></td>
+        <td><a href="frame_y.html#top">frame_y</a></td>
+      </tr>
+      <tr>
+        <td><a href="imagegrid.html#top">imagegrid</a></td>
+        <td><a href="imagegrid_hexagonal.html#top">imagegrid_hexagonal</a></td>
+        <td><a href="imagegrid_triangular.html#top">imagegrid_triangular</a></td>
+        <td><a href="img2ascii.html#top">img2ascii</a></td>
+        <td><a href="linearize_tiles.html#top">linearize_tiles</a></td>
+      </tr>
+      <tr>
+        <td><a href="map_sprites.html#top">map_sprites</a></td>
+        <td><a href="pack.html#top">pack</a></td>
+        <td><a href="puzzle.html#top">puzzle</a></td>
+        <td><a href="quadratize_tiles.html#top">quadratize_tiles</a></td>
+        <td><a href="rotate_tiles.html#top">rotate_tiles</a></td>
+      </tr>
+      <tr>
+        <td><a href="shift_tiles.html#top">shift_tiles</a></td>
+        <td><a href="taquin.html#top">taquin</a></td>
+        <td><a href="tunnel.html#top">tunnel</a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="artistic"></a>Artistic:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="boxfitting.html#top">boxfitting</a></td>
+        <td><a href="brushify.html#top">brushify</a></td>
+        <td><a href="cartoon.html#top">cartoon</a></td>
+        <td><a href="color_ellipses.html#top">color_ellipses</a></td>
+        <td><a href="cubism.html#top">cubism</a></td>
+      </tr>
+      <tr>
+        <td><a href="draw_whirl.html#top">draw_whirl</a></td>
+        <td><a href="drawing.html#top">drawing</a></td>
+        <td><a href="drop_shadow.html#top">drop_shadow</a></td>
+        <td><a href="ellipsionism.html#top">ellipsionism</a></td>
+        <td><a href="fire_edges.html#top">fire_edges</a></td>
+      </tr>
+      <tr>
+        <td><a href="fractalize.html#top">fractalize</a></td>
+        <td><a href="glow.html#top">glow</a></td>
+        <td><a href="halftone.html#top">halftone</a></td>
+        <td><a href="hardsketchbw.html#top">hardsketchbw</a></td>
+        <td><a href="hearts.html#top">hearts</a></td>
+      </tr>
+      <tr>
+        <td><a href="houghsketchbw.html#top">houghsketchbw</a></td>
+        <td><a href="light_relief.html#top">light_relief</a></td>
+        <td><a href="lightrays.html#top">lightrays</a></td>
+        <td><a href="linify.html#top">linify</a></td>
+        <td><a href="mosaic.html#top">mosaic</a></td>
+      </tr>
+      <tr>
+        <td><a href="old_photo.html#top">old_photo</a></td>
+        <td><a href="pencilbw.html#top">pencilbw</a></td>
+        <td><a href="pixelsort.html#top">pixelsort</a></td>
+        <td><a href="polaroid.html#top">polaroid</a></td>
+        <td><a href="polygonize.html#top">polygonize</a></td>
+      </tr>
+      <tr>
+        <td><a href="poster_edges.html#top">poster_edges</a></td>
+        <td><a href="poster_hope.html#top">poster_hope</a></td>
+        <td><a href="rodilius.html#top">rodilius</a></td>
+        <td><a href="sketchbw.html#top">sketchbw</a></td>
+        <td><a href="sponge.html#top">sponge</a></td>
+      </tr>
+      <tr>
+        <td><a href="stained_glass.html#top">stained_glass</a></td>
+        <td><a href="stars.html#top">stars</a></td>
+        <td><a href="stencil.html#top">stencil</a></td>
+        <td><a href="stencilbw.html#top">stencilbw</a></td>
+        <td><a href="stylize.html#top">stylize</a></td>
+      </tr>
+      <tr>
+        <td><a href="tetris.html#top">tetris</a></td>
+        <td><a href="warhol.html#top">warhol</a></td>
+        <td><a href="weave.html#top">weave</a></td>
+        <td><a href="whirls.html#top">whirls</a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="blending_and_fading"></a>Blending and Fading:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="blend.html#top">blend</a></td>
+        <td><a href="blend_edges.html#top">blend_edges</a></td>
+        <td><a href="blend_fade.html#top">blend_fade</a></td>
+        <td><a href="blend_median.html#top">blend_median</a></td>
+        <td><a href="blend_seamless.html#top">blend_seamless</a></td>
+      </tr>
+      <tr>
+        <td><a href="fade_diamond.html#top">fade_diamond</a></td>
+        <td><a href="fade_linear.html#top">fade_linear</a></td>
+        <td><a href="fade_radial.html#top">fade_radial</a></td>
+        <td><a href="fade_x.html#top">fade_x</a></td>
+        <td><a href="fade_y.html#top">fade_y</a></td>
+      </tr>
+      <tr>
+        <td><a href="fade_z.html#top">fade_z</a></td>
+        <td><a href="sub_alpha.html#top">sub_alpha</a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="colors"></a>Colors:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="adjust_colors.html#top">adjust_colors</a></td>
+        <td><a href="apply_channels.html#top">apply_channels</a></td>
+        <td><a href="autoindex.html#top">autoindex</a></td>
+        <td><a href="bayer2rgb.html#top">bayer2rgb</a></td>
+        <td><a href="cmy2rgb.html#top">cmy2rgb</a></td>
+      </tr>
+      <tr>
+        <td><a href="cmyk2rgb.html#top">cmyk2rgb</a></td>
+        <td><a href="colorblind.html#top">colorblind</a></td>
+        <td><a href="colormap.html#top">colormap</a></td>
+        <td><a href="compose_channels.html#top">compose_channels</a></td>
+        <td><a href="deltaE.html#top">deltaE</a></td>
+      </tr>
+      <tr>
+        <td><a href="direction2rgb.html#top">direction2rgb</a></td>
+        <td><a href="ditheredbw.html#top">ditheredbw</a></td>
+        <td><a href="fill_color.html#top">fill_color</a></td>
+        <td><a href="gradient2rgb.html#top">gradient2rgb</a></td>
+        <td><a href="hcy2rgb.html#top">hcy2rgb</a></td>
+      </tr>
+      <tr>
+        <td><a href="hsi2rgb.html#top">hsi2rgb</a></td>
+        <td><a href="hsi82rgb.html#top">hsi82rgb</a></td>
+        <td><a href="hsl2rgb.html#top">hsl2rgb</a></td>
+        <td><a href="hsl82rgb.html#top">hsl82rgb</a></td>
+        <td><a href="hsv2rgb.html#top">hsv2rgb</a></td>
+      </tr>
+      <tr>
+        <td><a href="hsv82rgb.html#top">hsv82rgb</a></td>
+        <td><a href="int2rgb.html#top">int2rgb</a></td>
+        <td><a href="jzazbz2rgb.html#top">jzazbz2rgb</a></td>
+        <td><a href="jzazbz2xyz.html#top">jzazbz2xyz</a></td>
+        <td><a href="lab2lch.html#top">lab2lch</a></td>
+      </tr>
+      <tr>
+        <td><a href="lab2rgb.html#top">lab2rgb</a></td>
+        <td><a href="lab2srgb.html#top">lab2srgb</a></td>
+        <td><a href="lab2xyz.html#top">lab2xyz</a></td>
+        <td><a href="lab82rgb.html#top">lab82rgb</a></td>
+        <td><a href="lab82srgb.html#top">lab82srgb</a></td>
+      </tr>
+      <tr>
+        <td><a href="lch2lab.html#top">lch2lab</a></td>
+        <td><a href="lch2rgb.html#top">lch2rgb</a></td>
+        <td><a href="lch82rgb.html#top">lch82rgb</a></td>
+        <td><a href="lightness.html#top">lightness</a></td>
+        <td><a href="luminance.html#top">luminance</a></td>
+      </tr>
+      <tr>
+        <td><a href="lut_contrast.html#top">lut_contrast</a></td>
+        <td><a href="map_clut.html#top">map_clut</a></td>
+        <td><a href="mix_rgb.html#top">mix_rgb</a></td>
+        <td><a href="palette.html#top">palette</a></td>
+        <td><a href="pseudogray.html#top">pseudogray</a></td>
+      </tr>
+      <tr>
+        <td><a href="remove_opacity.html#top">remove_opacity</a></td>
+        <td><a href="replace_color.html#top">replace_color</a></td>
+        <td><a href="retinex.html#top">retinex</a></td>
+        <td><a href="rgb2bayer.html#top">rgb2bayer</a></td>
+        <td><a href="rgb2cmy.html#top">rgb2cmy</a></td>
+      </tr>
+      <tr>
+        <td><a href="rgb2cmyk.html#top">rgb2cmyk</a></td>
+        <td><a href="rgb2hcy.html#top">rgb2hcy</a></td>
+        <td><a href="rgb2hsi.html#top">rgb2hsi</a></td>
+        <td><a href="rgb2hsi8.html#top">rgb2hsi8</a></td>
+        <td><a href="rgb2hsl.html#top">rgb2hsl</a></td>
+      </tr>
+      <tr>
+        <td><a href="rgb2hsl8.html#top">rgb2hsl8</a></td>
+        <td><a href="rgb2hsv.html#top">rgb2hsv</a></td>
+        <td><a href="rgb2hsv8.html#top">rgb2hsv8</a></td>
+        <td><a href="rgb2int.html#top">rgb2int</a></td>
+        <td><a href="rgb2jzazbz.html#top">rgb2jzazbz</a></td>
+      </tr>
+      <tr>
+        <td><a href="rgb2lab.html#top">rgb2lab</a></td>
+        <td><a href="rgb2lab8.html#top">rgb2lab8</a></td>
+        <td><a href="rgb2lch.html#top">rgb2lch</a></td>
+        <td><a href="rgb2lch8.html#top">rgb2lch8</a></td>
+        <td><a href="rgb2luv.html#top">rgb2luv</a></td>
+      </tr>
+      <tr>
+        <td><a href="rgb2ryb.html#top">rgb2ryb</a></td>
+        <td><a href="rgb2srgb.html#top">rgb2srgb</a></td>
+        <td><a href="rgb2xyz.html#top">rgb2xyz</a></td>
+        <td><a href="rgb2xyz8.html#top">rgb2xyz8</a></td>
+        <td><a href="rgb2ycbcr.html#top">rgb2ycbcr</a></td>
+      </tr>
+      <tr>
+        <td><a href="rgb2yiq.html#top">rgb2yiq</a></td>
+        <td><a href="rgb2yiq8.html#top">rgb2yiq8</a></td>
+        <td><a href="rgb2yuv.html#top">rgb2yuv</a></td>
+        <td><a href="rgb2yuv8.html#top">rgb2yuv8</a></td>
+        <td><a href="ryb2rgb.html#top">ryb2rgb</a></td>
+      </tr>
+      <tr>
+        <td><a href="select_color.html#top">select_color</a></td>
+        <td><a href="sepia.html#top">sepia</a></td>
+        <td><a href="solarize.html#top">solarize</a></td>
+        <td><a href="split_colors.html#top">split_colors</a></td>
+        <td><a href="split_opacity.html#top">split_opacity</a></td>
+      </tr>
+      <tr>
+        <td><a href="srgb2lab.html#top">srgb2lab</a></td>
+        <td><a href="srgb2lab8.html#top">srgb2lab8</a></td>
+        <td><a href="srgb2rgb.html#top">srgb2rgb</a></td>
+        <td><a href="to_a.html#top">to_a</a></td>
+        <td><a href="to_color.html#top">to_color</a></td>
+      </tr>
+      <tr>
+        <td><a href="to_colormode.html#top">to_colormode</a></td>
+        <td><a href="to_gray.html#top">to_gray</a></td>
+        <td><a href="to_graya.html#top">to_graya</a></td>
+        <td><a href="to_pseudogray.html#top">to_pseudogray</a></td>
+        <td><a href="to_rgb.html#top">to_rgb</a></td>
+      </tr>
+      <tr>
+        <td><a href="to_rgba.html#top">to_rgba</a></td>
+        <td><a href="transfer_histogram.html#top">transfer_histogram</a></td>
+        <td><a href="transfer_pca.html#top">transfer_pca</a></td>
+        <td><a href="transfer_rgb.html#top">transfer_rgb</a></td>
+        <td><a href="wavelength_color.html#top">wavelength_color</a></td>
+      </tr>
+      <tr>
+        <td><a href="xyz2jzazbz.html#top">xyz2jzazbz</a></td>
+        <td><a href="xyz2lab.html#top">xyz2lab</a></td>
+        <td><a href="xyz2rgb.html#top">xyz2rgb</a></td>
+        <td><a href="xyz82rgb.html#top">xyz82rgb</a></td>
+        <td><a href="ycbcr2rgb.html#top">ycbcr2rgb</a></td>
+      </tr>
+      <tr>
+        <td><a href="yiq2rgb.html#top">yiq2rgb</a></td>
+        <td><a href="yiq82rgb.html#top">yiq82rgb</a></td>
+        <td><a href="yuv2rgb.html#top">yuv2rgb</a></td>
+        <td><a href="yuv82rgb.html#top">yuv82rgb</a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="control_flow"></a>Control Flow:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="apply_parallel.html#top">apply_parallel</a></td>
+        <td><a href="apply_parallel_channels.html#top">apply_parallel_channels</a></td>
+        <td><a href="apply_parallel_overlap.html#top">apply_parallel_overlap</a></td>
+        <td><a href="apply_tiles.html#top">apply_tiles</a></td>
+        <td><a href="apply_timeout.html#top">apply_timeout</a></td>
+      </tr>
+      <tr>
+        <td><a href="break.html#top"><span class="native_command">break</span></a></td>
+        <td><a href="check.html#top"><span class="native_command">check</span></a></td>
+        <td><a href="check3d.html#top"><span class="native_command">check3d</span></a></td>
+        <td><a href="check_display.html#top">check_display</a></td>
+        <td><a href="continue.html#top"><span class="native_command">continue</span></a></td>
+      </tr>
+      <tr>
+        <td><a href="do.html#top"><span class="native_command">do</span></a></td>
+        <td><a href="done.html#top"><span class="native_command">done</span></a></td>
+        <td><a href="elif.html#top"><span class="native_command">elif</span></a></td>
+        <td><a href="else.html#top"><span class="native_command">else</span></a></td>
+        <td><a href="endlocal.html#top"><span class="native_command">endlocal</span></a></td>
+      </tr>
+      <tr>
+        <td><a href="error.html#top"><span class="native_command">error</span></a></td>
+        <td><a href="eval.html#top"><span class="native_command">eval</span></a></td>
+        <td><a href="exec.html#top"><span class="native_command">exec</span></a></td>
+        <td><a href="fi.html#top"><span class="native_command">fi</span></a></td>
+        <td><a href="for.html#top"><span class="native_command">for</span></a></td>
+      </tr>
+      <tr>
+        <td><a href="if.html#top"><span class="native_command">if</span></a></td>
+        <td><a href="local.html#top"><span class="native_command">local</span></a></td>
+        <td><a href="mutex.html#top"><span class="native_command">mutex</span></a></td>
+        <td><a href="noarg.html#top"><span class="native_command">noarg</span></a></td>
+        <td><a href="onfail.html#top"><span class="native_command">onfail</span></a></td>
+      </tr>
+      <tr>
+        <td><a href="parallel.html#top"><span class="native_command">parallel</span></a></td>
+        <td><a href="progress.html#top"><span class="native_command">progress</span></a></td>
+        <td><a href="quit.html#top"><span class="native_command">quit</span></a></td>
+        <td><a href="repeat.html#top"><span class="native_command">repeat</span></a></td>
+        <td><a href="return.html#top"><span class="native_command">return</span></a></td>
+      </tr>
+      <tr>
+        <td><a href="rprogress.html#top">rprogress</a></td>
+        <td><a href="run.html#top">run</a></td>
+        <td><a href="skip.html#top"><span class="native_command">skip</span></a></td>
+        <td><a href="status.html#top"><span class="native_command">status</span></a></td>
+        <td><a href="while.html#top"><span class="native_command">while</span></a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="convenience_functions"></a>Convenience Functions:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="alert.html#top">alert</a></td>
+        <td><a href="arg.html#top">arg</a></td>
+        <td><a href="arg2var.html#top">arg2var</a></td>
+        <td><a href="autocrop_coords.html#top">autocrop_coords</a></td>
+        <td><a href="average_colors.html#top">average_colors</a></td>
+      </tr>
+      <tr>
+        <td><a href="base642img.html#top">base642img</a></td>
+        <td><a href="base642uchar.html#top">base642uchar</a></td>
+        <td><a href="basename.html#top">basename</a></td>
+        <td><a href="bin.html#top">bin</a></td>
+        <td><a href="bin2dec.html#top">bin2dec</a></td>
+      </tr>
+      <tr>
+        <td><a href="covariance_colors.html#top">covariance_colors</a></td>
+        <td><a href="dec.html#top">dec</a></td>
+        <td><a href="dec2bin.html#top">dec2bin</a></td>
+        <td><a href="dec2hex.html#top">dec2hex</a></td>
+        <td><a href="dec2oct.html#top">dec2oct</a></td>
+      </tr>
+      <tr>
+        <td><a href="dec2str.html#top">dec2str</a></td>
+        <td><a href="fact.html#top">fact</a></td>
+        <td><a href="fibonacci.html#top">fibonacci</a></td>
+        <td><a href="file_mv.html#top">file_mv</a></td>
+        <td><a href="file_rand.html#top">file_rand</a></td>
+      </tr>
+      <tr>
+        <td><a href="file_rm.html#top">file_rm</a></td>
+        <td><a href="filename.html#top">filename</a></td>
+        <td><a href="files.html#top"><span class="native_command">files</span></a></td>
+        <td><a href="fitratio_wh.html#top">fitratio_wh</a></td>
+        <td><a href="fitscreen.html#top">fitscreen</a></td>
+      </tr>
+      <tr>
+        <td><a href="fontchart.html#top">fontchart</a></td>
+        <td><a href="fps.html#top">fps</a></td>
+        <td><a href="gcd.html#top">gcd</a></td>
+        <td><a href="hex.html#top">hex</a></td>
+        <td><a href="hex2dec.html#top">hex2dec</a></td>
+      </tr>
+      <tr>
+        <td><a href="hex2img.html#top">hex2img</a></td>
+        <td><a href="hex2img8.html#top">hex2img8</a></td>
+        <td><a href="hex2str.html#top">hex2str</a></td>
+        <td><a href="img2base64.html#top">img2base64</a></td>
+        <td><a href="img2hex.html#top">img2hex</a></td>
+      </tr>
+      <tr>
+        <td><a href="img2str.html#top">img2str</a></td>
+        <td><a href="img2text.html#top">img2text</a></td>
+        <td><a href="img82hex.html#top">img82hex</a></td>
+        <td><a href="is_3d.html#top">is_3d</a></td>
+        <td><a href="is_change.html#top">is_change</a></td>
+      </tr>
+      <tr>
+        <td><a href="is_ext.html#top">is_ext</a></td>
+        <td><a href="is_half.html#top">is_half</a></td>
+        <td><a href="is_image_arg.html#top">is_image_arg</a></td>
+        <td><a href="is_macos.html#top">is_macos</a></td>
+        <td><a href="is_pattern.html#top">is_pattern</a></td>
+      </tr>
+      <tr>
+        <td><a href="is_percent.html#top">is_percent</a></td>
+        <td><a href="is_variable_name.html#top">is_variable_name</a></td>
+        <td><a href="is_videofilename.html#top">is_videofilename</a></td>
+        <td><a href="is_windows.html#top">is_windows</a></td>
+        <td><a href="mad.html#top">mad</a></td>
+      </tr>
+      <tr>
+        <td><a href="math_lib.html#top">math_lib</a></td>
+        <td><a href="max_d.html#top">max_d</a></td>
+        <td><a href="max_h.html#top">max_h</a></td>
+        <td><a href="max_s.html#top">max_s</a></td>
+        <td><a href="max_w.html#top">max_w</a></td>
+      </tr>
+      <tr>
+        <td><a href="max_wh.html#top">max_wh</a></td>
+        <td><a href="max_whd.html#top">max_whd</a></td>
+        <td><a href="max_whds.html#top">max_whds</a></td>
+        <td><a href="median_color.html#top">median_color</a></td>
+        <td><a href="min_d.html#top">min_d</a></td>
+      </tr>
+      <tr>
+        <td><a href="min_h.html#top">min_h</a></td>
+        <td><a href="min_s.html#top">min_s</a></td>
+        <td><a href="min_w.html#top">min_w</a></td>
+        <td><a href="min_wh.html#top">min_wh</a></td>
+        <td><a href="min_whd.html#top">min_whd</a></td>
+      </tr>
+      <tr>
+        <td><a href="min_whds.html#top">min_whds</a></td>
+        <td><a href="named.html#top"><span class="native_command">named</span></a></td>
+        <td><a href="normalize_filename.html#top">normalize_filename</a></td>
+        <td><a href="oct.html#top">oct</a></td>
+        <td><a href="oct2dec.html#top">oct2dec</a></td>
+      </tr>
+      <tr>
+        <td><a href="padint.html#top">padint</a></td>
+        <td><a href="path_cache.html#top">path_cache</a></td>
+        <td><a href="path_gimp.html#top">path_gimp</a></td>
+        <td><a href="path_tmp.html#top">path_tmp</a></td>
+        <td><a href="remove_copymark.html#top">remove_copymark</a></td>
+      </tr>
+      <tr>
+        <td><a href="reset.html#top">reset</a></td>
+        <td><a href="rgb.html#top">rgb</a></td>
+        <td><a href="rgba.html#top">rgba</a></td>
+        <td><a href="std_noise.html#top">std_noise</a></td>
+        <td><a href="str.html#top">str</a></td>
+      </tr>
+      <tr>
+        <td><a href="str2hex.html#top">str2hex</a></td>
+        <td><a href="strcapitalize.html#top">strcapitalize</a></td>
+        <td><a href="strcontains.html#top">strcontains</a></td>
+        <td><a href="strcut.html#top">strcut</a></td>
+        <td><a href="strlen.html#top">strlen</a></td>
+      </tr>
+      <tr>
+        <td><a href="strlowercase.html#top">strlowercase</a></td>
+        <td><a href="strreplace.html#top">strreplace</a></td>
+        <td><a href="struppercase.html#top">struppercase</a></td>
+        <td><a href="strvar.html#top">strvar</a></td>
+        <td><a href="strver.html#top">strver</a></td>
+      </tr>
+      <tr>
+        <td><a href="tic.html#top">tic</a></td>
+        <td><a href="to_clutname.html#top">to_clutname</a></td>
+        <td><a href="toc.html#top">toc</a></td>
+        <td><a href="uchar2base64.html#top">uchar2base64</a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="degradations"></a>Degradations:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="cracks.html#top">cracks</a></td>
+        <td><a href="light_patch.html#top">light_patch</a></td>
+        <td><a href="noise_hurl.html#top">noise_hurl</a></td>
+        <td><a href="pixelize.html#top">pixelize</a></td>
+        <td><a href="scanlines.html#top">scanlines</a></td>
+      </tr>
+      <tr>
+        <td><a href="shade_stripes.html#top">shade_stripes</a></td>
+        <td><a href="shadow_patch.html#top">shadow_patch</a></td>
+        <td><a href="spread.html#top">spread</a></td>
+        <td><a href="stripes_y.html#top">stripes_y</a></td>
+        <td><a href="texturize_canvas.html#top">texturize_canvas</a></td>
+      </tr>
+      <tr>
+        <td><a href="texturize_paper.html#top">texturize_paper</a></td>
+        <td><a href="vignette.html#top">vignette</a></td>
+        <td><a href="watermark_visible.html#top">watermark_visible</a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="feature_detections"></a>Feature detections:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="circles.html#top">circles</a></td>
+        <td><a href="croparound.html#top">croparound</a></td>
+        <td><a href="detect_events.html#top">detect_events</a></td>
+        <td><a href="detect_spots.html#top">detect_spots</a></td>
+        <td><a href="estimate_shift.html#top">estimate_shift</a></td>
+      </tr>
+      <tr>
+        <td><a href="estimate_shift_core.html#top">estimate_shift_core</a></td>
+        <td><a href="fibers.html#top">fibers</a></td>
+        <td><a href="jeje_dog.html#top">jeje_dog</a></td>
+        <td><a href="labels.html#top">labels</a></td>
+        <td><a href="local_moments.html#top">local_moments</a></td>
+      </tr>
+      <tr>
+        <td><a href="lucas_kanade.html#top">lucas_kanade</a></td>
+        <td><a href="measure_colocalization.html#top">measure_colocalization</a></td>
+        <td><a href="measure_colocalization_object.html#top">measure_colocalization_object</a></td>
+        <td><a href="multi_resolution_pyramide.html#top">multi_resolution_pyramide</a></td>
+        <td><a href="pointscoordinates.html#top">pointscoordinates</a></td>
+      </tr>
+      <tr>
+        <td><a href="quiver2d.html#top">quiver2d</a></td>
+        <td><a href="random_walks.html#top">random_walks</a></td>
+        <td><a href="register_lucas_kanade.html#top">register_lucas_kanade</a></td>
+        <td><a href="shift_subpixel.html#top">shift_subpixel</a></td>
+        <td><a href="smooth_moments.html#top">smooth_moments</a></td>
+      </tr>
+      <tr>
+        <td><a href="unshift.html#top">unshift</a></td>
+        <td><a href="unwarp2d.html#top">unwarp2d</a></td>
+        <td><a href="warp2d.html#top">warp2d</a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="features_extraction"></a>Features Extraction:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="area.html#top">area</a></td>
+        <td><a href="area_fg.html#top">area_fg</a></td>
+        <td><a href="at_line.html#top">at_line</a></td>
+        <td><a href="at_quadrangle.html#top">at_quadrangle</a></td>
+        <td><a href="barycenter.html#top">barycenter</a></td>
+      </tr>
+      <tr>
+        <td><a href="delaunay.html#top">delaunay</a></td>
+        <td><a href="detect_skin.html#top">detect_skin</a></td>
+        <td><a href="displacement.html#top"><span class="native_command">displacement</span></a></td>
+        <td><a href="distance.html#top"><span class="native_command">distance</span></a></td>
+        <td><a href="fftpolar.html#top">fftpolar</a></td>
+      </tr>
+      <tr>
+        <td><a href="histogram.html#top"><span class="native_command">histogram</span></a></td>
+        <td><a href="histogram_cumul.html#top">histogram_cumul</a></td>
+        <td><a href="histogram_nd.html#top">histogram_nd</a></td>
+        <td><a href="histogram_pointwise.html#top">histogram_pointwise</a></td>
+        <td><a href="hough.html#top">hough</a></td>
+      </tr>
+      <tr>
+        <td><a href="ifftpolar.html#top">ifftpolar</a></td>
+        <td><a href="isophotes.html#top">isophotes</a></td>
+        <td><a href="laar.html#top">laar</a></td>
+        <td><a href="label.html#top"><span class="native_command">label</span></a></td>
+        <td><a href="label_fg.html#top">label_fg</a></td>
+      </tr>
+      <tr>
+        <td><a href="matchpatch.html#top"><span class="native_command">matchpatch</span></a></td>
+        <td><a href="max_patch.html#top">max_patch</a></td>
+        <td><a href="min_patch.html#top">min_patch</a></td>
+        <td><a href="minimal_path.html#top">minimal_path</a></td>
+        <td><a href="mse.html#top"><span class="native_command">mse</span></a></td>
+      </tr>
+      <tr>
+        <td><a href="patches.html#top">patches</a></td>
+        <td><a href="plot2value.html#top">plot2value</a></td>
+        <td><a href="pointcloud.html#top">pointcloud</a></td>
+        <td><a href="psnr.html#top">psnr</a></td>
+        <td><a href="segment_watershed.html#top">segment_watershed</a></td>
+      </tr>
+      <tr>
+        <td><a href="shape2bump.html#top">shape2bump</a></td>
+        <td><a href="skeleton.html#top">skeleton</a></td>
+        <td><a href="slic.html#top">slic</a></td>
+        <td><a href="ssd_patch.html#top">ssd_patch</a></td>
+        <td><a href="thinning.html#top">thinning</a></td>
+      </tr>
+      <tr>
+        <td><a href="tones.html#top">tones</a></td>
+        <td><a href="topographic_map.html#top">topographic_map</a></td>
+        <td><a href="tsp.html#top">tsp</a></td>
+        <td><a href="variance_patch.html#top">variance_patch</a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="filtering_and_deconvolution"></a>Filtering and deconvolution:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="add_colorbar.html#top">add_colorbar</a></td>
+        <td><a href="analyze_camera_noise.html#top">analyze_camera_noise</a></td>
+        <td><a href="autocorrelate.html#top">autocorrelate</a></td>
+        <td><a href="bgsubstract.html#top">bgsubstract</a></td>
+        <td><a href="blend_fft.html#top">blend_fft</a></td>
+      </tr>
+      <tr>
+        <td><a href="blend_sharpness.html#top">blend_sharpness</a></td>
+        <td><a href="calibrate_affine_transform.html#top">calibrate_affine_transform</a></td>
+        <td><a href="correlate_fft.html#top">correlate_fft</a></td>
+        <td><a href="deblur_upscale_goldmeinel.html#top">deblur_upscale_goldmeinel</a></td>
+        <td><a href="deblur_upscale_richardsonlucy.html#top">deblur_upscale_richardsonlucy</a></td>
+      </tr>
+      <tr>
+        <td><a href="deconvolve_goldmeinel.html#top">deconvolve_goldmeinel</a></td>
+        <td><a href="deconvolve_richardsonlucy.html#top">deconvolve_richardsonlucy</a></td>
+        <td><a href="deconvolve_richardsonlucy_blind.html#top">deconvolve_richardsonlucy_blind</a></td>
+        <td><a href="dehaze.html#top">dehaze</a></td>
+        <td><a href="denoise_fft.html#top">denoise_fft</a></td>
+      </tr>
+      <tr>
+        <td><a href="denoise_iuwt.html#top">denoise_iuwt</a></td>
+        <td><a href="denoise_karmuen_loeve.html#top">denoise_karmuen_loeve</a></td>
+        <td><a href="denoise_patch_dict.html#top">denoise_patch_dict</a></td>
+        <td><a href="display_colordepth.html#top">display_colordepth</a></td>
+        <td><a href="display_ldc.html#top">display_ldc</a></td>
+      </tr>
+      <tr>
+        <td><a href="display_pseudocolor.html#top">display_pseudocolor</a></td>
+        <td><a href="display_vobs.html#top">display_vobs</a></td>
+        <td><a href="fftshift.html#top">fftshift</a></td>
+        <td><a href="fouriermix.html#top">fouriermix</a></td>
+        <td><a href="hessian_sharpen.html#top">hessian_sharpen</a></td>
+      </tr>
+      <tr>
+        <td><a href="iuwt.html#top">iuwt</a></td>
+        <td><a href="iuwt_std.html#top">iuwt_std</a></td>
+        <td><a href="kymoline.html#top">kymoline</a></td>
+        <td><a href="local_diffusion_coefficient.html#top">local_diffusion_coefficient</a></td>
+        <td><a href="local_noise_variance.html#top">local_noise_variance</a></td>
+      </tr>
+      <tr>
+        <td><a href="local_variance.html#top">local_variance</a></td>
+        <td><a href="local_wiener.html#top">local_wiener</a></td>
+        <td><a href="map_hilo.html#top">map_hilo</a></td>
+        <td><a href="mapblur.html#top">mapblur</a></td>
+        <td><a href="movavg.html#top">movavg</a></td>
+      </tr>
+      <tr>
+        <td><a href="noise_poisson_gaussian.html#top">noise_poisson_gaussian</a></td>
+        <td><a href="noise_std.html#top">noise_std</a></td>
+        <td><a href="normalize_local_variance.html#top">normalize_local_variance</a></td>
+        <td><a href="pca.html#top">pca</a></td>
+        <td><a href="periodize.html#top">periodize</a></td>
+      </tr>
+      <tr>
+        <td><a href="powerspectrum.html#top">powerspectrum</a></td>
+        <td><a href="print_psnr.html#top">print_psnr</a></td>
+        <td><a href="reconstruct_laplacian.html#top">reconstruct_laplacian</a></td>
+        <td><a href="scandoc.html#top">scandoc</a></td>
+        <td><a href="schizo.html#top">schizo</a></td>
+      </tr>
+      <tr>
+        <td><a href="smurf.html#top">smurf</a></td>
+        <td><a href="solve_least_square.html#top">solve_least_square</a></td>
+        <td><a href="spotify.html#top">spotify</a></td>
+        <td><a href="tape.html#top">tape</a></td>
+        <td><a href="unstrip.html#top">unstrip</a></td>
+      </tr>
+      <tr>
+        <td><a href="vesselness.html#top">vesselness</a></td>
+        <td><a href="vobs.html#top">vobs</a></td>
+        <td><a href="warp_affine.html#top">warp_affine</a></td>
+        <td><a href="whiten_frequency.html#top">whiten_frequency</a></td>
+        <td><a href="zmax.html#top">zmax</a></td>
+      </tr>
+      <tr>
+        <td><a href="zmean.html#top">zmean</a></td>
+        <td><a href="zmin.html#top">zmin</a></td>
+        <td><a href="zstd.html#top">zstd</a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="filtering"></a>Filtering:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="bandpass.html#top">bandpass</a></td>
+        <td><a href="bilateral.html#top"><span class="native_command">bilateral</span></a></td>
+        <td><a href="blur.html#top"><span class="native_command">blur</span></a></td>
+        <td><a href="blur_angular.html#top">blur_angular</a></td>
+        <td><a href="blur_bloom.html#top">blur_bloom</a></td>
+      </tr>
+      <tr>
+        <td><a href="blur_linear.html#top">blur_linear</a></td>
+        <td><a href="blur_radial.html#top">blur_radial</a></td>
+        <td><a href="blur_selective.html#top">blur_selective</a></td>
+        <td><a href="blur_x.html#top">blur_x</a></td>
+        <td><a href="blur_xy.html#top">blur_xy</a></td>
+      </tr>
+      <tr>
+        <td><a href="blur_xyz.html#top">blur_xyz</a></td>
+        <td><a href="blur_y.html#top">blur_y</a></td>
+        <td><a href="blur_z.html#top">blur_z</a></td>
+        <td><a href="boxfilter.html#top"><span class="native_command">boxfilter</span></a></td>
+        <td><a href="bump2normal.html#top">bump2normal</a></td>
+      </tr>
+      <tr>
+        <td><a href="compose_freq.html#top">compose_freq</a></td>
+        <td><a href="convolve.html#top"><span class="native_command">convolve</span></a></td>
+        <td><a href="convolve_fft.html#top">convolve_fft</a></td>
+        <td><a href="correlate.html#top"><span class="native_command">correlate</span></a></td>
+        <td><a href="cross_correlation.html#top">cross_correlation</a></td>
+      </tr>
+      <tr>
+        <td><a href="curvature.html#top">curvature</a></td>
+        <td><a href="dct.html#top">dct</a></td>
+        <td><a href="deblur.html#top">deblur</a></td>
+        <td><a href="deblur_goldmeinel.html#top">deblur_goldmeinel</a></td>
+        <td><a href="deblur_richardsonlucy.html#top">deblur_richardsonlucy</a></td>
+      </tr>
+      <tr>
+        <td><a href="deconvolve_fft.html#top">deconvolve_fft</a></td>
+        <td><a href="deinterlace.html#top">deinterlace</a></td>
+        <td><a href="denoise.html#top"><span class="native_command">denoise</span></a></td>
+        <td><a href="denoise_haar.html#top">denoise_haar</a></td>
+        <td><a href="denoise_patchpca.html#top">denoise_patchpca</a></td>
+      </tr>
+      <tr>
+        <td><a href="deriche.html#top"><span class="native_command">deriche</span></a></td>
+        <td><a href="diffusiontensors.html#top">diffusiontensors</a></td>
+        <td><a href="dilate.html#top"><span class="native_command">dilate</span></a></td>
+        <td><a href="dilate_circ.html#top">dilate_circ</a></td>
+        <td><a href="dilate_oct.html#top">dilate_oct</a></td>
+      </tr>
+      <tr>
+        <td><a href="dilate_threshold.html#top">dilate_threshold</a></td>
+        <td><a href="divergence.html#top">divergence</a></td>
+        <td><a href="dog.html#top">dog</a></td>
+        <td><a href="edges.html#top">edges</a></td>
+        <td><a href="erode.html#top"><span class="native_command">erode</span></a></td>
+      </tr>
+      <tr>
+        <td><a href="erode_circ.html#top">erode_circ</a></td>
+        <td><a href="erode_oct.html#top">erode_oct</a></td>
+        <td><a href="erode_threshold.html#top">erode_threshold</a></td>
+        <td><a href="fft.html#top"><span class="native_command">fft</span></a></td>
+        <td><a href="gradient.html#top"><span class="native_command">gradient</span></a></td>
+      </tr>
+      <tr>
+        <td><a href="gradient_norm.html#top">gradient_norm</a></td>
+        <td><a href="gradient_orientation.html#top">gradient_orientation</a></td>
+        <td><a href="guided.html#top"><span class="native_command">guided</span></a></td>
+        <td><a href="haar.html#top">haar</a></td>
+        <td><a href="heat_flow.html#top">heat_flow</a></td>
+      </tr>
+      <tr>
+        <td><a href="hessian.html#top"><span class="native_command">hessian</span></a></td>
+        <td><a href="idct.html#top">idct</a></td>
+        <td><a href="iee.html#top">iee</a></td>
+        <td><a href="ifft.html#top"><span class="native_command">ifft</span></a></td>
+        <td><a href="ihaar.html#top">ihaar</a></td>
+      </tr>
+      <tr>
+        <td><a href="ilaplacian.html#top">ilaplacian</a></td>
+        <td><a href="inn.html#top">inn</a></td>
+        <td><a href="inpaint.html#top"><span class="native_command">inpaint</span></a></td>
+        <td><a href="inpaint_flow.html#top">inpaint_flow</a></td>
+        <td><a href="inpaint_holes.html#top">inpaint_holes</a></td>
+      </tr>
+      <tr>
+        <td><a href="inpaint_matchpatch.html#top">inpaint_matchpatch</a></td>
+        <td><a href="inpaint_morpho.html#top">inpaint_morpho</a></td>
+        <td><a href="inpaint_pde.html#top">inpaint_pde</a></td>
+        <td><a href="kuwahara.html#top">kuwahara</a></td>
+        <td><a href="laplacian.html#top">laplacian</a></td>
+      </tr>
+      <tr>
+        <td><a href="lic.html#top">lic</a></td>
+        <td><a href="map_tones.html#top">map_tones</a></td>
+        <td><a href="map_tones_fast.html#top">map_tones_fast</a></td>
+        <td><a href="meancurvature_flow.html#top">meancurvature_flow</a></td>
+        <td><a href="median.html#top"><span class="native_command">median</span></a></td>
+      </tr>
+      <tr>
+        <td><a href="nlmeans.html#top">nlmeans</a></td>
+        <td><a href="nlmeans_core.html#top">nlmeans_core</a></td>
+        <td><a href="normalize_local.html#top">normalize_local</a></td>
+        <td><a href="normalized_cross_correlation.html#top">normalized_cross_correlation</a></td>
+        <td><a href="pde_flow.html#top">pde_flow</a></td>
+      </tr>
+      <tr>
+        <td><a href="percentile.html#top">percentile</a></td>
+        <td><a href="periodize_poisson.html#top">periodize_poisson</a></td>
+        <td><a href="peronamalik_flow.html#top">peronamalik_flow</a></td>
+        <td><a href="phase_correlation.html#top">phase_correlation</a></td>
+        <td><a href="rbf.html#top">rbf</a></td>
+      </tr>
+      <tr>
+        <td><a href="red_eye.html#top">red_eye</a></td>
+        <td><a href="remove_hotpixels.html#top">remove_hotpixels</a></td>
+        <td><a href="remove_pixels.html#top">remove_pixels</a></td>
+        <td><a href="rolling_guidance.html#top">rolling_guidance</a></td>
+        <td><a href="sharpen.html#top"><span class="native_command">sharpen</span></a></td>
+      </tr>
+      <tr>
+        <td><a href="smooth.html#top"><span class="native_command">smooth</span></a></td>
+        <td><a href="solidify.html#top">solidify</a></td>
+        <td><a href="solve_poisson.html#top">solve_poisson</a></td>
+        <td><a href="split_details.html#top">split_details</a></td>
+        <td><a href="split_freq.html#top">split_freq</a></td>
+      </tr>
+      <tr>
+        <td><a href="structuretensors.html#top"><span class="native_command">structuretensors</span></a></td>
+        <td><a href="syntexturize.html#top">syntexturize</a></td>
+        <td><a href="syntexturize_matchpatch.html#top">syntexturize_matchpatch</a></td>
+        <td><a href="tv_flow.html#top">tv_flow</a></td>
+        <td><a href="unsharp.html#top">unsharp</a></td>
+      </tr>
+      <tr>
+        <td><a href="unsharp_octave.html#top">unsharp_octave</a></td>
+        <td><a href="vanvliet.html#top"><span class="native_command">vanvliet</span></a></td>
+        <td><a href="voronoi.html#top">voronoi</a></td>
+        <td><a href="watermark_fourier.html#top">watermark_fourier</a></td>
+        <td><a href="watershed.html#top"><span class="native_command">watershed</span></a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="funny_one_liners"></a>Funny One-Liners:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="afre_box.html#top">afre_box</a></td>
+        <td><a href="afre_brightness.html#top">afre_brightness</a></td>
+        <td><a href="afre_cleanphoto.html#top">afre_cleanphoto</a></td>
+        <td><a href="afre_cleanphoto1.html#top">afre_cleanphoto1</a></td>
+        <td><a href="afre_cleantext.html#top">afre_cleantext</a></td>
+      </tr>
+      <tr>
+        <td><a href="afre_compare.html#top">afre_compare</a></td>
+        <td><a href="afre_contrast.html#top">afre_contrast</a></td>
+        <td><a href="afre_contrastfft.html#top">afre_contrastfft</a></td>
+        <td><a href="afre_conv.html#top">afre_conv</a></td>
+        <td><a href="afre_darksky.html#top">afre_darksky</a></td>
+      </tr>
+      <tr>
+        <td><a href="afre_denoisesmooth.html#top">afre_denoisesmooth</a></td>
+        <td><a href="afre_denoisesmooth_alt.html#top">afre_denoisesmooth_alt</a></td>
+        <td><a href="afre_details.html#top">afre_details</a></td>
+        <td><a href="afre_edge.html#top">afre_edge</a></td>
+        <td><a href="afre_gleam.html#top">afre_gleam</a></td>
+      </tr>
+      <tr>
+        <td><a href="afre_gnorm.html#top">afre_gnorm</a></td>
+        <td><a href="afre_gui0.html#top">afre_gui0</a></td>
+        <td><a href="afre_gui0_alt.html#top">afre_gui0_alt</a></td>
+        <td><a href="afre_gui0c.html#top">afre_gui0c</a></td>
+        <td><a href="afre_gui1.html#top">afre_gui1</a></td>
+      </tr>
+      <tr>
+        <td><a href="afre_gui1_alt.html#top">afre_gui1_alt</a></td>
+        <td><a href="afre_gui1c.html#top">afre_gui1c</a></td>
+        <td><a href="afre_halfhalf.html#top">afre_halfhalf</a></td>
+        <td><a href="afre_hnorm.html#top">afre_hnorm</a></td>
+        <td><a href="afre_ijchz.html#top">afre_ijchz</a></td>
+      </tr>
+      <tr>
+        <td><a href="afre_jchz.html#top">afre_jchz</a></td>
+        <td><a href="afre_localcontrast.html#top">afre_localcontrast</a></td>
+        <td><a href="afre_log2.html#top">afre_log2</a></td>
+        <td><a href="afre_maxmin.html#top">afre_maxmin</a></td>
+        <td><a href="afre_minmax.html#top">afre_minmax</a></td>
+      </tr>
+      <tr>
+        <td><a href="afre_orien.html#top">afre_orien</a></td>
+        <td><a href="afre_portraitmontage.html#top">afre_portraitmontage</a></td>
+        <td><a href="afre_reorder.html#top">afre_reorder</a></td>
+        <td><a href="afre_sdpatch.html#top">afre_sdpatch</a></td>
+        <td><a href="afre_section.html#top">afre_section</a></td>
+      </tr>
+      <tr>
+        <td><a href="afre_softlight.html#top">afre_softlight</a></td>
+        <td><a href="afre_texture.html#top">afre_texture</a></td>
+        <td><a href="afre_y50.html#top">afre_y50</a></td>
+        <td><a href="Core.html#top">Core</a></td>
+        <td><a href="fft82float.html#top">fft82float</a></td>
+      </tr>
+      <tr>
+        <td><a href="float2fft8.html#top">float2fft8</a></td>
+        <td><a href="float2int8.html#top">float2int8</a></td>
+        <td><a href="int82float.html#top">int82float</a></td>
+        <td><a href="oneliner_lightspeed.html#top">oneliner_lightspeed</a></td>
+        <td><a href="oneliner_sierpinski_carpet.html#top">oneliner_sierpinski_carpet</a></td>
+      </tr>
+      <tr>
+        <td><a href="oneliner_sierpinski_triangle.html#top">oneliner_sierpinski_triangle</a></td>
+        <td><a href="shape_australia.html#top">shape_australia</a></td>
+        <td><a href="shape_barbedwire.html#top">shape_barbedwire</a></td>
+        <td><a href="shape_crosshair.html#top">shape_crosshair</a></td>
+        <td><a href="shape_flip.html#top">shape_flip</a></td>
+      </tr>
+      <tr>
+        <td><a href="shape_gumleaf.html#top">shape_gumleaf</a></td>
+        <td><a href="shape_information.html#top">shape_information</a></td>
+        <td><a href="shape_kookaburra.html#top">shape_kookaburra</a></td>
+        <td><a href="shape_mail.html#top">shape_mail</a></td>
+        <td><a href="shape_mapleleaf.html#top">shape_mapleleaf</a></td>
+      </tr>
+      <tr>
+        <td><a href="shape_paint_splat.html#top">shape_paint_splat</a></td>
+        <td><a href="shape_paw.html#top">shape_paw</a></td>
+        <td><a href="shape_phone.html#top">shape_phone</a></td>
+        <td><a href="shape_rooster.html#top">shape_rooster</a></td>
+        <td><a href="shape_shopping_cart.html#top">shape_shopping_cart</a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="geometry_manipulation"></a>Geometry Manipulation:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="append.html#top"><span class="native_command">append</span></a></td>
+        <td><a href="append_tiles.html#top">append_tiles</a></td>
+        <td><a href="apply_scales.html#top">apply_scales</a></td>
+        <td><a href="autocrop.html#top"><span class="native_command">autocrop</span></a></td>
+        <td><a href="autocrop_components.html#top">autocrop_components</a></td>
+      </tr>
+      <tr>
+        <td><a href="autocrop_seq.html#top">autocrop_seq</a></td>
+        <td><a href="channels.html#top"><span class="native_command">channels</span></a></td>
+        <td><a href="columns.html#top"><span class="native_command">columns</span></a></td>
+        <td><a href="crop.html#top"><span class="native_command">crop</span></a></td>
+        <td><a href="diagonal.html#top">diagonal</a></td>
+      </tr>
+      <tr>
+        <td><a href="elevate.html#top">elevate</a></td>
+        <td><a href="expand_x.html#top">expand_x</a></td>
+        <td><a href="expand_xy.html#top">expand_xy</a></td>
+        <td><a href="expand_xyz.html#top">expand_xyz</a></td>
+        <td><a href="expand_y.html#top">expand_y</a></td>
+      </tr>
+      <tr>
+        <td><a href="expand_z.html#top">expand_z</a></td>
+        <td><a href="extract.html#top">extract</a></td>
+        <td><a href="extract_region.html#top">extract_region</a></td>
+        <td><a href="mirror.html#top"><span class="native_command">mirror</span></a></td>
+        <td><a href="montage.html#top">montage</a></td>
+      </tr>
+      <tr>
+        <td><a href="permute.html#top"><span class="native_command">permute</span></a></td>
+        <td><a href="resize.html#top"><span class="native_command">resize</span></a></td>
+        <td><a href="resize2dx.html#top">resize2dx</a></td>
+        <td><a href="resize2dy.html#top">resize2dy</a></td>
+        <td><a href="resize3dx.html#top">resize3dx</a></td>
+      </tr>
+      <tr>
+        <td><a href="resize3dy.html#top">resize3dy</a></td>
+        <td><a href="resize3dz.html#top">resize3dz</a></td>
+        <td><a href="resize_as_image.html#top">resize_as_image</a></td>
+        <td><a href="resize_mn.html#top">resize_mn</a></td>
+        <td><a href="resize_pow2.html#top">resize_pow2</a></td>
+      </tr>
+      <tr>
+        <td><a href="resize_ratio2d.html#top">resize_ratio2d</a></td>
+        <td><a href="rotate.html#top"><span class="native_command">rotate</span></a></td>
+        <td><a href="rotate_tileable.html#top">rotate_tileable</a></td>
+        <td><a href="rows.html#top"><span class="native_command">rows</span></a></td>
+        <td><a href="scale2x.html#top">scale2x</a></td>
+      </tr>
+      <tr>
+        <td><a href="scale3x.html#top">scale3x</a></td>
+        <td><a href="scale_dcci2x.html#top">scale_dcci2x</a></td>
+        <td><a href="seamcarve.html#top">seamcarve</a></td>
+        <td><a href="shift.html#top"><span class="native_command">shift</span></a></td>
+        <td><a href="shrink_x.html#top">shrink_x</a></td>
+      </tr>
+      <tr>
+        <td><a href="shrink_xy.html#top">shrink_xy</a></td>
+        <td><a href="shrink_xyz.html#top">shrink_xyz</a></td>
+        <td><a href="shrink_y.html#top">shrink_y</a></td>
+        <td><a href="shrink_z.html#top">shrink_z</a></td>
+        <td><a href="slices.html#top"><span class="native_command">slices</span></a></td>
+      </tr>
+      <tr>
+        <td><a href="sort.html#top"><span class="native_command">sort</span></a></td>
+        <td><a href="split.html#top"><span class="native_command">split</span></a></td>
+        <td><a href="split_tiles.html#top">split_tiles</a></td>
+        <td><a href="undistort.html#top">undistort</a></td>
+        <td><a href="unroll.html#top"><span class="native_command">unroll</span></a></td>
+      </tr>
+      <tr>
+        <td><a href="upscale_smart.html#top">upscale_smart</a></td>
+        <td><a href="warp.html#top"><span class="native_command">warp</span></a></td>
+        <td><a href="warp_patch.html#top">warp_patch</a></td>
+        <td><a href="warp_rbf.html#top">warp_rbf</a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="gimp"></a>GIMP:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="jpr_gradient_smooth.html#top">jpr_gradient_smooth</a></td>
+        <td><a href="jpr_line_edges.html#top">jpr_line_edges</a></td>
+        <td><a href="jpr_orientedthinning.html#top">jpr_orientedthinning</a></td>
+        <td><a href="jpr_phasecongruence.html#top">jpr_phasecongruence</a></td>
+        <td><a href="jpr_remove_blocks1.html#top">jpr_remove_blocks1</a></td>
+      </tr>
+      <tr>
+        <td><a href="jpr_shapes_gradient.html#top">jpr_shapes_gradient</a></td>
+        <td><a href="jpr_specularbumps.html#top">jpr_specularbumps</a></td>
+        <td><a href="jpr_warpfromthreshold.html#top">jpr_warpfromthreshold</a></td>
+        <td><a href="jr_deform.html#top">jr_deform</a></td>
+        <td><a href="rgb2ycbcrglic.html#top">rgb2ycbcrglic</a></td>
+      </tr>
+      <tr>
+        <td><a href="symmetrize_jr.html#top">symmetrize_jr</a></td>
+        <td><a href="ycbcrglic2rgb.html#top">ycbcrglic2rgb</a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="global_options"></a>Global Options:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="debug.html#top"><span class="native_command">debug</span></a></td>
+        <td><a href="help.html#top">help</a></td>
+        <td><a href="version.html#top">version</a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="image_drawing"></a>Image Drawing:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="arrow.html#top">arrow</a></td>
+        <td><a href="axes.html#top">axes</a></td>
+        <td><a href="ball.html#top">ball</a></td>
+        <td><a href="chessboard.html#top">chessboard</a></td>
+        <td><a href="cie1931.html#top">cie1931</a></td>
+      </tr>
+      <tr>
+        <td><a href="circle.html#top">circle</a></td>
+        <td><a href="close_binary.html#top">close_binary</a></td>
+        <td><a href="ellipse.html#top"><span class="native_command">ellipse</span></a></td>
+        <td><a href="flood.html#top"><span class="native_command">flood</span></a></td>
+        <td><a href="gaussian.html#top">gaussian</a></td>
+      </tr>
+      <tr>
+        <td><a href="graph.html#top"><span class="native_command">graph</span></a></td>
+        <td><a href="grid.html#top">grid</a></td>
+        <td><a href="image.html#top"><span class="native_command">image</span></a></td>
+        <td><a href="line.html#top"><span class="native_command">line</span></a></td>
+        <td><a href="linethick.html#top">linethick</a></td>
+      </tr>
+      <tr>
+        <td><a href="mandelbrot.html#top"><span class="native_command">mandelbrot</span></a></td>
+        <td><a href="marble.html#top">marble</a></td>
+        <td><a href="maze.html#top">maze</a></td>
+        <td><a href="maze_mask.html#top">maze_mask</a></td>
+        <td><a href="newton_fractal.html#top">newton_fractal</a></td>
+      </tr>
+      <tr>
+        <td><a href="object3d.html#top"><span class="native_command">object3d</span></a></td>
+        <td><a href="pack_sprites.html#top">pack_sprites</a></td>
+        <td><a href="piechart.html#top">piechart</a></td>
+        <td><a href="plasma.html#top"><span class="native_command">plasma</span></a></td>
+        <td><a href="point.html#top"><span class="native_command">point</span></a></td>
+      </tr>
+      <tr>
+        <td><a href="polka_dots.html#top">polka_dots</a></td>
+        <td><a href="polygon.html#top"><span class="native_command">polygon</span></a></td>
+        <td><a href="quiver.html#top">quiver</a></td>
+        <td><a href="rectangle.html#top">rectangle</a></td>
+        <td><a href="rorschach.html#top">rorschach</a></td>
+      </tr>
+      <tr>
+        <td><a href="sierpinski.html#top">sierpinski</a></td>
+        <td><a href="spiralbw.html#top">spiralbw</a></td>
+        <td><a href="spline.html#top">spline</a></td>
+        <td><a href="tetraedron_shade.html#top">tetraedron_shade</a></td>
+        <td><a href="text.html#top"><span class="native_command">text</span></a></td>
+      </tr>
+      <tr>
+        <td><a href="text_outline.html#top">text_outline</a></td>
+        <td><a href="triangle_shade.html#top">triangle_shade</a></td>
+        <td><a href="truchet.html#top">truchet</a></td>
+        <td><a href="turbulence.html#top">turbulence</a></td>
+        <td><a href="yinyang.html#top">yinyang</a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="image_sequences_and_videos"></a>Image Sequences and Videos:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="animate.html#top">animate</a></td>
+        <td><a href="apply_camera.html#top">apply_camera</a></td>
+        <td><a href="apply_files.html#top">apply_files</a></td>
+        <td><a href="apply_video.html#top">apply_video</a></td>
+        <td><a href="average_files.html#top">average_files</a></td>
+      </tr>
+      <tr>
+        <td><a href="average_video.html#top">average_video</a></td>
+        <td><a href="fade_files.html#top">fade_files</a></td>
+        <td><a href="fade_video.html#top">fade_video</a></td>
+        <td><a href="files2video.html#top">files2video</a></td>
+        <td><a href="median_files.html#top">median_files</a></td>
+      </tr>
+      <tr>
+        <td><a href="median_video.html#top">median_video</a></td>
+        <td><a href="morph.html#top">morph</a></td>
+        <td><a href="morph_files.html#top">morph_files</a></td>
+        <td><a href="morph_rbf.html#top">morph_rbf</a></td>
+        <td><a href="morph_video.html#top">morph_video</a></td>
+      </tr>
+      <tr>
+        <td><a href="register_nonrigid.html#top">register_nonrigid</a></td>
+        <td><a href="register_rigid.html#top">register_rigid</a></td>
+        <td><a href="transition.html#top">transition</a></td>
+        <td><a href="transition3d.html#top">transition3d</a></td>
+        <td><a href="video2files.html#top">video2files</a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="input_output"></a>Input / Output:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="camera.html#top"><span class="native_command">camera</span></a></td>
+        <td><a href="clut.html#top">clut</a></td>
+        <td><a href="command.html#top"><span class="native_command">command</span></a></td>
+        <td><a href="cursor.html#top"><span class="native_command">cursor</span></a></td>
+        <td><a href="display.html#top"><span class="native_command">display</span></a></td>
+      </tr>
+      <tr>
+        <td><a href="display0.html#top">display0</a></td>
+        <td><a href="display2d.html#top">display2d</a></td>
+        <td><a href="display3d.html#top">display3d</a></td>
+        <td><a href="display_array.html#top">display_array</a></td>
+        <td><a href="display_camera.html#top">display_camera</a></td>
+      </tr>
+      <tr>
+        <td><a href="display_fft.html#top">display_fft</a></td>
+        <td><a href="display_graph.html#top">display_graph</a></td>
+        <td><a href="display_histogram.html#top">display_histogram</a></td>
+        <td><a href="display_parallel.html#top">display_parallel</a></td>
+        <td><a href="display_parallel0.html#top">display_parallel0</a></td>
+      </tr>
+      <tr>
+        <td><a href="display_parametric.html#top">display_parametric</a></td>
+        <td><a href="display_polar.html#top">display_polar</a></td>
+        <td><a href="display_quiver.html#top">display_quiver</a></td>
+        <td><a href="display_rgba.html#top">display_rgba</a></td>
+        <td><a href="display_tensors.html#top">display_tensors</a></td>
+      </tr>
+      <tr>
+        <td><a href="display_warp.html#top">display_warp</a></td>
+        <td><a href="document_gmic.html#top">document_gmic</a></td>
+        <td><a href="echo.html#top"><span class="native_command">echo</span></a></td>
+        <td><a href="echo_file.html#top">echo_file</a></td>
+        <td><a href="echo_stdout.html#top">echo_stdout</a></td>
+      </tr>
+      <tr>
+        <td><a href="function1d.html#top">function1d</a></td>
+        <td><a href="input.html#top"><span class="native_command">input</span></a></td>
+        <td><a href="input_565.html#top">input_565</a></td>
+        <td><a href="input_cube.html#top">input_cube</a></td>
+        <td><a href="input_flo.html#top">input_flo</a></td>
+      </tr>
+      <tr>
+        <td><a href="input_glob.html#top">input_glob</a></td>
+        <td><a href="input_gpl.html#top">input_gpl</a></td>
+        <td><a href="input_text.html#top">input_text</a></td>
+        <td><a href="network.html#top"><span class="native_command">network</span></a></td>
+        <td><a href="output.html#top"><span class="native_command">output</span></a></td>
+      </tr>
+      <tr>
+        <td><a href="output_565.html#top">output_565</a></td>
+        <td><a href="output_cube.html#top">output_cube</a></td>
+        <td><a href="output_flo.html#top">output_flo</a></td>
+        <td><a href="output_ggr.html#top">output_ggr</a></td>
+        <td><a href="output_text.html#top">output_text</a></td>
+      </tr>
+      <tr>
+        <td><a href="outputn.html#top">outputn</a></td>
+        <td><a href="outputp.html#top">outputp</a></td>
+        <td><a href="outputw.html#top">outputw</a></td>
+        <td><a href="outputx.html#top">outputx</a></td>
+        <td><a href="parse_cli.html#top">parse_cli</a></td>
+      </tr>
+      <tr>
+        <td><a href="parse_gui.html#top">parse_gui</a></td>
+        <td><a href="pass.html#top"><span class="native_command">pass</span></a></td>
+        <td><a href="plot.html#top"><span class="native_command">plot</span></a></td>
+        <td><a href="print.html#top"><span class="native_command">print</span></a></td>
+        <td><a href="random_pattern.html#top">random_pattern</a></td>
+      </tr>
+      <tr>
+        <td><a href="sample.html#top">sample</a></td>
+        <td><a href="screen.html#top"><span class="native_command">screen</span></a></td>
+        <td><a href="select.html#top"><span class="native_command">select</span></a></td>
+        <td><a href="serialize.html#top"><span class="native_command">serialize</span></a></td>
+        <td><a href="shape_circle.html#top">shape_circle</a></td>
+      </tr>
+      <tr>
+        <td><a href="shape_cupid.html#top">shape_cupid</a></td>
+        <td><a href="shape_diamond.html#top">shape_diamond</a></td>
+        <td><a href="shape_dragon.html#top">shape_dragon</a></td>
+        <td><a href="shape_fern.html#top">shape_fern</a></td>
+        <td><a href="shape_gear.html#top">shape_gear</a></td>
+      </tr>
+      <tr>
+        <td><a href="shape_heart.html#top">shape_heart</a></td>
+        <td><a href="shape_polygon.html#top">shape_polygon</a></td>
+        <td><a href="shape_snowflake.html#top">shape_snowflake</a></td>
+        <td><a href="shape_star.html#top">shape_star</a></td>
+        <td><a href="shared.html#top"><span class="native_command">shared</span></a></td>
+      </tr>
+      <tr>
+        <td><a href="srand.html#top"><span class="native_command">srand</span></a></td>
+        <td><a href="store.html#top"><span class="native_command">store</span></a></td>
+        <td><a href="testimage2d.html#top">testimage2d</a></td>
+        <td><a href="uncommand.html#top"><span class="native_command">uncommand</span></a></td>
+        <td><a href="uniform_distribution.html#top">uniform_distribution</a></td>
+      </tr>
+      <tr>
+        <td><a href="unserialize.html#top"><span class="native_command">unserialize</span></a></td>
+        <td><a href="update.html#top">update</a></td>
+        <td><a href="verbose.html#top"><span class="native_command">verbose</span></a></td>
+        <td><a href="wait.html#top"><span class="native_command">wait</span></a></td>
+        <td><a href="warn.html#top"><span class="native_command">warn</span></a></td>
+      </tr>
+      <tr>
+        <td><a href="window.html#top"><span class="native_command">window</span></a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="input_output"></a>Input/Output:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="tiff3d.html#top">tiff3d</a></td>
+        <td><a href="toff3d.html#top">toff3d</a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="karo_s_test_cli_custom_functions"></a>KaRo's Test cli custom functions:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="cimg2tiff.html#top">cimg2tiff</a></td>
+        <td><a href="hist_percentile.html#top">hist_percentile</a></td>
+        <td><a href="karo_bin_fill.html#top">karo_bin_fill</a></td>
+        <td><a href="karo_bin_max.html#top">karo_bin_max</a></td>
+        <td><a href="karo_bin_rand_del.html#top">karo_bin_rand_del</a></td>
+      </tr>
+      <tr>
+        <td><a href="karo_close.html#top">karo_close</a></td>
+        <td><a href="karo_doc.html#top">karo_doc</a></td>
+        <td><a href="karo_doo.html#top">karo_doo</a></td>
+        <td><a href="karo_label.html#top">karo_label</a></td>
+        <td><a href="karo_label_sort.html#top">karo_label_sort</a></td>
+      </tr>
+      <tr>
+        <td><a href="karo_luminance.html#top">karo_luminance</a></td>
+        <td><a href="karo_morpho.html#top">karo_morpho</a></td>
+        <td><a href="karo_nlmeans.html#top">karo_nlmeans</a></td>
+        <td><a href="karo_open.html#top">karo_open</a></td>
+        <td><a href="karo_rats.html#top">karo_rats</a></td>
+      </tr>
+      <tr>
+        <td><a href="karo_segmentarea.html#top">karo_segmentarea</a></td>
+        <td><a href="karo_skeleton.html#top">karo_skeleton</a></td>
+        <td><a href="karo_threshold.html#top">karo_threshold</a></td>
+        <td><a href="karo_threshold_demo.html#top">karo_threshold_demo</a></td>
+        <td><a href="karo_xcimg.html#top">karo_xcimg</a></td>
+      </tr>
+      <tr>
+        <td><a href="pseudo_c.html#top">pseudo_c</a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="karo_s_test_cli_feature_functions"></a>KaRo's Test cli feature functions:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="descriptive_feature.html#top">descriptive_feature</a></td>
+        <td><a href="example_descriptive_feature.html#top">example_descriptive_feature</a></td>
+        <td><a href="hist_feature.html#top">hist_feature</a></td>
+        <td><a href="hist_feature_demo.html#top">hist_feature_demo</a></td>
+        <td><a href="karo_extinction.html#top">karo_extinction</a></td>
+      </tr>
+      <tr>
+        <td><a href="karo_feat_eval_n.html#top">karo_feat_eval_n</a></td>
+        <td><a href="karo_nth_max.html#top">karo_nth_max</a></td>
+        <td><a href="karo_nth_min.html#top">karo_nth_min</a></td>
+        <td><a href="karo_shape_moments.html#top">karo_shape_moments</a></td>
+        <td><a href="karo_shape_moments_example.html#top">karo_shape_moments_example</a></td>
+      </tr>
+      <tr>
+        <td><a href="karo_VST.html#top">karo_VST</a></td>
+        <td><a href="kr_mean_lch.html#top">kr_mean_lch</a></td>
+        <td><a href="pearson_correlation.html#top">pearson_correlation</a></td>
+        <td><a href="region_feature.html#top">region_feature</a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="karo_s_test_custom_input_functions"></a>KaRo's Test custom input functions:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="follic.html#top">follic</a></td>
+        <td><a href="follic_.html#top">follic_</a></td>
+        <td><a href="gwyddionread.html#top">gwyddionread</a></td>
+        <td><a href="karo_dtpread.html#top">karo_dtpread</a></td>
+        <td><a href="karo_read_bd.html#top">karo_read_bd</a></td>
+      </tr>
+      <tr>
+        <td><a href="osteo.html#top">osteo</a></td>
+        <td><a href="osteo_.html#top">osteo_</a></td>
+        <td><a href="sincos.html#top">sincos</a></td>
+        <td><a href="wykoread.html#top">wykoread</a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="karo_s_test_custom_utility_functions"></a>KaRo's Test custom utility functions:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="karo_frame.html#top">karo_frame</a></td>
+        <td><a href="karo_li2st.html#top">karo_li2st</a></td>
+        <td><a href="karo_rndbit0.html#top">karo_rndbit0</a></td>
+        <td><a href="karos_error.html#top">karos_error</a></td>
+        <td><a href="kr_draw_vars.html#top">kr_draw_vars</a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="karo_s_test_gui_utility_functions"></a>Karo's Test gui utility functions:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="fx_karo_cimg_nlmeans.html#top">fx_karo_cimg_nlmeans</a></td>
+        <td><a href="fx_karo_cimg_skel.html#top">fx_karo_cimg_skel</a></td>
+        <td><a href="fx_karo_mm_diff.html#top">fx_karo_mm_diff</a></td>
+        <td><a href="fx_karo_oc_diff.html#top">fx_karo_oc_diff</a></td>
+        <td><a href="fx_karo_pink.html#top">fx_karo_pink</a></td>
+      </tr>
+      <tr>
+        <td><a href="fx_karo_pink_bianca.html#top">fx_karo_pink_bianca</a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="list_manipulation"></a>List Manipulation:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="keep.html#top"><span class="native_command">keep</span></a></td>
+        <td><a href="move.html#top"><span class="native_command">move</span></a></td>
+        <td><a href="name.html#top"><span class="native_command">name</span></a></td>
+        <td><a href="remove.html#top"><span class="native_command">remove</span></a></td>
+        <td><a href="remove_duplicates.html#top">remove_duplicates</a></td>
+      </tr>
+      <tr>
+        <td><a href="remove_empty.html#top">remove_empty</a></td>
+        <td><a href="remove_named.html#top">remove_named</a></td>
+        <td><a href="reverse.html#top"><span class="native_command">reverse</span></a></td>
+        <td><a href="sort_list.html#top">sort_list</a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="mathematical_operators"></a>Mathematical Operators:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="abs.html#top"><span class="native_command">abs</span></a></td>
+        <td><a href="acos.html#top"><span class="native_command">acos</span></a></td>
+        <td><a href="acosh.html#top"><span class="native_command">acosh</span></a></td>
+        <td><a href="add.html#top"><span class="native_command">add</span></a></td>
+        <td><a href="and.html#top"><span class="native_command">and</span></a></td>
+      </tr>
+      <tr>
+        <td><a href="argmax.html#top">argmax</a></td>
+        <td><a href="argmaxabs.html#top">argmaxabs</a></td>
+        <td><a href="argmin.html#top">argmin</a></td>
+        <td><a href="argminabs.html#top">argminabs</a></td>
+        <td><a href="asin.html#top"><span class="native_command">asin</span></a></td>
+      </tr>
+      <tr>
+        <td><a href="asinh.html#top"><span class="native_command">asinh</span></a></td>
+        <td><a href="atan.html#top"><span class="native_command">atan</span></a></td>
+        <td><a href="atan2.html#top"><span class="native_command">atan2</span></a></td>
+        <td><a href="atanh.html#top"><span class="native_command">atanh</span></a></td>
+        <td><a href="bsl.html#top"><span class="native_command">bsl</span></a></td>
+      </tr>
+      <tr>
+        <td><a href="bsr.html#top"><span class="native_command">bsr</span></a></td>
+        <td><a href="cos.html#top"><span class="native_command">cos</span></a></td>
+        <td><a href="cosh.html#top"><span class="native_command">cosh</span></a></td>
+        <td><a href="div.html#top"><span class="native_command">div</span></a></td>
+        <td><a href="div_complex.html#top">div_complex</a></td>
+      </tr>
+      <tr>
+        <td><a href="eq.html#top"><span class="native_command">eq</span></a></td>
+        <td><a href="exp.html#top"><span class="native_command">exp</span></a></td>
+        <td><a href="ge.html#top"><span class="native_command">ge</span></a></td>
+        <td><a href="gt.html#top"><span class="native_command">gt</span></a></td>
+        <td><a href="le.html#top"><span class="native_command">le</span></a></td>
+      </tr>
+      <tr>
+        <td><a href="log.html#top"><span class="native_command">log</span></a></td>
+        <td><a href="log10.html#top"><span class="native_command">log10</span></a></td>
+        <td><a href="log2.html#top"><span class="native_command">log2</span></a></td>
+        <td><a href="lt.html#top"><span class="native_command">lt</span></a></td>
+        <td><a href="max.html#top"><span class="native_command">max</span></a></td>
+      </tr>
+      <tr>
+        <td><a href="maxabs.html#top"><span class="native_command">maxabs</span></a></td>
+        <td><a href="mdiv.html#top"><span class="native_command">mdiv</span></a></td>
+        <td><a href="med.html#top">med</a></td>
+        <td><a href="min.html#top"><span class="native_command">min</span></a></td>
+        <td><a href="minabs.html#top"><span class="native_command">minabs</span></a></td>
+      </tr>
+      <tr>
+        <td><a href="mmul.html#top"><span class="native_command">mmul</span></a></td>
+        <td><a href="mod.html#top"><span class="native_command">mod</span></a></td>
+        <td><a href="mul.html#top"><span class="native_command">mul</span></a></td>
+        <td><a href="mul_channels.html#top">mul_channels</a></td>
+        <td><a href="mul_complex.html#top">mul_complex</a></td>
+      </tr>
+      <tr>
+        <td><a href="neq.html#top"><span class="native_command">neq</span></a></td>
+        <td><a href="or.html#top"><span class="native_command">or</span></a></td>
+        <td><a href="pow.html#top"><span class="native_command">pow</span></a></td>
+        <td><a href="rol.html#top"><span class="native_command">rol</span></a></td>
+        <td><a href="ror.html#top"><span class="native_command">ror</span></a></td>
+      </tr>
+      <tr>
+        <td><a href="sign.html#top"><span class="native_command">sign</span></a></td>
+        <td><a href="sin.html#top"><span class="native_command">sin</span></a></td>
+        <td><a href="sinc.html#top"><span class="native_command">sinc</span></a></td>
+        <td><a href="sinh.html#top"><span class="native_command">sinh</span></a></td>
+        <td><a href="sqr.html#top"><span class="native_command">sqr</span></a></td>
+      </tr>
+      <tr>
+        <td><a href="sqrt.html#top"><span class="native_command">sqrt</span></a></td>
+        <td><a href="sub.html#top"><span class="native_command">sub</span></a></td>
+        <td><a href="tan.html#top"><span class="native_command">tan</span></a></td>
+        <td><a href="tanh.html#top"><span class="native_command">tanh</span></a></td>
+        <td><a href="xor.html#top"><span class="native_command">xor</span></a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="matrix_computation"></a>Matrix Computation:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="dijkstra.html#top"><span class="native_command">dijkstra</span></a></td>
+        <td><a href="eigen.html#top"><span class="native_command">eigen</span></a></td>
+        <td><a href="invert.html#top"><span class="native_command">invert</span></a></td>
+        <td><a href="mproj.html#top"><span class="native_command">mproj</span></a></td>
+        <td><a href="orthogonalize.html#top">orthogonalize</a></td>
+      </tr>
+      <tr>
+        <td><a href="solve.html#top"><span class="native_command">solve</span></a></td>
+        <td><a href="svd.html#top"><span class="native_command">svd</span></a></td>
+        <td><a href="transpose.html#top">transpose</a></td>
+        <td><a href="trisolve.html#top"><span class="native_command">trisolve</span></a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="neural_networks"></a>Neural Networks:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="nn_backpropagate.html#top">nn_backpropagate</a></td>
+        <td><a href="nn_backpropagate_batch.html#top">nn_backpropagate_batch</a></td>
+        <td><a href="nn_input.html#top">nn_input</a></td>
+        <td><a href="nn_new_fullyconnected.html#top">nn_new_fullyconnected</a></td>
+        <td><a href="nn_new_input.html#top">nn_new_input</a></td>
+      </tr>
+      <tr>
+        <td><a href="nn_new_output.html#top">nn_new_output</a></td>
+        <td><a href="nn_output.html#top">nn_output</a></td>
+        <td><a href="nn_propagate.html#top">nn_propagate</a></td>
+        <td><a href="nn_propagate_batch.html#top">nn_propagate_batch</a></td>
+        <td><a href="nn_serialize.html#top">nn_serialize</a></td>
+      </tr>
+      <tr>
+        <td><a href="nn_unserialize.html#top">nn_unserialize</a></td>
+        <td><a href="nn_update.html#top">nn_update</a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="other_interactive_commands"></a>Other Interactive Commands:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="demos.html#top">demos</a></td>
+        <td><a href="x_2048.html#top">x_2048</a></td>
+        <td><a href="x_blobs.html#top">x_blobs</a></td>
+        <td><a href="x_bouncing.html#top">x_bouncing</a></td>
+        <td><a href="x_color_curves.html#top">x_color_curves</a></td>
+      </tr>
+      <tr>
+        <td><a href="x_colorize.html#top">x_colorize</a></td>
+        <td><a href="x_connect4.html#top">x_connect4</a></td>
+        <td><a href="x_crop.html#top">x_crop</a></td>
+        <td><a href="x_cut.html#top">x_cut</a></td>
+        <td><a href="x_fire.html#top">x_fire</a></td>
+      </tr>
+      <tr>
+        <td><a href="x_fireworks.html#top">x_fireworks</a></td>
+        <td><a href="x_fisheye.html#top">x_fisheye</a></td>
+        <td><a href="x_fourier.html#top">x_fourier</a></td>
+        <td><a href="x_grab_color.html#top">x_grab_color</a></td>
+        <td><a href="x_hanoi.html#top">x_hanoi</a></td>
+      </tr>
+      <tr>
+        <td><a href="x_histogram.html#top">x_histogram</a></td>
+        <td><a href="x_hough.html#top">x_hough</a></td>
+        <td><a href="x_jawbreaker.html#top">x_jawbreaker</a></td>
+        <td><a href="x_landscape.html#top">x_landscape</a></td>
+        <td><a href="x_life.html#top">x_life</a></td>
+      </tr>
+      <tr>
+        <td><a href="x_light.html#top">x_light</a></td>
+        <td><a href="x_mandelbrot.html#top">x_mandelbrot</a></td>
+        <td><a href="x_mask_color.html#top">x_mask_color</a></td>
+        <td><a href="x_metaballs3d.html#top">x_metaballs3d</a></td>
+        <td><a href="x_minesweeper.html#top">x_minesweeper</a></td>
+      </tr>
+      <tr>
+        <td><a href="x_minimal_path.html#top">x_minimal_path</a></td>
+        <td><a href="x_morph.html#top">x_morph</a></td>
+        <td><a href="x_pacman.html#top">x_pacman</a></td>
+        <td><a href="x_paint.html#top">x_paint</a></td>
+        <td><a href="x_plasma.html#top">x_plasma</a></td>
+      </tr>
+      <tr>
+        <td><a href="x_quantize_rgb.html#top">x_quantize_rgb</a></td>
+        <td><a href="x_reflection3d.html#top">x_reflection3d</a></td>
+        <td><a href="x_rubber3d.html#top">x_rubber3d</a></td>
+        <td><a href="x_segment.html#top">x_segment</a></td>
+        <td><a href="x_select_color.html#top">x_select_color</a></td>
+      </tr>
+      <tr>
+        <td><a href="x_select_function1d.html#top">x_select_function1d</a></td>
+        <td><a href="x_select_palette.html#top">x_select_palette</a></td>
+        <td><a href="x_shadebobs.html#top">x_shadebobs</a></td>
+        <td><a href="x_spline.html#top">x_spline</a></td>
+        <td><a href="x_starfield3d.html#top">x_starfield3d</a></td>
+      </tr>
+      <tr>
+        <td><a href="x_tetris.html#top">x_tetris</a></td>
+        <td><a href="x_threshold.html#top">x_threshold</a></td>
+        <td><a href="x_tictactoe.html#top">x_tictactoe</a></td>
+        <td><a href="x_warp.html#top">x_warp</a></td>
+        <td><a href="x_waves.html#top">x_waves</a></td>
+      </tr>
+      <tr>
+        <td><a href="x_whirl.html#top">x_whirl</a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="patterns"></a>Patterns:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="clearbluesky.html#top">clearbluesky</a></td>
+        <td><a href="clouds.html#top">clouds</a></td>
+        <td><a href="fractional_brownian_motion.html#top">fractional_brownian_motion</a></td>
+        <td><a href="freqy_pattern.html#top">freqy_pattern</a></td>
+        <td><a href="mm_mozaic.html#top">mm_mozaic</a></td>
+      </tr>
+      <tr>
+        <td><a href="periodic_dots.html#top">periodic_dots</a></td>
+        <td><a href="rays.html#top">rays</a></td>
+        <td><a href="turing_pattern.html#top">turing_pattern</a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="pink_library_operators"></a>PINK-library operators:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="input_pinklist.html#top">input_pinklist</a></td>
+        <td><a href="input_pinktest.html#top">input_pinktest</a></td>
+        <td><a href="karo_zerleg.html#top">karo_zerleg</a></td>
+        <td><a href="output_pink3d.html#top">output_pink3d</a></td>
+        <td><a href="output_pinklist.html#top">output_pinklist</a></td>
+      </tr>
+      <tr>
+        <td><a href="pink_delaunay.html#top">pink_delaunay</a></td>
+        <td><a href="pink_grayskel.html#top">pink_grayskel</a></td>
+        <td><a href="pink_heightmaxima.html#top">pink_heightmaxima</a></td>
+        <td><a href="pink_heightminima.html#top">pink_heightminima</a></td>
+        <td><a href="pink_htkern.html#top">pink_htkern</a></td>
+      </tr>
+      <tr>
+        <td><a href="pink_lvkern.html#top">pink_lvkern</a></td>
+        <td><a href="pink_new.html#top">pink_new</a></td>
+        <td><a href="pink_reg_minima.html#top">pink_reg_minima</a></td>
+        <td><a href="pink_setorigin.html#top">pink_setorigin</a></td>
+        <td><a href="pink_skelcurv.html#top">pink_skelcurv</a></td>
+      </tr>
+      <tr>
+        <td><a href="pink_skelend.html#top">pink_skelend</a></td>
+        <td><a href="pink_skeleton.html#top">pink_skeleton</a></td>
+        <td><a href="pink_skelpar.html#top">pink_skelpar</a></td>
+        <td><a href="pink_wshed.html#top">pink_wshed</a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="reptorian_s_cli_commands"></a>Reptorian's CLI Commands:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="auto_hardware_restriction_emulation_BW.html#top">auto_hardware_restriction_emulation_BW</a></td>
+        <td><a href="auto_hardware_restriction_emulation_RGB.html#top">auto_hardware_restriction_emulation_RGB</a></td>
+        <td><a href="em.html#top"><span class="native_command">em</span></a></td>
+        <td><a href="emboss_image.html#top">emboss_image</a></td>
+        <td><a href="index_table.html#top">index_table</a></td>
+      </tr>
+      <tr>
+        <td><a href="invert_alpha.html#top">invert_alpha</a></td>
+        <td><a href="invert_rgb.html#top">invert_rgb</a></td>
+        <td><a href="k12rgb.html#top">k12rgb</a></td>
+        <td><a href="k182rgb.html#top">k182rgb</a></td>
+        <td><a href="modular_formula.html#top">modular_formula</a></td>
+      </tr>
+      <tr>
+        <td><a href="ohta2rgb.html#top">ohta2rgb</a></td>
+        <td><a href="ohta82rgb.html#top">ohta82rgb</a></td>
+        <td><a href="pal.html#top">pal</a></td>
+        <td><a href="pal_l.html#top">pal_l</a></td>
+        <td><a href="palette_transfer.html#top">palette_transfer</a></td>
+      </tr>
+      <tr>
+        <td><a href="rep_2d_channels_ranges.html#top">rep_2d_channels_ranges</a></td>
+        <td><a href="rep_acb.html#top">rep_acb</a></td>
+        <td><a href="rep_aspect_crop_2d.html#top">rep_aspect_crop_2d</a></td>
+        <td><a href="rep_autofill_coloring_book.html#top">rep_autofill_coloring_book</a></td>
+        <td><a href="rep_axis_streak.html#top">rep_axis_streak</a></td>
+      </tr>
+      <tr>
+        <td><a href="rep_axis_streak_color.html#top">rep_axis_streak_color</a></td>
+        <td><a href="rep_axis_streak_distance.html#top">rep_axis_streak_distance</a></td>
+        <td><a href="rep_binary_alterating_quad_c.html#top">rep_binary_alterating_quad_c</a></td>
+        <td><a href="rep_binary_alterating_quad_texture.html#top">rep_binary_alterating_quad_texture</a></td>
+        <td><a href="rep_blur_splinter.html#top">rep_blur_splinter</a></td>
+      </tr>
+      <tr>
+        <td><a href="rep_by_channel_statistical_function.html#top">rep_by_channel_statistical_function</a></td>
+        <td><a href="rep_chirikov_taylor.html#top">rep_chirikov_taylor</a></td>
+        <td><a href="rep_color_existence_distribution_rgb8.html#top">rep_color_existence_distribution_rgb8</a></td>
+        <td><a href="rep_color_modulo_texture.html#top">rep_color_modulo_texture</a></td>
+        <td><a href="rep_cube_map_to_equirectangular_panorama.html#top">rep_cube_map_to_equirectangular_panorama</a></td>
+      </tr>
+      <tr>
+        <td><a href="rep_diffusion_limited_aggregation.html#top">rep_diffusion_limited_aggregation</a></td>
+        <td><a href="rep_duplicate_by_shift_distance_angle_xy.html#top">rep_duplicate_by_shift_distance_angle_xy</a></td>
+        <td><a href="rep_edgefade.html#top">rep_edgefade</a></td>
+        <td><a href="rep_equirectangular_panorama_to_cube_map.html#top">rep_equirectangular_panorama_to_cube_map</a></td>
+        <td><a href="rep_fibonacci_fill.html#top">rep_fibonacci_fill</a></td>
+      </tr>
+      <tr>
+        <td><a href="rep_fibonacci_squares.html#top">rep_fibonacci_squares</a></td>
+        <td><a href="rep_fill_background.html#top">rep_fill_background</a></td>
+        <td><a href="rep_form_pixel.html#top">rep_form_pixel</a></td>
+        <td><a href="rep_fragment_blur.html#top">rep_fragment_blur</a></td>
+        <td><a href="rep_glass_vignette.html#top">rep_glass_vignette</a></td>
+      </tr>
+      <tr>
+        <td><a href="rep_graduated_filter.html#top">rep_graduated_filter</a></td>
+        <td><a href="rep_hsx_poster_index.html#top">rep_hsx_poster_index</a></td>
+        <td><a href="rep_isprime.html#top">rep_isprime</a></td>
+        <td><a href="rep_jr_bitplane_shuffler.html#top">rep_jr_bitplane_shuffler</a></td>
+        <td><a href="rep_keep_original_dimension_and_or_layer.html#top">rep_keep_original_dimension_and_or_layer</a></td>
+      </tr>
+      <tr>
+        <td><a href="rep_layers_by_channel_statistical_function_to_palette.html#top">rep_layers_by_channel_statistical_function_to_palette</a></td>
+        <td><a href="rep_lerp_rgb_gray.html#top"><span class="native_command">rep_lerp_rgb_gray</span></a></td>
+        <td><a href="rep_linear_interpolation_rgb_gray.html#top">rep_linear_interpolation_rgb_gray</a></td>
+        <td><a href="rep_logarithmic_pinching_distortion.html#top">rep_logarithmic_pinching_distortion</a></td>
+        <td><a href="rep_loupasc_ordered_dither.html#top">rep_loupasc_ordered_dither</a></td>
+      </tr>
+      <tr>
+        <td><a href="rep_lpasc_ordith.html#top"><span class="native_command">rep_lpasc_ordith</span></a></td>
+        <td><a href="rep_madjik_newton_fractal.html#top">rep_madjik_newton_fractal</a></td>
+        <td><a href="rep_majority.html#top">rep_majority</a></td>
+        <td><a href="rep_majority_threshold.html#top">rep_majority_threshold</a></td>
+        <td><a href="rep_mj_pseudorandom_noise.html#top">rep_mj_pseudorandom_noise</a></td>
+      </tr>
+      <tr>
+        <td><a href="rep_modular_operation.html#top">rep_modular_operation</a></td>
+        <td><a href="rep_modular_operation_multiple_channels.html#top">rep_modular_operation_multiple_channels</a></td>
+        <td><a href="rep_multicut.html#top">rep_multicut</a></td>
+        <td><a href="rep_multinormalize.html#top">rep_multinormalize</a></td>
+        <td><a href="rep_ncee.html#top">rep_ncee</a></td>
+      </tr>
+      <tr>
+        <td><a href="rep_nebulous.html#top">rep_nebulous</a></td>
+        <td><a href="rep_objvolumefilt.html#top">rep_objvolumefilt</a></td>
+        <td><a href="rep_ol.html#top"><span class="native_command">rep_ol</span></a></td>
+        <td><a href="rep_orientation_list.html#top">rep_orientation_list</a></td>
+        <td><a href="rep_perspective_streak.html#top">rep_perspective_streak</a></td>
+      </tr>
+      <tr>
+        <td><a href="rep_photomosaic.html#top">rep_photomosaic</a></td>
+        <td><a href="rep_pixel_push.html#top">rep_pixel_push</a></td>
+        <td><a href="rep_point_warp.html#top">rep_point_warp</a></td>
+        <td><a href="rep_polar_kaleidoscope.html#top">rep_polar_kaleidoscope</a></td>
+        <td><a href="rep_polkal.html#top">rep_polkal</a></td>
+      </tr>
+      <tr>
+        <td><a href="rep_popcorn_fractal.html#top">rep_popcorn_fractal</a></td>
+        <td><a href="rep_prime_surface.html#top">rep_prime_surface</a></td>
+        <td><a href="rep_primelist.html#top">rep_primelist</a></td>
+        <td><a href="rep_random_square_rectangle_artistic.html#top">rep_random_square_rectangle_artistic</a></td>
+        <td><a href="rep_random_square_rectangle_fill.html#top">rep_random_square_rectangle_fill</a></td>
+      </tr>
+      <tr>
+        <td><a href="rep_random_square_rectangle_texture.html#top">rep_random_square_rectangle_texture</a></td>
+        <td><a href="rep_rectangular_polar_transformation.html#top">rep_rectangular_polar_transformation</a></td>
+        <td><a href="rep_reverse_engineer_gradient_map.html#top">rep_reverse_engineer_gradient_map</a></td>
+        <td><a href="rep_reverse_integer.html#top">rep_reverse_integer</a></td>
+        <td><a href="rep_rotate_by_torus_top.html#top">rep_rotate_by_torus_top</a></td>
+      </tr>
+      <tr>
+        <td><a href="rep_shape_brick.html#top">rep_shape_brick</a></td>
+        <td><a href="rep_shift_distance_angle_xy.html#top">rep_shift_distance_angle_xy</a></td>
+        <td><a href="rep_shift_pixel_to_boundary_with_group_pixels.html#top">rep_shift_pixel_to_boundary_with_group_pixels</a></td>
+        <td><a href="rep_shift_pixel_to_boundary_with_group_pixels_with_rectangular_polar_transformation.html#top">rep_shift_pixel_to_boundary_with_group_pixels_with_rectangular_polar_transformation</a></td>
+        <td><a href="rep_sinowaterdist.html#top">rep_sinowaterdist</a></td>
+      </tr>
+      <tr>
+        <td><a href="rep_sinusoidal_distortion.html#top">rep_sinusoidal_distortion</a></td>
+        <td><a href="rep_spiral_distort.html#top">rep_spiral_distort</a></td>
+        <td><a href="rep_splinter_blur_convolve_map.html#top">rep_splinter_blur_convolve_map</a></td>
+        <td><a href="rep_sptbwgp.html#top">rep_sptbwgp</a></td>
+        <td><a href="rep_sqrlogpindis.html#top"><span class="native_command">rep_sqrlogpindis</span></a></td>
+      </tr>
+      <tr>
+        <td><a href="rep_square_root_logarithmic_pinching_distortion.html#top">rep_square_root_logarithmic_pinching_distortion</a></td>
+        <td><a href="rep_stitch.html#top">rep_stitch</a></td>
+        <td><a href="rep_strange_bulger.html#top">rep_strange_bulger</a></td>
+        <td><a href="rep_strange_bulger_kaleidoscope.html#top">rep_strange_bulger_kaleidoscope</a></td>
+        <td><a href="rep_technorobbo_intense_filtration.html#top">rep_technorobbo_intense_filtration</a></td>
+      </tr>
+      <tr>
+        <td><a href="rep_technorobbo_strange_attractor.html#top">rep_technorobbo_strange_attractor</a></td>
+        <td><a href="rep_thorn_fractal.html#top">rep_thorn_fractal</a></td>
+        <td><a href="rep_tiled_zoom.html#top">rep_tiled_zoom</a></td>
+        <td><a href="rep_tiler_nonisometric.html#top">rep_tiler_nonisometric</a></td>
+        <td><a href="rep_tileset_nonisometric.html#top">rep_tileset_nonisometric</a></td>
+      </tr>
+      <tr>
+        <td><a href="rep_tr_pixel_sharpener.html#top">rep_tr_pixel_sharpener</a></td>
+        <td><a href="rep_trigonometry_map.html#top">rep_trigonometry_map</a></td>
+        <td><a href="rep_trigonometry_map_8bit_integer.html#top">rep_trigonometry_map_8bit_integer</a></td>
+        <td><a href="rep_trigonometry_three_channel_gradient.html#top">rep_trigonometry_three_channel_gradient</a></td>
+        <td><a href="rep_x_graphical_tiling.html#top">rep_x_graphical_tiling</a></td>
+      </tr>
+      <tr>
+        <td><a href="rep_z_render.html#top">rep_z_render</a></td>
+        <td><a href="rgb2k1.html#top">rgb2k1</a></td>
+        <td><a href="rgb2k18.html#top">rgb2k18</a></td>
+        <td><a href="rgb2ohta.html#top">rgb2ohta</a></td>
+        <td><a href="rgb2ohta8.html#top">rgb2ohta8</a></td>
+      </tr>
+      <tr>
+        <td><a href="rgb2ydbdr.html#top">rgb2ydbdr</a></td>
+        <td><a href="rgb2ydbdr.html#top">rgb2ydbdr</a></td>
+        <td><a href="rgb2yes.html#top">rgb2yes</a></td>
+        <td><a href="rgb2yes8.html#top">rgb2yes8</a></td>
+        <td><a href="shape_dragonfly.html#top">shape_dragonfly</a></td>
+      </tr>
+      <tr>
+        <td><a href="unpurple.html#top">unpurple</a></td>
+        <td><a href="watermark_fourier2.html#top">watermark_fourier2</a></td>
+        <td><a href="yes2rgb.html#top">yes2rgb</a></td>
+        <td><a href="yes82rgb.html#top">yes82rgb</a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="segmentation"></a>Segmentation:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="contour2d.html#top">contour2d</a></td>
+        <td><a href="segment_cells.html#top">segment_cells</a></td>
+        <td><a href="segment_snake.html#top">segment_snake</a></td>
+        <td><a href="zernike.html#top">zernike</a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="support_commands"></a>Support Commands:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="afre_sharpenfft.html#top">afre_sharpenfft</a></td>
+        <td><a href="afre_vigcirc.html#top">afre_vigcirc</a></td>
+        <td><a href="afre_vigrect.html#top">afre_vigrect</a></td>
+        <td><a href="colorwheel.html#top">colorwheel</a></td>
+        <td><a href="gcd_blur_masked.html#top">gcd_blur_masked</a></td>
+      </tr>
+      <tr>
+        <td><a href="gcd_blur_texture.html#top">gcd_blur_texture</a></td>
+        <td><a href="gcd_extract_clut.html#top">gcd_extract_clut</a></td>
+        <td><a href="gcd_fmean_local.html#top">gcd_fmean_local</a></td>
+        <td><a href="gcd_force_a.html#top">gcd_force_a</a></td>
+        <td><a href="gcd_force_rgb.html#top">gcd_force_rgb</a></td>
+      </tr>
+      <tr>
+        <td><a href="gcd_force_rgba.html#top">gcd_force_rgba</a></td>
+        <td><a href="gcd_geometric_median.html#top">gcd_geometric_median</a></td>
+        <td><a href="gcd_noalpha.html#top">gcd_noalpha</a></td>
+        <td><a href="gcd_poisson_disk.html#top">gcd_poisson_disk</a></td>
+        <td><a href="gcd_rgb2srgb.html#top">gcd_rgb2srgb</a></td>
+      </tr>
+      <tr>
+        <td><a href="gcd_splitalpha.html#top">gcd_splitalpha</a></td>
+        <td><a href="gcd_srgb2rgb.html#top">gcd_srgb2rgb</a></td>
+        <td><a href="gcd_tonemap_gamma.html#top">gcd_tonemap_gamma</a></td>
+        <td><a href="hedcut.html#top">hedcut</a></td>
+        <td><a href="jpr_colourillusion.html#top">jpr_colourillusion</a></td>
+      </tr>
+      <tr>
+        <td><a href="jpr_coltexindex.html#top">jpr_coltexindex</a></td>
+        <td><a href="jpr_decimate.html#top">jpr_decimate</a></td>
+        <td><a href="search_dichotomic.html#top">search_dichotomic</a></td>
+        <td><a href="tiletex.html#top">tiletex</a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="values_manipulation"></a>Values Manipulation:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="apply_curve.html#top">apply_curve</a></td>
+        <td><a href="apply_gamma.html#top">apply_gamma</a></td>
+        <td><a href="balance_gamma.html#top">balance_gamma</a></td>
+        <td><a href="cast.html#top">cast</a></td>
+        <td><a href="complex2polar.html#top">complex2polar</a></td>
+      </tr>
+      <tr>
+        <td><a href="compress_clut.html#top">compress_clut</a></td>
+        <td><a href="compress_rle.html#top">compress_rle</a></td>
+        <td><a href="cumulate.html#top"><span class="native_command">cumulate</span></a></td>
+        <td><a href="cut.html#top"><span class="native_command">cut</span></a></td>
+        <td><a href="decompress_clut.html#top">decompress_clut</a></td>
+      </tr>
+      <tr>
+        <td><a href="decompress_clut_pde.html#top">decompress_clut_pde</a></td>
+        <td><a href="decompress_clut_rbf.html#top">decompress_clut_rbf</a></td>
+        <td><a href="decompress_rle.html#top">decompress_rle</a></td>
+        <td><a href="discard.html#top"><span class="native_command">discard</span></a></td>
+        <td><a href="eigen2tensor.html#top">eigen2tensor</a></td>
+      </tr>
+      <tr>
+        <td><a href="endian.html#top"><span class="native_command">endian</span></a></td>
+        <td><a href="equalize.html#top"><span class="native_command">equalize</span></a></td>
+        <td><a href="fill.html#top"><span class="native_command">fill</span></a></td>
+        <td><a href="_index.html#top"><span class="native_command">index</span></a></td>
+        <td><a href="inrange.html#top">inrange</a></td>
+      </tr>
+      <tr>
+        <td><a href="map.html#top"><span class="native_command">map</span></a></td>
+        <td><a href="mix_channels.html#top">mix_channels</a></td>
+        <td><a href="negate.html#top">negate</a></td>
+        <td><a href="noise.html#top"><span class="native_command">noise</span></a></td>
+        <td><a href="noise_perlin.html#top">noise_perlin</a></td>
+      </tr>
+      <tr>
+        <td><a href="noise_poissondisk.html#top">noise_poissondisk</a></td>
+        <td><a href="norm.html#top">norm</a></td>
+        <td><a href="normalize.html#top"><span class="native_command">normalize</span></a></td>
+        <td><a href="normalize_sum.html#top">normalize_sum</a></td>
+        <td><a href="normp.html#top">normp</a></td>
+      </tr>
+      <tr>
+        <td><a href="not.html#top">not</a></td>
+        <td><a href="oneminus.html#top">oneminus</a></td>
+        <td><a href="orientation.html#top">orientation</a></td>
+        <td><a href="otsu.html#top">otsu</a></td>
+        <td><a href="polar2complex.html#top">polar2complex</a></td>
+      </tr>
+      <tr>
+        <td><a href="quantize.html#top">quantize</a></td>
+        <td><a href="quantize_area.html#top">quantize_area</a></td>
+        <td><a href="rand.html#top"><span class="native_command">rand</span></a></td>
+        <td><a href="replace.html#top">replace</a></td>
+        <td><a href="replace_inf.html#top">replace_inf</a></td>
+      </tr>
+      <tr>
+        <td><a href="replace_nan.html#top">replace_nan</a></td>
+        <td><a href="replace_naninf.html#top">replace_naninf</a></td>
+        <td><a href="replace_seq.html#top">replace_seq</a></td>
+        <td><a href="replace_str.html#top">replace_str</a></td>
+        <td><a href="round.html#top"><span class="native_command">round</span></a></td>
+      </tr>
+      <tr>
+        <td><a href="roundify.html#top">roundify</a></td>
+        <td><a href="set.html#top"><span class="native_command">set</span></a></td>
+        <td><a href="threshold.html#top">threshold</a></td>
+        <td><a href="vector2tensor.html#top">vector2tensor</a></td>
+      </tr>
+    </table><br/>
+
+    <h1 class="h1_reference"><a id="warpings"></a>Warpings:</h1>
+    <table class="table_category">
+      <tr>
+        <td><a href="deform.html#top">deform</a></td>
+        <td><a href="equirectangular2nadirzenith.html#top">equirectangular2nadirzenith</a></td>
+        <td><a href="euclidean2polar.html#top">euclidean2polar</a></td>
+        <td><a href="fisheye.html#top">fisheye</a></td>
+        <td><a href="flower.html#top">flower</a></td>
+      </tr>
+      <tr>
+        <td><a href="kaleidoscope.html#top">kaleidoscope</a></td>
+        <td><a href="map_sphere.html#top">map_sphere</a></td>
+        <td><a href="nadirzenith2equirectangular.html#top">nadirzenith2equirectangular</a></td>
+        <td><a href="polar2euclidean.html#top">polar2euclidean</a></td>
+        <td><a href="raindrops.html#top">raindrops</a></td>
+      </tr>
+      <tr>
+        <td><a href="ripple.html#top">ripple</a></td>
+        <td><a href="rotoidoscope.html#top">rotoidoscope</a></td>
+        <td><a href="spherize.html#top">spherize</a></td>
+        <td><a href="symmetrize.html#top">symmetrize</a></td>
+        <td><a href="transform_polar.html#top">transform_polar</a></td>
+      </tr>
+      <tr>
+        <td><a href="twirl.html#top">twirl</a></td>
+        <td><a href="warp_perspective.html#top">warp_perspective</a></td>
+        <td><a href="water.html#top">water</a></td>
+        <td><a href="wave.html#top">wave</a></td>
+        <td><a href="wind.html#top">wind</a></td>
+      </tr>
+      <tr>
+        <td><a href="zoom.html#top">zoom</a></td>
+      </tr>
+    </table>
+
+    <h2><a id="shortcuts"></a>Shortcut commands:</h2>
+    <table cellspacing="0" class="table_category">
+      <tr>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="mul3d.html#top"><samp style="color:#2080F0">*3d</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="add3d.html#top"><samp style="color:#2080F0">+3d</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="sub3d.html#top"><samp style="color:#2080F0">-3d</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="div3d.html#top"><samp style="color:#2080F0">/3d</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="center3d.html#top"><samp>c3d</samp></a></td>
+      </tr>
+      <tr style="background-color:#DDDDDD">
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="color3d.html#top"><samp style="color:#2080F0">col3d</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="double3d.html#top"><samp style="color:#2080F0">db3d</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="focale3d.html#top"><samp style="color:#2080F0">f3d</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="light3d.html#top"><samp style="color:#2080F0">l3d</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="mode3d.html#top"><samp style="color:#2080F0">m3d</samp></a></td>
+      </tr>
+      <tr>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="moded3d.html#top"><samp style="color:#2080F0">md3d</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="normalize3d.html#top"><samp>n3d</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="opacity3d.html#top"><samp style="color:#2080F0">o3d</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="primitives3d.html#top"><samp>p3d</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rotate3d.html#top"><samp style="color:#2080F0">r3d</samp></a></td>
+      </tr>
+      <tr style="background-color:#DDDDDD">
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="reverse3d.html#top"><samp style="color:#2080F0">rv3d</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="split3d.html#top"><samp style="color:#2080F0">s3d</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="specl3d.html#top"><samp style="color:#2080F0">sl3d</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="specs3d.html#top"><samp style="color:#2080F0">ss3d</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="texturize3d.html#top"><samp>t3d</samp></a></td>
+      </tr>
+      <tr>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="frame_xy.html#top"><samp>frame</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="apply_channels.html#top"><samp>ac</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="fill_color.html#top"><samp>fc</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="apply_parallel.html#top"><samp>ap</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="apply_parallel_channels.html#top"><samp>apc</samp></a></td>
+      </tr>
+      <tr style="background-color:#DDDDDD">
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="apply_parallel_overlap.html#top"><samp>apo</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="apply_tiles.html#top"><samp>at</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="endlocal.html#top"><samp style="color:#2080F0">endl</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="local.html#top"><samp style="color:#2080F0">l</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="quit.html#top"><samp style="color:#2080F0">q</samp></a></td>
+      </tr>
+      <tr>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="status.html#top"><samp style="color:#2080F0">u</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="exec.html#top"><samp style="color:#2080F0">x</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="named.html#top"><samp style="color:#2080F0">nmd</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="blur.html#top"><samp style="color:#2080F0">b</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="gradient.html#top"><samp style="color:#2080F0">g</samp></a></td>
+      </tr>
+      <tr style="background-color:#DDDDDD">
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="append.html#top"><samp style="color:#2080F0">a</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="resize.html#top"><samp style="color:#2080F0">r</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="resize2dx.html#top"><samp>r2dx</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="resize2dy.html#top"><samp>r2dy</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="resize3dx.html#top"><samp>r3dx</samp></a></td>
+      </tr>
+      <tr>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="resize3dy.html#top"><samp>r3dy</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="resize3dz.html#top"><samp>r3dz</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="resize_as_image.html#top"><samp style="color:#2080F0">ri</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="resize_ratio2d.html#top"><samp>rr2d</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="split.html#top"><samp style="color:#2080F0">s</samp></a></td>
+      </tr>
+      <tr style="background-color:#DDDDDD">
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="unroll.html#top"><samp style="color:#2080F0">y</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="crop.html#top"><samp style="color:#2080F0">z</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="help.html#top"><samp>h</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="image.html#top"><samp style="color:#2080F0">j</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="object3d.html#top"><samp style="color:#2080F0">j3d</samp></a></td>
+      </tr>
+      <tr>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="text.html#top"><samp style="color:#2080F0">t</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="text_outline.html#top"><samp>to</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="display.html#top"><samp style="color:#2080F0">d</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="display0.html#top"><samp>d0</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="display2d.html#top"><samp>d2d</samp></a></td>
+      </tr>
+      <tr style="background-color:#DDDDDD">
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="display3d.html#top"><samp>d3d</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="display_array.html#top"><samp>da</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="display_camera.html#top"><samp>dc</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="display_fft.html#top"><samp>dfft</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="display_graph.html#top"><samp>dg</samp></a></td>
+      </tr>
+      <tr>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="display_histogram.html#top"><samp>dh</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="display_parallel.html#top"><samp>dp</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="display_parallel0.html#top"><samp>dp0</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="display_quiver.html#top"><samp>dq</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="display_rgba.html#top"><samp>drgba</samp></a></td>
+      </tr>
+      <tr style="background-color:#DDDDDD">
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="display_tensors.html#top"><samp>dt</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="display_warp.html#top"><samp>dw</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="echo.html#top"><samp style="color:#2080F0">e</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="input.html#top"><samp style="color:#2080F0">i</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="input_glob.html#top"><samp>ig</samp></a></td>
+      </tr>
+      <tr>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="input_text.html#top"><samp>it</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="command.html#top"><samp style="color:#2080F0">m</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="output.html#top"><samp style="color:#2080F0">o</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="outputn.html#top"><samp>on</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="outputp.html#top"><samp>op</samp></a></td>
+      </tr>
+      <tr style="background-color:#DDDDDD">
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="output_text.html#top"><samp>ot</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="outputw.html#top"><samp>ow</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="outputx.html#top"><samp>ox</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="print.html#top"><samp style="color:#2080F0">p</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="shared.html#top"><samp style="color:#2080F0">sh</samp></a></td>
+      </tr>
+      <tr>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="sample.html#top"><samp>sp</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="uncommand.html#top"><samp>um</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="update.html#top"><samp>up</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="verbose.html#top"><samp style="color:#2080F0">v</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="window.html#top"><samp style="color:#2080F0">w</samp></a></td>
+      </tr>
+      <tr style="background-color:#DDDDDD">
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="keep.html#top"><samp style="color:#2080F0">k</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="move.html#top"><samp style="color:#2080F0">mv</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="name.html#top"><samp style="color:#2080F0">nm</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="remove.html#top"><samp style="color:#2080F0">rm</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="remove_named.html#top"><samp>rmn</samp></a></td>
+      </tr>
+      <tr>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="reverse.html#top"><samp style="color:#2080F0">rv</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="neq.html#top"><samp style="color:#2080F0">!=</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="mod.html#top"><samp style="color:#2080F0">%</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="and.html#top"><samp style="color:#2080F0">&</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="mul.html#top"><samp style="color:#2080F0">*</samp></a></td>
+      </tr>
+      <tr style="background-color:#DDDDDD">
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="add.html#top"><samp style="color:#2080F0">+</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="sub.html#top"><samp style="color:#2080F0">-</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="div.html#top"><samp style="color:#2080F0">/</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="lt.html#top"><samp style="color:#2080F0"><</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="bsl.html#top"><samp style="color:#2080F0"><<</samp></a></td>
+      </tr>
+      <tr>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="le.html#top"><samp style="color:#2080F0"><=</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="eq.html#top"><samp style="color:#2080F0">==</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="gt.html#top"><samp style="color:#2080F0">></samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="ge.html#top"><samp style="color:#2080F0">>=</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="bsr.html#top"><samp style="color:#2080F0">>></samp></a></td>
+      </tr>
+      <tr style="background-color:#DDDDDD">
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="pow.html#top"><samp style="color:#2080F0">^</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="mmul.html#top"><samp style="color:#2080F0">m*</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="mdiv.html#top"><samp style="color:#2080F0">m/</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="or.html#top"><samp style="color:#2080F0">|</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="x_crop.html#top"><samp>xz</samp></a></td>
+      </tr>
+      <tr>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="pink_new.html#top"><samp>pink</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="auto_hardware_restriction_emulation_BW.html#top"><samp style="color:#2080F0">ahre_bw</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="auto_hardware_restriction_emulation_RGB.html#top"><samp style="color:#2080F0">ahre_rgb</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="modular_formula.html#top"><samp style="color:#2080F0">modf</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="palette_transfer.html#top"><samp style="color:#2080F0">pal_t</samp></a></td>
+      </tr>
+      <tr style="background-color:#DDDDDD">
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_2dcr.html#top"><samp style="color:#2080F0">rep_2dcr</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_by_channel_statistical_function.html#top"><samp style="color:#2080F0">rep_bchstatfunc</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_fill_background.html#top"><samp style="color:#2080F0">rep_bgfill</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_binary_alterating_quad_texture.html#top"><samp style="color:#2080F0">rep_binaltquad</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_binary_alterating_quad_c.html#top"><samp style="color:#2080F0">rep_binaltquadc</samp></a></td>
+      </tr>
+      <tr>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_color_existence_distribution_rgb8.html#top"><samp style="color:#2080F0">rep_ced8</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_color_modulo_texture.html#top"><samp style="color:#2080F0">rep_colmt</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_chirikov_taylor.html#top"><samp style="color:#2080F0">rep_cstdmap</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_cube_map_to_equirectangular_panorama.html#top"><samp style="color:#2080F0">rep_cube2equi</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_diffusion_limited_aggregation.html#top"><samp style="color:#2080F0">rep_dla</samp></a></td>
+      </tr>
+      <tr style="background-color:#DDDDDD">
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_duplicate_by_shift_distance_angle_xy.html#top"><samp style="color:#2080F0">rep_dupsdaxy</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_equirectangular_panorama_to_cube_map.html#top"><samp style="color:#2080F0">rep_equi2cube</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_fibonacci_fill.html#top"><samp style="color:#2080F0">rep_fibofill</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_fibonacci_squares.html#top"><samp style="color:#2080F0">rep_fibosq</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_fragment_blur.html#top"><samp style="color:#2080F0">rep_frblur</samp></a></td>
+      </tr>
+      <tr>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_graduated_filter.html#top"><samp style="color:#2080F0">rep_gradf</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_glass_vignette.html#top"><samp style="color:#2080F0">rep_gv</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_hsx_poster_index.html#top"><samp style="color:#2080F0">rep_hsx_p_i</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_jr_bitplane_shuffler.html#top"><samp style="color:#2080F0">rep_jr_bps</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_keep_original_dimension_and_or_layer.html#top"><samp style="color:#2080F0">rep_kodl</samp></a></td>
+      </tr>
+      <tr style="background-color:#DDDDDD">
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_layers_by_channel_statistical_function_to_palette.html#top"><samp style="color:#2080F0">rep_lbchstatfunc_to_pal</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_logarithmic_pinching_distortion.html#top"><samp style="color:#2080F0">rep_logpindis</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_majority.html#top"><samp style="color:#2080F0">rep_major</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_majority_threshold.html#top"><samp style="color:#2080F0">rep_major_t</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_multicut.html#top"><samp style="color:#2080F0">rep_mc</samp></a></td>
+      </tr>
+      <tr>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_madjik_newton_fractal.html#top"><samp style="color:#2080F0">rep_mj_newf</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_mj_pseudorandom_noise.html#top"><samp style="color:#2080F0">rep_mj_prn</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_multinormalize.html#top"><samp style="color:#2080F0">rep_mn</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_modular_operation.html#top"><samp style="color:#2080F0">rep_modo</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_modular_operation_multiple_channels.html#top"><samp style="color:#2080F0">rep_modo_mc</samp></a></td>
+      </tr>
+      <tr style="background-color:#DDDDDD">
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_objvolumefilt.html#top"><samp style="color:#2080F0">rep_objvf</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_popcorn_fractal.html#top"><samp style="color:#2080F0">rep_pfrac</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_perspective_streak.html#top"><samp style="color:#2080F0">rep_pstrk</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_point_warp.html#top"><samp style="color:#2080F0">rep_pw</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_pixel_push.html#top"><samp style="color:#2080F0">rep_pxpush</samp></a></td>
+      </tr>
+      <tr>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_random_square_rectangle_texture.html#top"><samp style="color:#2080F0">rep_rand_sqrrecart</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_random_square_rectangle_fill.html#top"><samp style="color:#2080F0">rep_rand_sqrrecfill</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_random_square_rectangle_texture.html#top"><samp style="color:#2080F0">rep_rand_sqrrectex</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_rotate_by_torus_top.html#top"><samp style="color:#2080F0">rep_rbtt</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_rectangular_polar_transformation.html#top"><samp style="color:#2080F0">rep_recpoltrans</samp></a></td>
+      </tr>
+      <tr style="background-color:#DDDDDD">
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_reverse_engineer_gradient_map.html#top"><samp style="color:#2080F0">rep_regm</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_reverse_integer.html#top"><samp style="color:#2080F0">rep_rvi</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_spiral_distort.html#top"><samp style="color:#2080F0">rep_sd</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_shift_distance_angle_xy.html#top"><samp style="color:#2080F0">rep_sdaxy</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_shift_pixel_to_boundary_with_group_pixels_with_rectangular_polar_transformation.html#top"><samp style="color:#2080F0">rep_sptbwgp_recpoltrans</samp></a></td>
+      </tr>
+      <tr>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_strange_bulger.html#top"><samp style="color:#2080F0">rep_strbul</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_strange_bulger_kaleidoscope.html#top"><samp style="color:#2080F0">rep_strbulkal</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_thorn_fractal.html#top"><samp style="color:#2080F0">rep_tfrac</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_trigonometry_three_channel_gradient.html#top"><samp style="color:#2080F0">rep_tg3</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_tiler_nonisometric.html#top"><samp style="color:#2080F0">rep_tiler_n</samp></a></td>
+      </tr>
+      <tr style="background-color:#DDDDDD">
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_tileset_nonisometric.html#top"><samp style="color:#2080F0">rep_tileset_n</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_technorobbo_intense_filtration.html#top"><samp style="color:#2080F0">rep_trif</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_trigonometry_map.html#top"><samp style="color:#2080F0">rep_trigmap</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_trigonometry_map_8bit_integer.html#top"><samp style="color:#2080F0">rep_trigmap_8i</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_tr_pixel_sharpener.html#top"><samp style="color:#2080F0">rep_trps</samp></a></td>
+      </tr>
+      <tr>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_technorobbo_strange_attractor.html#top"><samp style="color:#2080F0">rep_trsa</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="rep_tiled_zoom.html#top"><samp style="color:#2080F0">rep_tz</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="set.html#top"><samp style="color:#2080F0">=</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="cut.html#top"><samp style="color:#2080F0">c</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="fill.html#top"><samp style="color:#2080F0">f</samp></a></td>
+      </tr>
+      <tr style="background-color:#DDDDDD">
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="inrange.html#top"><samp>ir</samp></a></td>
+        <td style="max-width:170px; padding:5px; border:1px solid #000000;"><a href="normalize.html#top"><samp style="color:#2080F0">n</samp></a></td>
+      </tr>
+    </table>
+    </div><div class="section_end"></div>
+    <div id="include_footer"></div>
+  </body>

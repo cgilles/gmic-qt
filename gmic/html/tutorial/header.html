@@ -1,0 +1,171 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"></meta>
+    <title>G'MIC - GREYC's Magic for Image Computing: A Full-Featured Open-Source Framework for Image Processing</title>
+    <meta name="author" content="David Tschumperle"></meta>
+    <meta name="description" content="A full-featured open-source framework for processing generic image (2d,3d,3d+t) with multiple interfaces: command-line (cli), gimp plug-in, web service, Qt interface, C++ library"></meta>
+    <meta name="keywords" content="open-source, image processing, command-line tool, GIMP plug-in, C++ library, zart"></meta>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="shortcut icon" type="image/x-icon" href="https://gmic.eu/favicon.ico"></link>
+    <link rel="icon" type="image/png" href="https://gmic.eu/favicon.png"></link>
+    <link rel="alternate" type="application/rss+xml" title="G'MIC News" href="https://gplus-to-rss.appspot.com/rss/+GMIC_software" />
+    <link href="style.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="https://gmic.eu/highslide/highslide.css" />
+    <link rel="stylesheet" href="cssmenu.css">
+
+    <!-- Begin Cookie Consent plugin by Silktide - http://silktide.com/cookieconsent -->
+    <script type="text/javascript">
+      window.cookieconsent_options = {"message":"This website uses cookies to ensure you get the best experience on our website","dismiss":"Got it!","learnMore":"More info","link":null,"theme":"dark-bottom"};
+    </script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/cookieconsent2/1.0.9/cookieconsent.min.js"></script>
+    <!-- End Cookie Consent plugin -->
+    <script>
+      function popupFunction() {
+          var popup = document.getElementById("myPopup");
+          popup.classList.toggle("show");
+      }
+    </script>
+    <script type="text/javascript" src="jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="highslide/highslide-full.js"></script>
+    <script type="text/javascript">
+      hs.graphicsDir = 'highslide/graphics/';
+      hs.wrapperClassName = 'wide-border';
+      hs.showCredits = 'false';
+    </script>
+
+    <style type="text/css">
+      body {background-color:#707090; }
+      a:active {text-decoration:none; color:#000000}
+      a:link {text-decoration:none; color:#000000}
+      a:visited {text-decoration:none; color:#000000}
+      a:hover {text-decoration:none; color:#4E9F71}
+      p { margin-top:1em; }
+    </style>
+  </head>
+
+  <body>
+    <table align="center" border="0" cellpadding="0" cellspacing="0" width="1000" bgcolor="#DDDDDD"><tbody>
+        <tr><td><table align="center" border="0" cellpadding="0" cellspacing="0" width="1000" bgcolor="#FFFFFF"><tbody>
+                <tr><td>
+                    <center>
+                      <a href="https://gmic.eu"><img src="https://gmic.eu/img/logo5.jpg" alt="" border="0" /></a>&nbsp;
+                      <img src="https://gmic.eu/img/logos2.jpg" alt="" border="0" usemap="#logomap"/>
+                      <map name="logomap">
+                        <area shape="rect" coords="0,0,98,30" alt="GREYC" href="https://www.greyc.fr/?page_id=443&lang=en">
+                        <area shape="rect" coords="104,0,147,43" alt="CNRS" href="http://www.cnrs.fr/index.php">
+                        <area shape="rect" coords="13,32,59,76" alt="ENSICAEN" href="http://www.ensicaen.fr">
+                        <area shape="rect" coords="76,47,139,71" alt="UNICAEN" href="http://www.unicaen.fr/home-578581.kjsp?RH=1291198060074&RF=UNIV-EN">
+                      </map>
+                      <br/>
+                      <font size="+1"><font color="#AAAAAA">A Full-Featured Open-Source Framework for Image Processing</font></font>
+                    </center>
+                </td></tr>
+                <tr><td><hr style="border-top: 1px solid #ccc;"/></td></tr>
+        </tbody></table></td></tr>
+        <tr><td>
+            <center>
+              <table><tr>
+                  <td>
+                    <div id='cssmenu'>
+                      <ul>
+                        <li><a href='https://gmic.eu'><span>
+                              <img src='https://gmic.eu/img/menuicon_000000.png' style='vertical-align:-20%' />&nbsp;&nbsp;
+                              Home</span></a></li>
+                        <li><a href='https://twitter.com/gmic_eu' target='_blank'><span>
+                              <img src='https://gmic.eu/img/menuicon_000001.png ' style='vertical-align:-20%' />&nbsp;&nbsp;
+                              News</span></a></li>
+                        <li><a href='https://gmic.eu/download.shtml'><span>
+                              <img src='https://gmic.eu/img/menuicon_000002.png' style='vertical-align:-20%' />&nbsp;&nbsp;
+                              Download</span></a></li>
+                        <li class='has-sub'><a href='#'><span>
+                              <img src='https://gmic.eu/img/menuicon_000003.png' style='vertical-align:-20%' />&nbsp;&nbsp;
+                              Resources</span></a>
+                          <ul>
+                            <li><a href='https://gmic.eu/tutorials/bouncing_balls3d'><span>
+                                  <img src='https://gmic.eu/img/menuicon_000007.png' style='vertical-align:-20%' />&nbsp;&nbsp;
+                                  An Example of G'MIC Scripting</span></a></li>
+                            <li><a href='https://gmic.eu/tutorial/basics.shtml'><span>
+                                  <img src='https://gmic.eu/img/menuicon_000007.png' style='vertical-align:-20%' />&nbsp;&nbsp;
+                                  G'MIC Scripting Tutorial</span></a></li>
+                            <li><a href='https://gmic.eu/reference.shtml'><span>
+                                  <img src='https://gmic.eu/img/menuicon_000008.png' style='vertical-align:-20%' />&nbsp;&nbsp;
+                                  G'MIC Technical Reference</span></a></li>
+                            <li><a href='https://www.youtube.com/playlist?list=PLxhZWW4XG2XEJqfGmGWiG7EfttWtpQvyu' target='_blank'><span>
+                                  <img src='https://gmic.eu/img/menuicon_000009.png' style='vertical-align:-20%' />&nbsp;&nbsp;
+                                  Video Tutorials</span></a></li>
+                            <li><a href='https://github.com/dtschump/gmic-community/wiki' target='_blank'><span>
+                                  <img src='https://gmic.eu/img/menuicon_000010.png' style='vertical-align:-20%' />&nbsp;&nbsp;
+                                  Wiki Pages</span></a></li>
+                            <li><a href='https://gmic.eu/gallery/'><span>
+                                  <img src='https://gmic.eu/img/menuicon_000011.png' style='vertical-align:-20%' />&nbsp;&nbsp;
+                                  Image Gallery</span></a></li>
+                            <li><a href='https://gmic.eu/color_presets/index.shtml'><span>
+                                  <img src='https://gmic.eu/img/menuicon_000012.png' style='vertical-align:-20%' />&nbsp;&nbsp;
+                                  Color Presets</span></a></li>
+                            <li><a href='https://gmic.eu/libgmic.shtml'><span>
+                                  <img src='https://gmic.eu/img/menuicon_000013.png' style='vertical-align:-20%' />&nbsp;&nbsp;
+                                  Using libgmic</span></a></li>
+                            <li><a href='https://gmicol.greyc.fr/' target='_blank'><span>
+                                  <img src='https://gmic.eu/img/menuicon_000014.png' style='vertical-align:-20%' />&nbsp;&nbsp;
+                                  G'MIC Online</span></a></li>
+                          </ul>
+                        </li>
+                        <li class='has-sub'><a href='#'><span>
+                              <img src='https://gmic.eu/img/menuicon_000004.png' style='vertical-align:-20%' />&nbsp;&nbsp;
+                              Community</span></a>
+                          <ul>
+                            <li><a href='https://discuss.pixls.us/c/software/gmic' target='_blank'><span>
+                                  <img src='https://gmic.eu/img/menuicon_000015.png' style='vertical-align:-20%' />&nbsp;&nbsp;
+                                  Discussion Forum (Pixls.us)</span></a></li>
+                            <li><a href='https://twitter.com/gmic_eu' target='_blank'><span>
+                                  <img src='https://gmic.eu/img/menuicon_000001.png' style='vertical-align:-20%' />&nbsp;&nbsp;
+                                  Twitter</span></a></li>
+                            <li><a href='https://www.reddit.com/r/gmic' target='_blank'><span>
+                                  <img src='https://gmic.eu/img/menuicon_000016.png' style='vertical-align:-20%' />&nbsp;&nbsp;
+                                  Reddit</span></a></li>
+                            <li><a href='http://gimpchat.com/viewforum.php?f=28' target='_blank'><span>
+                                  <img src='https://gmic.eu/img/menuicon_000017.png' style='vertical-align:-20%' />&nbsp;&nbsp;
+                                  GimpChat</span></a></li>
+                            <li><a href='https://webchat.freenode.net/?channels=#pixls.us' target='_blank'><span>
+                                  <img src='https://gmic.eu/img/menuicon_000018.png' style='vertical-align:-20%' />&nbsp;&nbsp;
+                                  IRC</span></a></li>
+                            <!-- <li><a href='https://www.utip.io/gmic'><span> -->
+                            <!--       <img src='https://gmic.eu/img/menuicon_000019.png' style='vertical-align:-20%' />&nbsp;&nbsp; -->
+                            <!--       uTip</span></a></li> -->
+                          </ul>
+                        </li>
+
+                        <li><a href='https://github.com/dtschump/gmic/issues' target='_blank'><span>
+                              <img src='https://gmic.eu/img/menuicon_000005.png' style='vertical-align:-20%' />&nbsp;&nbsp;
+                              Report Issue</span></a></li>
+
+                        <li class='has-sub'><a href='#'><span>
+                              <img src='https://gmic.eu/img/menuicon_000006.png' style='vertical-align:-20%' />&nbsp;&nbsp;
+                              Support Us</span></a>
+                          <ul>
+                            <!-- <li><a href='https://www.utip.io/gmic' target='_blank'><span> -->
+                            <!--       <img src='https://gmic.eu/img/menuicon_000019.png' style='vertical-align:-20%' />&nbsp;&nbsp; -->
+                            <!--       uTip (Support for Free by Watching Ads)</span></a></li> -->
+                            <li><a href='https://libreart.info/en/projects/gmic' target='_blank'><span>
+                                  <img src='https://gmic.eu/img/menuicon_000020.png' style='vertical-align:-20%' />&nbsp;&nbsp;
+                                  Paypal (Through the LILA Association)</span></a></li>
+                          </ul>
+                        </li>
+                        <!-- <li> -->
+                        <!--   <a href="https://utip.io/gmic"><img src='https://gmic.eu/img/utip.png' style='vertical-align:-14px' /></a> -->
+                        <!-- </li> -->
+                      </ul>
+                    </div>
+                  </td>
+              </tr></table>
+            </center>
+        </td></tr>
+        <tr bgcolor="#FFFFFF"><td>
+            <center><font size="-1" color="#777777">
+                Latest stable version: <b><a href="https://gmic.eu/download.shtml">2.9.2</a></b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Current pre-release: <b><a href="https://gmic.eu/files/prerelease">2.9.3</a></b>
+            </font></center>
+        </td></tr>
+      </tbody>
+    </table>
