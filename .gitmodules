@@ -1,8 +1,0 @@
-[submodule "gmic"]
-	path = gmic
-	url = https://github.com/dtschump/gmic.git
-	branch = v.2.9.1
-[submodule "CImg"]
-	path = CImg
-	url = https://github.com/dtschump/CImg.git
-	branch = v.2.9.1
