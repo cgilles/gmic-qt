@@ -7,6 +7,10 @@ LIST (APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 include(FeatureSummary)
 include(FindPkgConfig)
 
+# -- Debug Symbols rules under MacOS -------------------------------------------
+include(MacroUtils)
+MACOS_DEBUG_POLICIES()
+
 set(CMAKE_CXX_STANDARD 11)
 add_definitions(-Dcimg_use_cpp11=1)
 set(MIN_QT_VERSION 5.2.0)
