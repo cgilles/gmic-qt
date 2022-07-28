@@ -3,7 +3,7 @@
 *  editors, offering hundreds of filters thanks to the underlying G'MIC
 *  image processing framework.
 *
-*  Copyright (C) 2018, 2019, 2020 Nicholas Hayes
+*  Copyright (C) 2018, 2019, 2020, 2022 Nicholas Hayes
 *
 *  G'MIC-Qt is free software: you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -30,9 +30,12 @@
 #include <memory>
 #include <vector>
 #include "Common.h"
-#include "Host/host.h"
+#include "Host/GmicQtHost.h"
 #include "MainWindow.h"
-#include "gmic_qt.h"
+#include "GmicQt.h"
+#ifndef gmic_core
+#include "CImg.h"
+#endif
 #include "gmic.h"
 #include <Windows.h>
 
@@ -67,10 +70,10 @@ namespace host_paintdotnet
     std::vector<ScopedFileMapping> sharedMemory;
 }
 
-namespace GmicQt
+namespace GmicQtHost
 {
-    const QString HostApplicationName = QString("Paint.NET");
-    const char * HostApplicationShortname = GMIC_QT_XSTRINGIFY(GMIC_HOST);
+    const QString ApplicationName = QString("Paint.NET");
+    const char * const ApplicationShortname = GMIC_QT_XSTRINGIFY(GMIC_HOST);
     const bool DarkThemeIsDefault = false;
 }
 
@@ -252,16 +255,18 @@ namespace
     }
 }
 
-void gmic_qt_get_layers_extent(int * width, int * height, GmicQt::InputMode mode)
+namespace GmicQtHost {
+
+void getLayersExtent(int * width, int * height, GmicQt::InputMode mode)
 {
-    if (mode == GmicQt::NoInput)
+    if (mode == GmicQt::InputMode::NoInput)
     {
         *width = 0;
         *height = 0;
         return;
     }
 
-    QString getMaxLayerSizeCommand = QString("command=gmic_qt_get_max_layer_size\nmode=%1\n").arg(mode);
+    QString getMaxLayerSizeCommand = QString("command=gmic_qt_get_max_layer_size\nmode=%1\n").arg((int)mode);
 
     QString reply = QString::fromUtf8(SendMessageSynchronously(getMaxLayerSizeCommand.toUtf8()));
 
@@ -277,9 +282,9 @@ void gmic_qt_get_layers_extent(int * width, int * height, GmicQt::InputMode mode
     }
 }
 
-void gmic_qt_get_cropped_images(gmic_list<float> & images, gmic_list<char> & imageNames, double x, double y, double width, double height, GmicQt::InputMode mode)
+void getCroppedImages(gmic_list<float> & images, gmic_list<char> & imageNames, double x, double y, double width, double height, GmicQt::InputMode mode)
 {
-    if (mode == GmicQt::NoInput)
+    if (mode == GmicQt::InputMode::NoInput)
     {
         images.assign();
         imageNames.assign();
@@ -295,7 +300,7 @@ void gmic_qt_get_cropped_images(gmic_list<float> & images, gmic_list<char> & ima
         height = 1.0;
     }
 
-    QString getImagesCommand = QString("command=gmic_qt_get_cropped_images\nmode=%1\ncroprect=%2,%3,%4,%5\n").arg(mode).arg(x).arg(y).arg(width).arg(height);
+    QString getImagesCommand = QString("command=gmic_qt_get_cropped_images\nmode=%1\ncroprect=%2,%3,%4,%5\n").arg((int)mode).arg(x).arg(y).arg(width).arg(height);
 
     QString reply = QString::fromUtf8(SendMessageSynchronously(getImagesCommand.toUtf8()));
 
@@ -376,10 +381,9 @@ void gmic_qt_get_cropped_images(gmic_list<float> & images, gmic_list<char> & ima
     SendMessageSynchronously("command=gmic_qt_release_shared_memory");
 }
 
-void gmic_qt_output_images(gmic_list<float> & images, const gmic_list<char> & imageNames, GmicQt::OutputMode mode, const char * verboseLayersLabel)
+void outputImages(gmic_list<float> & images, const gmic_list<char> & imageNames, GmicQt::OutputMode mode)
 {
     unused(imageNames);
-    unused(verboseLayersLabel);
 
     if (images.size() > 0)
     {
@@ -389,158 +393,163 @@ void gmic_qt_output_images(gmic_list<float> & images, const gmic_list<char> & im
         }
         host_paintdotnet::sharedMemory.clear();
 
-        QString outputImagesCommand = QString("command=gmic_qt_output_images\nmode=%1\n").arg(mode);
+        QString outputImagesCommand = QString("command=gmic_qt_output_images\nmode=%1\n").arg((int)mode);
 
-        QString mappingName = QString("pdn_%1").arg(QUuid::createUuid().toString(QUuid::StringFormat::WithoutBraces));
-
-
-        const cimg_library::CImg<float>& out = images[0];
-
-        const int width = out.width();
-        const int height = out.height();
-
-        const qint64 imageSizeInBytes = static_cast<qint64>(width) * static_cast<qint64>(height) * 4;
-
-        const DWORD capacityHigh = static_cast<DWORD>((imageSizeInBytes >> 32) & 0xFFFFFFFF);
-        const DWORD capacityLow = static_cast<DWORD>(imageSizeInBytes & 0x00000000FFFFFFFF);
-
-        ScopedFileMapping fileMappingObject(CreateFileMappingW(INVALID_HANDLE_VALUE,
-                                                               nullptr,
-                                                               PAGE_READWRITE,
-                                                               capacityHigh,
-                                                               capacityLow,
-                                                               reinterpret_cast<LPCWSTR>(mappingName.utf16())));
-        if (fileMappingObject)
+        for (size_t i = 0; i < images.size(); ++i)
         {
-            ScopedFileMappingView mappedData(MapViewOfFile(fileMappingObject.get(), FILE_MAP_ALL_ACCESS, 0, 0, static_cast<size_t>(imageSizeInBytes)));
+            QString mappingName = QString("pdn_%1").arg(QUuid::createUuid().toString(QUuid::StringFormat::WithoutBraces));
 
-            if (mappedData)
+            const cimg_library::CImg<float>& out = images[i];
+
+            const int width = out.width();
+            const int height = out.height();
+
+            const qint64 imageSizeInBytes = static_cast<qint64>(width) * static_cast<qint64>(height) * 4;
+
+            const DWORD capacityHigh = static_cast<DWORD>((imageSizeInBytes >> 32) & 0xFFFFFFFF);
+            const DWORD capacityLow = static_cast<DWORD>(imageSizeInBytes & 0x00000000FFFFFFFF);
+
+            ScopedFileMapping fileMappingObject(CreateFileMappingW(INVALID_HANDLE_VALUE,
+                                                                   nullptr,
+                                                                   PAGE_READWRITE,
+                                                                   capacityHigh,
+                                                                   capacityLow,
+                                                                   reinterpret_cast<LPCWSTR>(mappingName.utf16())));
+            if (fileMappingObject)
             {
-                quint8* scan0 = static_cast<quint8*>(mappedData.get());
-                const int stride = width * 4;
+                ScopedFileMappingView mappedData(MapViewOfFile(fileMappingObject.get(), FILE_MAP_ALL_ACCESS, 0, 0, static_cast<size_t>(imageSizeInBytes)));
 
-                if (out.spectrum() == 3)
+                if (mappedData)
                 {
-                    const float* srcR = out.data(0, 0, 0, 0);
-                    const float* srcG = out.data(0, 0, 0, 1);
-                    const float* srcB = out.data(0, 0, 0, 2);
+                    quint8* scan0 = static_cast<quint8*>(mappedData.get());
+                    const int stride = width * 4;
 
-                    for (int y = 0; y < height; ++y)
+                    if (out.spectrum() == 3)
                     {
-                        quint8* dst = scan0 + (y * stride);
+                        const float* srcR = out.data(0, 0, 0, 0);
+                        const float* srcG = out.data(0, 0, 0, 1);
+                        const float* srcB = out.data(0, 0, 0, 2);
 
-                        for (int x = 0; x < width; ++x)
+                        for (int y = 0; y < height; ++y)
                         {
-                            dst[0] = Float2Uint8Clamped(*srcB++);
-                            dst[1] = Float2Uint8Clamped(*srcG++);
-                            dst[2] = Float2Uint8Clamped(*srcR++);
-                            dst[3] = 255;
+                            quint8* dst = scan0 + (y * stride);
 
-                            dst += 4;
+                            for (int x = 0; x < width; ++x)
+                            {
+                                dst[0] = Float2Uint8Clamped(*srcB++);
+                                dst[1] = Float2Uint8Clamped(*srcG++);
+                                dst[2] = Float2Uint8Clamped(*srcR++);
+                                dst[3] = 255;
+
+                                dst += 4;
+                            }
                         }
                     }
-                }
-                else if (out.spectrum() == 4)
-                {
-                    const float* srcR = out.data(0, 0, 0, 0);
-                    const float* srcG = out.data(0, 0, 0, 1);
-                    const float* srcB = out.data(0, 0, 0, 2);
-                    const float* srcA = out.data(0, 0, 0, 3);
-
-                    for (int y = 0; y < height; ++y)
+                    else if (out.spectrum() == 4)
                     {
-                        quint8* dst = scan0 + (y * stride);
+                        const float* srcR = out.data(0, 0, 0, 0);
+                        const float* srcG = out.data(0, 0, 0, 1);
+                        const float* srcB = out.data(0, 0, 0, 2);
+                        const float* srcA = out.data(0, 0, 0, 3);
 
-                        for (int x = 0; x < width; ++x)
+                        for (int y = 0; y < height; ++y)
                         {
-                            dst[0] = Float2Uint8Clamped(*srcB++);
-                            dst[1] = Float2Uint8Clamped(*srcG++);
-                            dst[2] = Float2Uint8Clamped(*srcR++);
-                            dst[3] = Float2Uint8Clamped(*srcA++);
+                            quint8* dst = scan0 + (y * stride);
 
-                            dst += 4;
+                            for (int x = 0; x < width; ++x)
+                            {
+                                dst[0] = Float2Uint8Clamped(*srcB++);
+                                dst[1] = Float2Uint8Clamped(*srcG++);
+                                dst[2] = Float2Uint8Clamped(*srcR++);
+                                dst[3] = Float2Uint8Clamped(*srcA++);
+
+                                dst += 4;
+                            }
                         }
                     }
-                }
-                else if (out.spectrum() == 2)
-                {
-                    const float* srcGray = out.data(0, 0, 0, 0);
-                    const float* srcAlpha = out.data(0, 0, 0, 1);
-
-                    for (int y = 0; y < height; ++y)
+                    else if (out.spectrum() == 2)
                     {
-                        quint8* dst = scan0 + (y * stride);
+                        const float* srcGray = out.data(0, 0, 0, 0);
+                        const float* srcAlpha = out.data(0, 0, 0, 1);
 
-                        for (int x = 0; x < width; ++x)
+                        for (int y = 0; y < height; ++y)
                         {
-                            dst[0] = dst[1] = dst[2] = Float2Uint8Clamped(*srcGray++);
-                            dst[3] = Float2Uint8Clamped(*srcAlpha++);
+                            quint8* dst = scan0 + (y * stride);
 
-                            dst += 4;
+                            for (int x = 0; x < width; ++x)
+                            {
+                                dst[0] = dst[1] = dst[2] = Float2Uint8Clamped(*srcGray++);
+                                dst[3] = Float2Uint8Clamped(*srcAlpha++);
+
+                                dst += 4;
+                            }
                         }
                     }
-                }
-                else if (out.spectrum() == 1)
-                {
-                    const float* srcGray = out.data(0, 0, 0, 0);
-
-                    for (int y = 0; y < height; ++y)
+                    else if (out.spectrum() == 1)
                     {
-                        quint8* dst = scan0 + (y * stride);
+                        const float* srcGray = out.data(0, 0, 0, 0);
 
-                        for (int x = 0; x < width; ++x)
+                        for (int y = 0; y < height; ++y)
                         {
-                            dst[0] = dst[1] = dst[2] = Float2Uint8Clamped(*srcGray++);
-                            dst[3] = 255;
+                            quint8* dst = scan0 + (y * stride);
 
-                            dst += 4;
+                            for (int x = 0; x < width; ++x)
+                            {
+                                dst[0] = dst[1] = dst[2] = Float2Uint8Clamped(*srcGray++);
+                                dst[3] = 255;
+
+                                dst += 4;
+                            }
                         }
                     }
+                    else
+                    {
+                        qWarning() << "The image must have between 1 and 4 channels. Actual value=" << out.spectrum();
+                        return;
+                    }
+
+                    // Manually release the mapped data to ensue it is committed before the parent file mapping handle
+                    // is moved into the host_paintdotnet::sharedMemory vector (which invalidates the previous handle).
+
+                    mappedData.reset();
+
+                    outputImagesCommand += "layer=" + mappingName + ","
+                        + QString::number(width) + ","
+                        + QString::number(height) + ","
+                        + QString::number(stride) + "\n";
+
+
+                    host_paintdotnet::sharedMemory.push_back(std::move(fileMappingObject));
                 }
                 else
                 {
-                    qWarning() << "The image must have between 1 and 4 channels. Actual value=" << out.spectrum();
+                    qWarning() << "MapViewOfFile failed GetLastError=" << GetLastError();
                     return;
                 }
-
-                // Manually release the mapped data to ensue it is committed before the parent file mapping handle
-                // is moved into the host_paintdotnet::sharedMemory vector (which invalidates the previous handle).
-
-                mappedData.reset();
-
-                outputImagesCommand += "layer=" + mappingName + ","
-                    + QString::number(width) + ","
-                    + QString::number(height) + ","
-                    + QString::number(stride) + "\n";
-
-
-                host_paintdotnet::sharedMemory.push_back(std::move(fileMappingObject));
             }
             else
             {
-                qWarning() << "MapViewOfFile failed GetLastError=" << GetLastError();
+                qWarning() << "CreateFileMappingW failed GetLastError=" << GetLastError();
                 return;
             }
-        }
-        else
-        {
-            qWarning() << "CreateFileMappingW failed GetLastError=" << GetLastError();
-            return;
         }
 
         SendMessageSynchronously(outputImagesCommand.toUtf8());
     }
 }
 
-void gmic_qt_apply_color_profile(cimg_library::CImg<gmic_pixel_type> & images)
+void applyColorProfile(cimg_library::CImg<gmic_pixel_type> & images)
 {
     unused(images);
 }
 
-void gmic_qt_show_message(const char * message)
+void showMessage(const char * message)
 {
     unused(message);
 }
+
+} // namespace GmicQtHost
+
 
 int main(int argc, char *argv[])
 {
@@ -582,35 +591,40 @@ int main(int argc, char *argv[])
 
     int exitCode = 0;
 
-    disableInputMode(GmicQt::NoInput);
-    // disableInputMode(GmicQt::Active);
-    // disableInputMode(GmicQt::All);
-    disableInputMode(GmicQt::ActiveAndBelow);
-    disableInputMode(GmicQt::ActiveAndAbove);
-    disableInputMode(GmicQt::AllVisible);
-    disableInputMode(GmicQt::AllInvisible);
+    std::list<GmicQt::InputMode> disabledInputModes;
+    disabledInputModes.push_back(GmicQt::InputMode::NoInput);
+    // disabledInputModes.push_back(GmicQt::InputMode::Active);
+    // disabledInputModes.push_back(GmicQt::InputMode::All);
+    disabledInputModes.push_back(GmicQt::InputMode::ActiveAndBelow);
+    disabledInputModes.push_back(GmicQt::InputMode::ActiveAndAbove);
+    disabledInputModes.push_back(GmicQt::InputMode::AllVisible);
+    disabledInputModes.push_back(GmicQt::InputMode::AllInvisible);
 
-    // disableOutputMode(GmicQt::InPlace);
-    disableOutputMode(GmicQt::NewImage);
-    disableOutputMode(GmicQt::NewLayers);
-    disableOutputMode(GmicQt::NewActiveLayers);
 
-	// disablePreviewMode(GmicQt::FirstOutput);
-    disablePreviewMode(GmicQt::SecondOutput);
-    disablePreviewMode(GmicQt::ThirdOutput);
-    disablePreviewMode(GmicQt::FourthOutput);
-    disablePreviewMode(GmicQt::First2SecondOutput);
-    disablePreviewMode(GmicQt::First2ThirdOutput);
-    disablePreviewMode(GmicQt::First2FourthOutput);
-    disablePreviewMode(GmicQt::AllOutputs);
+    std::list<GmicQt::OutputMode> disabledOutputModes;
+    // disabledOutputModes.push_back(GmicQt::OutputMode::InPlace);
+    disabledOutputModes.push_back(GmicQt::OutputMode::NewImage);
+    disabledOutputModes.push_back(GmicQt::OutputMode::NewLayers);
+    disabledOutputModes.push_back(GmicQt::OutputMode::NewActiveLayers);
+    bool dialogAccepted = true;
 
     if (useLastParameters)
     {
-        exitCode = launchPluginHeadlessUsingLastParameters();
+        GmicQt::RunParameters parameters;
+        parameters = GmicQt::lastAppliedFilterRunParameters(GmicQt::ReturnedRunParametersFlag::AfterFilterExecution);
+        exitCode = GmicQt::run(GmicQt::UserInterfaceMode::ProgressDialog,
+                               parameters,
+                               disabledInputModes,
+                               disabledOutputModes,
+                               &dialogAccepted);
     }
     else
     {
-        exitCode = launchPlugin();
+        exitCode = GmicQt::run(GmicQt::UserInterfaceMode::Full,
+                               GmicQt::RunParameters(),
+                               disabledInputModes,
+                               disabledOutputModes,
+                               &dialogAccepted);
     }
 
     for (size_t i = 0; i < host_paintdotnet::sharedMemory.size(); ++i)
@@ -619,7 +633,38 @@ int main(int argc, char *argv[])
     }
     host_paintdotnet::sharedMemory.clear();
 
-    if (!pluginDialogWasAccepted())
+    if (dialogAccepted)
+    {
+        // Send the G'MIC command name to Paint.NET.
+        // It will be added to the image file names when writing the G'MIC images to an external file.
+        GmicQt::RunParameters parameters = GmicQt::lastAppliedFilterRunParameters(GmicQt::ReturnedRunParametersFlag::AfterFilterExecution);
+        QString gmicCommandName;
+
+        // A G'MIC command consists of a command name that can optionally be followed
+        // by a space and the command arguments.
+        // If a command does not take any arguments only the command name will be present.
+        //
+        // According to the G'MIC Language Reference command names are restricted to a
+        // subset of 7-bit US-ASCII: letters, numbers and underscores.
+        // These restrictions make the command name safe to use in an OS file name.
+        // See https://gmic.eu/reference/adding_custom_commands.html for more information.
+
+        size_t firstSpaceIndex = parameters.command.find_first_of(' ');
+
+        if (firstSpaceIndex != std::string::npos)
+        {
+            gmicCommandName = QString::fromStdString(parameters.command.substr(0, firstSpaceIndex));
+        }
+        else
+        {
+            gmicCommandName = QString::fromStdString(parameters.command);
+        }
+        
+        QString message = QString("command=gmic_qt_set_gmic_command_name\n%1\n").arg(gmicCommandName);
+        
+        SendMessageSynchronously(message.toUtf8());
+    }
+    else
     {
         exitCode = 4;
     }

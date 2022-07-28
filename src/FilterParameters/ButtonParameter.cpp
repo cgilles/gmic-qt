@@ -32,11 +32,19 @@
 #include "FilterTextTranslator.h"
 #include "HtmlTranslator.h"
 
-ButtonParameter::ButtonParameter(QObject * parent) : AbstractParameter(parent, true), _value(false), _pushButton(nullptr), _alignment(Qt::AlignHCenter) {}
+namespace GmicQt
+{
+
+ButtonParameter::ButtonParameter(QObject * parent) : AbstractParameter(parent), _value(false), _pushButton(nullptr), _alignment(Qt::AlignHCenter) {}
 
 ButtonParameter::~ButtonParameter()
 {
   delete _pushButton;
+}
+
+int ButtonParameter::size() const
+{
+  return 1;
 }
 
 bool ButtonParameter::addTo(QWidget * widget, int row)
@@ -48,13 +56,18 @@ bool ButtonParameter::addTo(QWidget * widget, int row)
   _pushButton = new QPushButton(_text, widget);
   _pushButton->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
   _grid->addWidget(_pushButton, row, 0, 1, 3, _alignment);
-  connect(_pushButton, SIGNAL(clicked(bool)), this, SLOT(onPushButtonClicked(bool)));
+  connect(_pushButton, &QPushButton::clicked, this, &ButtonParameter::onPushButtonClicked);
   return true;
 }
 
-QString ButtonParameter::textValue() const
+QString ButtonParameter::value() const
 {
   return _value ? QString("1") : QString("0");
+}
+
+QString ButtonParameter::defaultValue() const
+{
+  return QString("0");
 }
 
 void ButtonParameter::setValue(const QString & s)
@@ -75,13 +88,13 @@ void ButtonParameter::onPushButtonClicked(bool)
   notifyIfRelevant();
 }
 
-bool ButtonParameter::initFromText(const char * text, int & textLength)
+bool ButtonParameter::initFromText(const QString & filterName, const char * text, int & textLength)
 {
   QList<QString> list = parseText("button", text, textLength);
   if (list.isEmpty()) {
     return false;
   }
-  _text = HtmlTranslator::html2txt(FilterTextTranslator::translate(list[0]));
+  _text = HtmlTranslator::html2txt(FilterTextTranslator::translate(list[0], filterName));
   QString & alignment = list[1];
   if (alignment.isEmpty()) {
     return true;
@@ -96,3 +109,5 @@ bool ButtonParameter::initFromText(const char * text, int & textLength)
   }
   return true;
 }
+
+} // namespace GmicQt

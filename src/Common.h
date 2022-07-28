@@ -25,15 +25,21 @@
 #ifndef GMIC_QT_COMMON_H
 #define GMIC_QT_COMMON_H
 
+#include <QTime>
+#include <QtGlobal>
 #include <iostream>
 #include "TimeLogger.h"
 
 #ifdef _GMIC_QT_DEBUG_
-#define ENTERING qWarning() << "[" << __PRETTY_FUNCTION__ << "] <<Entering>>"
-#define LEAVING qWarning() << "[" << __PRETTY_FUNCTION__ << "] <<Leaving>>"
-#define TRACE qWarning() << "[" << __PRETTY_FUNCTION__ << "]"
-#define TSHOW(V) qWarning() << "[" << __PRETTY_FUNCTION__ << __LINE__ << "]" << #V << "=" << (V)
+#define DEBUG_QTIMESTAMP QTime::currentTime().toString("[hh:mm:ss]")
+#define DEBUG_TIMESTAMP QTime::currentTime().toString("[hh:mm:ss]").toStdString()
+#define ENTERING std::cerr << DEBUG_TIMESTAMP << " [" << __PRETTY_FUNCTION__ << "] <<Entering>>" << std::endl
+#define LEAVING std::cerr << DEBUG_TIMESTAMP << " [" << __PRETTY_FUNCTION__ << "] <<Leaving>>" << std::endl
+#define TRACE qWarning() << DEBUG_QTIMESTAMP << "[" << __PRETTY_FUNCTION__ << "]"
+#define TSHOW(V) qWarning() << DEBUG_QTIMESTAMP << "[" << __PRETTY_FUNCTION__ << "]:" << __LINE__ << " " << #V << "=" << (V)
 #define SHOW(V) qWarning() << #V << "=" << (V)
+#define STDSHOW(V) std::cerr << #V << " = " << (V) << std::endl
+#define QSTDSHOW(STR) std::cerr << #STR << " = " << (STR).toStdString() << std::endl
 #else
 #define ENTERING while (false)
 #define LEAVING while (false)
@@ -46,6 +52,12 @@
 #define SHOW(V)                                                                                                                                                                                        \
   while (false)                                                                                                                                                                                        \
   qWarning() << ""
+#define STDSHOW(V)                                                                                                                                                                                     \
+  while (false)                                                                                                                                                                                        \
+  std::cerr << ""
+#define QSTDSHOW(STR)                                                                                                                                                                                  \
+  while (false)                                                                                                                                                                                        \
+  std::cerr << ""
 #endif
 
 template <typename T> inline void unused(const T &, ...) {}
@@ -58,9 +70,9 @@ template <typename T> inline void unused(const T &, ...) {}
   std::cout << ""
 #endif
 
-#define QT_VERSION_GTE(MAJOR, MINOR) (((QT_VERSION_MAJOR == MAJOR) && (QT_VERSION_MINOR >= MINOR)) || (QT_VERSION_MAJOR > MAJOR))
+#define QT_VERSION_GTE(MAJOR, MINOR, PATCH) (QT_VERSION >= QT_VERSION_CHECK(MAJOR, MINOR, PATCH))
 
-#if QT_VERSION_GTE(5, 14)
+#if QT_VERSION_GTE(5, 14, 0)
 #define QT_SKIP_EMPTY_PARTS Qt::SkipEmptyParts
 #define QT_KEEP_EMPTY_PARTS Qt::KeepEmptyParts
 #else

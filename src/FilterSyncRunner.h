@@ -30,9 +30,8 @@
 #include <QTime>
 
 #include "Common.h"
-#include "Host/host.h"
-#include "gmic_qt.h"
-
+#include "GmicQt.h"
+#include "Host/GmicQtHost.h"
 class QObject;
 
 namespace cimg_library
@@ -40,10 +39,13 @@ namespace cimg_library
 template <typename T> struct CImgList;
 }
 
+namespace GmicQt
+{
+
 class FilterSyncRunner : public QObject {
   Q_OBJECT
 public:
-  FilterSyncRunner(QObject * parent, const QString & name, const QString & command, const QString & arguments, const QString & environment, GmicQt::OutputMessageMode mode);
+  FilterSyncRunner(QObject * parent, const QString & command, const QString & arguments, const QString & environment);
 
   virtual ~FilterSyncRunner();
   void setArguments(const QString &);
@@ -52,13 +54,13 @@ public:
   void swapImages(cimg_library::CImgList<float> & images);
   const cimg_library::CImgList<float> & images() const;
   const cimg_library::CImgList<char> & imageNames() const;
+  cimg_library::CImg<char> & persistentMemoryOutput();
   QStringList gmicStatus() const;
   QList<int> parametersVisibilityStates() const;
   QString errorMessage() const;
   bool failed() const;
   bool aborted() const;
   float progress() const;
-  QString name() const;
   QString fullCommand() const;
   void setLogSuffix(const QString & text);
   void run();
@@ -70,6 +72,7 @@ private:
   QString _environment;
   cimg_library::CImgList<float> * _images;
   cimg_library::CImgList<char> * _imageNames;
+  cimg_library::CImg<char> * _persistentMemoryOuptut;
   bool _gmicAbort;
   bool _failed;
   QString _gmicStatus;
@@ -77,7 +80,8 @@ private:
   QString _errorMessage;
   QString _name;
   QString _logSuffix;
-  GmicQt::OutputMessageMode _messageMode;
 };
+
+} // namespace GmicQt
 
 #endif // GMIC_QT_FILTERSYNCRUNNER_H

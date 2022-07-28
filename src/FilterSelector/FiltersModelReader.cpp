@@ -34,11 +34,17 @@
 #include "Common.h"
 #include "FilterSelector/FiltersModel.h"
 #include "Globals.h"
+#include "GmicQt.h"
 #include "LanguageSettings.h"
 #include "Logger.h"
 #include "Utils.h"
-#include "gmic_qt.h"
+#ifndef gmic_core
+#include "CImg.h"
+#endif
 #include "gmic.h"
+
+namespace GmicQt
+{
 
 FiltersModelReader::FiltersModelReader(FiltersModel & model) : _model(model) {}
 
@@ -104,8 +110,8 @@ void FiltersModelReader::parseFiltersDefinitions(QByteArray & stdlibArray)
         // A filter
         //
         QString filterName = line;
-        filterName.replace(QRegExp("[ ]*:.*$"), "");
-        filterName.replace(QRegExp("^\\s*#@gui[_a-zA-Z]{0,3}[ ]"), "");
+        filterName.remove(QRegExp("[ ]*:.*$"));
+        filterName.remove(QRegExp("^\\s*#@gui[_a-zA-Z]{0,3}[ ]"));
         const bool warning = filterName.startsWith(WarningPrefix);
         if (warning) {
           filterName.remove(0, 1);
@@ -115,7 +121,7 @@ void FiltersModelReader::parseFiltersDefinitions(QByteArray & stdlibArray)
         filterCommands.replace(QRegExp("^\\s*#@gui[_a-zA-Z]{0,3}[ ][^:]+[ ]*:[ ]*"), "");
 
         // Extract default input mode
-        GmicQt::InputMode defaultInputMode = GmicQt::UnspecifiedInputMode;
+        InputMode defaultInputMode = InputMode::Unspecified;
         QRegExp reInputMode("\\s*:\\s*([xX.*+vViI-])\\s*$");
         if (reInputMode.indexIn(filterCommands) != -1) {
           QString mode = reInputMode.cap(1);
@@ -132,29 +138,34 @@ void FiltersModelReader::parseFiltersDefinitions(QByteArray & stdlibArray)
           commands.push_back(commands.front());
         }
         QList<QString> preview = commands[1].trimmed().split("(");
-        float previewFactor = GmicQt::PreviewFactorAny;
+        float previewFactor = PreviewFactorAny;
         bool accurateIfZoomed = true;
+        bool previewFromFullImage = false;
         if (preview.size() >= 2) {
           if (preview[1].endsWith("+")) {
             accurateIfZoomed = true;
             preview[1].chop(1);
+          } else if (preview[1].endsWith("*")) {
+            accurateIfZoomed = true;
+            previewFromFullImage = true;
+            preview[1].chop(1);
           } else {
             accurateIfZoomed = false;
           }
-          previewFactor = preview[1].replace(QRegExp("\\).*"), "").toFloat();
+          bool ok = false;
+          preview[1].replace(QRegExp("\\).*"), "");
+          previewFactor = preview[1].toFloat(&ok);
+          if (!ok) {
+            Logger::error(QString("Cannot parse zoom factor for filter [%1]:\n%2").arg(filterName).arg(line));
+            previewFactor = PreviewFactorAny;
+          }
+          previewFactor = std::abs(previewFactor);
         }
+
         QString filterPreviewCommand = preview[0].trimmed();
-
-        //        FiltersTreeFilterItem * filterItem = new FiltersTreeFilterItem(filterName,
-        //                                                                       filterCommand,
-        //                                                                       filterPreviewCommand,
-        //                                                                       previewFactor,
-        //                                                                       accurateIfZoomed);
-        // filterItem->setWarningFlag(warning);
-
         QString start = line;
         start.replace(QRegExp("^\\s*"), "");
-        start.replace(QRegExp(" .*"), " :");
+        start.replace(QRegExp(" .*"), "[ ]?:");
         QRegExp startRegexp(QString("^\\s*%1").arg(start));
 
         // Read parameters
@@ -171,7 +182,6 @@ void FiltersModelReader::parseFiltersDefinitions(QByteArray & stdlibArray)
                  && !folderRegexpLanguage.exactMatch(buffer)   //
                  && !filterRegexpNoLanguage.exactMatch(buffer) //
                  && !filterRegexpLanguage.exactMatch(buffer));
-
         FiltersModel::Filter filter;
         filter.setName(filterName);
         filter.setCommand(filterCommand);
@@ -179,6 +189,7 @@ void FiltersModelReader::parseFiltersDefinitions(QByteArray & stdlibArray)
         filter.setDefaultInputMode(defaultInputMode);
         filter.setPreviewFactor(previewFactor);
         filter.setAccurateIfZoomed(accurateIfZoomed);
+        filter.setPreviewFromFullImage(previewFromFullImage);
         filter.setParameters(parameters);
         filter.setPath(filterPath);
         filter.setWarningFlag(warning);
@@ -225,33 +236,33 @@ bool FiltersModelReader::textIsPrecededBySpacesInSomeLineOfArray(const QByteArra
   return false;
 }
 
-GmicQt::InputMode FiltersModelReader::symbolToInputMode(const QString & str)
+InputMode FiltersModelReader::symbolToInputMode(const QString & str)
 {
   if (str.length() != 1) {
     Logger::warning(QString("'%1' is not recognized as a default input mode (should be a single symbol/letter)").arg(str));
-    return GmicQt::UnspecifiedInputMode;
+    return InputMode::Unspecified;
   }
   switch (str.toLocal8Bit()[0]) {
   case 'x':
   case 'X':
-    return GmicQt::NoInput;
+    return InputMode::NoInput;
   case '.':
-    return GmicQt::Active;
+    return InputMode::Active;
   case '*':
-    return GmicQt::All;
+    return InputMode::All;
   case '-':
-    return GmicQt::ActiveAndAbove;
+    return InputMode::ActiveAndAbove;
   case '+':
-    return GmicQt::ActiveAndBelow;
+    return InputMode::ActiveAndBelow;
   case 'V':
   case 'v':
-    return GmicQt::AllVisible;
+    return InputMode::AllVisible;
   case 'I':
   case 'i':
-    return GmicQt::AllInvisible;
+    return InputMode::AllInvisible;
   default:
     Logger::warning(QString("'%1' is not recognized as a default input mode").arg(str));
-    return GmicQt::UnspecifiedInputMode;
+    return InputMode::Unspecified;
   }
 }
 
@@ -291,3 +302,5 @@ QString FiltersModelReader::readBufferLine(QBuffer & buffer)
   }
   return result;
 }
+
+} // namespace GmicQt

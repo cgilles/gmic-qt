@@ -24,6 +24,7 @@
  */
 #include "FilterParameters/CustomDoubleSpinBox.h"
 #include <QFontMetrics>
+#include <QKeyEvent>
 #include <QLineEdit>
 #include <QShowEvent>
 #include <QSizePolicy>
@@ -32,6 +33,10 @@
 #include <algorithm>
 #include <cmath>
 #include "Common.h"
+#include "Settings.h"
+
+namespace GmicQt
+{
 
 CustomDoubleSpinBox::CustomDoubleSpinBox(QWidget * parent, float min, float max) : QDoubleSpinBox(parent)
 {
@@ -47,6 +52,7 @@ CustomDoubleSpinBox::CustomDoubleSpinBox(QWidget * parent, float min, float max)
   _sizeHint = dummy->sizeHint();
   _minimumSizeHint = dummy->minimumSizeHint();
   delete dummy;
+  connect(this, &QDoubleSpinBox::editingFinished, [this]() { _unfinishedKeyboardEditing = false; });
 }
 
 CustomDoubleSpinBox::~CustomDoubleSpinBox() {}
@@ -79,6 +85,20 @@ QSize CustomDoubleSpinBox::minimumSizeHint() const
   return _minimumSizeHint;
 }
 
+void CustomDoubleSpinBox::keyPressEvent(QKeyEvent * event)
+{
+  QString text = event->text();
+  if ((text.length() == 1 && text[0].isDigit()) || //
+      (text == Settings::DecimalPoint) ||          //
+      (text == Settings::NegativeSign) ||          //
+      (text == Settings::GroupSeparator) ||        //
+      (event->key() == Qt::Key_Backspace) ||       //
+      (event->key() == Qt::Key_Delete)) {
+    _unfinishedKeyboardEditing = true;
+  }
+  QDoubleSpinBox::keyPressEvent(event);
+}
+
 int CustomDoubleSpinBox::integerPartDigitCount(float value)
 {
   QString text = QString::number(static_cast<double>(value), 'f', 0);
@@ -87,3 +107,5 @@ int CustomDoubleSpinBox::integerPartDigitCount(float value)
   }
   return text.length();
 }
+
+} // namespace GmicQt

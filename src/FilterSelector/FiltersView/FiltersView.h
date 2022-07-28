@@ -32,17 +32,21 @@
 #include <QStandardItemModel>
 #include <QString>
 #include <QWidget>
+#include "Tags.h"
+class QSettings;
+class QEvent;
 
 namespace Ui
 {
 class FiltersView;
 }
 
+namespace GmicQt
+{
+
 class FilterTreeFolder;
 class FilterTreeItem;
 class FilterTreeAbstractItem;
-class QSettings;
-class QEvent;
 
 class FiltersView : public QWidget {
   Q_OBJECT
@@ -79,13 +83,17 @@ public:
   void adjustTreeSize();
   void expandFolders(QList<QString> & folderPaths);
 
-  bool eventFilter(QObject * watched, QEvent * event);
+  bool eventFilter(QObject * watched, QEvent * event) override;
+
+  void setVisibleTagColors(const TagColorSet & colors);
+  TagColorSet visibleTagColors() const;
 
 signals:
   void filterSelected(QString hash);
   void faveRenamed(QString hash, QString newName);
   void faveRemovalRequested(QString hash);
   void faveAdditionRequested(QString hash);
+  void tagToggled(int iColor);
 
 public slots:
   void editSelectedFaveName();
@@ -116,6 +124,14 @@ private:
   FilterTreeItem * findFave(const QString & hash);
   static QStandardItem * getFolderFromPath(QStandardItem * parent, QList<QString> path);
   static void saveFiltersVisibility(QStandardItem * item);
+  static void saveFiltersTags(QStandardItem * item);
+  enum class MenuType
+  {
+    Fave,
+    Filter
+  };
+  QMenu * itemContextMenu(MenuType type, FilterTreeItem * item);
+  void toggleItemTag(FilterTreeItem * item, TagColor color);
   Ui::FiltersView * ui;
 
   QStandardItemModel _model;
@@ -128,6 +144,11 @@ private:
   bool _isInSelectionMode;
   QMenu * _faveContextMenu;
   QMenu * _filterContextMenu;
+  TagColorSet _visibleTagColors;
+  QModelIndex _indexBeforeClick;
+  void updateIndexBeforeClick();
 };
+
+} // namespace GmicQt
 
 #endif // GMIC_QT_FILTERSVIEW_H

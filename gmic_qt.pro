@@ -1,12 +1,14 @@
 #
 # Set HOST variable to define target host software.
-# Possible values are "none", "gimp", "krita" and "paintdotnet"
+# Possible values are "none", "gimp", "gimp3" (experimental) "krita" and "paintdotnet"
 #
 #
 
 !defined(HOST,var) { HOST = gimp }
 
 !defined(GMIC_DYNAMIC_LINKING,var) { GMIC_DYNAMIC_LINKING = off }
+
+!defined(ASAN,var) { ASAN = off }
 
 !defined(PRERELEASE, var) {
 # calling 'date' directly crashes on MSYS2!
@@ -17,10 +19,7 @@
 !defined(COMPILER,var) { COMPILER = gcc }
 
 # Possible values are "on" or "off"
-!defined(LTO,var) { LTO=on }
-
-# Possible values are "on" or "off"
-!defined(TEST_FILTERS_QM,var) { TEST_FILTERS_QM=off }
+!defined(LTO,var) { LTO=off }
 
 #
 #
@@ -54,15 +53,19 @@ QT_CONFIG -= no-pkg-config
 CONFIG += link_pkgconfig
 VERSION = 0.0.0
 
-PKGCONFIG += fftw3 zlib libpng libcurl
+PKGCONFIG += fftw3 zlib libpng libjpeg libcurl
 
 equals( HOST, "gimp" ) {
   PKGCONFIG += gimp-2.0
 }
 
+equals( HOST, "gimp3" ) {
+  PKGCONFIG += gimp-3.0
+}
+
 DEFINES += cimg_use_cpp11=1
 DEFINES += cimg_use_fftw3 cimg_use_zlib
-DEFINES += gmic_build cimg_use_abort gmic_is_parallel cimg_use_curl cimg_use_png
+DEFINES += cimg_use_abort gmic_is_parallel cimg_use_curl cimg_use_png cimg_use_jpeg
 DEFINES += cimg_appname="\\\"gmic\\\""
 
 equals(TIMING, "on") {
@@ -87,13 +90,11 @@ defined(GMIC_PATH, var):!exists( $$GMIC_PATH/gmic.cpp ) {
 
 message("G'MIC repository was found ("$$GMIC_PATH")")
 
-
 equals( COMPILER, "clang" ) {
  message("Compiler is clang++")
  QMAKE_CXX = clang++
  QMAKE_LINK = clang++
 }
-
 
 #
 # Make sure CImg.h is in G'MIC source tree
@@ -110,26 +111,31 @@ equals( COMPILER, "clang" ) {
 }
 
 #
-# Make sure gmic_stdlib.h is in G'MIC source tree
+# Make sure gmic_stdlib_community.h is in G'MIC source tree
 #
-!exists( $$GMIC_PATH/gmic_stdlib.h ) {
-  message( "gmic_stdlib.h is missing. Trying to get it..." )
-  !system(make -C $$GMIC_PATH gmic_stdlib.h) {
-    error("Could not get gmic_stdlib.h from G'MIC repository")
+!exists( $$GMIC_PATH/gmic_stdlib_community.h ) {
+  message( "gmic_stdlib_community.h is missing. Trying to get it..." )
+  !system(make -C $$GMIC_PATH gmic_stdlib_community.h) {
+    error("Could not get gmic_stdlib_community.h from G'MIC repository")
   }
-  !exists($$GMIC_PATH/gmic_stdlib.h) {
-    error("Could not get gmic_stdlib.h from G'MIC repository")
+  !exists($$GMIC_PATH/gmic_stdlib_community.h) {
+    error("Could not get gmic_stdlib_community.h from G'MIC repository")
   }
-  message("gmic_stdlib.h found")
+  message("gmic_stdlib_community.h found")
 }
 
-# Make sure CImg and gmic are the same version
+# Make sure CImg, gmic and gmic_stdlib_community.h are the same version
 GMIC_VERSION = $$system(bash check_versions.sh $$GMIC_PATH gmic)
+STDLIB_VERSION = $$system(bash check_versions.sh $$GMIC_PATH stdlib)
 CIMG_VERSION = $$system(bash check_versions.sh $$GMIC_PATH CImg)
-message("G'MIC version is" $$GMIC_VERSION)
-message("CImg version is" $$CIMG_VERSION)
-!system(bash check_versions.sh $$GMIC_PATH check):{
+message("G'MIC version is ................." $$GMIC_VERSION)
+message("gmic_stdlib_community.h version is" $$STDLIB_VERSION)
+message("CImg version is .................." $$CIMG_VERSION)
+!equals(GMIC_VERSION, $$CIMG_VERSION):{
    error("Version numbers of files 'gmic.h' (" $$GMIC_VERSION ") and 'CImg.h' (" $$CIMG_VERSION ") mismatch")
+}
+!equals(GMIC_VERSION, $$STDLIB_VERSION):{
+   error("Version numbers of files 'gmic.h' (" $$GMIC_VERSION ") and 'gmic_stdlib_community.h' (" $$STDLIB_VERSION ") mismatch")
 }
 
 !isEmpty(PRERELEASE) {
@@ -154,7 +160,7 @@ linux {
   message( Linux platform )
 }
 
-equals( HOST, "gimp") {
+equals( HOST, "gimp")|equals( HOST, "gimp3") {
  TARGET = gmic_gimp_qt
  SOURCES += src/Host/Gimp/host_gimp.cpp
  DEFINES += GMIC_HOST=gimp
@@ -163,13 +169,15 @@ equals( HOST, "gimp") {
  message(Target host software is GIMP)
 }
 
-
 equals( HOST, "none") {
  TARGET = gmic_qt
  DEFINES += GMIC_HOST=standalone
- SOURCES += src/Host/None/host_none.cpp
- SOURCES += src/Host/None/ImageDialog.cpp
- HEADERS += src/Host/None/ImageDialog.h
+ HEADERS += src/Host/None/ImageDialog.h \
+            src/Host/None/JpegQualityDialog.h
+ SOURCES += src/Host/None/host_none.cpp \
+            src/Host/None/ImageDialog.cpp \
+            src/Host/None/JpegQualityDialog.cpp
+ FORMS += src/Host/None/jpegqualitydialog.ui
  DEPENDPATH += $$PWD/src/Host/None
  message(Building standalone version)
 }
@@ -188,6 +196,14 @@ equals( HOST, "paintdotnet") {
  DEFINES += GMIC_HOST=paintdotnet
  DEPENDPATH += $$PWD/src/Host/PaintDotNet
  message(Target host software is Paint.NET)
+}
+
+equals( HOST, "8bf") {
+ TARGET = gmic_8bf_qt
+ SOURCES += src/Host/8bf/host_8bf.cpp
+ DEFINES += GMIC_HOST=plugin8bf
+ DEPENDPATH += $$PWD/src/Host/8bf
+ message(Target host software is 8bf filter)
 }
 
 # enable OpenMP by default on with g++, except on OS X
@@ -229,7 +245,7 @@ CONFIG(release, debug|release):gcc|clang:equals(LTO,"on") {
     QMAKE_LFLAGS_RELEASE += -flto
 }
 
-DEFINES += gmic_gui gmic_build gmic_is_parallel cimg_use_abort
+DEFINES += gmic_gui gmic_core gmic_is_parallel gmic_community cimg_use_abort
 
 INCLUDEPATH	+= $$PWD $$PWD/src $$GMIC_PATH
 DEPENDPATH += $$PWD/src \
@@ -241,6 +257,9 @@ DEPENDPATH += $$PWD/src \
 HEADERS +=  \
   src/ClickableLabel.h \
   src/Common.h \
+  src/FilterParameters/CustomSpinBox.h \
+  src/GmicQt.h \
+  src/Host/GmicQtHost.h \
   src/OverrideCursor.h \
   src/DialogSettings.h \
   src/FilterParameters/AbstractParameter.h \
@@ -267,20 +286,18 @@ HEADERS +=  \
   src/FilterSelector/FiltersView/FiltersView.h \
   src/FilterSelector/FiltersView/TreeView.h \
   src/FilterSelector/FiltersVisibilityMap.h \
+  src/FilterSelector/FilterTagMap.h \
   src/CroppedImageListProxy.h \
   src/CroppedActiveLayerProxy.h \
   src/FilterSyncRunner.h \
   src/FilterThread.h \
-  src/gmic_qt.h \
   src/FilterTextTranslator.h \
   src/Globals.h \
   src/GmicStdlib.h \
   src/GmicProcessor.h \
   src/HeadlessProcessor.h \
-  src/Host/host.h \
   src/HtmlTranslator.h \
   src/IconLoader.h \
-  src/ImageConverter.h \
   src/ImageTools.h \
   src/InputOutputState.h \
   src/KeypointList.h \
@@ -288,10 +305,15 @@ HEADERS +=  \
   src/Logger.h \
   src/LanguageSettings.h \
   src/MainWindow.h \
+  src/Misc.h \
   src/ParametersCache.h \
+  src/PersistentMemory.h \
+  src/Settings.h \
+  src/Tags.h \
   src/TimeLogger.h \
   src/Updater.h \
   src/Utils.h \
+  src/Widgets/VisibleTagSelector.h \
   src/ZoomConstraint.h \
   src/FilterSelector/FiltersView/FilterTreeFolder.h \
   src/FilterSelector/FiltersView/FilterTreeItem.h \
@@ -311,11 +333,13 @@ HEADERS +=  \
 
 HEADERS += $$GMIC_PATH/gmic.h
 HEADERS += $$GMIC_PATH/CImg.h
-HEADERS += $$GMIC_PATH/gmic_stdlib.h
+HEADERS += $$GMIC_PATH/gmic_stdlib_community.h
 
 SOURCES += \
   src/ClickableLabel.cpp \
   src/Common.cpp \
+  src/FilterParameters/CustomSpinBox.cpp \
+  src/GmicQt.cpp \
   src/OverrideCursor.cpp \
   src/DialogSettings.cpp \
   src/FilterParameters/AbstractParameter.cpp \
@@ -342,11 +366,11 @@ SOURCES += \
   src/FilterSelector/FiltersView/FiltersView.cpp \
   src/FilterSelector/FiltersView/TreeView.cpp \
   src/FilterSelector/FiltersVisibilityMap.cpp \
+  src/FilterSelector/FilterTagMap.cpp \
   src/CroppedImageListProxy.cpp \
   src/CroppedActiveLayerProxy.cpp \
   src/FilterSyncRunner.cpp \
   src/FilterThread.cpp \
-  src/gmic_qt.cpp \
   src/FilterTextTranslator.cpp \
   src/Globals.cpp \
   src/GmicStdlib.cpp \
@@ -354,7 +378,6 @@ SOURCES += \
   src/HeadlessProcessor.cpp \
   src/HtmlTranslator.cpp \
   src/IconLoader.cpp \
-  src/ImageConverter.cpp \
   src/ImageTools.cpp \
   src/InputOutputState.cpp \
   src/KeypointList.cpp \
@@ -363,9 +386,13 @@ SOURCES += \
   src/Logger.cpp \
   src/MainWindow.cpp \
   src/ParametersCache.cpp \
+  src/PersistentMemory.cpp \
+  src/Settings.cpp \
+  src/Tags.cpp \
   src/TimeLogger.cpp \
   src/Updater.cpp \
   src/Utils.cpp \
+  src/Misc.cpp \
   src/FilterSelector/FiltersView/FilterTreeItem.cpp \
   src/FilterSelector/FiltersView/FilterTreeFolder.cpp \
   src/FilterSelector/FavesModel.cpp \
@@ -376,19 +403,20 @@ SOURCES += \
   src/Widgets/PreviewWidget.cpp \
   src/Widgets/ProgressInfoWidget.cpp \
   src/Widgets/InOutPanel.cpp \
+  src/Widgets/VisibleTagSelector.cpp \
   src/Widgets/ZoomLevelSelector.cpp \
   src/Widgets/SearchFieldWidget.cpp \
   src/Widgets/LanguageSelectionWidget.cpp \
   src/Widgets/ProgressInfoWindow.cpp
 
-
 equals(GMIC_DYNAMIC_LINKING, "on" ) {
   message(Dynamic linking with libgmic)
-  LIBS += $$GMIC_PATH/libgmic.so
+  LIBS += -Wl,-rpath,. $$GMIC_PATH/libgmic.so
 }
 
 equals(GMIC_DYNAMIC_LINKING, "off" ) {
    SOURCES += $$GMIC_PATH/gmic.cpp
+   DEFINES += gmic_core
 }
 
 # ALL_FORMS
@@ -408,9 +436,6 @@ RESOURCES += gmic_qt.qrc translations.qrc
 equals(HOST, "none") {
  RESOURCES += standalone.qrc
 }
-equals(TEST_FILTERS_QM, "on") {
- RESOURCES += wip_translations.qrc
-}
 
 TRANSLATIONS = \
 translations/cs.ts \
@@ -419,15 +444,34 @@ translations/es.ts \
 translations/fr.ts \
 translations/id.ts \
 translations/it.ts \
+translations/ja.ts \
 translations/nl.ts \
 translations/pl.ts \
 translations/pt.ts \
 translations/ru.ts \
 translations/sv.ts \
-translations/ua.ts \
-translations/ja.ts \
+translations/uk.ts \
 translations/zh.ts \
 translations/zh_tw.ts
+
+RESOURCES += wip_translations.qrc
+
+# message(Build QM translation files)
+# system(make -C translations)
+# system(make -C translations/filters)
+
+qm_files.commands += make -C translations
+qm_filter_files.commands += make -C translations/filters
+QMAKE_EXTRA_TARGETS += qm_files qm_filter_files
+PRE_TARGETDEPS += qm_files qm_filter_files
+
+QMAKE_DISTCLEAN = \
+  translations/*.qm \
+  translations/filters/*.ts \
+  translations/filters/*.qm
+
+# Prevent overwriting of these files by lupdate
+# TRANSLATIONS += translations/filters/fr.ts
 
 # PRE_TARGETDEPS +=
 
@@ -445,8 +489,13 @@ CONFIG(release, debug|release) {
 CONFIG(debug, debug|release) {
     message(Debug build)
     DEFINES += _GMIC_QT_DEBUG_
-#    QMAKE_CXXFLAGS_DEBUG += -fsanitize=address
-#    QMAKE_LFLAGS_DEBUG += -fsanitize=address
+#    QMAKE_CXXFLAGS_DEBUG += -Wfatal-errors
+}
+
+equals(ASAN, "on" ) {
+    message(Address sanitizer enabled)
+    QMAKE_CXXFLAGS_DEBUG += -fsanitize=address
+    QMAKE_LFLAGS_DEBUG += -fsanitize=address
 }
 
 UI_DIR = .ui

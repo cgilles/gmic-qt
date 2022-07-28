@@ -28,13 +28,17 @@
 #include <QHBoxLayout>
 #include <QIcon>
 #include <QLineEdit>
+#include <QPalette>
 #include <QRegExp>
 #include <QRegExpValidator>
 #include <QToolButton>
 #include "Common.h"
-#include "DialogSettings.h"
 #include "IconLoader.h"
+#include "Settings.h"
 #include "ui_SearchFieldWidget.h"
+
+namespace GmicQt
+{
 
 SearchFieldWidget::SearchFieldWidget(QWidget * parent) : QWidget(parent), ui(new Ui::SearchFieldWidget)
 {
@@ -43,15 +47,15 @@ SearchFieldWidget::SearchFieldWidget(QWidget * parent) : QWidget(parent), ui(new
   _findIcon = LOAD_ICON("edit-find");
   _empty = true;
 
-#if QT_VERSION >= 0x050200
+#if QT_VERSION_GTE(5, 2, 0)
   auto hbox = dynamic_cast<QHBoxLayout *>(layout());
   if (hbox) {
     hbox->setMargin(0);
     hbox->setSpacing(0);
+    hbox->addWidget(_lineEdit = new QLineEdit(this));
+    _action = _lineEdit->addAction(LOAD_ICON("edit-find"), QLineEdit::TrailingPosition);
+    connect(_action, &QAction::triggered, _lineEdit, &QLineEdit::clear);
   }
-  hbox->addWidget(_lineEdit = new QLineEdit(this));
-  _action = _lineEdit->addAction(LOAD_ICON("edit-find"), QLineEdit::TrailingPosition);
-  connect(_action, SIGNAL(triggered(bool)), _lineEdit, SLOT(clear()));
 #else
   QFrame * frame = new QFrame(this);
   layout()->addWidget(frame);
@@ -69,14 +73,20 @@ SearchFieldWidget::SearchFieldWidget(QWidget * parent) : QWidget(parent), ui(new
   _button->setStyleSheet("border:none");
   _lineEdit->setFrame(false);
   _button->setIcon(_findIcon);
-  connect(_button, SIGNAL(clicked(bool)), _lineEdit, SLOT(clear()));
+  connect(_button, &QToolButton::clicked, _lineEdit, &QLineEdit::clear);
 #endif
-  connect(_lineEdit, SIGNAL(textChanged(QString)), this, SIGNAL(textChanged(QString)));
-  connect(_lineEdit, SIGNAL(textChanged(QString)), this, SLOT(onTextChanged(QString)));
+  connect(_lineEdit, &QLineEdit::textChanged, this, &SearchFieldWidget::textChanged);
+  connect(_lineEdit, &QLineEdit::textChanged, this, &SearchFieldWidget::onTextChanged);
   _lineEdit->setPlaceholderText(tr("Search"));
   _lineEdit->setToolTip(tr("Search in filters list (%1)").arg(QKeySequence(QKeySequence::Find).toString()));
   setFocusProxy(_lineEdit);
-
+#if QT_VERSION_GTE(5, 12, 0)
+  if (Settings::darkThemeEnabled()) {
+    QPalette palette = _lineEdit->palette();
+    palette.setColor(QPalette::PlaceholderText, Qt::gray);
+    _lineEdit->setPalette(palette);
+  }
+#endif
   QRegExpValidator * validator = new QRegExpValidator(QRegExp("[^/].*"), this);
   _lineEdit->setValidator(validator);
 }
@@ -93,7 +103,7 @@ QString SearchFieldWidget::text() const
 
 void SearchFieldWidget::onTextChanged(const QString & str)
 {
-#if QT_VERSION >= 0x050200
+#if QT_VERSION_GTE(5, 2, 0)
   if (str.isEmpty()) {
     _empty = true;
     _action->setIcon(_findIcon);
@@ -120,3 +130,5 @@ void SearchFieldWidget::clear()
 {
   _lineEdit->clear();
 }
+
+} // namespace GmicQt

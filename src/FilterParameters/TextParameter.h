@@ -27,24 +27,27 @@
 
 #include <QString>
 #include "AbstractParameter.h"
-
 class QLineEdit;
 class QLabel;
 class QTextEdit;
 class QAction;
+
+namespace GmicQt
+{
 class MultilineTextParameterWidget;
 
 class TextParameter : public AbstractParameter {
   Q_OBJECT
 public:
-  TextParameter(QObject * parent = nullptr);
+  TextParameter(QObject * parent);
   ~TextParameter() override;
+  int size() const override;
   bool addTo(QWidget *, int row) override;
-  QString textValue() const override;
-  QString unquotedTextValue() const override;
+  QString value() const override;
+  QString defaultValue() const override;
   void setValue(const QString & value) override;
   void reset() override;
-  bool initFromText(const char * text, int & textLength) override;
+  bool initFromText(const QString & filterName, const char * text, int & textLength) override;
   bool isQuoted() const override;
 
 private slots:
@@ -63,5 +66,7 @@ private:
   bool _multiline;
   bool _connected;
 };
+
+} // namespace GmicQt
 
 #endif // GMIC_QT_TEXTPARAMETER_H

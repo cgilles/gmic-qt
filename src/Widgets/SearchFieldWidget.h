@@ -26,21 +26,24 @@
 #define GMIC_QT_SEARCHFIELDWIDGET_H
 #include <QIcon>
 #include <QWidget>
+#include "Common.h"
+class QAction;
+class QLineEdit;
+class QToolButton;
 
 namespace Ui
 {
 class SearchFieldWidget;
 }
 
-class QAction;
-class QLineEdit;
-class QToolButton;
+namespace GmicQt
+{
 
 class SearchFieldWidget : public QWidget {
   Q_OBJECT
 public:
-  explicit SearchFieldWidget(QWidget * parent = nullptr);
-  ~SearchFieldWidget();
+  explicit SearchFieldWidget(QWidget * parent);
+  ~SearchFieldWidget() override;
   QString text() const;
 public slots:
   void clear();
@@ -55,11 +58,13 @@ private:
   QIcon _clearIcon;
   QIcon _findIcon;
   QLineEdit * _lineEdit;
-#if QT_VERSION >= 0x050200
+#if QT_VERSION_GTE(5, 2, 0)
   QAction * _action;
 #else
   QToolButton * _button;
 #endif
 };
+
+} // namespace GmicQt
 
 #endif // GMIC_QT_SEARCHFIELDWIDGET_H

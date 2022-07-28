@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>465</width>
-    <height>444</height>
+    <width>553</width>
+    <height>496</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="interface">
       <attribute name="title">
@@ -40,7 +40,7 @@
           <item row="0" column="0">
            <layout class="QVBoxLayout" name="verticalLayout">
             <item>
-             <widget class="ClickableLabel" name="labelPreviewLeft">
+             <widget class="GmicQt::ClickableLabel" name="labelPreviewLeft">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -70,7 +70,7 @@
           <item row="0" column="1">
            <layout class="QVBoxLayout" name="verticalLayout_4">
             <item>
-             <widget class="ClickableLabel" name="labelPreviewRight">
+             <widget class="GmicQt::ClickableLabel" name="labelPreviewRight">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -150,7 +150,7 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_7">
           <item>
-           <widget class="LanguageSelectionWidget" name="languageSelector" native="true"/>
+           <widget class="GmicQt::LanguageSelectionWidget" name="languageSelector" native="true"/>
           </item>
          </layout>
         </widget>
@@ -193,13 +193,30 @@
          <item>
           <widget class="QGroupBox" name="groupBox_4">
            <property name="title">
-            <string>Dialogs</string>
+            <string>Misc</string>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_6">
             <item>
              <widget class="QCheckBox" name="cbNativeColorDialogs">
               <property name="text">
-               <string>Use native color dialog</string>
+               <string>&amp;Use native color dialog</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="cbHighDPI">
+              <property name="text">
+               <string>&amp;Enable High-DPI support</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_4">
+              <property name="text">
+               <string>&lt;i&gt;(Restart needed)&lt;/i&gt;</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTop|Qt::AlignTrailing</set>
               </property>
              </widget>
             </item>
@@ -311,12 +328,12 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ClickableLabel</class>
+   <class>GmicQt::ClickableLabel</class>
    <extends>QLabel</extends>
    <header>ClickableLabel.h</header>
   </customwidget>
   <customwidget>
-   <class>LanguageSelectionWidget</class>
+   <class>GmicQt::LanguageSelectionWidget</class>
    <extends>QWidget</extends>
    <header>Widgets/LanguageSelectionWidget.h</header>
    <container>1</container>

@@ -27,20 +27,25 @@
 
 #include <QString>
 #include "AbstractParameter.h"
-class QSpinBox;
 class QSlider;
 class QLabel;
 
+namespace GmicQt
+{
+
+class CustomSpinBox;
 class IntParameter : public AbstractParameter {
   Q_OBJECT
 public:
-  IntParameter(QObject * parent = nullptr);
+  IntParameter(QObject * parent);
   ~IntParameter() override;
+  virtual int size() const override;
   bool addTo(QWidget *, int row) override;
-  QString textValue() const override;
+  QString value() const override;
+  QString defaultValue() const override;
   void setValue(const QString & value) override;
   void reset() override;
-  bool initFromText(const char * text, int & textLength) override;
+  bool initFromText(const QString & filterName, const char * text, int & textLength) override;
 
 protected:
   void timerEvent(QTimerEvent *) override;
@@ -59,10 +64,12 @@ private:
   int _value;
   QLabel * _label;
   QSlider * _slider;
-  QSpinBox * _spinBox;
+  CustomSpinBox * _spinBox;
   int _timerId;
   static const int UPDATE_DELAY = 300;
   bool _connected;
 };
+
+} // namespace GmicQt
 
 #endif // GMIC_QT_INTPARAMETER_H

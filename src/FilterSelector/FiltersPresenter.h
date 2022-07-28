@@ -28,10 +28,17 @@
 #include "FilterSelector/FavesModel.h"
 #include "FilterSelector/FiltersModel.h"
 #include "FilterSelector/FiltersView/FiltersView.h"
+#include "GmicQt.h"
 #include "InputOutputState.h"
-#include "gmic_qt.h"
+#include "Tags.h"
+#include "Widgets/VisibleTagSelector.h"
 
 class QSettings;
+
+namespace GmicQt
+{
+
+class SearchFieldWidget;
 
 class FiltersPresenter : public QObject {
   Q_OBJECT
@@ -39,27 +46,31 @@ public:
   struct Filter {
     QString name;
     QString plainTextName;
+    QString fullPath;
     QString command;
     QString previewCommand;
     QString parameters;
     QList<QString> defaultParameterValues;
     QList<int> defaultVisibilityStates;
-    GmicQt::InputMode defaultInputMode;
+    InputMode defaultInputMode;
     QString hash;
     bool isAccurateIfZoomed;
+    bool previewFromFullImage;
     float previewFactor;
     bool isAFave;
     void clear();
     void setInvalid();
     bool isInvalid() const;
+    bool isValid() const;
     bool isNoApplyFilter() const;
     bool isNoPreviewFilter() const;
     const char * previewFactorString() const;
   };
 
   FiltersPresenter(QObject * parent);
-  ~FiltersPresenter();
+  ~FiltersPresenter() override;
   void setFiltersView(FiltersView * filtersView);
+  void setSearchField(SearchFieldWidget *);
   void rebuildFilterView();
   void rebuildFilterViewWithSelection(const QList<QString> & keywords);
 
@@ -81,10 +92,15 @@ public:
   void restoreFaveHashLinksAfterCaseChange();
   void importGmicGTKFaves();
   void saveFaves();
-  void addSelectedFilterAsNewFave(const QList<QString> & defaultValues, const QList<int> & visibilityStates, GmicQt::InputOutputState inOutState);
+  void addSelectedFilterAsNewFave(const QList<QString> & defaultValues, const QList<int> & visibilityStates, InputOutputState inOutState);
 
   void applySearchCriterion(const QString & text);
   void selectFilterFromHash(QString hash, bool notify);
+  void selectFilterFromAbsolutePathOrPlainName(const QString & path);
+  void selectFilterFromAbsolutePath(QString path);
+  void selectFilterFromPlainName(const QString & name);
+  void selectFilterFromCommand(const QString & command);
+  void setVisibleTagSelector(VisibleTagSelector * selector);
   const Filter & currentFilter() const;
 
   void loadSettings(const QSettings & settings);
@@ -101,12 +117,20 @@ public:
   void collapseAll();
   const QString & errorMessage() const;
 
+  /**
+   * @brief findFilterFromPlainPathInStdlib
+   * Caution: this function parses the stdlib each time it is called
+   */
+  static Filter findFilterFromAbsolutePathOrNameInStdlib(const QString & path);
+  static Filter findFilterFromCommandInStdlib(const QString & command);
+
 signals:
   void filterSelectionChanged();
   void faveAdditionRequested(QString);
   void faveNameChanged(QString);
 
 public slots:
+  void setVisibleTagColors(unsigned int color);
   void removeSelectedFave();
   void editSelectedFaveName();
   void onFaveRenamed(const QString & hash, const QString & name);
@@ -115,6 +139,7 @@ public slots:
 private slots:
   void onFilterChanged(const QString & hash);
   void removeFave(const QString & hash);
+  void onTagToggled(int color);
 
 private:
   void setCurrentFilter(const QString & hash);
@@ -123,8 +148,12 @@ private:
   FiltersModel _filtersModel;
   FavesModel _favesModel;
   FiltersView * _filtersView;
+  SearchFieldWidget * _searchField;
+  VisibleTagSelector * _visibleTagSelector;
   Filter _currentFilter;
   QString _errorMessage;
 };
+
+} // namespace GmicQt
 
 #endif // GMIC_QT_FILTERSPRESENTER_H

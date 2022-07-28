@@ -25,12 +25,8 @@
 #ifndef GMIC_QT_DIALOGSETTINGS_H
 #define GMIC_QT_DIALOGSETTINGS_H
 
-#include <QColor>
 #include <QDialog>
-#include <QIcon>
-#include "MainWindow.h"
-#include "gmic_qt.h"
-
+#include "GmicQt.h"
 class QCloseEvent;
 class QSettings;
 
@@ -41,65 +37,34 @@ class DialogSettings;
 
 namespace GmicQt
 {
-enum ApplicationType
-{
-  GuiApplication,
-  NonGuiApplication
-};
-}
 
 class DialogSettings : public QDialog {
   Q_OBJECT
 
 public:
-  explicit DialogSettings(QWidget * parent = nullptr);
-  ~DialogSettings();
-  static MainWindow::PreviewPosition previewPosition();
-  static bool logosAreVisible();
-  static bool darkThemeEnabled();
-  static QString languageCode();
-  static bool nativeColorDialogs();
-  static void saveSettings(QSettings &);
-  static void loadSettings(GmicQt::ApplicationType applicationType);
-  static bool previewZoomAlwaysEnabled();
-  static bool notifyFailedStartupUpdate();
-  static const QColor CheckBoxTextColor;
-  static const QColor CheckBoxBaseColor;
-  static QColor UnselectedFilterTextColor;
-  static QString FolderParameterDefaultValue;
-  static QString FileParameterDefaultPath;
-  static int previewTimeout();
-  static GmicQt::OutputMessageMode outputMessageMode();
-  static QIcon AddIcon;
-  static QIcon RemoveIcon;
+  explicit DialogSettings(QWidget * parent);
+  ~DialogSettings() override;
 
 public slots:
   void onRadioLeftPreviewToggled(bool);
+  void onDarkThemeToggled(bool on);
   void onUpdateClicked();
   void onOk();
   void enableUpdateButton();
-  void onDarkThemeToggled(bool);
   void onUpdatePeriodicityChanged(int i);
   void onColorDialogsToggled(bool);
   void done(int r) override;
-  void onLogosVisibleToggled(bool);
+  void onVisibleLogosToggled(bool);
   void onPreviewTimeoutChange(int);
   void onOutputMessageModeChanged(int);
   void onPreviewZoomToggled(bool);
   void onNotifyStartupUpdateFailedToggle(bool);
+  void onHighDPIToggled(bool);
 
 private:
   Ui::DialogSettings * ui;
-  static bool _darkThemeEnabled;
-  static QString _languageCode;
-  static bool _nativeColorDialogs;
-  static MainWindow::PreviewPosition _previewPosition;
-  static int _updatePeriodicity;
-  static bool _logosAreVisible;
-  static int _previewTimeout;
-  static GmicQt::OutputMessageMode _outputMessageMode;
-  static bool _previewZoomAlwaysEnabled;
-  static bool _notifyFailedStartupUpdate;
 };
+
+} // namespace GmicQt
 
 #endif // GMIC_QT_DIALOGSETTINGS_H

@@ -27,10 +27,17 @@
 #include <QApplication>
 #include <QDebug>
 #include <QFileInfo>
+#include <QLibraryInfo>
 #include <QLocale>
 #include <QSettings>
 #include <QTranslator>
+#include "Common.h"
+#include "Globals.h"
 #include "Logger.h"
+#include "Settings.h"
+
+namespace GmicQt
+{
 
 const QMap<QString, QString> & LanguageSettings::availableLanguages()
 {
@@ -50,7 +57,7 @@ const QMap<QString, QString> & LanguageSettings::availableLanguages()
     result["pt"] = QString::fromUtf8("Portugu\xc3\xaas");
     result["ru"] = QString::fromUtf8("\xd0\xa0\xd1\x83\xd1\x81\xd1\x81\xd0\xba\xd0\xb8\xd0\xb9");
     result["sv"] = QString::fromUtf8("Svenska");
-    result["ua"] = QString::fromUtf8("\xd0\xa3\xd0\xba\xd1\x80\xd0\xb0\xd1\x97\xd0\xbd\xd1\x81\xd1\x8c\xd0\xba\xd0\xb0");
+    result["uk"] = QString::fromUtf8("\xd0\xa3\xd0\xba\xd1\x80\xd0\xb0\xd1\x97\xd0\xbd\xd1\x81\xd1\x8c\xd0\xba\xd0\xb0");
     result["zh"] = QString::fromUtf8("\xe7\xae\x80\xe5\x8c\x96\xe5\xad\x97");
     result["zh_tw"] = QString::fromUtf8("\xe6\xad\xa3\xe9\xab\x94\xe5\xad\x97\x2f\xe7\xb9\x81\xe9\xab\x94\xe5\xad\x97");
   }
@@ -59,7 +66,7 @@ const QMap<QString, QString> & LanguageSettings::availableLanguages()
 
 QString LanguageSettings::configuredTranslator()
 {
-  QString code = QSettings().value("Config/LanguageCode", QString()).toString();
+  QString code = QSettings().value(LANGUAGE_CODE_KEY, QString()).toString();
   if (code.isEmpty()) {
     code = systemDefaultAndAvailableLanguageCode();
     if (code.isEmpty()) {
@@ -96,15 +103,43 @@ void LanguageSettings::installTranslators()
 {
   QString lang = LanguageSettings::configuredTranslator();
   if (!lang.isEmpty() && (lang != "en")) {
-    auto translator = new QTranslator(qApp);
-    translator->load(QString(":/translations/%1.qm").arg(lang));
-    QApplication::installTranslator(translator);
-    auto filtersQM = QString(":/translations/filters/%1.qm").arg(lang);
-    QFileInfo info(filtersQM);
-    if (info.exists()) {
-      auto filtersTranslator = new QTranslator(qApp);
-      filtersTranslator->load(filtersQM);
-      QApplication::installTranslator(filtersTranslator);
+    installQtTranslator(lang);
+    installTranslator(QString(":/translations/%1.qm").arg(lang));
+    if (QSettings().value(ENABLE_FILTER_TRANSLATION, false).toBool()) {
+      installTranslator(QString(":/translations/filters/%1.qm").arg(lang));
     }
   }
 }
+
+bool LanguageSettings::filterTranslationAvailable(const QString & lang)
+{
+  return QFileInfo(QString(":/translations/filters/%1.qm").arg(lang)).isReadable();
+}
+
+void LanguageSettings::installTranslator(const QString & qmPath)
+{
+  if (!QFileInfo(qmPath).isReadable()) {
+    return;
+  }
+  auto translator = new QTranslator(qApp);
+  if (translator->load(qmPath)) {
+    if (!QApplication::installTranslator(translator)) {
+      Logger::error(QObject::tr("Could not install translator for file %1").arg(qmPath));
+    }
+  } else {
+    Logger::error(QObject::tr("Could not load translation file %1").arg(qmPath));
+    translator->deleteLater();
+  }
+}
+
+void LanguageSettings::installQtTranslator(const QString & lang)
+{
+  auto qtTranslator = new QTranslator(qApp);
+  if (qtTranslator->load(QString("qt_%1").arg(lang), QLibraryInfo::location(QLibraryInfo::TranslationsPath))) {
+    QApplication::installTranslator(qtTranslator);
+  } else {
+    qtTranslator->deleteLater();
+  }
+}
+
+} // namespace GmicQt

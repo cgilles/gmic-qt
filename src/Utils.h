@@ -25,18 +25,21 @@
 #ifndef GMIC_QT_UTILS_H
 #define GMIC_QT_UTILS_H
 
-#include "gmic_qt.h"
+#include "GmicQt.h"
+class QFile;
+class QByteArray;
 class QString;
+class QStringList;
 
 namespace GmicQt
 {
-const QString & path_rc(bool create);
+const QString & gmicConfigPath(bool create);
 unsigned int host_app_pid();
 const QString & pluginFullName();
 const QString & pluginCodeName();
-const char * commandFromOutputMessageMode(OutputMessageMode mode);
-void downcaseCommandTitle(QString & title);
-void appendWithSpace(QString & str, const QString & other);
+bool touchFile(const QString & path);
+bool writeAll(const QByteArray & array, QFile & file);
+bool safelyWrite(const QByteArray & array, const QString & filename);
 } // namespace GmicQt
 
 #endif // GMIC_QT_UTILS_H

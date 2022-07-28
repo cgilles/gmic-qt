@@ -34,16 +34,21 @@
 #include <functional>
 #include "Common.h"
 #include "CroppedActiveLayerProxy.h"
-#include "DialogSettings.h"
 #include "Globals.h"
 #include "GmicStdlib.h"
-#include "ImageConverter.h"
 #include "ImageTools.h"
 #include "LayersExtentProxy.h"
 #include "Logger.h"
+#include "Misc.h"
 #include "OverrideCursor.h"
-#include "Utils.h"
+#include "Settings.h"
+#ifndef gmic_core
+#include "CImg.h"
+#endif
 #include "gmic.h"
+
+namespace GmicQt
+{
 
 const PreviewWidget::PreviewRect PreviewWidget::PreviewRect::Full{0.0, 0.0, 1.0, 1.0};
 
@@ -214,8 +219,8 @@ void PreviewWidget::updateErrorImage()
   gmic_image<float> image;
   getOriginalImageCrop(image);
   image.move_to(images);
-  QString fullCommandLine = QString::fromLocal8Bit(GmicQt::commandFromOutputMessageMode(DialogSettings::outputMessageMode()));
-  fullCommandLine += QString(" _host=%1 _tk=qt").arg(GmicQt::HostApplicationShortname);
+  QString fullCommandLine = commandFromOutputMessageMode(Settings::outputMessageMode());
+  fullCommandLine += QString(" _host=%1 _tk=qt").arg(GmicQtHost::ApplicationShortname);
   fullCommandLine += QString(" _preview_width=%1").arg(width());
   fullCommandLine += QString(" _preview_height=%1").arg(height());
   fullCommandLine += QString(" gui_error_preview \"%2\"").arg(_errorMessage);
@@ -234,7 +239,7 @@ void PreviewWidget::updateErrorImage()
     return;
   }
   QImage qimage;
-  ImageConverter::convert(images.front(), qimage);
+  convertCImgToQImage(images.front(), qimage);
   if (qimage.size() != size()) {
     _errorImage = qimage.scaled(size());
   } else {
@@ -370,7 +375,7 @@ void PreviewWidget::paintPreview(QPainter & painter)
     painter.fillRect(_imagePosition, QBrush(_transparency));
   }
   QImage qimage;
-  ImageConverter::convert(_image->get_resize(_imagePosition.width(), _imagePosition.height(), 1, -100, 1), qimage);
+  convertCImgToQImage(_image->get_resize(_imagePosition.width(), _imagePosition.height(), 1, -100, 1), qimage);
   painter.drawImage(_imagePosition, qimage);
   paintKeypoints(painter);
 }
@@ -388,7 +393,7 @@ void PreviewWidget::paintOriginalImage(QPainter & painter)
       painter.fillRect(_imagePosition, QBrush(_transparency));
     }
     QImage qimage;
-    ImageConverter::convert(image, qimage);
+    convertCImgToQImage(image, qimage);
     painter.drawImage(_imagePosition, qimage);
     paintKeypoints(painter);
   }
@@ -448,8 +453,7 @@ void PreviewWidget::sendUpdateRequest()
 
 bool PreviewWidget::isAtDefaultZoom() const
 {
-  return (_previewFactor == GmicQt::PreviewFactorAny) || (std::abs(_currentZoomFactor - defaultZoomFactor()) < 0.05) ||
-         ((_previewFactor == GmicQt::PreviewFactorActualSize) && (_currentZoomFactor >= 1.0));
+  return (_previewFactor == PreviewFactorAny) || (std::abs(_currentZoomFactor - defaultZoomFactor()) < 0.05) || ((_previewFactor == PreviewFactorActualSize) && (_currentZoomFactor >= 1.0));
 }
 
 double PreviewWidget::currentZoomFactor() const
@@ -492,7 +496,7 @@ void PreviewWidget::wheelEvent(QWheelEvent * event)
 {
   double degrees = event->angleDelta().y() / 8.0;
   int steps = static_cast<int>(std::fabs(degrees) / 15.0);
-#if QT_VERSION_GTE(5, 14)
+#if QT_VERSION_GTE(5, 14, 0)
   const QPoint position = event->position().toPoint();
 #else
   const QPoint position = event->pos();
@@ -791,13 +795,13 @@ double PreviewWidget::defaultZoomFactor() const
   if (_fullImageSize.isNull()) {
     return 1.0;
   }
-  if (_previewFactor == GmicQt::PreviewFactorFullImage) {
+  if (_previewFactor == PreviewFactorFullImage) {
     return std::min(width() / static_cast<double>(_fullImageSize.width()), height() / static_cast<double>(_fullImageSize.height()));
   }
   if (_previewFactor > 1.0f) {
     return _previewFactor * std::min(width() / (double)_fullImageSize.width(), height() / (double)_fullImageSize.height());
   }
-  return 1.0; // We suppose GmicQt::PreviewFactorActualSize
+  return 1.0; // We suppose PreviewFactorActualSize
 }
 
 void PreviewWidget::saveVisibleCenter()
@@ -821,13 +825,13 @@ void PreviewWidget::setPreviewFactor(float filterFactor, bool reset)
     emit zoomChanged(_currentZoomFactor);
     return;
   }
-  if ((_previewFactor == GmicQt::PreviewFactorFullImage) || ((_previewFactor == GmicQt::PreviewFactorAny) && reset)) {
+  if ((_previewFactor == PreviewFactorFullImage) || ((_previewFactor == PreviewFactorAny) && reset)) {
     _currentZoomFactor = std::min(width() / (double)_fullImageSize.width(), height() / (double)_fullImageSize.height());
     _visibleRect = PreviewRect::Full;
     if (reset) {
       saveVisibleCenter();
     }
-  } else if ((_previewFactor == GmicQt::PreviewFactorAny) && !reset) {
+  } else if ((_previewFactor == PreviewFactorAny) && !reset) {
     updateVisibleRect();
     _visibleRect.moveCenter(_savedVisibleCenter);
   } else {
@@ -993,3 +997,5 @@ bool PreviewWidget::PreviewPoint::operator==(const PreviewWidget::PreviewPoint &
 {
   return (x == other.x) && (y == other.y);
 }
+
+} // namespace GmicQt

@@ -31,11 +31,17 @@
 #include "Common.h"
 #include "GmicStdlib.h"
 #include "Logger.h"
+#include "Misc.h"
 #include "Utils.h"
+#ifndef gmic_core
+#include "CImg.h"
+#endif
 #include "gmic.h"
 
+namespace GmicQt
+{
 std::unique_ptr<Updater> Updater::_instance = std::unique_ptr<Updater>(nullptr);
-GmicQt::OutputMessageMode Updater::_outputMessageMode = GmicQt::Quiet;
+OutputMessageMode Updater::_outputMessageMode = OutputMessageMode::Quiet;
 
 Updater::Updater(QObject * parent) : QObject(parent)
 {
@@ -45,7 +51,7 @@ Updater::Updater(QObject * parent) : QObject(parent)
 
 Updater * Updater::getInstance()
 {
-  if (!_instance.get()) {
+  if (!_instance) {
     _instance = std::unique_ptr<Updater>(new Updater(nullptr));
   }
   return _instance.get();
@@ -58,7 +64,7 @@ void Updater::updateSources(bool useNetwork)
   _sources.clear();
   _sourceIsStdLib.clear();
   // Build sources map
-  QString prefix = GmicQt::commandFromOutputMessageMode(_outputMessageMode);
+  QString prefix = commandFromOutputMessageMode(_outputMessageMode);
   if (!prefix.isEmpty()) {
     prefix.push_back(QChar(' '));
   }
@@ -68,6 +74,7 @@ void Updater::updateSources(bool useNetwork)
   try {
     gmic(command.toLocal8Bit().constData(), gptSources, names, nullptr, true);
   } catch (...) {
+    Logger::error(QString("Command '%1' failed.").arg(command));
     gptSources.assign();
   }
   cimg_library::CImgList<char> sources;
@@ -82,7 +89,7 @@ void Updater::updateSources(bool useNetwork)
     } else {
       str.columns(0, str.width());
     }
-    QString source = QString::fromLocal8Bit(str);
+    QString source = QString::fromUtf8(str);
     _sources << source;
     _sourceIsStdLib[source] = isStdlib;
   }
@@ -90,10 +97,10 @@ void Updater::updateSources(bool useNetwork)
   // NOTE : For testing purpose
   //  _sources.clear();
   //  _sourceIsStdLib.clear();
-  //  _sources.push_back("http://localhost:2222/update220.gmic");
-  //  _sourceIsStdLib["http://localhost:2222/update220.gmic"] = true;
-
-  // SHOW(_sources);
+  //  //  _sources.push_back("http://localhost:2222/update300.gmic");
+  //  //  _sourceIsStdLib["http://localhost:2222/update300.gmic"] = true;
+  //  _sources.push_back("https://gmic.eu/update271.gmic");
+  //  _sourceIsStdLib["https://gmic.eu/update271.gmic"] = true;
 }
 
 void Updater::startUpdate(int ageLimit, int timeout, bool useNetwork)
@@ -102,7 +109,7 @@ void Updater::startUpdate(int ageLimit, int timeout, bool useNetwork)
   updateSources(useNetwork);
   _errorMessages.clear();
   _networkAccessManager = new QNetworkAccessManager(this);
-  connect(_networkAccessManager, SIGNAL(finished(QNetworkReply *)), this, SLOT(onNetworkReplyFinished(QNetworkReply *)));
+  connect(_networkAccessManager, &QNetworkAccessManager::finished, this, &Updater::onNetworkReplyFinished);
   _someNetworkUpdatesAchieved = false;
   if (useNetwork) {
     QDateTime limit = QDateTime::currentDateTime().addSecs(-3600 * (qint64)ageLimit);
@@ -114,7 +121,7 @@ void Updater::startUpdate(int ageLimit, int timeout, bool useNetwork)
           TRACE << "Downloading" << str << "to" << filename;
           QUrl url(str);
           QNetworkRequest request(url);
-          request.setHeader(QNetworkRequest::UserAgentHeader, GmicQt::pluginFullName());
+          request.setHeader(QNetworkRequest::UserAgentHeader, pluginFullName());
           // PRIVACY NOTICE (to be displayed in one of the "About" filters of the plugin
           //
           // PRIVACY NOTICE
@@ -135,10 +142,10 @@ void Updater::startUpdate(int ageLimit, int timeout, bool useNetwork)
     }
   }
   if (_pendingReplies.isEmpty()) {
-    QTimer::singleShot(0, this, SLOT(onUpdateNotNecessary())); // While GUI is Idle
+    QTimer::singleShot(0, this, &Updater::onUpdateNotNecessary); // While GUI is Idle
     _networkAccessManager->deleteLater();
   } else {
-    QTimer::singleShot(timeout * 1000, this, SLOT(cancelAllPendingDownloads()));
+    QTimer::singleShot(timeout * 1000, this, &Updater::cancelAllPendingDownloads);
   }
   TIMING;
 }
@@ -205,16 +212,11 @@ void Updater::processReply(QNetworkReply * reply)
     return;
   }
   QString filename = localFilename(url);
-  QFile file(filename);
-  if (!file.open(QFile::WriteOnly)) {
-    _errorMessages << QString(tr("Error creating file %1")).arg(filename);
+  if (!safelyWrite(array, filename)) {
+    _errorMessages << QString(tr("Error writing file %1")).arg(filename);
     return;
   }
-  if (file.write(array) != array.size()) {
-    _errorMessages << QString(tr("Error writing file %1")).arg(filename);
-  } else {
-    _someNetworkUpdatesAchieved = true;
-  }
+  _someNetworkUpdatesAchieved = true;
 }
 
 void Updater::onNetworkReplyFinished(QNetworkReply * reply)
@@ -234,13 +236,16 @@ void Updater::onNetworkReplyFinished(QNetworkReply * reply)
     Logger::note("******* Full reply contents ******\n");
     Logger::note(reply->readAll());
     Logger::note(QString("******** HTTP Status: %1").arg(reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt()));
+    // We either create an empty local file or 'touch' the existing one to prevent a systematic update on next startups
+    // Instead, usual delay will occur before next try
+    touchFile(localFilename(reply->url().toString()));
   }
   _pendingReplies.remove(reply);
   if (_pendingReplies.isEmpty()) {
     if (_errorMessages.isEmpty()) {
-      emit updateIsDone(UpdateSuccessful);
+      emit updateIsDone((int)UpdateStatus::Successful);
     } else {
-      emit updateIsDone(SomeUpdatesFailed);
+      emit updateIsDone((int)UpdateStatus::SomeFailed);
     }
     _networkAccessManager->deleteLater();
     _networkAccessManager = nullptr;
@@ -251,7 +256,7 @@ void Updater::onNetworkReplyFinished(QNetworkReply * reply)
 void Updater::notifyAllDownloadsOK()
 {
   _errorMessages.clear();
-  emit updateIsDone(UpdateSuccessful);
+  emit updateIsDone((int)UpdateStatus::Successful);
 }
 
 void Updater::cancelAllPendingDownloads()
@@ -268,32 +273,29 @@ void Updater::cancelAllPendingDownloads()
 
 void Updater::onUpdateNotNecessary()
 {
-  emit updateIsDone(UpdateNotNecessary);
+  emit updateIsDone((int)UpdateStatus::NotNecessary);
 }
 
 QByteArray Updater::cimgzDecompress(const QByteArray & array)
 {
   QTemporaryFile tmpZ(QDir::tempPath() + QDir::separator() + "gmic_qt_update_XXXXXX_cimgz");
   if (!tmpZ.open()) {
-    qWarning() << "Updater::cimgzDecompress(): Error creating" << tmpZ.fileName();
+    Logger::warning("Updater::cimgzDecompress(): Error creating " + tmpZ.fileName());
     return QByteArray();
   }
-  tmpZ.write(array);
-  tmpZ.flush();
+  if (!writeAll(array, tmpZ)) {
+    Logger::warning("Updater::cimgzDecompress(): Error writing temporary " + tmpZ.fileName());
+    return QByteArray();
+  }
   tmpZ.close();
-  std::FILE * file = fopen(tmpZ.fileName().toLocal8Bit().constData(), "rb");
-  if (!file) {
-    qWarning() << "Updater::cimgzDecompress(): Error opening" << tmpZ.fileName();
-    return QByteArray();
-  }
   cimg_library::CImg<unsigned char> buffer;
   try {
-    buffer.load_cimg(file);
+    buffer.load_cimg(tmpZ.fileName().toUtf8().constData());
   } catch (...) {
-    qWarning() << "Updater::cimgzDecompress(): CImg<>::load_cimg error for file " << tmpZ.fileName();
+    Logger::warning("Updater::cimgzDecompress(): CImg<>::load_cimg error for file " + tmpZ.fileName());
     return QByteArray();
   }
-  return QByteArray((char *)buffer.data(), buffer.size());
+  return QByteArray((char *)buffer.data(), (int)buffer.size());
 }
 
 QByteArray Updater::cimgzDecompressFile(const QString & filename)
@@ -302,17 +304,17 @@ QByteArray Updater::cimgzDecompressFile(const QString & filename)
   try {
     buffer.load_cimg(filename.toLocal8Bit().constData());
   } catch (...) {
-    qWarning() << "Updater::cimgzDecompressFile(): CImg<>::load_cimg error for file " << filename;
+    Logger::warning("Updater::cimgzDecompressFile(): CImg<>::load_cimg error for file " + filename);
     return QByteArray();
   }
-  return QByteArray((char *)buffer.data(), buffer.size());
+  return QByteArray((char *)buffer.data(), (int)buffer.size());
 }
 
 QString Updater::localFilename(QString url)
 {
   if (url.startsWith("http://") || url.startsWith("https://")) {
     QUrl u(url);
-    return QString("%1%2").arg(GmicQt::path_rc(true)).arg(u.fileName());
+    return QString("%1%2").arg(gmicConfigPath(true)).arg(u.fileName());
   }
   return url;
 }
@@ -336,7 +338,7 @@ QByteArray Updater::buildFullStdlib() const
   QByteArray result;
   if (_sources.isEmpty()) {
     gmic_image<char> stdlib_h = gmic::decompress_stdlib();
-    QByteArray tmp = QByteArray::fromRawData(stdlib_h, stdlib_h.size());
+    QByteArray tmp = QByteArray::fromRawData(stdlib_h, (int)stdlib_h.size());
     tmp[tmp.size() - 1] = '\n';
     result.append(tmp);
     return result;
@@ -356,7 +358,7 @@ QByteArray Updater::buildFullStdlib() const
         }
         if (!array.size()) {
           gmic_image<char> stdlib_h = gmic::decompress_stdlib();
-          QByteArray tmp = QByteArray::fromRawData(stdlib_h, stdlib_h.size());
+          QByteArray tmp = QByteArray::fromRawData(stdlib_h, (int)stdlib_h.size());
           tmp[tmp.size() - 1] = '\n';
           array.append(tmp);
         }
@@ -368,11 +370,12 @@ QByteArray Updater::buildFullStdlib() const
       result.append('\n');
     } else if (isStdlib(source)) {
       gmic_image<char> stdlib_h = gmic::decompress_stdlib();
-      QByteArray tmp = QByteArray::fromRawData(stdlib_h, stdlib_h.size());
+      QByteArray tmp = QByteArray::fromRawData(stdlib_h, (int)stdlib_h.size());
       tmp[tmp.size() - 1] = '\n';
       result.append(tmp);
     }
-    result.append(QString("#@gui ") + QString("_").repeated(80) + QString("\n"));
+    const QString toTopLevel = QString("#@gui ") + QString("_").repeated(80) + QString("\n");
+    result.append(toTopLevel.toUtf8());
   }
   return result;
 }
@@ -382,7 +385,9 @@ bool Updater::someNetworkUpdateAchieved() const
   return _someNetworkUpdatesAchieved;
 }
 
-void Updater::setOutputMessageMode(GmicQt::OutputMessageMode mode)
+void Updater::setOutputMessageMode(OutputMessageMode mode)
 {
   _outputMessageMode = mode;
 }
+
+} // namespace GmicQt

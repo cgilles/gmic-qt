@@ -35,17 +35,36 @@
 #include <QWidget>
 #include <cstdio>
 #include "Common.h"
-#include "DialogSettings.h"
 #include "FilterTextTranslator.h"
 #include "HtmlTranslator.h"
+#include "Logger.h"
+#include "Settings.h"
 
-ColorParameter::ColorParameter(QObject * parent) : AbstractParameter(parent, true), _default(0, 0, 0, 0), _value(_default), _alphaChannel(false), _label(nullptr), _button(nullptr), _dialog(nullptr) {}
+namespace GmicQt
+{
+
+ColorParameter::ColorParameter(QObject * parent) //
+    : AbstractParameter(parent),                 //
+      _default(0, 0, 0, 0),                      //
+      _value(_default),                          //
+      _alphaChannel(false),                      //
+      _label(nullptr),                           //
+      _button(nullptr),                          //
+      _dialog(nullptr),                          //
+      _size(-1)
+{
+}
 
 ColorParameter::~ColorParameter()
 {
   delete _button;
   delete _label;
   delete _dialog;
+}
+
+int ColorParameter::size() const
+{
+  return _size;
 }
 
 bool ColorParameter::addTo(QWidget * widget, int row)
@@ -69,14 +88,24 @@ bool ColorParameter::addTo(QWidget * widget, int row)
   updateButtonColor();
 
   _grid->addWidget(_label = new QLabel(_name, widget), row, 0, 1, 1);
+  setTextSelectable(_label);
   _grid->addWidget(_button, row, 1, 1, 1);
-  connect(_button, SIGNAL(clicked()), this, SLOT(onButtonPressed()));
+  connect(_button, &QPushButton::clicked, this, &ColorParameter::onButtonPressed);
   return true;
 }
 
-QString ColorParameter::textValue() const
+QString ColorParameter::value() const
 {
   const QColor & c = _value;
+  if (_alphaChannel) {
+    return QString("%1,%2,%3,%4").arg(c.red()).arg(c.green()).arg(c.blue()).arg(c.alpha());
+  }
+  return QString("%1,%2,%3").arg(c.red()).arg(c.green()).arg(c.blue());
+}
+
+QString ColorParameter::defaultValue() const
+{
+  const QColor & c = _default;
   if (_alphaChannel) {
     return QString("%1,%2,%3,%4").arg(c.red()).arg(c.green()).arg(c.blue()).arg(c.alpha());
   }
@@ -86,11 +115,27 @@ QString ColorParameter::textValue() const
 void ColorParameter::setValue(const QString & value)
 {
   QStringList list = value.split(",");
-  const int red = list[0].toInt();
-  const int green = list[1].toInt();
-  const int blue = list[2].toInt();
+  if ((list.size() != 3) && (list.size() != 4)) {
+    return;
+  }
+  bool ok = false;
+  const int red = list[0].toInt(&ok);
+  if (!ok) {
+    Logger::warning(QString("ColorParameter::setValue(\"%1\"): bad red channel").arg(value));
+  }
+  const int green = list[1].toInt(&ok);
+  if (!ok) {
+    Logger::warning(QString("ColorParameter::setValue(\"%1\"): bad green channel").arg(value));
+  }
+  const int blue = list[2].toInt(&ok);
+  if (!ok) {
+    Logger::warning(QString("ColorParameter::setValue(\"%1\"): bad blue channel").arg(value));
+  }
   if ((list.size() == 4) && _alphaChannel) {
-    const int alpha = list[3].toInt();
+    const int alpha = list[3].toInt(&ok);
+    if (!ok) {
+      Logger::warning(QString("ColorParameter::setValue(\"%1\"): bad alpha channel").arg(value));
+    }
     _value = QColor(red, green, blue, alpha);
   } else {
     _value = QColor(red, green, blue);
@@ -106,13 +151,13 @@ void ColorParameter::reset()
   updateButtonColor();
 }
 
-bool ColorParameter::initFromText(const char * text, int & textLength)
+bool ColorParameter::initFromText(const QString & filterName, const char * text, int & textLength)
 {
   QList<QString> list = parseText("color", text, textLength);
   if (list.isEmpty()) {
     return false;
   }
-  _name = HtmlTranslator::html2txt(FilterTextTranslator::translate(list[0]));
+  _name = HtmlTranslator::html2txt(FilterTextTranslator::translate(list[0], filterName));
 
   // color(#e9cc00) and color(#e9cc00ff)
   const QString trimmed = list[1].trimmed();
@@ -125,6 +170,7 @@ bool ColorParameter::initFromText(const char * text, int & textLength)
     } else {
       _alphaChannel = false;
     }
+    _size = 3 + _alphaChannel;
     _value = _default;
     return true;
   }
@@ -143,13 +189,17 @@ bool ColorParameter::initFromText(const char * text, int & textLength)
   } else {
     _default = _value = QColor(r, g, b);
   }
-  return okR && okG && okB && okA;
+  if (okR && okG && okB && okA) {
+    _size = channels.size();
+    return true;
+  }
+  return false;
 }
 
 void ColorParameter::onButtonPressed()
 {
   QColor color = QColorDialog::getColor(_value, QApplication::activeWindow(), tr("Select color"),
-                                        (DialogSettings::nativeColorDialogs() ? QColorDialog::ColorDialogOptions() : QColorDialog::DontUseNativeDialog) |
+                                        (Settings::nativeColorDialogs() ? QColorDialog::ColorDialogOptions() : QColorDialog::DontUseNativeDialog) |
                                             (_alphaChannel ? QColorDialog::ShowAlphaChannel : QColorDialog::ColorDialogOptions()));
   if (color.isValid()) {
     _value = color;
@@ -170,3 +220,5 @@ void ColorParameter::updateButtonColor()
   painter.drawRect(0, 0, _pixmap.width() - 1, _pixmap.height() - 1);
   _button->setIcon(_pixmap);
 }
+
+} // namespace GmicQt

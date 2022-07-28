@@ -33,12 +33,19 @@
 #include "HtmlTranslator.h"
 #include "Logger.h"
 
-ChoiceParameter::ChoiceParameter(QObject * parent) : AbstractParameter(parent, true), _default(0), _value(0), _label(nullptr), _comboBox(nullptr), _connected(false) {}
+namespace GmicQt
+{
+ChoiceParameter::ChoiceParameter(QObject * parent) : AbstractParameter(parent), _default(0), _value(0), _label(nullptr), _comboBox(nullptr), _connected(false) {}
 
 ChoiceParameter::~ChoiceParameter()
 {
   delete _comboBox;
   delete _label;
+}
+
+int ChoiceParameter::size() const
+{
+  return 1;
 }
 
 bool ChoiceParameter::addTo(QWidget * widget, int row)
@@ -54,19 +61,33 @@ bool ChoiceParameter::addTo(QWidget * widget, int row)
   _comboBox->setCurrentIndex(_value);
 
   _grid->addWidget(_label = new QLabel(_name, widget), row, 0, 1, 1);
+  setTextSelectable(_label);
   _grid->addWidget(_comboBox, row, 1, 1, 2);
   connectComboBox();
   return true;
 }
 
-QString ChoiceParameter::textValue() const
+QString ChoiceParameter::value() const
 {
   return QString("%1").arg(_comboBox->currentIndex());
 }
 
+QString ChoiceParameter::defaultValue() const
+{
+  return QString("%1").arg(_default);
+}
+
 void ChoiceParameter::setValue(const QString & value)
 {
-  _value = value.toInt();
+  bool ok = true;
+  const int k = value.toInt(&ok);
+  if (!ok || (k < 0)) {
+    return;
+  }
+  if (_comboBox && (k >= _comboBox->count())) {
+    return;
+  }
+  _value = k;
   if (_comboBox) {
     disconnectComboBox();
     _comboBox->setCurrentIndex(_value);
@@ -82,13 +103,13 @@ void ChoiceParameter::reset()
   connectComboBox();
 }
 
-bool ChoiceParameter::initFromText(const char * text, int & textLength)
+bool ChoiceParameter::initFromText(const QString & filterName, const char * text, int & textLength)
 {
   QStringList list = parseText("choice", text, textLength);
   if (list.isEmpty()) {
     return false;
   }
-  _name = HtmlTranslator::html2txt(FilterTextTranslator::translate(list[0]));
+  _name = HtmlTranslator::html2txt(FilterTextTranslator::translate(list[0], filterName));
   _choices = list[1].split(QChar(','));
   bool ok;
   if (_choices.isEmpty()) {
@@ -103,7 +124,7 @@ bool ChoiceParameter::initFromText(const char * text, int & textLength)
   QList<QString>::iterator it = _choices.begin();
   while (it != _choices.end()) {
     *it = it->trimmed().remove(QRegExp("^\"")).remove(QRegExp("\"$"));
-    *it = HtmlTranslator::html2txt(FilterTextTranslator::translate(*it));
+    *it = HtmlTranslator::html2txt(FilterTextTranslator::translate(*it, filterName));
     ++it;
   }
   _value = _default;
@@ -121,7 +142,7 @@ void ChoiceParameter::connectComboBox()
   if (_connected) {
     return;
   }
-  connect(_comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onComboBoxIndexChanged(int)));
+  connect(_comboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ChoiceParameter::onComboBoxIndexChanged);
   _connected = true;
 }
 
@@ -133,3 +154,5 @@ void ChoiceParameter::disconnectComboBox()
   _comboBox->disconnect(this);
   _connected = false;
 }
+
+} // namespace GmicQt

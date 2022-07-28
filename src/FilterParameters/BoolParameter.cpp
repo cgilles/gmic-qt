@@ -30,16 +30,23 @@
 #include <QPalette>
 #include <QWidget>
 #include "Common.h"
-#include "DialogSettings.h"
 #include "FilterTextTranslator.h"
 #include "HtmlTranslator.h"
+#include "Settings.h"
 
-BoolParameter::BoolParameter(QObject * parent) : AbstractParameter(parent, true), _default(false), _value(false), _label(nullptr), _checkBox(nullptr), _connected(false) {}
+namespace GmicQt
+{
+
+BoolParameter::BoolParameter(QObject * parent) : AbstractParameter(parent), _default(false), _value(false), _checkBox(nullptr), _connected(false) {}
 
 BoolParameter::~BoolParameter()
 {
   delete _checkBox;
-  delete _label;
+}
+
+int BoolParameter::size() const
+{
+  return 1;
 }
 
 bool BoolParameter::addTo(QWidget * widget, int row)
@@ -48,13 +55,12 @@ bool BoolParameter::addTo(QWidget * widget, int row)
   Q_ASSERT_X(_grid, __PRETTY_FUNCTION__, "No grid layout in widget");
   _row = row;
   delete _checkBox;
-  delete _label;
   _checkBox = new QCheckBox(_name, widget);
   _checkBox->setChecked(_value);
-  if (DialogSettings::darkThemeEnabled()) {
+  if (Settings::darkThemeEnabled()) {
     QPalette p = _checkBox->palette();
-    p.setColor(QPalette::Text, DialogSettings::CheckBoxTextColor);
-    p.setColor(QPalette::Base, DialogSettings::CheckBoxBaseColor);
+    p.setColor(QPalette::Text, Settings::CheckBoxTextColor);
+    p.setColor(QPalette::Base, Settings::CheckBoxBaseColor);
     _checkBox->setPalette(p);
   }
   _grid->addWidget(_checkBox, row, 0, 1, 3);
@@ -62,9 +68,14 @@ bool BoolParameter::addTo(QWidget * widget, int row)
   return true;
 }
 
-QString BoolParameter::textValue() const
+QString BoolParameter::value() const
 {
   return _value ? QString("1") : QString("0");
+}
+
+QString BoolParameter::defaultValue() const
+{
+  return _default ? QString("1") : QString("0");
 }
 
 void BoolParameter::setValue(const QString & value)
@@ -92,7 +103,7 @@ void BoolParameter::connectCheckBox()
   if (_connected) {
     return;
   }
-  connect(_checkBox, SIGNAL(toggled(bool)), this, SLOT(onCheckBoxChanged(bool)));
+  connect(_checkBox, &QCheckBox::toggled, this, &BoolParameter::onCheckBoxChanged);
   _connected = true;
 }
 
@@ -105,13 +116,15 @@ void BoolParameter::disconnectCheckBox()
   _connected = false;
 }
 
-bool BoolParameter::initFromText(const char * text, int & textLength)
+bool BoolParameter::initFromText(const QString & filterName, const char * text, int & textLength)
 {
   QList<QString> list = parseText("bool", text, textLength);
   if (list.isEmpty()) {
     return false;
   }
-  _name = HtmlTranslator::html2txt(FilterTextTranslator::translate(list[0]));
+  _name = HtmlTranslator::html2txt(FilterTextTranslator::translate(list[0], filterName));
   _value = _default = (list[1].startsWith("true") || list[1].startsWith("1"));
   return true;
 }
+
+} // namespace GmicQt

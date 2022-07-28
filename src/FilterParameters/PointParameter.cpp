@@ -39,15 +39,18 @@
 #include <cstdio>
 #include <cstdlib>
 #include "Common.h"
-#include "DialogSettings.h"
 #include "FilterTextTranslator.h"
 #include "HtmlTranslator.h"
 #include "KeypointList.h"
+#include "Settings.h"
+
+namespace GmicQt
+{
 
 int PointParameter::_defaultColorNextIndex = 0;
 unsigned long PointParameter::_randomSeed = 12345;
 
-PointParameter::PointParameter(QObject * parent) : AbstractParameter(parent, true), _defaultPosition(0, 0), _position(0, 0), _removable(false), _burst(false)
+PointParameter::PointParameter(QObject * parent) : AbstractParameter(parent), _defaultPosition(0, 0), _position(0, 0), _removable(false), _burst(false)
 {
   _label = nullptr;
   _colorLabel = nullptr;
@@ -70,6 +73,11 @@ PointParameter::~PointParameter()
 {
   delete _label;
   delete _rowCell;
+}
+
+int PointParameter::size() const
+{
+  return 2;
 }
 
 bool PointParameter::addTo(QWidget * widget, int row)
@@ -103,7 +111,7 @@ bool PointParameter::addTo(QWidget * widget, int row)
     hbox->addWidget(_removeButton = new QToolButton(_rowCell));
     _removeButton->setCheckable(true);
     _removeButton->setChecked(_removed);
-    _removeButton->setIcon(DialogSettings::RemoveIcon);
+    _removeButton->setIcon(Settings::RemoveIcon);
   } else {
     _removeButton = nullptr;
   }
@@ -113,6 +121,7 @@ bool PointParameter::addTo(QWidget * widget, int row)
   _spinBoxX->setValue(_position.x());
   _spinBoxY->setValue(_position.y());
   _grid->addWidget(_label = new QLabel(_name, widget), row, 0, 1, 1);
+  setTextSelectable(_label);
   _grid->addWidget(_rowCell, row, 1, 1, 2);
 
 #ifdef _GMIC_QT_DEBUG_
@@ -150,12 +159,17 @@ void PointParameter::extractPositionFromKeypointList(KeypointList & list)
   enableNotifications(true);
 }
 
-QString PointParameter::textValue() const
+QString PointParameter::value() const
 {
   if (_removed) {
     return "nan,nan";
   }
   return QString("%1,%2").arg(_position.x()).arg(_position.y());
+}
+
+QString PointParameter::defaultValue() const
+{
+  return QString("%1,%2").arg(_defaultPosition.x()).arg(_defaultPosition.y());
 }
 
 void PointParameter::setValue(const QString & value)
@@ -182,14 +196,14 @@ void PointParameter::setValue(const QString & value)
 void PointParameter::setVisibilityState(AbstractParameter::VisibilityState state)
 {
   AbstractParameter::setVisibilityState(state);
-  if (state & VisibleParameter) {
+  if (state == VisibilityState::Visible) {
     updateView();
   }
 }
 
 void PointParameter::updateView()
 {
-  if (not _spinBoxX) {
+  if (!_spinBoxX) {
     return;
   }
   disconnectSpinboxes();
@@ -219,13 +233,13 @@ void PointParameter::reset()
 }
 
 // P = point(x,y,removable{(0),1},burst{(0),1},r,g,b,a{negative->keepOpacityWhenSelected},radius,widget_visible{0|(1)})
-bool PointParameter::initFromText(const char * text, int & textLength)
+bool PointParameter::initFromText(const QString & filterName, const char * text, int & textLength)
 {
   QList<QString> list = parseText("point", text, textLength);
   if (list.isEmpty()) {
     return false;
   }
-  _name = HtmlTranslator::html2txt(FilterTextTranslator::translate(list[0]));
+  _name = HtmlTranslator::html2txt(FilterTextTranslator::translate(list[0], filterName));
   QList<QString> params = list[1].split(",");
 
   bool ok = true;
@@ -379,7 +393,7 @@ void PointParameter::setRemoved(bool on)
     _labelX->setDisabled(on);
     _labelY->setDisabled(on);
     if (_removeButton) {
-      _removeButton->setIcon(on ? DialogSettings::AddIcon : DialogSettings::RemoveIcon);
+      _removeButton->setIcon(on ? Settings::AddIcon : Settings::RemoveIcon);
     }
   }
 }
@@ -408,10 +422,10 @@ void PointParameter::connectSpinboxes()
   if (_connected || !_spinBoxX) {
     return;
   }
-  connect(_spinBoxX, SIGNAL(valueChanged(double)), this, SLOT(onSpinBoxChanged()));
-  connect(_spinBoxY, SIGNAL(valueChanged(double)), this, SLOT(onSpinBoxChanged()));
+  connect(_spinBoxX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &PointParameter::onSpinBoxChanged);
+  connect(_spinBoxY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &PointParameter::onSpinBoxChanged);
   if (_removable && _removeButton) {
-    connect(_removeButton, SIGNAL(toggled(bool)), this, SLOT(onRemoveButtonToggled(bool)));
+    connect(_removeButton, &QToolButton::toggled, this, &PointParameter::onRemoveButtonToggled);
   }
   _connected = true;
 }
@@ -458,3 +472,5 @@ void PointParameter::pickColorFromDefaultColormap()
   }
   ++_defaultColorNextIndex;
 }
+
+} // namespace GmicQt

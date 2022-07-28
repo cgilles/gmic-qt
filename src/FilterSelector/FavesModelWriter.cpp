@@ -24,6 +24,7 @@
  */
 #include "FavesModelWriter.h"
 #include <QFile>
+#include <QFileInfo>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -33,13 +34,16 @@
 #include "Logger.h"
 #include "Utils.h"
 
+namespace GmicQt
+{
+
 FavesModelWriter::FavesModelWriter(const FavesModel & model) : _model(model) {}
 
 FavesModelWriter::~FavesModelWriter() = default;
 
 void FavesModelWriter::writeFaves()
 {
-  QString jsonFilename(QString("%1%2").arg(GmicQt::path_rc(true)).arg("gmic_qt_faves.json"));
+  QString jsonFilename(QString("%1%2").arg(gmicConfigPath(true)).arg("gmic_qt_faves.json"));
   // Create JSON array
   QJsonArray array;
   FavesModel::const_iterator itFave = _model.cbegin();
@@ -48,21 +52,17 @@ void FavesModelWriter::writeFaves()
     array.append(object);
     ++itFave;
   }
-  if (array.isEmpty()) { // Backup
+  if (array.isEmpty() && (QFileInfo(jsonFilename).size() > 10)) { // Backup
     QFile::copy(jsonFilename, jsonFilename + ".bak");
   }
   // Save JSON array
-  QFile jsonFile(jsonFilename);
-  if (jsonFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-    QJsonDocument jsonDoc(array);
-    if (jsonFile.write(jsonDoc.toJson()) != -1) {
-      // Cleanup 2.0.0 pre-release files
-      QString obsoleteFilename(QString("%1%2").arg(GmicQt::path_rc(false)).arg("gmic_qt_faves"));
-      QFile::remove(obsoleteFilename);
-      QFile::remove(obsoleteFilename + ".bak");
-    }
+  if (safelyWrite(QJsonDocument(array).toJson(), jsonFilename)) {
+    // Cleanup 2.0.0 pre-release files
+    QString obsoleteFilename(QString("%1%2").arg(gmicConfigPath(false)).arg("gmic_qt_faves"));
+    QFile::remove(obsoleteFilename);
+    QFile::remove(obsoleteFilename + ".bak");
   } else {
-    Logger::error("Cannot open/create file " + jsonFilename);
+    Logger::error("Cannot write fave file " + jsonFilename);
   }
 }
 
@@ -85,3 +85,5 @@ QJsonObject FavesModelWriter::faveToJsonObject(const FavesModel::Fave & fave)
   object["defaultVisibilities"] = visibilities;
   return object;
 }
+
+} // namespace GmicQt

@@ -33,17 +33,25 @@
 #include <QRegExp>
 #include <QWidget>
 #include "Common.h"
-#include "DialogSettings.h"
 #include "FilterTextTranslator.h"
 #include "HtmlTranslator.h"
 #include "IconLoader.h"
+#include "Settings.h"
 
-FolderParameter::FolderParameter(QObject * parent) : AbstractParameter(parent, true), _label(nullptr), _button(nullptr) {}
+namespace GmicQt
+{
+
+FolderParameter::FolderParameter(QObject * parent) : AbstractParameter(parent), _label(nullptr), _button(nullptr) {}
 
 FolderParameter::~FolderParameter()
 {
   delete _label;
   delete _button;
+}
+
+int FolderParameter::size() const
+{
+  return 1;
 }
 
 bool FolderParameter::addTo(QWidget * widget, int row)
@@ -57,27 +65,28 @@ bool FolderParameter::addTo(QWidget * widget, int row)
   _button = new QPushButton(widget);
   _button->setIcon(LOAD_ICON("folder"));
   _grid->addWidget(_label = new QLabel(_name, widget), row, 0, 1, 1);
+  setTextSelectable(_label);
   _grid->addWidget(_button, row, 1, 1, 2);
   setValue(_value);
-  connect(_button, SIGNAL(clicked()), this, SLOT(onButtonPressed()));
+  connect(_button, &QPushButton::clicked, this, &FolderParameter::onButtonPressed);
   return true;
 }
 
-QString FolderParameter::textValue() const
-{
-  return QString("\"%1\"").arg(_value);
-}
-
-QString FolderParameter::unquotedTextValue() const
+QString FolderParameter::value() const
 {
   return _value;
+}
+
+QString FolderParameter::defaultValue() const
+{
+  return _default;
 }
 
 void FolderParameter::setValue(const QString & value)
 {
   _value = value;
   if (_value.isEmpty()) {
-    _value = DialogSettings::FolderParameterDefaultValue;
+    _value = Settings::FolderParameterDefaultValue;
   } else if (!QFileInfo(_value).isDir()) {
     _value = QDir::homePath();
   }
@@ -95,13 +104,13 @@ void FolderParameter::reset()
   setValue(_default);
 }
 
-bool FolderParameter::initFromText(const char * text, int & textLength)
+bool FolderParameter::initFromText(const QString & filterName, const char * text, int & textLength)
 {
   QList<QString> list = parseText("folder", text, textLength);
   if (list.isEmpty()) {
     return false;
   }
-  _name = HtmlTranslator::html2txt(FilterTextTranslator::translate(list[0]));
+  _name = HtmlTranslator::html2txt(FilterTextTranslator::translate(list[0], filterName));
   QRegExp re("^\".*\"$");
   if (re.exactMatch(list[1])) {
     list[1].chop(1);
@@ -109,7 +118,7 @@ bool FolderParameter::initFromText(const char * text, int & textLength)
   }
   if (list[1].isEmpty()) {
     _default.clear();
-    _value = DialogSettings::FolderParameterDefaultValue;
+    _value = Settings::FolderParameterDefaultValue;
   } else {
     _default = _value = list[1];
   }
@@ -128,8 +137,10 @@ void FolderParameter::onButtonPressed()
   if (path.isEmpty()) {
     setValue(oldValue);
   } else {
-    DialogSettings::FolderParameterDefaultValue = path;
+    Settings::FolderParameterDefaultValue = path;
     setValue(path);
   }
   notifyIfRelevant();
 }
+
+} // namespace GmicQt

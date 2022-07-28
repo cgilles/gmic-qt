@@ -25,9 +25,10 @@
 #include "TreeView.h"
 #include <QKeyEvent>
 
-TreeView::TreeView(QWidget * parent) : QTreeView(parent)
+namespace GmicQt
 {
-}
+
+TreeView::TreeView(QWidget * parent) : QTreeView(parent) {}
 
 void TreeView::keyPressEvent(QKeyEvent * event)
 {
@@ -37,4 +38,6 @@ void TreeView::keyPressEvent(QKeyEvent * event)
   QTreeView::keyPressEvent(event);
 }
 
-TreeView::~TreeView() = default;
+TreeView::~TreeView() {}
+
+} // namespace GmicQt

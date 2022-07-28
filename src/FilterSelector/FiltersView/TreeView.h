@@ -30,16 +30,20 @@
 #include <QWidget>
 #include "Common.h"
 
+namespace GmicQt
+{
 class TreeView : public QTreeView {
   Q_OBJECT
 public:
-  TreeView(QWidget * parent = nullptr);
-  ~TreeView();
+  TreeView(QWidget * parent);
+  ~TreeView() override;
   void keyPressEvent(QKeyEvent * event) override;
 signals:
   void returnKeyPressed();
 
 private:
 };
+
+} // namespace GmicQt
 
 #endif // GMIC_QT_TREEVIEW_H

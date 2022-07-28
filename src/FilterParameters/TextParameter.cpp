@@ -29,16 +29,20 @@
 #include <QIcon>
 #include <QLabel>
 #include <QLineEdit>
+#include <QRegularExpression>
 #include <QTextEdit>
 #include <QWidget>
 #include "Common.h"
-#include "DialogSettings.h"
 #include "FilterParameters/MultilineTextParameterWidget.h"
 #include "FilterTextTranslator.h"
 #include "HtmlTranslator.h"
 #include "IconLoader.h"
+#include "Misc.h"
 
-TextParameter::TextParameter(QObject * parent) : AbstractParameter(parent, true), _label(nullptr), _lineEdit(nullptr), _textEdit(nullptr), _multiline(false), _connected(false)
+namespace GmicQt
+{
+
+TextParameter::TextParameter(QObject * parent) : AbstractParameter(parent), _label(nullptr), _lineEdit(nullptr), _textEdit(nullptr), _multiline(false), _connected(false)
 {
   _updateAction = nullptr;
 }
@@ -48,6 +52,11 @@ TextParameter::~TextParameter()
   delete _lineEdit;
   delete _textEdit;
   delete _label;
+}
+
+int TextParameter::size() const
+{
+  return 1;
 }
 
 bool TextParameter::addTo(QWidget * widget, int row)
@@ -65,10 +74,11 @@ bool TextParameter::addTo(QWidget * widget, int row)
     _grid->addWidget(_textEdit, row, 0, 1, 3);
   } else {
     _grid->addWidget(_label = new QLabel(_name, widget), row, 0, 1, 1);
+    setTextSelectable(_label);
     _lineEdit = new QLineEdit(_value, widget);
     _textEdit = nullptr;
     _grid->addWidget(_lineEdit, row, 1, 1, 2);
-#if QT_VERSION >= 0x050200
+#if QT_VERSION_GTE(5, 2, 0)
     _updateAction = _lineEdit->addAction(LOAD_ICON("view-refresh"), QLineEdit::TrailingPosition);
 #endif
   }
@@ -76,22 +86,20 @@ bool TextParameter::addTo(QWidget * widget, int row)
   return true;
 }
 
-QString TextParameter::textValue() const
-{
-  QString text = _multiline ? _textEdit->text() : _lineEdit->text();
-  text.replace(QChar('"'), QString("\\\""));
-  return QString("\"%1\"").arg(text);
-}
-
-QString TextParameter::unquotedTextValue() const
+QString TextParameter::value() const
 {
   return _multiline ? _textEdit->text() : _lineEdit->text();
+}
+
+QString TextParameter::defaultValue() const
+{
+  return _default;
 }
 
 void TextParameter::setValue(const QString & value)
 {
   _value = value;
-  if (_multiline && _textEdit) {
+  if (_textEdit) {
     disconnectEditor();
     _textEdit->setText(_value);
     connectEditor();
@@ -104,32 +112,30 @@ void TextParameter::setValue(const QString & value)
 
 void TextParameter::reset()
 {
-  if (_multiline) {
+  if (_textEdit) {
     _textEdit->setText(_default);
-  } else {
+  } else if (_lineEdit) {
     _lineEdit->setText(_default);
   }
   _value = _default;
 }
 
-bool TextParameter::initFromText(const char * text, int & textLength)
+bool TextParameter::initFromText(const QString & filterName, const char * text, int & textLength)
 {
   QStringList list = parseText("text", text, textLength);
   if (list.isEmpty()) {
     return false;
   }
-  _name = HtmlTranslator::html2txt(FilterTextTranslator::translate(list[0]));
+  _name = HtmlTranslator::html2txt(FilterTextTranslator::translate(list[0], filterName));
   QString value = list[1];
   _multiline = false;
-  QRegExp re("^\\s*(0|1)\\s*,");
-  if (value.contains(re) && re.matchedLength() > 0) {
-    _multiline = (re.cap(1).toInt() == 1);
+  QRegularExpression re("^\\s*(0|1)\\s*,");
+  auto match = re.match(value);
+  if (match.hasMatch()) {
+    _multiline = (match.captured(1).toInt() == 1);
     value.replace(re, "");
   }
-  value = value.trimmed().remove(QRegExp("^\"")).remove(QRegExp("\"$"));
-  value.replace(QString("\\\\"), QString("\\"));
-  value.replace(QString("\\n"), QString("\n"));
-  _value = _default = value;
+  _value = _default = unescaped(unquoted(value));
   return true;
 }
 
@@ -148,12 +154,12 @@ void TextParameter::connectEditor()
   if (_connected) {
     return;
   }
-  if (_multiline) {
-    connect(_textEdit, SIGNAL(valueChanged()), this, SLOT(onValueChanged()));
-  } else {
-    connect(_lineEdit, SIGNAL(editingFinished()), this, SLOT(onValueChanged()));
-#if QT_VERSION >= 0x050200
-    connect(_updateAction, SIGNAL(triggered(bool)), this, SLOT(onValueChanged()));
+  if (_textEdit) {
+    connect(_textEdit, &MultilineTextParameterWidget::valueChanged, this, &TextParameter::onValueChanged);
+  } else if (_lineEdit) {
+    connect(_lineEdit, &QLineEdit::editingFinished, this, &TextParameter::onValueChanged);
+#if QT_VERSION_GTE(5, 2, 0)
+    connect(_updateAction, &QAction::triggered, this, &TextParameter::onValueChanged);
 #endif
   }
   _connected = true;
@@ -164,13 +170,15 @@ void TextParameter::disconnectEditor()
   if (!_connected) {
     return;
   }
-  if (_multiline) {
+  if (_textEdit) {
     _textEdit->disconnect(this);
-  } else {
+  } else if (_lineEdit) {
     _lineEdit->disconnect(this);
-#if QT_VERSION >= 0x050200
+#if QT_VERSION_GTE(5, 2, 0)
     _updateAction->disconnect(this);
 #endif
   }
   _connected = false;
 }
+
+} // namespace GmicQt

@@ -30,27 +30,31 @@
 class QLabel;
 class QPushButton;
 
+namespace GmicQt
+{
+
 class FileParameter : public AbstractParameter {
   Q_OBJECT
 public:
-  FileParameter(QObject * parent = nullptr);
+  FileParameter(QObject * parent);
   ~FileParameter() override;
+  virtual int size() const override;
   bool addTo(QWidget *, int row) override;
-  QString textValue() const override;
-  QString unquotedTextValue() const override;
+  QString value() const override;
+  QString defaultValue() const override;
   void setValue(const QString & value) override;
   void reset() override;
-  bool initFromText(const char * text, int & textLength) override;
+  bool initFromText(const QString & filterName, const char * text, int & textLength) override;
   bool isQuoted() const override;
 public slots:
   void onButtonPressed();
 
 private:
-  enum DialogMode
+  enum class DialogMode
   {
-    InputMode,
-    OutputMode,
-    InputOutputMode
+    Input,
+    Output,
+    InputOutput
   };
   QString _name;
   QString _default;
@@ -59,5 +63,7 @@ private:
   QPushButton * _button;
   DialogMode _dialogMode;
 };
+
+} // namespace GmicQt
 
 #endif // GMIC_QT_FILEPARAMETER_H

@@ -27,8 +27,13 @@
 #include <QSettings>
 #include <QStringList>
 #include "Common.h"
+#include "Globals.h"
 #include "LanguageSettings.h"
+#include "Settings.h"
 #include "ui_languageselectionwidget.h"
+
+namespace GmicQt
+{
 
 LanguageSelectionWidget::LanguageSelectionWidget(QWidget * parent) //
     : QWidget(parent),                                             //
@@ -47,6 +52,17 @@ LanguageSelectionWidget::LanguageSelectionWidget(QWidget * parent) //
   if (_systemDefaultIsAvailable) {
     ui->comboBox->insertItem(0, QString(tr("System default (%1)")).arg(_code2name[lang]), QVariant(QString()));
   }
+
+  if (Settings::darkThemeEnabled()) {
+    QPalette p = ui->cbTranslateFilters->palette();
+    p.setColor(QPalette::Text, Settings::CheckBoxTextColor);
+    p.setColor(QPalette::Base, Settings::CheckBoxBaseColor);
+    ui->cbTranslateFilters->setPalette(p);
+  }
+  ui->cbTranslateFilters->setToolTip(tr("Translations are very likely to be incomplete."));
+
+  connect(ui->comboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &LanguageSelectionWidget::onLanguageSelectionChanged);
+  connect(ui->cbTranslateFilters, &QCheckBox::toggled, this, &LanguageSelectionWidget::onCheckboxToggled);
 }
 
 LanguageSelectionWidget::~LanguageSelectionWidget()
@@ -54,9 +70,19 @@ LanguageSelectionWidget::~LanguageSelectionWidget()
   delete ui;
 }
 
-QString LanguageSelectionWidget::selectedLanguageCode()
+QString LanguageSelectionWidget::selectedLanguageCode() const
 {
   return ui->comboBox->currentData().toString();
+}
+
+bool LanguageSelectionWidget::translateFiltersEnabled() const
+{
+  return ui->cbTranslateFilters->isChecked();
+}
+
+void LanguageSelectionWidget::enableFilterTranslation(bool on)
+{
+  ui->cbTranslateFilters->setChecked(on);
 }
 
 void LanguageSelectionWidget::selectLanguage(const QString & code)
@@ -84,3 +110,26 @@ void LanguageSelectionWidget::selectLanguage(const QString & code)
     }
   }
 }
+
+void LanguageSelectionWidget::onLanguageSelectionChanged(int index)
+{
+  QString lang = ui->comboBox->itemData(index).toString();
+  if (lang.isEmpty()) {
+    lang = LanguageSettings::systemDefaultAndAvailableLanguageCode();
+  }
+  if (LanguageSettings::filterTranslationAvailable(lang)) {
+    ui->cbTranslateFilters->setEnabled(true);
+  } else {
+    ui->cbTranslateFilters->setChecked(false);
+    ui->cbTranslateFilters->setEnabled(false);
+  }
+  emit languageCodeSelected(lang);
+  Settings::setLanguageCode(lang);
+}
+
+void LanguageSelectionWidget::onCheckboxToggled(bool on)
+{
+  Settings::setFilterTranslationEnabled(on);
+}
+
+} // namespace GmicQt

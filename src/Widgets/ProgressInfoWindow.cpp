@@ -31,32 +31,38 @@
 #include <QSettings>
 #include <QStyleFactory>
 #include "Common.h"
-#include "DialogSettings.h"
 #include "FilterThread.h"
 #include "Globals.h"
 #include "GmicStdlib.h"
 #include "HeadlessProcessor.h"
+#include "Settings.h"
 #include "Updater.h"
 #include "ui_progressinfowindow.h"
+#ifndef gmic_core
+#include "CImg.h"
+#endif
 #include "gmic.h"
+
+namespace GmicQt
+{
 
 ProgressInfoWindow::ProgressInfoWindow(HeadlessProcessor * processor) : QMainWindow(nullptr), ui(new Ui::ProgressInfoWindow), _processor(processor)
 {
   ui->setupUi(this);
-  setWindowTitle("G'MIC-Qt Plug-in progression");
-  processor->setProgressWindowFlag(true);
+  setWindowTitle(tr("G'MIC-Qt Plug-in progression"));
+  processor->setProgressWindow(this);
 
   ui->label->setText(QString("%1").arg(processor->filterName()));
   ui->progressBar->setRange(0, 100);
   ui->progressBar->setValue(100);
   ui->info->setText("");
-  connect(processor, SIGNAL(singleShotTimeout()), this, SLOT(show()));
-  connect(ui->pbCancel, SIGNAL(clicked(bool)), this, SLOT(onCancelClicked(bool)));
-  connect(processor, SIGNAL(progression(float, int, ulong)), this, SLOT(onProgress(float, int, ulong)));
-  connect(processor, SIGNAL(done(QString)), this, SLOT(onProcessingFinished(QString)));
+  connect(processor, &HeadlessProcessor::progressWindowShouldShow, this, &ProgressInfoWindow::show);
+  connect(ui->pbCancel, &QPushButton::clicked, this, &ProgressInfoWindow::onCancelClicked);
+  connect(processor, &HeadlessProcessor::progression, this, &ProgressInfoWindow::onProgress);
+  connect(processor, &HeadlessProcessor::done, this, &ProgressInfoWindow::onProcessingFinished);
   _isShown = false;
 
-  if (DialogSettings::darkThemeEnabled()) {
+  if (Settings::darkThemeEnabled()) {
     setDarkTheme();
   }
 }
@@ -151,10 +157,17 @@ void ProgressInfoWindow::onProgress(float progress, int duration, unsigned long 
   }
 }
 
+void ProgressInfoWindow::onInfo(QString text)
+{
+  ui->info->setText(text);
+}
+
 void ProgressInfoWindow::onProcessingFinished(const QString & errorMessage)
 {
   if (!errorMessage.isEmpty()) {
-    QMessageBox::warning(this, "Error", errorMessage, QMessageBox::Close);
+    QMessageBox::critical(this, "Error", errorMessage, QMessageBox::Close);
   }
   close();
 }
+
+} // namespace GmicQt

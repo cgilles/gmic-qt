@@ -25,6 +25,7 @@
 #include "FilterParameters/AbstractParameter.h"
 #include <QDebug>
 #include <QGridLayout>
+#include <QLabel>
 #include <cstring>
 #include "Common.h"
 #include "FilterParameters/BoolParameter.h"
@@ -43,14 +44,16 @@
 #include "FilterParameters/TextParameter.h"
 #include "Logger.h"
 
+namespace GmicQt
+{
+
 const QStringList AbstractParameter::NoValueParameters = {"link", "note", "separator"};
 
-AbstractParameter::AbstractParameter(QObject * parent, bool actualParameter) : QObject(parent), _actualParameter(actualParameter)
+AbstractParameter::AbstractParameter(QObject * parent) : QObject(parent)
 {
   _update = true;
-  _defaultVisibilityState = VisibleParameter;
-  _visibilityState = VisibleParameter;
-  _visibilityPropagation = PropagateNone;
+  _visibilityState = _defaultVisibilityState = VisibilityState::Visible;
+  _visibilityPropagation = VisibilityPropagation::NoPropagation;
   _row = -1;
   _grid = nullptr;
 }
@@ -59,12 +62,7 @@ AbstractParameter::~AbstractParameter() {}
 
 bool AbstractParameter::isActualParameter() const
 {
-  return _actualParameter;
-}
-
-QString AbstractParameter::unquotedTextValue() const
-{
-  return textValue();
+  return size() > 0;
 }
 
 bool AbstractParameter::isQuoted() const
@@ -81,7 +79,7 @@ void AbstractParameter::addToKeypointList(KeypointList &) const {}
 
 void AbstractParameter::extractPositionFromKeypointList(KeypointList &) {}
 
-AbstractParameter * AbstractParameter::createFromText(const char * text, int & length, QString & error, QWidget * parent)
+AbstractParameter * AbstractParameter::createFromText(const QString & filterName, const char * text, int & length, QString & error, QObject * parent)
 {
   AbstractParameter * result = nullptr;
   QString line = text;
@@ -120,7 +118,7 @@ AbstractParameter * AbstractParameter::createFromText(const char * text, int & l
     result = new PointParameter(parent);
   }
   if (result) {
-    if (!result->initFromText(text, length)) {
+    if (!result->initFromText(filterName, text, length)) {
       delete result;
       result = nullptr;
       if (!line.isEmpty()) {
@@ -155,7 +153,7 @@ AbstractParameter::VisibilityState AbstractParameter::defaultVisibilityState() c
 
 void AbstractParameter::setVisibilityState(AbstractParameter::VisibilityState state)
 {
-  if (state == UnspecifiedVisibilityState) {
+  if (state == VisibilityState::Unspecified) {
     setVisibilityState(defaultVisibilityState());
     return;
   }
@@ -167,19 +165,19 @@ void AbstractParameter::setVisibilityState(AbstractParameter::VisibilityState st
     QLayoutItem * item = _grid->itemAtPosition(_row, col);
     if (item) {
       auto widget = item->widget();
-      switch (state & 3) {
-      case VisibleParameter:
+      switch (state) {
+      case VisibilityState::Visible:
         widget->setEnabled(true);
         widget->show();
         break;
-      case DisabledParameter:
+      case VisibilityState::Disabled:
         widget->setEnabled(false);
         widget->show();
         break;
-      case HiddenParameter:
+      case VisibilityState::Hidden:
         widget->hide();
         break;
-      case UnspecifiedVisibilityState:
+      case VisibilityState::Unspecified:
         // Taken care above (if)
         break;
       }
@@ -195,6 +193,13 @@ AbstractParameter::VisibilityState AbstractParameter::visibilityState() const
 AbstractParameter::VisibilityPropagation AbstractParameter::visibilityPropagation() const
 {
   return _visibilityPropagation;
+}
+
+void AbstractParameter::setTextSelectable(QLabel * label)
+{
+  Qt::TextInteractionFlags flags = label->textInteractionFlags();
+  flags.setFlag(Qt::TextSelectableByMouse, true);
+  label->setTextInteractionFlags(flags);
 }
 
 QStringList AbstractParameter::parseText(const QString & type, const char * text, int & length)
@@ -235,18 +240,18 @@ QStringList AbstractParameter::parseText(const QString & type, const char * text
 
   if (text[length] == '_' && text[length + 1] >= '0' && text[length + 1] <= '2') {
     _defaultVisibilityState = static_cast<VisibilityState>(text[length + 1] - '0');
-    _visibilityPropagation = PropagateNone;
+    _visibilityPropagation = VisibilityPropagation::NoPropagation;
     switch (text[length + 2]) {
     case '-':
-      _visibilityPropagation = PropagateUp;
+      _visibilityPropagation = VisibilityPropagation::Up;
       length += 3;
       break;
     case '+':
-      _visibilityPropagation = PropagateDown;
+      _visibilityPropagation = VisibilityPropagation::Down;
       length += 3;
       break;
     case '*':
-      _visibilityPropagation = PropagateUpDown;
+      _visibilityPropagation = VisibilityPropagation::Down;
       length += 3;
       break;
     default:
@@ -255,8 +260,8 @@ QStringList AbstractParameter::parseText(const QString & type, const char * text
     }
     if (NoValueParameters.contains(type)) {
       Logger::warning(QString("Warning: %1 parameter should not define visibility. Ignored.").arg(result.first()));
-      _defaultVisibilityState = AbstractParameter::VisibleParameter;
-      _visibilityPropagation = PropagateNone;
+      _defaultVisibilityState = AbstractParameter::VisibilityState::Visible;
+      _visibilityPropagation = VisibilityPropagation::NoPropagation;
     }
   }
   while (text[length] && (text[length] == ',' || QChar(text[length]).isSpace())) {
@@ -277,3 +282,5 @@ void AbstractParameter::notifyIfRelevant()
     emit valueChanged();
   }
 }
+
+} // namespace GmicQt

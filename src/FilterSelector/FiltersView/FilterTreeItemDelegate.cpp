@@ -28,13 +28,15 @@
 #include <QPainter>
 #include <QPalette>
 #include <QTextDocument>
-#include "DialogSettings.h"
 #include "FilterSelector/FiltersView/FilterTreeAbstractItem.h"
 #include "FilterSelector/FiltersView/FilterTreeItem.h"
+#include "Settings.h"
+#include "Tags.h"
 
-FilterTreeItemDelegate::FilterTreeItemDelegate(QObject * parent) : QStyledItemDelegate(parent)
+namespace GmicQt
 {
-}
+
+FilterTreeItemDelegate::FilterTreeItemDelegate(QObject * parent) : QStyledItemDelegate(parent) {}
 
 void FilterTreeItemDelegate::paint(QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index) const
 {
@@ -47,14 +49,30 @@ void FilterTreeItemDelegate::paint(QPainter * painter, const QStyleOptionViewIte
   const QStandardItem * item = model->itemFromIndex(index);
   Q_ASSERT_X(item, "FiltersTreeItemDelegate::paint()", "No item");
   auto filter = dynamic_cast<const FilterTreeItem *>(item);
+  const int height = int(options.rect.height() * 0.4);
+  QString tagString;
+
+  if (filter) {
+    TagColorSet tags = filter->tags();
+    if (!tags.isEmpty()) {
+      tagString = "&nbsp;&nbsp;";
+      for (TagColor color : tags) {
+        tagString += QString("&nbsp;") + TagAssets::markerHtml(color, height);
+      }
+    }
+  }
 
   QTextDocument doc;
   if (!item->isCheckable() && filter && !filter->isVisible()) {
     QColor textColor;
-    textColor = DialogSettings::UnselectedFilterTextColor;
-    doc.setHtml(QString("<span style=\"color:%1\">%2</span>").arg(textColor.name()).arg(options.text));
+    textColor = Settings::UnselectedFilterTextColor;
+    doc.setHtml(QString("<span style=\"color:%1\">%2</span>&nbsp;%3").arg(textColor.name()).arg(options.text).arg(tagString));
   } else {
-    doc.setHtml(options.text);
+    if (filter) {
+      doc.setHtml(options.text + tagString);
+    } else {
+      doc.setHtml(options.text);
+    }
   }
   options.text = "";
   options.widget->style()->drawControl(QStyle::CE_ItemViewItem, &options, painter);
@@ -74,3 +92,5 @@ QSize FilterTreeItemDelegate::sizeHint(const QStyleOptionViewItem & option, cons
   doc.setTextWidth(options.rect.width());
   return {static_cast<int>(doc.idealWidth()), static_cast<int>(doc.size().height())};
 }
+
+} // namespace GmicQt

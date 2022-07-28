@@ -28,8 +28,17 @@
 #include "Common.h"
 #include "FilterTextTranslator.h"
 #include "HtmlTranslator.h"
+#include "Misc.h"
 
-ConstParameter::ConstParameter(QObject * parent) : AbstractParameter(parent, true) {}
+namespace GmicQt
+{
+
+ConstParameter::ConstParameter(QObject * parent) : AbstractParameter(parent) {}
+
+int ConstParameter::size() const
+{
+  return 1;
+}
 
 ConstParameter::~ConstParameter() = default;
 
@@ -38,9 +47,19 @@ bool ConstParameter::addTo(QWidget *, int)
   return false;
 }
 
-QString ConstParameter::textValue() const
+bool ConstParameter::isQuoted() const
+{
+  return true;
+}
+
+QString ConstParameter::value() const
 {
   return _value;
+}
+
+QString ConstParameter::defaultValue() const
+{
+  return _default;
 }
 
 void ConstParameter::setValue(const QString & value)
@@ -53,13 +72,15 @@ void ConstParameter::reset()
   _value = _default;
 }
 
-bool ConstParameter::initFromText(const char * text, int & textLength)
+bool ConstParameter::initFromText(const QString & filterName, const char * text, int & textLength)
 {
   QStringList list = parseText("value", text, textLength);
   if (list.isEmpty()) {
     return false;
   }
-  _name = HtmlTranslator::html2txt(FilterTextTranslator::translate(list[0]));
-  _value = _default = list[1];
+  _name = HtmlTranslator::html2txt(FilterTextTranslator::translate(list[0], filterName));
+  _value = _default = unescaped(unquoted(list[1]));
   return true;
 }
+
+} // namespace GmicQt

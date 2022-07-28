@@ -41,22 +41,24 @@
 #include <QTemporaryFile>
 #include <QTimer>
 #include <memory>
+#include "GmicQt.h"
 
-#include "gmic_qt.h"
+namespace GmicQt
+{
 class Updater : public QObject {
   Q_OBJECT
 
 public:
-  enum UpdateStatus
+  enum class UpdateStatus
   {
-    UpdateSuccessful,
-    SomeUpdatesFailed,
-    UpdateNotNecessary
+    Successful,
+    SomeFailed,
+    NotNecessary
   };
 
   static Updater * getInstance();
-  static void setOutputMessageMode(GmicQt::OutputMessageMode mode);
-  ~Updater();
+  static void setOutputMessageMode(OutputMessageMode mode);
+  ~Updater() override;
 
   /**
    * @brief Launch download of files that are either not present locally, or
@@ -77,7 +79,6 @@ public:
   QByteArray buildFullStdlib() const;
 
   bool someNetworkUpdateAchieved() const;
-
   void updateSources(bool useNetwork);
 
 signals:
@@ -100,7 +101,7 @@ private:
   static QByteArray cimgzDecompress(const QByteArray & array);
   static QByteArray cimgzDecompressFile(const QString & filename);
   static std::unique_ptr<Updater> _instance;
-  static GmicQt::OutputMessageMode _outputMessageMode;
+  static OutputMessageMode _outputMessageMode;
 
   QNetworkAccessManager * _networkAccessManager;
   QList<QString> _sources;
@@ -109,5 +110,7 @@ private:
   QList<QString> _errorMessages;
   bool _someNetworkUpdatesAchieved;
 };
+
+} // namespace GmicQt
 
 #endif // GMIC_QT_UPDATER_H

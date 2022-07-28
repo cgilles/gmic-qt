@@ -24,12 +24,21 @@
  */
 
 #include "Utils.h"
+#include <QByteArray>
 #include <QDebug>
+#include <QDir>
+#include <QFile>
 #include <QFileInfo>
 #include <QRegExp>
+#include <QStandardPaths>
 #include <QString>
+#include <QTemporaryFile>
 #include "Common.h"
-#include "Host/host.h"
+#include "Host/GmicQtHost.h"
+#include "Logger.h"
+#ifndef gmic_core
+#include "CImg.h"
+#endif
 #include "gmic.h"
 
 #ifdef _IS_WINDOWS_
@@ -42,19 +51,23 @@
 
 namespace GmicQt
 {
-const QString & path_rc(bool create)
+
+const QString & gmicConfigPath(bool create)
 {
-  QString qpath = QString::fromLocal8Bit(gmic::path_rc());
-  QFileInfo dir(qpath);
+#if defined(Q_OS_ANDROID)
+  QString baseAppPath = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
+  const QString qpath = QString::fromUtf8(gmic::path_rc(qPrintable(baseAppPath)));
+#elif defined(_IS_WINDOWS_)
+  const QString qpath = QString::fromUtf8(gmic::path_rc());
+#else
+  const QString qpath = QString::fromLocal8Bit(gmic::path_rc());
+#endif
   static QString result;
-  if (dir.isDir()) {
+  QFileInfo pathInfo(qpath);
+  if (pathInfo.isDir() || (create && gmic::init_rc())) {
     result = qpath;
-    return result;
-  }
-  if (!create || !gmic::init_rc()) {
-    result.clear();
   } else {
-    result = QString::fromLocal8Bit(gmic::path_rc());
+    result.clear();
   }
   return result;
 }
@@ -94,10 +107,10 @@ const QString & pluginFullName()
   static QString result;
   if (result.isEmpty()) {
     result = QString("G'MIC-Qt %1- %2 %3 bits - %4" BETA_SUFFIX)
-                 .arg(GmicQt::HostApplicationName.isEmpty() ? QString() : QString("for %1 ").arg(GmicQt::HostApplicationName))
+                 .arg(GmicQtHost::ApplicationName.isEmpty() ? QString() : QString("for %1 ").arg(GmicQtHost::ApplicationName))
                  .arg(cimg_library::cimg::stros())
                  .arg(sizeof(void *) == 8 ? 64 : 32)
-                 .arg(GmicQt::gmicVersionString());
+                 .arg(gmicVersionString());
   }
   return result;
 }
@@ -106,78 +119,61 @@ const QString & pluginCodeName()
 {
   static QString result;
   if (result.isEmpty()) {
-    result = GmicQt::HostApplicationName.isEmpty() ? QString("gmic_qt") : QString("gmic_%1_qt").arg(QString(GmicQt::HostApplicationShortname).toLower());
+    result = GmicQtHost::ApplicationName.isEmpty() ? QString("gmic_qt") : QString("gmic_%1_qt").arg(QString(GmicQtHost::ApplicationShortname).toLower());
   }
   return result;
 }
 
-const char * commandFromOutputMessageMode(OutputMessageMode mode)
+bool touchFile(const QString & path)
 {
-  switch (mode) {
-  case Quiet:
-  case VerboseLayerName:
-  case VerboseConsole:
-  case VerboseLogFile:
-  case UnspecifiedOutputMessageMode:
-    return "";
-  case VeryVerboseConsole:
-  case VeryVerboseLogFile:
-    return "v 3";
-  case DebugConsole:
-  case DebugLogFile:
-    return "debug";
+  QFile file(path);
+  if (!file.open(QFile::ReadWrite)) {
+    return false;
   }
-  return "";
+  const auto size = file.size();
+  file.resize(size + 1);
+  file.resize(size);
+  return true;
 }
 
-void downcaseCommandTitle(QString & title)
+bool writeAll(const QByteArray & array, QFile & file)
 {
-  QMap<int, QString> acronyms;
-  // Acronyms
-  QRegExp re("([A-Z0-9]{2,255})");
-  int index = 0;
-  while ((index = re.indexIn(title, index)) != -1) {
-    QString pattern = re.cap(0);
-    acronyms[index] = pattern;
-    index += pattern.length();
-  }
-
-  // 3D
-  re.setPattern("([1-9])[dD] ");
-  if ((index = re.indexIn(title, 0)) != -1) {
-    acronyms[index] = re.cap(1) + "d ";
-  }
-
-  // B&amp;W
-  re.setPattern("(B&amp;W|[ \\[]Lab|[ \\[]YCbCr)");
-  index = 0;
-  while ((index = re.indexIn(title, index)) != -1) {
-    acronyms[index] = re.cap(1);
-    index += re.cap(1).length();
-  }
-
-  // Uppercase letter in last position, after a space
-  re.setPattern(" ([A-Z])$");
-  if ((index = re.indexIn(title, 0)) != -1) {
-    acronyms[index] = re.cap(0);
-  }
-  title = title.toLower();
-  QMap<int, QString>::const_iterator it = acronyms.cbegin();
-  while (it != acronyms.cend()) {
-    title.replace(it.key(), it.value().length(), it.value());
-    ++it;
-  }
-  title[0] = title[0].toUpper();
+  qint64 toBeWritten = array.size();
+  qint64 totalWritten = 0;
+  qint64 writtenByCall = 0;
+  qint64 maxBytesPerWrite = 10l << 20;
+  const char * data = array.constData();
+  do {
+    writtenByCall = file.write(data, std::min(toBeWritten, maxBytesPerWrite));
+    if (writtenByCall == -1) {
+      Logger::error(QString("Could not properly write file %1 (%2/%3 bytes written)") //
+                        .arg(file.fileName())
+                        .arg(totalWritten)
+                        .arg(array.size()));
+      return false;
+    }
+    data += writtenByCall;
+    totalWritten += writtenByCall;
+    toBeWritten -= writtenByCall;
+  } while (toBeWritten);
+  file.flush();
+  return true;
 }
 
-void appendWithSpace(QString & str, const QString & other)
+bool safelyWrite(const QByteArray & array, const QString & filename)
 {
-  if (str.isEmpty() || other.isEmpty()) {
-    str += other;
-    return;
+  QString directory = QFileInfo(filename).absoluteDir().absolutePath();
+  if (!QFileInfo(directory).isWritable()) {
+    Logger::error(QString("Folder is not writable (%1)").arg(directory));
+    return false;
   }
-  str += QChar(' ');
-  str += other;
+  QTemporaryFile temporary;
+  temporary.setAutoRemove(false);
+  const bool ok = temporary.open()                                              //
+                  && writeAll(array, temporary)                                 //
+                  && (!QFileInfo(filename).exists() || QFile::remove(filename)) //
+                  && temporary.copy(filename);
+  temporary.remove();
+  return ok;
 }
-
 } // namespace GmicQt

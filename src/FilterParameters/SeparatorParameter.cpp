@@ -27,13 +27,21 @@
 #include <QGridLayout>
 #include <QSizePolicy>
 #include "Common.h"
-#include "DialogSettings.h"
+#include "Settings.h"
 
-SeparatorParameter::SeparatorParameter(QObject * parent) : AbstractParameter(parent, false), _frame(nullptr) {}
+namespace GmicQt
+{
+
+SeparatorParameter::SeparatorParameter(QObject * parent) : AbstractParameter(parent), _frame(nullptr) {}
 
 SeparatorParameter::~SeparatorParameter()
 {
   delete _frame;
+}
+
+int SeparatorParameter::size() const
+{
+  return 0;
 }
 
 bool SeparatorParameter::addTo(QWidget * widget, int row)
@@ -50,14 +58,19 @@ bool SeparatorParameter::addTo(QWidget * widget, int row)
   _frame->setSizePolicy(sizePolicy);
   _frame->setFrameShape(QFrame::HLine);
   _frame->setFrameShadow(QFrame::Sunken);
-  if (DialogSettings::darkThemeEnabled()) {
+  if (Settings::darkThemeEnabled()) {
     _frame->setStyleSheet("QFrame{ border-top: 0px none #a0a0a0; border-bottom: 2px solid rgb(160,160,160);}");
   }
   _grid->addWidget(_frame, row, 0, 1, 3);
   return true;
 }
 
-QString SeparatorParameter::textValue() const
+QString SeparatorParameter::value() const
+{
+  return QString();
+}
+
+QString SeparatorParameter::defaultValue() const
 {
   return QString();
 }
@@ -66,9 +79,11 @@ void SeparatorParameter::setValue(const QString &) {}
 
 void SeparatorParameter::reset() {}
 
-bool SeparatorParameter::initFromText(const char * text, int & textLength)
+bool SeparatorParameter::initFromText(const QString & /* filterName */, const char * text, int & textLength)
 {
   QStringList list = parseText("separator", text, textLength);
   unused(list);
   return true;
 }
+
+} // namespace GmicQt

@@ -34,11 +34,13 @@ namespace GmicQt
 extern const float PreviewFactorAny;
 extern const float PreviewFactorFullImage;
 extern const float PreviewFactorActualSize;
+const char WarningPrefix = '!';
 } // namespace GmicQt
 
 #define SLIDER_MIN_WIDTH 60
 #define PARAMETERS_CACHE_FILENAME "gmic_qt_params.dat"
 #define FILTERS_VISIBILITY_FILENAME "gmic_qt_visibility.dat"
+#define FILTERS_TAGS_FILENAME "gmic_qt_tags.dat"
 
 #define FAVE_FOLDER_TEXT "<b>Faves</b>"
 #define FAVES_IMPORT_KEY "Faves/ImportedGTK179"
@@ -46,8 +48,15 @@ extern const float PreviewFactorActualSize;
 #define DARK_THEME_KEY "Config/DarkTheme"
 #define REFRESH_USING_INTERNET_KEY "Config/RefreshInternetUpdate"
 #define INTERNET_UPDATE_PERIODICITY_KEY "Config/UpdatesPeriodicityValue"
+#define ENABLE_FILTER_TRANSLATION "Config/FilterTranslation"
+#define LANGUAGE_CODE_KEY "Config/LanguageCode"
+#define HIGHDPI_KEY "Config/HighDPIEnabled"
 #define INTERNET_NEVER_UPDATE_PERIODICITY std::numeric_limits<int>::max()
-#define INTERNET_DEFAULT_PERIODICITY (7 * 24)
+#define ONE_DAY_HOURS (24)
+#define ONE_WEEK_HOURS (7 * 24)
+#define TWO_WEEKS_HOURS (14 * 24)
+#define ONE_MONTH_HOURS (30 * 24)
+#define INTERNET_DEFAULT_PERIODICITY ONE_MONTH_HOURS
 
 #define PREVIEW_MAX_ZOOM_FACTOR 40.0
 

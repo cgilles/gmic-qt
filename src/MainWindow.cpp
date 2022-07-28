@@ -24,6 +24,7 @@
  */
 #include "MainWindow.h"
 #include <QAction>
+#include <QClipboard>
 #include <QCursor>
 #include <QDebug>
 #include <QEvent>
@@ -33,7 +34,9 @@
 #include <QPalette>
 #include <QScreen>
 #include <QSettings>
+#include <QShortcut>
 #include <QShowEvent>
+#include <QStringList>
 #include <QStyleFactory>
 #include <cassert>
 #include <iostream>
@@ -43,19 +46,44 @@
 #include "CroppedImageListProxy.h"
 #include "DialogSettings.h"
 #include "FilterSelector/FavesModelReader.h"
+#include "FilterSelector/FilterTagMap.h"
 #include "FilterSelector/FiltersPresenter.h"
 #include "FilterSelector/FiltersVisibilityMap.h"
 #include "FilterTextTranslator.h"
 #include "Globals.h"
 #include "GmicStdlib.h"
+#include "HtmlTranslator.h"
 #include "IconLoader.h"
 #include "LayersExtentProxy.h"
 #include "Logger.h"
+#include "Misc.h"
 #include "ParametersCache.h"
+#include "PersistentMemory.h"
+#include "Settings.h"
 #include "Updater.h"
 #include "Utils.h"
+#include "Widgets/VisibleTagSelector.h"
 #include "ui_mainwindow.h"
+#ifndef gmic_core
+#include "CImg.h"
+#endif
 #include "gmic.h"
+
+namespace
+{
+QString appendShortcutText(const QString & text, const QKeySequence & key)
+{
+  if (text.isRightToLeft()) {
+    return QString("(%2) %1").arg(text).arg(key.toString());
+  } else {
+    return QString("%1 (%2)").arg(text).arg(key.toString());
+  }
+}
+
+} // namespace
+
+namespace GmicQt
+{
 
 bool MainWindow::_isAccepted = false;
 
@@ -63,7 +91,7 @@ bool MainWindow::_isAccepted = false;
 // TODO : Handle window maximization properly (Windows as well as some Linux desktops)
 //
 
-MainWindow::MainWindow(QWidget * parent) : QWidget(parent), ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget * parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
   TIMING;
   ui->setupUi(this);
@@ -75,20 +103,29 @@ MainWindow::MainWindow(QWidget * parent) : QWidget(parent), ui(new Ui::MainWindo
   _expandCollapseIcon = nullptr;
   _newSession = true; // Overwritten by loadSettings()
 
-  setWindowTitle(GmicQt::pluginFullName());
+  setWindowTitle(pluginFullName());
   QStringList tsp = QIcon::themeSearchPaths();
   tsp.append(QString("/usr/share/icons/gnome"));
   QIcon::setThemeSearchPaths(tsp);
 
-  _filterUpdateWidgets = {ui->previewWidget,     ui->zoomLevelSelector, ui->filtersView, ui->filterParams, ui->tbUpdateFilters, ui->pbFullscreen, ui->pbSettings,       ui->pbOk,           ui->pbApply,
-                          ui->tbResetParameters, ui->searchField,       ui->cbPreview,   ui->tbAddFave,    ui->tbRemoveFave,    ui->tbRenameFave, ui->tbExpandCollapse, ui->tbSelectionMode};
+  _filterUpdateWidgets = {ui->previewWidget, ui->zoomLevelSelector, ui->filtersView,       ui->filterParams,   ui->tbUpdateFilters, ui->pbFullscreen, ui->pbSettings,
+                          ui->pbOk,          ui->pbApply,           ui->tbResetParameters, ui->tbCopyCommand,  ui->searchField,     ui->cbPreview,    ui->tbAddFave,
+                          ui->tbRemoveFave,  ui->tbRenameFave,      ui->tbExpandCollapse,  ui->tbSelectionMode};
 
   ui->tbAddFave->setToolTip(tr("Add fave"));
 
   ui->tbResetParameters->setToolTip(tr("Reset parameters to default values"));
   ui->tbResetParameters->setVisible(false);
 
-  ui->tbUpdateFilters->setToolTip(tr("Update filters (Ctrl+R / F5)"));
+  QShortcut * copyShortcut = new QShortcut(QKeySequence::Copy, this);
+  copyShortcut->setContext(Qt::ApplicationShortcut);
+  connect(copyShortcut, &QShortcut::activated, [this] { ui->tbCopyCommand->animateClick(100); });
+  ui->tbCopyCommand->setToolTip(appendShortcutText(tr("Copy G'MIC command to clipboard"), copyShortcut->key()));
+  ui->tbCopyCommand->setVisible(false);
+
+  QShortcut * closeShortcut = new QShortcut(QKeySequence::Close, this);
+  closeShortcut->setContext(Qt::ApplicationShortcut);
+  connect(closeShortcut, &QShortcut::activated, this, &MainWindow::close);
 
   ui->tbRenameFave->setToolTip(tr("Rename fave"));
   ui->tbRenameFave->setEnabled(false);
@@ -116,7 +153,7 @@ MainWindow::MainWindow(QWidget * parent) : QWidget(parent), ui(new Ui::MainWindo
   ui->messageLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 
   ui->filterParams->setNoFilter();
-  _pendingActionAfterCurrentProcessing = NoAction;
+  _pendingActionAfterCurrentProcessing = ProcessingAction::NoAction;
   ui->inOutSelector->disable();
   ui->splitter->setChildrenCollapsible(false);
 
@@ -125,27 +162,38 @@ MainWindow::MainWindow(QWidget * parent) : QWidget(parent), ui(new Ui::MainWindo
   auto searchAction = new QAction(this);
   searchAction->setShortcut(QKeySequence::Find);
   searchAction->setShortcutContext(Qt::ApplicationShortcut);
-  connect(searchAction, SIGNAL(triggered(bool)), ui->searchField, SLOT(setFocus()));
+  connect(searchAction, &QAction::triggered, ui->searchField, QOverload<>::of(&SearchFieldWidget::setFocus));
   addAction(searchAction);
 
   auto togglePreviewAction = new QAction(this);
   togglePreviewAction->setShortcut(QKeySequence("Ctrl+P"));
   togglePreviewAction->setShortcutContext(Qt::ApplicationShortcut);
-  connect(togglePreviewAction, SIGNAL(triggered(bool)), ui->cbPreview, SLOT(toggle()));
+  connect(togglePreviewAction, &QAction::triggered, ui->cbPreview, &QCheckBox::toggle);
   addAction(togglePreviewAction);
 
   searchAction = new QAction(this);
   searchAction->setShortcut(QKeySequence("/"));
   searchAction->setShortcutContext(Qt::ApplicationShortcut);
-  connect(searchAction, SIGNAL(triggered(bool)), ui->searchField, SLOT(setFocus()));
+  connect(searchAction, &QAction::triggered, ui->searchField, QOverload<>::of(&SearchFieldWidget::setFocus));
   addAction(searchAction);
 
-  ui->tbUpdateFilters->setShortcut(QKeySequence("Ctrl+R"));
-  auto updateFiltersAction = new QAction(this);
-  updateFiltersAction->setShortcut(QKeySequence("F5"));
-  updateFiltersAction->setShortcutContext(Qt::ApplicationShortcut);
-  connect(updateFiltersAction, SIGNAL(triggered(bool)), ui->tbUpdateFilters, SLOT(click()));
-  addAction(updateFiltersAction);
+  {
+    QKeySequence f5("F5");
+    QKeySequence ctrlR("Ctrl+R");
+    QString updateText = tr("Update filters");
+    if (updateText.isRightToLeft()) {
+      updateText = QString("(%2 / %3) %1").arg(updateText).arg(f5.toString()).arg(ctrlR.toString());
+    } else {
+      updateText = QString("%1 (%2 / %3)").arg(updateText).arg(ctrlR.toString()).arg(f5.toString());
+    }
+    QShortcut * updateShortcutF5 = new QShortcut(QKeySequence("F5"), this);
+    updateShortcutF5->setContext(Qt::ApplicationShortcut);
+    QShortcut * updateShortcutCtrlR = new QShortcut(QKeySequence("Ctrl+R"), this);
+    updateShortcutCtrlR->setContext(Qt::ApplicationShortcut);
+    connect(updateShortcutF5, &QShortcut::activated, [this]() { ui->tbUpdateFilters->animateClick(); });
+    connect(updateShortcutCtrlR, &QShortcut::activated, [this]() { ui->tbUpdateFilters->animateClick(); });
+    ui->tbUpdateFilters->setToolTip(updateText);
+  }
 
   ui->splitter->setHandleWidth(6);
   ui->verticalSplitter->setHandleWidth(6);
@@ -158,10 +206,11 @@ MainWindow::MainWindow(QWidget * parent) : QWidget(parent), ui(new Ui::MainWindo
   }
 
   QPalette p = QGuiApplication::palette();
-  DialogSettings::UnselectedFilterTextColor = p.color(QPalette::Disabled, QPalette::WindowText);
+  Settings::UnselectedFilterTextColor = p.color(QPalette::Disabled, QPalette::WindowText);
 
   _filtersPresenter = new FiltersPresenter(this);
   _filtersPresenter->setFiltersView(ui->filtersView);
+  _filtersPresenter->setSearchField(ui->searchField);
 
   ui->progressInfoWidget->setGmicProcessor(&_processor);
 
@@ -174,7 +223,7 @@ MainWindow::MainWindow(QWidget * parent) : QWidget(parent), ui(new Ui::MainWindo
   QAction * escAction = new QAction(this);
   escAction->setShortcut(QKeySequence(Qt::Key_Escape));
   escAction->setShortcutContext(Qt::ApplicationShortcut);
-  connect(escAction, SIGNAL(triggered(bool)), this, SLOT(onEscapeKeyPressed()));
+  connect(escAction, &QAction::triggered, this, &MainWindow::onEscapeKeyPressed);
   addAction(escAction);
 
   CroppedImageListProxy::clear();
@@ -184,6 +233,12 @@ MainWindow::MainWindow(QWidget * parent) : QWidget(parent), ui(new Ui::MainWindo
   ui->previewWidget->setFullImageSize(layersExtent);
   _lastPreviewKeypointBurstUpdateTime = 0;
   _isAccepted = false;
+
+  ui->tbTags->setToolTip(tr("Manage visible tags\n(Right-click on a fave or a filter to set/remove tags)"));
+  _visibleTagSelector = new VisibleTagSelector(this);
+  _visibleTagSelector->setToolButton(ui->tbTags);
+  _visibleTagSelector->updateColors();
+  _filtersPresenter->setVisibleTagSelector(_visibleTagSelector);
 
   TIMING;
   makeConnections();
@@ -199,12 +254,13 @@ MainWindow::~MainWindow()
   saveCurrentParameters();
   ParametersCache::save();
   saveSettings();
-  Logger::setMode(Logger::StandardOutput); // Close log file, if necessary
+  Logger::setMode(Logger::Mode::StandardOutput); // Close log file, if necessary
   delete ui;
 }
 
 void MainWindow::setIcons()
 {
+  ui->tbTags->setIcon(LOAD_ICON("color-wheel"));
   ui->tbRenameFave->setIcon(LOAD_ICON("rename"));
   ui->pbSettings->setIcon(LOAD_ICON("package_settings"));
   ui->pbFullscreen->setIcon(LOAD_ICON("view-fullscreen"));
@@ -212,6 +268,7 @@ void MainWindow::setIcons()
   ui->pbApply->setIcon(LOAD_ICON("system-run"));
   ui->pbOk->setIcon(LOAD_ICON("insert-image"));
   ui->tbResetParameters->setIcon(LOAD_ICON("view-refresh"));
+  ui->tbCopyCommand->setIcon(LOAD_ICON("edit-copy"));
   ui->pbCancel->setIcon(LOAD_ICON("process-stop"));
   ui->tbAddFave->setIcon(LOAD_ICON("bookmark-add"));
   ui->tbRemoveFave->setIcon(LOAD_ICON("bookmark-remove"));
@@ -250,8 +307,8 @@ void MainWindow::setDarkTheme()
   qApp->setPalette(p);
 
   p = ui->cbInternetUpdate->palette();
-  p.setColor(QPalette::Text, DialogSettings::CheckBoxTextColor);
-  p.setColor(QPalette::Base, DialogSettings::CheckBoxBaseColor);
+  p.setColor(QPalette::Text, Settings::CheckBoxTextColor);
+  p.setColor(QPalette::Base, Settings::CheckBoxBaseColor);
   ui->cbInternetUpdate->setPalette(p);
   ui->cbPreview->setPalette(p);
 
@@ -272,7 +329,12 @@ void MainWindow::setDarkTheme()
   qApp->setStyleSheet(css);
   ui->inOutSelector->setDarkTheme();
   ui->vSplitterLine->setStyleSheet("QFrame{ border-top: 0px none #a0a0a0; border-bottom: 1px solid rgb(160,160,160);}");
-  DialogSettings::UnselectedFilterTextColor = DialogSettings::UnselectedFilterTextColor.darker(150);
+  Settings::UnselectedFilterTextColor = Settings::UnselectedFilterTextColor.darker(150);
+}
+
+void MainWindow::setPluginParameters(const RunParameters & parameters)
+{
+  _pluginParameters = parameters;
 }
 
 void MainWindow::updateFiltersFromSources(int ageLimit, bool useNetwork)
@@ -280,7 +342,7 @@ void MainWindow::updateFiltersFromSources(int ageLimit, bool useNetwork)
   if (useNetwork) {
     ui->progressInfoWidget->startFiltersUpdateAnimationAndShow();
   }
-  connect(Updater::getInstance(), SIGNAL(updateIsDone(int)), this, SLOT(onUpdateDownloadsFinished(int)), Qt::UniqueConnection);
+  connect(Updater::getInstance(), &Updater::updateIsDone, this, &MainWindow::onUpdateDownloadsFinished, Qt::UniqueConnection);
   Updater::getInstance()->startUpdate(ageLimit, 60, useNetwork);
 }
 
@@ -288,24 +350,24 @@ void MainWindow::onUpdateDownloadsFinished(int status)
 {
   ui->progressInfoWidget->stopAnimationAndHide();
 
-  if (status == Updater::SomeUpdatesFailed) {
+  if (status == (int)Updater::UpdateStatus::SomeFailed) {
     if (!ui->progressInfoWidget->hasBeenCanceled()) {
       showUpdateErrors();
     }
-  } else if (status == Updater::UpdateSuccessful) {
+  } else if (status == (int)Updater::UpdateStatus::Successful) {
     if (ui->cbInternetUpdate->isChecked()) {
       QMessageBox::information(this, tr("Update completed"), tr("Filter definitions have been updated."));
     } else {
       showMessage(tr("Filter definitions have been updated."), 3000);
     }
-  } else if (status == Updater::UpdateNotNecessary) {
+  } else if (status == (int)Updater::UpdateStatus::NotNecessary) {
     showMessage(tr("No download was needed."), 3000);
   }
 
   buildFiltersTree();
   ui->tbUpdateFilters->setEnabled(true);
   if (!_filtersPresenter->currentFilter().hash.isEmpty()) {
-    ui->previewWidget->sendUpdateRequest(); // FIXME : Select filter
+    ui->previewWidget->sendUpdateRequest();
   }
 }
 
@@ -315,7 +377,6 @@ void MainWindow::buildFiltersTree()
   GmicStdLib::Array = Updater::getInstance()->buildFullStdlib();
   const bool withVisibility = filtersSelectionMode();
 
-  // TODO : Is this the right place?
   _filtersPresenter->clear();
   _filtersPresenter->readFilters();
   _filtersPresenter->readFaves();
@@ -327,9 +388,7 @@ void MainWindow::buildFiltersTree()
     QSettings().setValue(FAVES_IMPORT_KEY, true);
   }
 
-  QString searchText = ui->searchField->text();
   _filtersPresenter->toggleSelectionMode(withVisibility);
-  _filtersPresenter->applySearchCriterion(searchText);
 
   if (_filtersPresenter->currentFilter().hash.isEmpty()) {
     setNoFilter();
@@ -339,20 +398,101 @@ void MainWindow::buildFiltersTree()
   }
 }
 
+void MainWindow::retrieveFilterAndParametersFromPluginParameters(QString & hash, QList<QString> & parameters)
+{
+  if (_pluginParameters.command.empty() && _pluginParameters.filterPath.empty()) {
+    return;
+  }
+  hash.clear();
+  parameters.clear();
+  try {
+    QString plainPath = HtmlTranslator::html2txt(QString::fromStdString(_pluginParameters.filterPath), false);
+    QString command;
+    QString arguments;
+    QStringList providedParameters;
+    const FiltersPresenter::Filter & filter = _filtersPresenter->currentFilter();
+    if (!plainPath.isEmpty()) {
+      _filtersPresenter->selectFilterFromAbsolutePathOrPlainName(plainPath);
+      if (!filter.isValid()) {
+        throw tr("Plugin was called with a filter path with no matching filter:\n\nPath: %1").arg(QString::fromStdString(_pluginParameters.filterPath));
+      }
+    }
+    if (_pluginParameters.command.empty()) {
+      if (filter.isValid()) {
+        QString error;
+        parameters = filter.isAFave ? filter.defaultParameterValues : FilterParametersWidget::defaultParameterList(filter.parameters, &error, nullptr, nullptr);
+        if (notEmpty(error)) {
+          throw tr("Error parsing filter parameters definition for filter:\n\n%1\n\nCannot retrieve default parameters.\n\n%2").arg(filter.fullPath).arg(error);
+        }
+        hash = filter.hash;
+      }
+    } else {
+      // A command (and maybe a path) is provided
+      if (!parseGmicUniqueFilterCommand(_pluginParameters.command.c_str(), command, arguments) //
+          || !parseGmicFilterParameters(arguments, providedParameters)) {
+        throw tr("Plugin was called with a command that cannot be parsed:\n\n%1").arg(elided80(_pluginParameters.command));
+      }
+      if (plainPath.isEmpty()) {
+        _filtersPresenter->selectFilterFromCommand(command);
+        if (filter.isInvalid()) {
+          throw tr("Plugin was called with a command that cannot be recognized as a filter:\n\nCommand: %1").arg(elided80(_pluginParameters.command));
+        }
+      } else { // Filter has already been selected (above) from its path
+        if (filter.command != command) {
+          throw tr("Plugin was called with a command that does not match the provided path:\n\nPath: %1\nCommand: %2\nCommand found for this path : %3") //
+              .arg(elided80(_pluginParameters.filterPath))
+              .arg(QString::fromStdString(_pluginParameters.command))
+              .arg(filter.command);
+        }
+      }
+      QString error;
+      QVector<int> lengths;
+      auto defaults = FilterParametersWidget::defaultParameterList(filter.parameters, &error, nullptr, &lengths);
+      if (notEmpty(error)) {
+        throw tr("Error parsing filter parameters definition for filter:\n\n%1\n\nCannot retrieve default parameters.\n\n%2").arg(filter.fullPath).arg(error);
+      }
+      if (filter.isAFave) {
+        // lengths have been computed, but we replace 'defaults' with Fave's ones.
+        defaults = filter.defaultParameterValues;
+      }
+      hash = filter.hash;
+      auto expandedDefaults = expandParameterList(defaults, lengths);
+      auto completed = completePrefixFromFullList(providedParameters, expandedDefaults);
+      parameters = mergeSubsequences(completed, lengths);
+    }
+  } catch (const QString & errorMessage) {
+    hash.clear();
+    parameters.clear();
+    QMessageBox::critical(this, "Error with plugin arguments", errorMessage);
+  }
+}
+
+QString MainWindow::screenGeometries()
+{
+  QList<QScreen *> screens = QGuiApplication::screens();
+  QStringList geometries;
+  for (QScreen * screen : screens) {
+    QRect geometry = screen->geometry();
+    geometries.push_back(QString("(%1,%2,%3,%4)").arg(geometry.x()).arg(geometry.y()).arg(geometry.width()).arg(geometry.height()));
+  }
+  return geometries.join(QString());
+}
+
 void MainWindow::onStartupFiltersUpdateFinished(int status)
 {
-  QObject::disconnect(Updater::getInstance(), SIGNAL(updateIsDone(int)), this, SLOT(onStartupFiltersUpdateFinished(int)));
+  bool ok = QObject::disconnect(Updater::getInstance(), &Updater::updateIsDone, this, &MainWindow::onStartupFiltersUpdateFinished);
+  Q_ASSERT_X(ok, __PRETTY_FUNCTION__, "Cannot disconnect Updater::updateIsDone from MainWindow::onStartupFiltersUpdateFinished");
 
   ui->progressInfoWidget->stopAnimationAndHide();
-  if (status == Updater::SomeUpdatesFailed) {
-    if (DialogSettings::notifyFailedStartupUpdate()) {
+  if (status == (int)Updater::UpdateStatus::SomeFailed) {
+    if (Settings::notifyFailedStartupUpdate()) {
       showMessage(tr("Filters update could not be achieved"), 3000);
     }
-  } else if (status == Updater::UpdateSuccessful) {
+  } else if (status == (int)Updater::UpdateStatus::Successful) {
     if (Updater::getInstance()->someNetworkUpdateAchieved()) {
       showMessage(tr("Filter definitions have been updated."), 4000);
     }
-  } else if (status == Updater::UpdateNotNecessary) {
+  } else if (status == (int)Updater::UpdateStatus::NotNecessary) {
   }
 
   if (QSettings().value(FAVES_IMPORT_KEY, false).toBool() || !FavesModelReader::gmicGTKFaveFileAvailable()) {
@@ -364,7 +504,7 @@ void MainWindow::onStartupFiltersUpdateFinished(int status)
   ui->searchField->setFocus();
 
   // Let the standalone version load an image, if necessary (not pretty)
-  if (GmicQt::HostApplicationName.isEmpty()) {
+  if (GmicQtHost::ApplicationName.isEmpty()) {
     LayersExtentProxy::clear();
     QSize extent = LayersExtentProxy::getExtent(ui->inOutSelector->inputMode());
     ui->previewWidget->setFullImageSize(extent);
@@ -376,14 +516,19 @@ void MainWindow::onStartupFiltersUpdateFinished(int status)
   if (_newSession || !_lastExecutionOK) {
     hash.clear();
   }
+
+  // If plugin was called with parameters
+  QList<QString> pluginParametersCommandArguments;
+  retrieveFilterAndParametersFromPluginParameters(hash, pluginParametersCommandArguments);
+
   _filtersPresenter->selectFilterFromHash(hash, false);
   if (_filtersPresenter->currentFilter().hash.isEmpty()) {
     _filtersPresenter->expandFaveFolder();
     _filtersPresenter->adjustViewSize();
-    ui->previewWidget->setPreviewFactor(GmicQt::PreviewFactorFullImage, true);
+    ui->previewWidget->setPreviewFactor(PreviewFactorFullImage, true);
   } else {
     _filtersPresenter->adjustViewSize();
-    activateFilter(true);
+    activateFilter(true, pluginParametersCommandArguments);
     if (ui->cbPreview->isChecked()) {
       ui->previewWidget->sendUpdateRequest();
     }
@@ -407,7 +552,6 @@ void MainWindow::updateZoomLabel(double zoom)
 void MainWindow::onFiltersSelectionModeToggled(bool on)
 {
   _filtersPresenter->toggleSelectionMode(on);
-  _filtersPresenter->applySearchCriterion(ui->searchField->text());
 }
 
 void MainWindow::onPreviewCheckBoxToggled(bool on)
@@ -471,7 +615,7 @@ void MainWindow::showUpdateErrors()
   QString message(tr("The update could not be achieved<br>"
                      "because of the following errors:<br>"));
   QList<QString> errors = Updater::getInstance()->errorMessages();
-  for (const QString s : errors) {
+  for (const QString & s : errors) {
     message += QString("<br/>%1").arg(s);
   }
   QMessageBox::information(this, tr("Update error"), message);
@@ -479,50 +623,36 @@ void MainWindow::showUpdateErrors()
 
 void MainWindow::makeConnections()
 {
-  connect(ui->zoomLevelSelector, SIGNAL(valueChanged(double)), ui->previewWidget, SLOT(setZoomLevel(double)));
+  connect(ui->zoomLevelSelector, &ZoomLevelSelector::valueChanged, ui->previewWidget, &PreviewWidget::setZoomLevel);
 
-  connect(ui->previewWidget, SIGNAL(zoomChanged(double)), this, SLOT(showZoomWarningIfNeeded()));
-  connect(ui->previewWidget, SIGNAL(zoomChanged(double)), this, SLOT(updateZoomLabel(double)));
-  connect(ui->previewWidget, SIGNAL(previewVisibleRectIsChanging()), &_processor, SLOT(cancel()));
-
-  connect(_filtersPresenter, SIGNAL(filterSelectionChanged()), this, SLOT(onFilterSelectionChanged()));
-
-  connect(ui->pbOk, SIGNAL(clicked(bool)), this, SLOT(onOkClicked()));
-  connect(ui->pbCancel, SIGNAL(clicked(bool)), this, SLOT(onCancelClicked()));
-  connect(ui->pbApply, SIGNAL(clicked(bool)), this, SLOT(onApplyClicked()));
-  connect(ui->tbResetParameters, SIGNAL(clicked(bool)), this, SLOT(onReset()));
-
-  connect(ui->tbUpdateFilters, SIGNAL(clicked(bool)), this, SLOT(onUpdateFiltersClicked()));
-
-  connect(ui->pbSettings, SIGNAL(clicked(bool)), this, SLOT(onSettingsClicked()));
-
-  connect(ui->pbFullscreen, SIGNAL(toggled(bool)), this, SLOT(onToggleFullScreen(bool)));
-
-  connect(ui->filterParams, SIGNAL(valueChanged()), this, SLOT(onParametersChanged()));
-  connect(ui->previewWidget, SIGNAL(previewUpdateRequested()), this, SLOT(onPreviewUpdateRequested()));
-  connect(ui->previewWidget, SIGNAL(keypointPositionsChanged(unsigned int, unsigned long)), this, SLOT(onPreviewKeypointsEvent(unsigned int, unsigned long)));
-
-  connect(ui->zoomLevelSelector, SIGNAL(zoomIn()), ui->previewWidget, SLOT(zoomIn()));
-  connect(ui->zoomLevelSelector, SIGNAL(zoomOut()), ui->previewWidget, SLOT(zoomOut()));
-  connect(ui->zoomLevelSelector, SIGNAL(zoomReset()), this, SLOT(onPreviewZoomReset()));
-
-  connect(ui->tbAddFave, SIGNAL(clicked(bool)), this, SLOT(onAddFave()));
-  connect(_filtersPresenter, SIGNAL(faveAdditionRequested(QString)), this, SLOT(onAddFave()));
+  connect(ui->previewWidget, &PreviewWidget::zoomChanged, this, &MainWindow::showZoomWarningIfNeeded);
+  connect(ui->previewWidget, &PreviewWidget::zoomChanged, this, &MainWindow::updateZoomLabel);
+  connect(ui->previewWidget, &PreviewWidget::previewVisibleRectIsChanging, &_processor, &GmicProcessor::cancel);
+  connect(_filtersPresenter, &FiltersPresenter::filterSelectionChanged, this, &MainWindow::onFilterSelectionChanged);
+  connect(ui->pbOk, &QPushButton::clicked, this, &MainWindow::onOkClicked);
+  connect(ui->pbCancel, &QPushButton::clicked, this, &MainWindow::onCancelClicked);
+  connect(ui->pbApply, &QPushButton::clicked, this, &MainWindow::onApplyClicked);
+  connect(ui->tbResetParameters, &QToolButton::clicked, this, &MainWindow::onReset);
+  connect(ui->tbCopyCommand, &QToolButton::clicked, this, &MainWindow::onCopyGMICCommand);
+  connect(ui->tbUpdateFilters, &QToolButton::clicked, this, &MainWindow::onUpdateFiltersClicked);
+  connect(ui->pbSettings, &QPushButton::clicked, this, &MainWindow::onSettingsClicked);
+  connect(ui->pbFullscreen, &QPushButton::toggled, this, &MainWindow::onToggleFullScreen);
+  connect(ui->filterParams, &FilterParametersWidget::valueChanged, this, &MainWindow::onParametersChanged);
+  connect(ui->previewWidget, &PreviewWidget::previewUpdateRequested, this, QOverload<>::of(&MainWindow::onPreviewUpdateRequested));
+  connect(ui->previewWidget, &PreviewWidget::keypointPositionsChanged, this, &MainWindow::onPreviewKeypointsEvent);
+  connect(ui->zoomLevelSelector, &ZoomLevelSelector::zoomIn, ui->previewWidget, QOverload<>::of(&PreviewWidget::zoomIn));
+  connect(ui->zoomLevelSelector, &ZoomLevelSelector::zoomOut, ui->previewWidget, QOverload<>::of(&PreviewWidget::zoomOut));
+  connect(ui->zoomLevelSelector, &ZoomLevelSelector::zoomReset, this, &MainWindow::onPreviewZoomReset);
+  connect(ui->tbAddFave, &QToolButton::clicked, this, &MainWindow::onAddFave);
+  connect(_filtersPresenter, &FiltersPresenter::faveAdditionRequested, this, &MainWindow::onAddFave);
   connect(ui->tbRemoveFave, &QToolButton::clicked, this, &MainWindow::onRemoveFave);
   connect(ui->tbRenameFave, &QToolButton::clicked, this, &MainWindow::onRenameFave);
-
-  connect(ui->inOutSelector, SIGNAL(inputModeChanged(GmicQt::InputMode)), this, SLOT(onInputModeChanged(GmicQt::InputMode)));
-  connect(ui->inOutSelector, SIGNAL(previewModeChanged(GmicQt::PreviewMode)), ui->previewWidget, SLOT(sendUpdateRequest()));
-
-  connect(ui->cbPreview, SIGNAL(toggled(bool)), this, SLOT(onPreviewCheckBoxToggled(bool)));
-
-  connect(ui->searchField, SIGNAL(textChanged(QString)), this, SLOT(search(QString)));
-
-  connect(ui->tbExpandCollapse, SIGNAL(clicked(bool)), this, SLOT(expandOrCollapseFolders()));
-  connect(ui->progressInfoWidget, SIGNAL(cancel()), this, SLOT(onProgressionWidgetCancelClicked()));
-
-  connect(ui->tbSelectionMode, SIGNAL(toggled(bool)), this, SLOT(onFiltersSelectionModeToggled(bool)));
-
+  connect(ui->inOutSelector, &InOutPanel::inputModeChanged, this, &MainWindow::onInputModeChanged);
+  connect(ui->cbPreview, &QCheckBox::toggled, this, &MainWindow::onPreviewCheckBoxToggled);
+  connect(ui->searchField, &SearchFieldWidget::textChanged, this, &MainWindow::search);
+  connect(ui->tbExpandCollapse, &QToolButton::clicked, this, &MainWindow::expandOrCollapseFolders);
+  connect(ui->progressInfoWidget, &ProgressInfoWidget::cancel, this, &MainWindow::onProgressionWidgetCancelClicked);
+  connect(ui->tbSelectionMode, &QToolButton::toggled, this, &MainWindow::onFiltersSelectionModeToggled);
   connect(&_processor, &GmicProcessor::previewImageAvailable, this, &MainWindow::onPreviewImageAvailable);
   connect(&_processor, &GmicProcessor::previewCommandFailed, this, &MainWindow::onPreviewError);
   connect(&_processor, &GmicProcessor::fullImageProcessingFailed, this, &MainWindow::onFullImageProcessingError);
@@ -551,20 +681,21 @@ void MainWindow::onPreviewUpdateRequested(bool synchronous)
 
   const FiltersPresenter::Filter currentFilter = _filtersPresenter->currentFilter();
   GmicProcessor::FilterContext context;
-  context.requestType = synchronous ? GmicProcessor::FilterContext::SynchronousPreviewProcessing : GmicProcessor::FilterContext::PreviewProcessing;
+  context.requestType = synchronous ? GmicProcessor::FilterContext::RequestType::SynchronousPreview : GmicProcessor::FilterContext::RequestType::Preview;
   GmicProcessor::FilterContext::VisibleRect & rect = context.visibleRect;
   ui->previewWidget->normalizedVisibleRect(rect.x, rect.y, rect.w, rect.h);
+
   context.inputOutputState = ui->inOutSelector->state();
-  context.outputMessageMode = DialogSettings::outputMessageMode();
   ui->previewWidget->getPositionStringCorrection(context.positionStringCorrection.xFactor, context.positionStringCorrection.yFactor);
   context.zoomFactor = ui->previewWidget->currentZoomFactor();
-  context.previewWidth = ui->previewWidget->width();
-  context.previewHeight = ui->previewWidget->height();
-  context.previewTimeout = DialogSettings::previewTimeout();
-  context.filterName = currentFilter.plainTextName;
+  context.previewWindowWidth = ui->previewWidget->width();
+  context.previewWindowHeight = ui->previewWidget->height();
+  context.previewTimeout = Settings::previewTimeout();
+  // context.filterName = currentFilter.plainTextName; // Unused in this context
+  // context.filterHash = currentFilter.hash; // Unused in this context
   context.filterCommand = currentFilter.previewCommand;
   context.filterArguments = ui->filterParams->valueString();
-  context.filterHash = currentFilter.hash;
+  context.previewFromFullImage = currentFilter.previewFromFullImage;
   _processor.setContext(context);
   _processor.execute();
 
@@ -610,7 +741,7 @@ void MainWindow::onPreviewImageAvailable()
   ui->previewWidget->setPreviewImage(_processor.previewImage());
   ui->previewWidget->enableRightClick();
   ui->tbUpdateFilters->setEnabled(true);
-  if (_pendingActionAfterCurrentProcessing == CloseAction) {
+  if (_pendingActionAfterCurrentProcessing == ProcessingAction::Close) {
     close();
   }
 }
@@ -620,7 +751,7 @@ void MainWindow::onPreviewError(const QString & message)
   ui->previewWidget->setPreviewErrorMessage(message);
   ui->previewWidget->enableRightClick();
   ui->tbUpdateFilters->setEnabled(true);
-  if (_pendingActionAfterCurrentProcessing == CloseAction) {
+  if (_pendingActionAfterCurrentProcessing == ProcessingAction::Close) {
     close();
   }
 }
@@ -656,16 +787,17 @@ void MainWindow::processImage()
   enableWidgetList(false);
 
   GmicProcessor::FilterContext context;
-  context.requestType = GmicProcessor::FilterContext::FullImageProcessing;
+  context.requestType = GmicProcessor::FilterContext::RequestType::FullImage;
   GmicProcessor::FilterContext::VisibleRect & rect = context.visibleRect;
   rect.x = rect.y = rect.w = rect.h = -1;
   context.inputOutputState = ui->inOutSelector->state();
-  context.outputMessageMode = DialogSettings::outputMessageMode();
   context.filterName = currentFilter.plainTextName;
-  context.filterCommand = currentFilter.command;
+  context.filterFullPath = currentFilter.fullPath;
   context.filterHash = currentFilter.hash;
+  context.filterCommand = currentFilter.command;
   ui->filterParams->updateValueString(false); // Required to get up-to-date values of text parameters
   context.filterArguments = ui->filterParams->valueString();
+  context.previewFromFullImage = false;
   _processor.setGmicStatusQuotedParameters(ui->filterParams->quotedParameters());
   ui->filterParams->clearButtonParameters();
   _processor.setContext(context);
@@ -677,24 +809,43 @@ void MainWindow::onFullImageProcessingError(const QString & message)
   ui->progressInfoWidget->stopAnimationAndHide();
   QMessageBox::warning(this, tr("Error"), message, QMessageBox::Close);
   enableWidgetList(true);
-  if ((_pendingActionAfterCurrentProcessing == OkAction || _pendingActionAfterCurrentProcessing == CloseAction)) {
+  if ((_pendingActionAfterCurrentProcessing == ProcessingAction::Ok || _pendingActionAfterCurrentProcessing == ProcessingAction::Close)) {
     close();
   }
 }
 
-void MainWindow::onInputModeChanged(GmicQt::InputMode mode)
+void MainWindow::onInputModeChanged(InputMode mode)
 {
   ui->previewWidget->setFullImageSize(LayersExtentProxy::getExtent(mode));
   ui->previewWidget->sendUpdateRequest();
+}
+
+void MainWindow::onVeryFirstShowEvent()
+{
+  adjustVerticalSplitter();
+  if (_newSession) {
+    Logger::clear();
+  }
+  QObject::connect(Updater::getInstance(), &Updater::updateIsDone, this, &MainWindow::onStartupFiltersUpdateFinished);
+  Logger::setMode(Settings::outputMessageMode());
+  Updater::setOutputMessageMode(Settings::outputMessageMode());
+  int ageLimit;
+  {
+    QSettings settings;
+    ageLimit = settings.value(INTERNET_UPDATE_PERIODICITY_KEY, INTERNET_DEFAULT_PERIODICITY).toInt();
+  }
+  const bool useNetwork = (ageLimit != INTERNET_NEVER_UPDATE_PERIODICITY);
+  ui->progressInfoWidget->startFiltersUpdateAnimationAndShow();
+  Updater::getInstance()->startUpdate(ageLimit, 4, useNetwork);
 }
 
 void MainWindow::setZoomConstraint()
 {
   const FiltersPresenter::Filter & currentFilter = _filtersPresenter->currentFilter();
   ZoomConstraint constraint;
-  if (currentFilter.hash.isEmpty() || currentFilter.isAccurateIfZoomed || DialogSettings::previewZoomAlwaysEnabled() || (currentFilter.previewFactor == GmicQt::PreviewFactorAny)) {
+  if (currentFilter.hash.isEmpty() || currentFilter.isAccurateIfZoomed || Settings::previewZoomAlwaysEnabled() || (currentFilter.previewFactor == PreviewFactorAny)) {
     constraint = ZoomConstraint::Any;
-  } else if (currentFilter.previewFactor == GmicQt::PreviewFactorActualSize) {
+  } else if (currentFilter.previewFactor == PreviewFactorActualSize) {
     constraint = ZoomConstraint::OneOrMore;
   } else {
     constraint = ZoomConstraint::Fixed;
@@ -711,13 +862,13 @@ void MainWindow::onFullImageProcessingDone()
   ui->previewWidget->update();
   ui->filterParams->setValues(_processor.gmicStatus(), false);
   ui->filterParams->setVisibilityStates(_processor.parametersVisibilityStates());
-  if ((_pendingActionAfterCurrentProcessing == OkAction || _pendingActionAfterCurrentProcessing == CloseAction)) {
-    _isAccepted = (_pendingActionAfterCurrentProcessing == OkAction);
+  if ((_pendingActionAfterCurrentProcessing == ProcessingAction::Ok || _pendingActionAfterCurrentProcessing == ProcessingAction::Close)) {
+    _isAccepted = (_pendingActionAfterCurrentProcessing == ProcessingAction::Ok);
     close();
   } else {
     // Extent cache has been cleared by the GmicProcessor
     QSize extent = LayersExtentProxy::getExtent(ui->inOutSelector->inputMode());
-    ui->previewWidget->updateFullImageSizeIfDifferent(extent); // FIXME: updateIfDifferent ?
+    ui->previewWidget->updateFullImageSizeIfDifferent(extent);
     ui->previewWidget->sendUpdateRequest();
     _okButtonShouldApply = false;
   }
@@ -743,7 +894,7 @@ void MainWindow::search(const QString & text)
 
 void MainWindow::onApplyClicked()
 {
-  _pendingActionAfterCurrentProcessing = ApplyAction;
+  _pendingActionAfterCurrentProcessing = ProcessingAction::Apply;
   processImage();
 }
 
@@ -755,7 +906,7 @@ void MainWindow::onOkClicked()
     return;
   }
   if (_okButtonShouldApply) {
-    _pendingActionAfterCurrentProcessing = OkAction;
+    _pendingActionAfterCurrentProcessing = ProcessingAction::Ok;
     processImage();
   } else {
     _isAccepted = _processor.completedFullImageProcessingCount();
@@ -768,8 +919,8 @@ void MainWindow::onCancelClicked()
   TIMING;
   if (_processor.isProcessing() && confirmAbortProcessingOnCloseRequest()) {
     if (_processor.isProcessing()) {
-      _pendingActionAfterCurrentProcessing = CloseAction;
-      connect(&_processor, SIGNAL(noMoreUnfinishedJobs()), this, SLOT(close()));
+      _pendingActionAfterCurrentProcessing = ProcessingAction::Close;
+      connect(&_processor, &GmicProcessor::noMoreUnfinishedJobs, this, &MainWindow::close);
       ui->progressInfoWidget->showBusyIndicator();
       ui->previewWidget->setOverlayMessage(tr("Waiting for cancelled jobs..."));
       _processor.cancel();
@@ -783,15 +934,15 @@ void MainWindow::onCancelClicked()
 
 void MainWindow::onProgressionWidgetCancelClicked()
 {
-  if (ui->progressInfoWidget->mode() == ProgressInfoWidget::GmicProcessingMode) {
+  if (ui->progressInfoWidget->mode() == ProgressInfoWidget::Mode::GmicProcessing) {
     if (_processor.isProcessing()) {
-      _pendingActionAfterCurrentProcessing = NoAction;
+      _pendingActionAfterCurrentProcessing = ProcessingAction::NoAction;
       _processor.cancel();
       ui->progressInfoWidget->stopAnimationAndHide();
       enableWidgetList(true);
     }
   }
-  if (ui->progressInfoWidget->mode() == ProgressInfoWidget::FiltersUpdateMode) {
+  if (ui->progressInfoWidget->mode() == ProgressInfoWidget::Mode::FiltersUpdate) {
     Updater::getInstance()->cancelAllPendingDownloads();
   }
 }
@@ -799,13 +950,24 @@ void MainWindow::onProgressionWidgetCancelClicked()
 void MainWindow::onReset()
 {
   if (!_filtersPresenter->currentFilter().hash.isEmpty() && _filtersPresenter->currentFilter().isAFave) {
+    PersistentMemory::clear();
     ui->filterParams->setVisibilityStates(_filtersPresenter->currentFilter().defaultVisibilityStates);
     ui->filterParams->setValues(_filtersPresenter->currentFilter().defaultParameterValues, true);
     return;
   }
   if (!_filtersPresenter->currentFilter().isNoPreviewFilter()) {
+    PersistentMemory::clear();
     ui->filterParams->reset(true);
   }
+}
+
+void MainWindow::onCopyGMICCommand()
+{
+  QClipboard * clipboard = QGuiApplication::clipboard();
+  QString fullCommand = _filtersPresenter->currentFilter().command;
+  fullCommand += " ";
+  fullCommand += ui->filterParams->valueString();
+  clipboard->setText(fullCommand, QClipboard::Clipboard);
 }
 
 void MainWindow::onPreviewZoomReset()
@@ -852,17 +1014,17 @@ void MainWindow::saveSettings()
 
   // Save all settings
 
-  DialogSettings::saveSettings(settings);
+  Settings::save(settings);
   settings.setValue("LastExecution/gmic_version", gmic_version);
   _processor.saveSettings(settings);
   settings.setValue("SelectedFilter", _filtersPresenter->currentFilter().hash);
   settings.setValue("Config/MainWindowPosition", frameGeometry().topLeft());
   settings.setValue("Config/MainWindowRect", rect());
   settings.setValue("Config/MainWindowMaximized", isMaximized());
-  settings.setValue("Config/ShowAllFilters", filtersSelectionMode());
+  settings.setValue("Config/ScreenGeometries", screenGeometries());
   settings.setValue("Config/PreviewEnabled", ui->cbPreview->isChecked());
   settings.setValue("LastExecution/ExitedNormally", true);
-  settings.setValue("LastExecution/HostApplicationID", GmicQt::host_app_pid());
+  settings.setValue("LastExecution/HostApplicationID", host_app_pid());
   QList<int> splitterSizes = ui->splitter->sizes();
   for (int i = 0; i < splitterSizes.size(); ++i) {
     settings.setValue(QString("Config/PanelSize%1").arg(i), splitterSizes.at(i));
@@ -881,7 +1043,7 @@ void MainWindow::loadSettings()
   _filtersPresenter->loadSettings(settings);
 
   _lastExecutionOK = settings.value("LastExecution/ExitedNormally", true).toBool();
-  _newSession = GmicQt::host_app_pid() != settings.value("LastExecution/HostApplicationID", 0).toUInt();
+  _newSession = host_app_pid() != settings.value("LastExecution/HostApplicationID", 0).toUInt();
   settings.setValue("LastExecution/ExitedNormally", false);
   ui->inOutSelector->reset();
 
@@ -891,22 +1053,26 @@ void MainWindow::loadSettings()
 
   // Preview position
   if (settings.value("Config/PreviewPosition", "Left").toString() == "Left") {
-    setPreviewPosition(PreviewOnLeft);
+    setPreviewPosition(PreviewPosition::Left);
   }
-  if (DialogSettings::darkThemeEnabled()) {
+  if (Settings::darkThemeEnabled()) {
     setDarkTheme();
   }
-  if (!DialogSettings::logosAreVisible()) {
+  if (!Settings::visibleLogos()) {
     ui->logosLabel->hide();
   }
 
   // Mainwindow geometry
-  QPoint position = settings.value("Config/MainWindowPosition", QPoint()).toPoint();
+  QPoint position = settings.value("Config/MainWindowPosition", QPoint(20, 20)).toPoint();
   QRect r = settings.value("Config/MainWindowRect", QRect()).toRect();
+  const bool sameScreenGeometries = (settings.value("Config/ScreenGeometries", QString()).toString() == screenGeometries());
   if (settings.value("Config/MainWindowMaximized", false).toBool()) {
     ui->pbFullscreen->setChecked(true);
   } else {
-    if (r.isValid()) {
+    if (r.isValid() && sameScreenGeometries) {
+      if ((r.width() < 640) || (r.height() < 400)) {
+        r.setSize(QSize(640, 400));
+      }
       setGeometry(r);
       move(position);
     } else {
@@ -935,8 +1101,6 @@ void MainWindow::loadSettings()
     ui->splitter->setSizes(sizes);
   }
 
-  // Filters visibility
-  ui->tbSelectionMode->setChecked(settings.value("Config/ShowAllFilters", false).toBool());
   ui->cbInternetUpdate->setChecked(settings.value("Config/RefreshInternetUpdate", true).toBool());
 }
 
@@ -951,7 +1115,7 @@ void MainWindow::setPreviewPosition(MainWindow::PreviewPosition position)
   if (layout) {
     layout->removeWidget(ui->belowPreviewPadding);
     layout->removeWidget(ui->logosLabel);
-    if (position == MainWindow::PreviewOnLeft) {
+    if (position == MainWindow::PreviewPosition::Left) {
       layout->addWidget(ui->logosLabel);
       layout->addWidget(ui->belowPreviewPadding);
     } else {
@@ -964,7 +1128,7 @@ void MainWindow::setPreviewPosition(MainWindow::PreviewPosition position)
   QWidget * preview;
   QWidget * list;
   QWidget * params;
-  if (position == MainWindow::PreviewOnRight) {
+  if (position == MainWindow::PreviewPosition::Right) {
     ui->messageLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     preview = ui->splitter->widget(0);
     list = ui->splitter->widget(1);
@@ -981,7 +1145,7 @@ void MainWindow::setPreviewPosition(MainWindow::PreviewPosition position)
   preview->setParent(this);
   list->setParent(this);
   params->setParent(this);
-  if (position == MainWindow::PreviewOnRight) {
+  if (position == MainWindow::PreviewPosition::Right) {
     ui->splitter->addWidget(list);
     ui->splitter->addWidget(params);
     ui->splitter->addWidget(preview);
@@ -993,7 +1157,7 @@ void MainWindow::setPreviewPosition(MainWindow::PreviewPosition position)
   preview->show();
   list->show();
   params->show();
-  ui->logosLabel->setAlignment(Qt::AlignVCenter | ((_previewPosition == PreviewOnRight) ? Qt::AlignRight : Qt::AlignLeft));
+  ui->logosLabel->setAlignment(Qt::AlignVCenter | ((_previewPosition == PreviewPosition::Right) ? Qt::AlignRight : Qt::AlignLeft));
 }
 
 void MainWindow::adjustVerticalSplitter()
@@ -1002,15 +1166,17 @@ void MainWindow::adjustVerticalSplitter()
   QSettings settings;
   sizes.push_back(settings.value(QString("Config/ParamsVerticalSplitterSizeTop"), -1).toInt());
   sizes.push_back(settings.value(QString("Config/ParamsVerticalSplitterSizeBottom"), -1).toInt());
-  if ((sizes.front() != -1) && (sizes.back() != -1)) {
+  const int splitterHeight = ui->verticalSplitter->height();
+  if ((sizes.front() != -1) && (sizes.back() != -1) && (sizes.front() + sizes.back() <= splitterHeight)) {
     ui->verticalSplitter->setSizes(sizes);
   } else {
-    int h1 = std::max(ui->inOutSelector->sizeHint().height(), 75);
-    int h = std::max(ui->verticalSplitter->height(), 150);
-    sizes.clear();
-    sizes.push_back(h - h1);
-    sizes.push_back(h1);
-    ui->verticalSplitter->setSizes(sizes);
+    const int inOutHeight = std::max(ui->inOutSelector->sizeHint().height(), 75);
+    if (splitterHeight > inOutHeight) {
+      sizes.clear();
+      sizes.push_back(splitterHeight - inOutHeight);
+      sizes.push_back(inOutHeight);
+      ui->verticalSplitter->setSizes(sizes);
+    }
   }
 }
 
@@ -1019,7 +1185,7 @@ bool MainWindow::filtersSelectionMode()
   return ui->tbSelectionMode->isChecked();
 }
 
-void MainWindow::activateFilter(bool resetZoom)
+void MainWindow::activateFilter(bool resetZoom, const QList<QString> & values)
 {
   saveCurrentParameters();
   const FiltersPresenter::Filter & filter = _filtersPresenter->currentFilter();
@@ -1028,7 +1194,7 @@ void MainWindow::activateFilter(bool resetZoom)
   if (filter.hash.isEmpty()) {
     setNoFilter();
   } else {
-    QList<QString> savedValues = ParametersCache::getValues(filter.hash);
+    QList<QString> savedValues = values.isEmpty() ? ParametersCache::getValues(filter.hash) : values;
     if (savedValues.isEmpty() && filter.isAFave) {
       savedValues = filter.defaultParameterValues;
     }
@@ -1042,7 +1208,7 @@ void MainWindow::activateFilter(bool resetZoom)
     } else {
       ui->previewWidget->setKeypoints(ui->filterParams->keypoints());
     }
-    setFilterName(FilterTextTranslator::translate((filter.name)));
+    setFilterName(FilterTextTranslator::translate(filter.name));
     ui->inOutSelector->enable();
     if (ui->inOutSelector->hasActiveControls()) {
       ui->inOutSelector->show();
@@ -1050,14 +1216,25 @@ void MainWindow::activateFilter(bool resetZoom)
       ui->inOutSelector->hide();
     }
 
-    GmicQt::InputOutputState inOutState = ParametersCache::getInputOutputState(filter.hash);
-    if (inOutState.inputMode == GmicQt::UnspecifiedInputMode) {
-      if ((filter.defaultInputMode != GmicQt::UnspecifiedInputMode)) {
+    InputOutputState inOutState = ParametersCache::getInputOutputState(filter.hash);
+    if (inOutState.inputMode == InputMode::Unspecified) {
+      if ((filter.defaultInputMode != InputMode::Unspecified)) {
         inOutState.inputMode = filter.defaultInputMode;
       } else {
-        inOutState.inputMode = GmicQt::DefaultInputMode;
+        inOutState.inputMode = DefaultInputMode;
       }
     }
+
+    // Take plugin parameters into account
+    if (_pluginParameters.inputMode != InputMode::Unspecified) {
+      inOutState.inputMode = _pluginParameters.inputMode;
+      _pluginParameters.inputMode = InputMode::Unspecified;
+    }
+    if (_pluginParameters.outputMode != OutputMode::Unspecified) {
+      inOutState.outputMode = _pluginParameters.outputMode;
+      _pluginParameters.outputMode = OutputMode::Unspecified;
+    }
+
     ui->inOutSelector->setState(inOutState, false);
 
     ui->previewWidget->updateFullImageSizeIfDifferent(LayersExtentProxy::getExtent(ui->inOutSelector->inputMode()));
@@ -1067,6 +1244,7 @@ void MainWindow::activateFilter(bool resetZoom)
     setZoomConstraint();
     _okButtonShouldApply = true;
     ui->tbResetParameters->setVisible(true);
+    ui->tbCopyCommand->setVisible(true);
     ui->tbRemoveFave->setEnabled(filter.isAFave);
     ui->tbRenameFave->setEnabled(filter.isAFave);
   }
@@ -1074,13 +1252,15 @@ void MainWindow::activateFilter(bool resetZoom)
 
 void MainWindow::setNoFilter()
 {
+  PersistentMemory::clear();
   ui->filterParams->setNoFilter(_filtersPresenter->errorMessage());
   ui->previewWidget->disableRightClick();
   ui->previewWidget->setKeypoints(KeypointList());
   ui->inOutSelector->hide();
-  ui->inOutSelector->setState(GmicQt::InputOutputState::Default, false);
+  ui->inOutSelector->setState(InputOutputState::Default, false);
   ui->filterName->setVisible(false);
   ui->tbAddFave->setEnabled(false);
+  ui->tbCopyCommand->setVisible(false);
   ui->tbResetParameters->setVisible(false);
   ui->zoomLevelSelector->showWarning(false);
   _okButtonShouldApply = false;
@@ -1092,25 +1272,10 @@ void MainWindow::showEvent(QShowEvent * event)
 {
   TIMING;
   event->accept();
-  if (_showEventReceived) {
-    return;
+  if (!_showEventReceived) {
+    _showEventReceived = true;
+    onVeryFirstShowEvent();
   }
-  _showEventReceived = true;
-  adjustVerticalSplitter();
-  if (_newSession) {
-    Logger::clear();
-  }
-  QObject::connect(Updater::getInstance(), SIGNAL(updateIsDone(int)), this, SLOT(onStartupFiltersUpdateFinished(int)));
-  Logger::setMode(DialogSettings::outputMessageMode());
-  Updater::setOutputMessageMode(DialogSettings::outputMessageMode());
-  int ageLimit;
-  {
-    QSettings settings;
-    ageLimit = settings.value(INTERNET_UPDATE_PERIODICITY_KEY, INTERNET_DEFAULT_PERIODICITY).toInt();
-  }
-  const bool useNetwork = (ageLimit != INTERNET_NEVER_UPDATE_PERIODICITY);
-  ui->progressInfoWidget->startFiltersUpdateAnimationAndShow();
-  Updater::getInstance()->startUpdate(ageLimit, 4, useNetwork);
 }
 
 void MainWindow::resizeEvent(QResizeEvent * e)
@@ -1127,10 +1292,10 @@ bool MainWindow::askUserForGTKFavesImport()
                          QMessageBox::Yes | QMessageBox::No, this);
   messageBox.setDefaultButton(QMessageBox::Yes);
   QCheckBox * cb = new QCheckBox(tr("Don't ask again"));
-  if (DialogSettings::darkThemeEnabled()) {
+  if (Settings::darkThemeEnabled()) {
     QPalette p = cb->palette();
-    p.setColor(QPalette::Text, DialogSettings::CheckBoxTextColor);
-    p.setColor(QPalette::Base, DialogSettings::CheckBoxBaseColor);
+    p.setColor(QPalette::Text, Settings::CheckBoxTextColor);
+    p.setColor(QPalette::Base, Settings::CheckBoxBaseColor);
     cb->setPalette(p);
   }
   messageBox.setCheckBox(cb);
@@ -1179,7 +1344,7 @@ void MainWindow::onSettingsClicked()
   int previewWidth;
   int paramsWidth;
   int treeWidth;
-  if (_previewPosition == PreviewOnLeft) {
+  if (_previewPosition == PreviewPosition::Left) {
     previewWidth = splitterSizes.at(0);
     paramsWidth = splitterSizes.at(2);
     treeWidth = splitterSizes.at(1);
@@ -1191,11 +1356,11 @@ void MainWindow::onSettingsClicked()
 
   DialogSettings dialog(this);
   dialog.exec();
-  bool previewPositionChanged = (_previewPosition != DialogSettings::previewPosition());
-  setPreviewPosition(DialogSettings::previewPosition());
+  bool previewPositionChanged = (_previewPosition != Settings::previewPosition());
+  setPreviewPosition(Settings::previewPosition());
   if (previewPositionChanged) {
     splitterSizes.clear();
-    if (_previewPosition == PreviewOnLeft) {
+    if (_previewPosition == PreviewPosition::Left) {
       splitterSizes.push_back(previewWidth);
       splitterSizes.push_back(treeWidth);
       splitterSizes.push_back(paramsWidth);
@@ -1207,7 +1372,7 @@ void MainWindow::onSettingsClicked()
     ui->splitter->setSizes(splitterSizes);
   }
   bool shouldUpdatePreview = false;
-  if (DialogSettings::logosAreVisible()) {
+  if (Settings::visibleLogos()) {
     if (!ui->logosLabel->isVisible()) {
       shouldUpdatePreview = true;
       ui->logosLabel->show();
@@ -1223,7 +1388,7 @@ void MainWindow::onSettingsClicked()
   }
   // Manage zoom constraints
   setZoomConstraint();
-  if (!DialogSettings::previewZoomAlwaysEnabled()) {
+  if (!Settings::previewZoomAlwaysEnabled()) {
     const FiltersPresenter::Filter & filter = _filtersPresenter->currentFilter();
     if (((ui->previewWidget->zoomConstraint() == ZoomConstraint::Fixed) && (ui->previewWidget->defaultZoomFactor() != ui->previewWidget->currentZoomFactor())) ||
         ((ui->previewWidget->zoomConstraint() == ZoomConstraint::OneOrMore) && (ui->previewWidget->currentZoomFactor() < 1.0))) {
@@ -1252,9 +1417,9 @@ void MainWindow::enableWidgetList(bool on)
 
 void MainWindow::closeEvent(QCloseEvent * e)
 {
-  if (_processor.isProcessing() && _pendingActionAfterCurrentProcessing != CloseAction) {
+  if (_processor.isProcessing() && _pendingActionAfterCurrentProcessing != ProcessingAction::Close) {
     if (confirmAbortProcessingOnCloseRequest()) {
-      _pendingActionAfterCurrentProcessing = CloseAction;
+      _pendingActionAfterCurrentProcessing = ProcessingAction::Close;
       _processor.cancel();
     }
     e->ignore();
@@ -1262,3 +1427,5 @@ void MainWindow::closeEvent(QCloseEvent * e)
     e->accept();
   }
 }
+
+} // namespace GmicQt

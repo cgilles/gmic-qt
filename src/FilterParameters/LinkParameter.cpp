@@ -33,11 +33,19 @@
 #include "FilterTextTranslator.h"
 #include "HtmlTranslator.h"
 
-LinkParameter::LinkParameter(QObject * parent) : AbstractParameter(parent, false), _label(nullptr), _alignment(Qt::AlignLeft) {}
+namespace GmicQt
+{
+
+LinkParameter::LinkParameter(QObject * parent) : AbstractParameter(parent), _label(nullptr), _alignment(Qt::AlignLeft) {}
 
 LinkParameter::~LinkParameter()
 {
   delete _label;
+}
+
+int LinkParameter::size() const
+{
+  return 0;
 }
 
 bool LinkParameter::addTo(QWidget * widget, int row)
@@ -50,12 +58,18 @@ bool LinkParameter::addTo(QWidget * widget, int row)
   _label->setAlignment(_alignment);
   _label->setTextFormat(Qt::RichText);
   _label->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
-  connect(_label, SIGNAL(linkActivated(QString)), this, SLOT(onLinkActivated(QString)));
+  setTextSelectable(_label);
+  connect(_label, &QLabel::linkActivated, this, &LinkParameter::onLinkActivated);
   _grid->addWidget(_label, row, 0, 1, 3);
   return true;
 }
 
-QString LinkParameter::textValue() const
+QString LinkParameter::value() const
+{
+  return QString();
+}
+
+QString LinkParameter::defaultValue() const
 {
   return QString();
 }
@@ -64,7 +78,7 @@ void LinkParameter::setValue(const QString &) {}
 
 void LinkParameter::reset() {}
 
-bool LinkParameter::initFromText(const char * text, int & textLength)
+bool LinkParameter::initFromText(const QString & filterName, const char * text, int & textLength)
 {
   QList<QString> list = parseText("link", text, textLength);
   if (list.isEmpty()) {
@@ -92,7 +106,7 @@ bool LinkParameter::initFromText(const char * text, int & textLength)
 
   if (values.size() == 2) {
     _text = values[0].trimmed().remove(QRegExp("^\"")).remove(QRegExp("\"$"));
-    _text = HtmlTranslator::html2txt(FilterTextTranslator::translate(_text));
+    _text = HtmlTranslator::html2txt(FilterTextTranslator::translate(_text, filterName));
     values.pop_front();
   }
   if (values.size() == 1) {
@@ -111,3 +125,5 @@ void LinkParameter::onLinkActivated(const QString & link)
 {
   QDesktopServices::openUrl(QUrl(link));
 }
+
+} // namespace GmicQt

@@ -32,10 +32,13 @@ namespace Ui
 class MultilineTextParameterWidget;
 }
 
+namespace GmicQt
+{
+
 class MultilineTextParameterWidget : public QWidget {
   Q_OBJECT
 public:
-  explicit MultilineTextParameterWidget(const QString & name, const QString & value, QWidget * parent = nullptr);
+  explicit MultilineTextParameterWidget(const QString & name, const QString & value, QWidget * parent);
   ~MultilineTextParameterWidget() override;
   QString text() const;
   void setText(const QString & text);
@@ -45,10 +48,12 @@ public slots:
   void onUpdate(bool);
 
 protected:
-  bool eventFilter(QObject * obj, QEvent * event);
+  bool eventFilter(QObject * obj, QEvent * event) override;
 
 private:
   Ui::MultilineTextParameterWidget * ui;
 };
+
+} // namespace GmicQt
 
 #endif // GMIC_QT_MULTILINETEXTPARAMETERWIDGET_H

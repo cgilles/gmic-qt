@@ -30,9 +30,12 @@
 #include <QFile>
 #include "Common.h"
 #include "Globals.h"
+#include "GmicQt.h"
 #include "Logger.h"
 #include "Utils.h"
-#include "gmic_qt.h"
+
+namespace GmicQt
+{
 
 QSet<QString> FiltersVisibilityMap::_hiddenFilters;
 
@@ -52,7 +55,7 @@ void FiltersVisibilityMap::setVisibility(const QString & hash, bool visible)
 
 void FiltersVisibilityMap::load()
 {
-  QString path = QString("%1%2").arg(GmicQt::path_rc(false), FILTERS_VISIBILITY_FILENAME);
+  QString path = QString("%1%2").arg(gmicConfigPath(false), FILTERS_VISIBILITY_FILENAME);
   QFile file(path);
   if (file.open(QFile::ReadOnly)) {
     QString line;
@@ -87,15 +90,12 @@ void FiltersVisibilityMap::save()
   for (const QString & str : _hiddenFilters) {
     buffer.write((str + QChar('\n')).toLatin1());
   }
-
-  QString path = QString("%1%2").arg(GmicQt::path_rc(true), FILTERS_VISIBILITY_FILENAME);
-  QFile file(path);
-  if (file.open(QFile::WriteOnly)) {
-    file.write(QString("Version=%1\n").arg(GmicQt::gmicVersionString()).toLocal8Bit());
-    file.write(QString("[Hidden filters list (compressed)]\n").toLocal8Bit());
-    file.write(qCompress(data));
-    file.close();
-  } else {
-    Logger::error("Cannot write " + path);
+  QString path = QString("%1%2").arg(gmicConfigPath(true), FILTERS_VISIBILITY_FILENAME);
+  QByteArray array = QString("Version=%1\n[Hidden filters list (compressed)]\n").arg(gmicVersionString()).toLocal8Bit();
+  array += qCompress(data);
+  if (!safelyWrite(array, path)) {
+    Logger::error("Saving filters visibility in " + path);
   }
 }
+
+} // namespace GmicQt

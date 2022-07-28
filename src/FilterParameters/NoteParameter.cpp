@@ -29,15 +29,23 @@
 #include <QLabel>
 #include <QUrl>
 #include "Common.h"
-#include "DialogSettings.h"
 #include "FilterTextTranslator.h"
 #include "HtmlTranslator.h"
+#include "Settings.h"
 
-NoteParameter::NoteParameter(QObject * parent) : AbstractParameter(parent, false), _label(nullptr) {}
+namespace GmicQt
+{
+
+NoteParameter::NoteParameter(QObject * parent) : AbstractParameter(parent), _label(nullptr) {}
 
 NoteParameter::~NoteParameter()
 {
   delete _label;
+}
+
+int NoteParameter::size() const
+{
+  return 0;
 }
 
 bool NoteParameter::addTo(QWidget * widget, int row)
@@ -50,12 +58,18 @@ bool NoteParameter::addTo(QWidget * widget, int row)
   _label->setTextFormat(Qt::RichText);
   _label->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
   _label->setWordWrap(true);
-  connect(_label, SIGNAL(linkActivated(QString)), this, SLOT(onLinkActivated(QString)));
+  setTextSelectable(_label);
+  connect(_label, &QLabel::linkActivated, this, &NoteParameter::onLinkActivated);
   _grid->addWidget(_label, row, 0, 1, 3);
   return true;
 }
 
-QString NoteParameter::textValue() const
+QString NoteParameter::value() const
+{
+  return QString();
+}
+
+QString NoteParameter::defaultValue() const
 {
   return QString();
 }
@@ -64,7 +78,7 @@ void NoteParameter::setValue(const QString &) {}
 
 void NoteParameter::reset() {}
 
-bool NoteParameter::initFromText(const char * text, int & textLength)
+bool NoteParameter::initFromText(const QString & /* filterName */, const char * text, int & textLength)
 {
   QList<QString> list = parseText("note", text, textLength);
   if (list.isEmpty()) {
@@ -75,7 +89,7 @@ bool NoteParameter::initFromText(const char * text, int & textLength)
   _text.remove(QRegExp("^\"")).remove(QRegExp("\"$")).replace(QString("\\\""), "\"");
   _text.replace(QString("\\n"), "<br/>");
 
-  if (DialogSettings::darkThemeEnabled()) {
+  if (Settings::darkThemeEnabled()) {
     _text.replace(QRegExp("color\\s*=\\s*\"purple\""), QString("color=\"#ff00ff\""));
     _text.replace(QRegExp("foreground\\s*=\\s*\"purple\""), QString("foreground=\"#ff00ff\""));
     _text.replace(QRegExp("color\\s*=\\s*\"blue\""), QString("color=\"#9b9bff\""));
@@ -92,3 +106,5 @@ void NoteParameter::onLinkActivated(const QString & link)
 {
   QDesktopServices::openUrl(QUrl(link));
 }
+
+} // namespace GmicQt

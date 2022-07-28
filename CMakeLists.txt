@@ -2,14 +2,10 @@ project(gmic-qt)
 
 message(STATUS "Using CMake version: ${CMAKE_VERSION}")
 
-cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.10.0 FATAL_ERROR)
 LIST (APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 include(FeatureSummary)
 include(FindPkgConfig)
-
-# -- Debug Symbols rules under MacOS -------------------------------------------
-include(MacroUtils)
-MACOS_DEBUG_POLICIES()
 
 set(CMAKE_CXX_STANDARD 11)
 add_definitions(-Dcimg_use_cpp11=1)
@@ -26,89 +22,104 @@ endif()
 
 message("Build type is " ${CMAKE_BUILD_TYPE})
 
-set (GMIC_QT_HOST "gimp" CACHE STRING "Define for which host qmic-qt will be built: gimp, krita, none, paintdotnet, or digikam.")
+set (GMIC_QT_HOST "gimp" CACHE STRING "Define for which host gmic-qt will be built: gimp, gimp3 (experimental), krita, none, paintdotnet or 8bf.")
 if (${GMIC_QT_HOST} STREQUAL "none")
   message("Building standalone version.")
 else()
   message("Building for target host application: " ${GMIC_QT_HOST})
 endif()
 
-if(EXISTS "./gmic/gmic.cpp")
-  set (GMIC_PATH "./gmic" CACHE STRING "Define the path to the gmic headers")
+option(ENABLE_SYSTEM_GMIC "Find GMIC shared library installed on the system" ON)
+
+if (ENABLE_SYSTEM_GMIC)
+  option(ENABLE_DYNAMIC_LINKING "Dynamically link the binaries to the GMIC shared library" ON)
 else()
-  set (GMIC_PATH "./gmic/src" CACHE STRING "Define the path to the gmic headers")
+  option(ENABLE_DYNAMIC_LINKING "Dynamically link the binaries to the GMIC shared library" OFF)
+
+  set (GMIC_LIB_PATH "${GMIC_PATH}" CACHE STRING "Define the path to the GMIC shared library")
+  if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../src/gmic.cpp")
+  set (GMIC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../src" CACHE STRING "Define the path to the gmic headers")
+  else()
+  set (GMIC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../gmic/src" CACHE STRING "Define the path to the gmic headers")
+  endif()
+
+  message("G'MIC path: " ${GMIC_PATH})
 endif()
 
-message("G'MIC path: " ${GMIC_PATH})
-
-option(ENABLE_DYNAMIC_LINKING "Dynamically link the binaries to the GMIC shared library" OFF)
 option(ENABLE_CURL "Add support for curl" ON)
-set (GMIC_LIB_PATH "${GMIC_PATH}" CACHE STRING "Define the path to the GMIC shared library")
 
 option(ENABLE_ASAN "Enable -fsanitize=address (if debug build)" ON)
 option(ENABLE_FFTW3 "Enable FFTW3 library support" ON)
 
-option(ENABLE_LTO "Enable -flto (Link Time Optimizer) on gcc and clang" ON)
+include(CheckIPOSupported)
 
-if (WIN32)
-    message("LTO is disabled (windows platform)")
-    set(ENABLE_LTO OFF)
+check_ipo_supported(RESULT HAVE_LTO LANGUAGES CXX)
+
+if (HAVE_LTO)
+option(ENABLE_LTO "Enable Link Time Optimizer" OFF)
+endif()
+
+if (MSVC)
+  option(ENABLE_CFG "Enable Control Flow Guard (MSVC)" ON)
+  add_definitions(-D__PRETTY_FUNCTION__=__FUNCSIG__)
 endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(ENABLE_LTO OFF)
+    set(ENABLE_LTO OFF FORCE)
 endif()
 
 
-#
-# Look for G'MIC repository
-#
-get_filename_component(GMIC_ABSOLUTE_PATH ${GMIC_PATH} ABSOLUTE BASEDIR ${CMAKE_SOURCE_DIR})
-if (EXISTS ${GMIC_ABSOLUTE_PATH}/gmic.cpp)
-  message("Found G'MIC repository")
-else()
-  get_filename_component(TARGET_CLONE_DIR ${GMIC_ABSOLUTE_PATH}/.. ABSOLUTE)
-  message("")
-  message("Cannot find G'MIC repository in " ${GMIC_ABSOLUTE_PATH} )
-  message("")
-  message("You should try:")
-  message("")
-  message("   git clone https://github.com/dtschump/gmic.git " ${TARGET_CLONE_DIR}/gmic )
-  message("")
-  message(FATAL_ERROR "\nG'MIC repository not found")
-endif()
-
-#
-# Look for CImg.h and gmic_stdlib.h
-#
-set(GMIC_FILES CImg.h gmic_stdlib.h)
-foreach(F ${GMIC_FILES})
-  if(EXISTS ${GMIC_ABSOLUTE_PATH}/${F})
-    message("Found " ${GMIC_PATH}/${F})
+if (NOT ENABLE_SYSTEM_GMIC)
+  #
+  # Look for G'MIC repository
+  #
+  get_filename_component(GMIC_ABSOLUTE_PATH ${GMIC_PATH} ABSOLUTE BASEDIR ${CMAKE_SOURCE_DIR})
+  if (EXISTS ${GMIC_ABSOLUTE_PATH}/gmic.cpp)
+    message("Found G'MIC repository")
   else()
-    message(${F} " not found")
-    execute_process(COMMAND make -C ${GMIC_ABSOLUTE_PATH} ${F})
-    if(EXISTS ${GMIC_ABSOLUTE_PATH}/${F})
-      message("Found " ${GMIC_PATH}/${F})
-    else()
-      message(FATAL_ERROR "\nCannot obtain " ${GMIC_PATH}/${F})
-    endif()
+    get_filename_component(TARGET_CLONE_DIR ${GMIC_ABSOLUTE_PATH}/.. ABSOLUTE)
+    message("")
+    message("Cannot find G'MIC repository in " ${GMIC_ABSOLUTE_PATH} )
+    message("")
+    message("You should try:")
+    message("")
+    message("   git clone https://github.com/dtschump/gmic.git " ${TARGET_CLONE_DIR}/gmic )
+    message("")
+    message(FATAL_ERROR "\nG'MIC repository not found")
   endif()
-endforeach()
 
-#
-# Ensure that gmic and CImg are the same version
-#
-file(STRINGS ${GMIC_ABSOLUTE_PATH}/CImg.h CIMG_VERSION REGEX "cimg_version ")
-string(REGEX REPLACE ".*cimg_version " "" CIMG_VERSION ${CIMG_VERSION})
-message("CImg version is [" ${CIMG_VERSION} "]")
+  #
+  # Look for CImg.h and gmic_stdlib_community.h
+  #
+  set(GMIC_FILES CImg.h gmic_stdlib_community.h)
+  foreach(F ${GMIC_FILES})
+  if(EXISTS ${GMIC_ABSOLUTE_PATH}/${F})
+      message("Found " ${GMIC_PATH}/${F})
+  else()
+      message(${F} " not found")
+      execute_process(COMMAND make -C ${GMIC_ABSOLUTE_PATH} ${F})
+      if(EXISTS ${GMIC_ABSOLUTE_PATH}/${F})
+      message("Found " ${GMIC_PATH}/${F})
+      else()
+      message(FATAL_ERROR "\nCannot obtain " ${GMIC_PATH}/${F})
+      endif()
+  endif()
+  endforeach()
 
-file(STRINGS ${GMIC_ABSOLUTE_PATH}/gmic.h GMIC_VERSION REGEX "gmic_version ")
-string(REGEX REPLACE ".*gmic_version " "" GMIC_VERSION ${GMIC_VERSION})
-message("G'MIC version is [" ${GMIC_VERSION} "]")
+  #
+  # Ensure that gmic and CImg are the same version
+  #
+  file(STRINGS ${GMIC_ABSOLUTE_PATH}/CImg.h CIMG_VERSION REGEX "cimg_version ")
+  string(REGEX REPLACE ".*cimg_version " "" CIMG_VERSION ${CIMG_VERSION})
+  message("CImg version is [" ${CIMG_VERSION} "]")
 
-if (NOT(${GMIC_VERSION} EQUAL ${CIMG_VERSION}))
+  file(STRINGS ${GMIC_ABSOLUTE_PATH}/gmic.h GMIC_VERSION REGEX "gmic_version ")
+  string(REGEX REPLACE ".*gmic_version " "" GMIC_VERSION ${GMIC_VERSION})
+  message("G'MIC version is [" ${GMIC_VERSION} "]")
+
+  if (NOT(${GMIC_VERSION} EQUAL ${CIMG_VERSION}))
   message(FATAL_ERROR "\nVersion numbers of files 'gmic.h' (" ${GMIC_VERSION} ") and 'CImg.h' (" ${CIMG_VERSION} ") mismatch")
+  endif()
 endif()
 
 
@@ -126,6 +137,18 @@ endif()
 
 
 # Required packages
+
+#
+# Gmic
+#
+if (ENABLE_SYSTEM_GMIC)
+  find_package(Gmic REQUIRED CONFIG)
+endif (ENABLE_SYSTEM_GMIC)
+
+#
+# Threads
+#
+find_package(Threads REQUIRED)
 
 #
 # Qt5
@@ -165,14 +188,29 @@ include_directories(SYSTEM ${ZLIB_INCLUDE_DIRS} )
 #
 # FFTW3
 #
-find_package(FFTW3 REQUIRED)
-add_definitions(-Dcimg_use_fftw3 )
-include_directories(${FFTW3_INCLUDE_DIR})
-find_library(FFTW3_THREADS_LIB fftw3_threads PATHS ${FFTW3_LIBRARY_DIRS})
-if(FFTW3_THREADS_LIB STREQUAL "FFTW3_THREADS_LIB-NOTFOUND")
+if (ENABLE_FFTW3)
+  find_package(FFTW3 REQUIRED)
+  add_definitions(-Dcimg_use_fftw3 )
+  include_directories(${FFTW3_INCLUDE_DIR})
+
+  # Detect
+  include(CheckCXXSourceCompiles)
+  set(CMAKE_REQUIRED_INCLUDES ${FFTW3_INCLUDE_DIR})
+  set(CMAKE_REQUIRED_LIBRARIES ${FFTW3_LIBRARIES})
+  check_cxx_source_compiles("
+      #include <fftw3.h>
+
+      int main() {
+          fftw_init_threads();
+      }
+  " HAVE_FFTW3_THREADS)
+
+  if(HAVE_FFTW3_THREADS)
+    message(STATUS "FFTW threads Found")
+    list(APPEND EXTRA_LIBRARIES ${FFTW3_THREADS_LIBRARIES})
+  else()
     add_definitions(-Dcimg_use_fftw3_singlethread)
-else()
-    list(APPEND EXTRA_LIBRARIES ${FFTW3_LIBRARIES})
+  endif()
 endif()
 
 #
@@ -189,28 +227,43 @@ endif()
 #
 # Test for OpenMP
 #
-find_package(OpenMP)
+find_package(OpenMP 2.0)
 set_package_properties(OpenMP PROPERTIES
     DESCRIPTION "A low-level parallel execution library"
     URL "http://openmp.org/wp/"
     TYPE OPTIONAL
     PURPOSE "Optionally used by gmic-qt")
 
-if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.8.3 AND OPENMP_FOUND)
-    message("G'Mic: using OpenMP")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+if (OpenMP_FOUND)
+    message(STATUS "G'Mic: using OpenMP ${OpenMP_CXX_VERSION}")
+    link_libraries(OpenMP::OpenMP_CXX)
     add_definitions(-Dcimg_use_openmp)
-    add_definitions(-fopenmp)
 endif()
 
 #
 # LTO option
 #
 
-if (ENABLE_LTO AND (CMAKE_COMPILER_IS_GNUCC OR (CMAKE_CSS_COMPILER_IS STREQUAL "Clang")))
-    message("Link Time Optimizer enabled")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto")
+if (ENABLE_LTO)
+    message(STATUS "Link Time Optimizer enabled")
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()
+
+#
+# Enable CFG
+#
+if (MSVC)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /STACK:16777216")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /STACK:16777216")
+    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /STACK:16777216")
+    if (ENABLE_CFG)
+        add_compile_options(/guard:CF)
+        add_link_options(/GUARD:CF)
+    endif()
+elseif(WIN32)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--stack,16777216")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--stack,16777216")
+    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,--stack,16777216")
 endif()
 
 #
@@ -237,24 +290,28 @@ if(ENABLE_CURL)
     endif()
 endif()
 
-add_definitions(-Dgmic_build)
+add_definitions(-Dgmic_community)
 add_definitions(-Dcimg_use_abort)
 add_definitions(-Dgmic_is_parallel)
 add_definitions(-Dgmic_gui)
 add_definitions(-Dcimg_use_abort)
 add_definitions(-Dcimg_appname=\"gmic\")
 
-if (UNIX AND NOT APPLE)
-    add_definitions(-Dcimg_display=1)
-    add_definitions(-D_IS_LINUX_)
-    add_definitions(-Dcimg_use_vt100)
-    add_definitions(-D_IS_UNIX_)
-    find_package(X11)
-    set(gmic_qt_LIBRARIES
-        ${gmic_qt_LIBRARIES}
-        ${X11_LIBRARIES} # XXX: Search for X11: Wayland is coming!
-    )
-
+if (UNIX)
+    if(ANDROID)
+        add_definitions(-Dcimg_display=0)
+        add_definitions(-D_IS_UNIX_)
+    elseif(NOT APPLE)
+        add_definitions(-Dcimg_display=1)
+        add_definitions(-D_IS_LINUX_)
+        add_definitions(-Dcimg_use_vt100)
+        add_definitions(-D_IS_UNIX_)
+        find_package(X11)
+        set(gmic_qt_LIBRARIES
+            ${gmic_qt_LIBRARIES}
+            ${X11_LIBRARIES} # XXX: Search for X11: Wayland is coming!
+        )
+    endif()
 endif()
 
 if (APPLE)
@@ -268,9 +325,14 @@ endif()
 if (WIN32)
     add_definitions(-Dcimg_display=2)
     add_definitions(-DPSAPI_VERSION=1)
+    add_definitions(-D_IS_WINDOWS_)
+    if (MSVC)
+      add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+      add_compile_options(/wd4267)
+    endif()
     set(gmic_qt_LIBRARIES
         ${gmic_qt_LIBRARIES}
-        pthread psapi gdi32
+        Threads::Threads psapi gdi32
     )
 endif()
 
@@ -285,24 +347,41 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     endif(ENABLE_ASAN)
 elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
     add_definitions(-DQT_NO_DEBUG_OUTPUT)
-    string(REPLACE "-O2" "" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
-    string(REPLACE "-O3" "" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s")
-    if (WIN32)
+    if (MSVC)
+      set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /fp:fast /Oi")
+    else()
+      string(REPLACE "-O2" "" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+      string(REPLACE "-O3" "" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+      set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast")
+    endif()
+    if (NOT MSVC)
+      set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s")
+    endif()
+    if (WIN32 AND NOT MSVC)
       set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -mwindows")
     endif()
 elseif (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
     add_definitions(-DQT_NO_DEBUG_OUTPUT)
-    string(REPLACE "-O2" "" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
-    string(REPLACE "-O3" "" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
-    set_source_files_properties(${GMIC_PATH}/gmic.cpp PROPERTIES COMPILE_FLAGS "-Ofast")
-    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -O2")
+    if(MSVC)
+      string(REPLACE "Ob1" "Ob2" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+      set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /fp:fast /Oi")
+    else()
+      string(REPLACE "-O2" "" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+      string(REPLACE "-O3" "" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+      if (NOT ENABLE_SYSTEM_GMIC)
+          set_source_files_properties(${GMIC_PATH}/gmic.cpp PROPERTIES COMPILE_FLAGS "-Ofast")
+      endif (NOT ENABLE_SYSTEM_GMIC)
+      set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -O2")
+    endif()
 else()
     message(FATAL_ERROR "Build type not recognized (${CMAKE_BUILD_TYPE})")
 endif()
 
-include_directories(${CMAKE_SOURCE_DIR}/src ${GMIC_PATH})
+if (NOT ENABLE_SYSTEM_GMIC)
+    add_definitions(-Dgmic_core)
+    include_directories(${GMIC_PATH})
+endif (NOT ENABLE_SYSTEM_GMIC)
+include_directories(${CMAKE_SOURCE_DIR}/src)
 
 set (gmic_qt_SRCS
 
@@ -317,6 +396,7 @@ set (gmic_qt_SRCS
   src/FilterParameters/ColorParameter.h
   src/FilterParameters/ConstParameter.h
   src/FilterParameters/CustomDoubleSpinBox.h
+  src/FilterParameters/CustomSpinBox.h
   src/FilterParameters/FileParameter.h
   src/FilterParameters/FilterParametersWidget.h
   src/FilterParameters/FloatParameter.h
@@ -334,20 +414,20 @@ set (gmic_qt_SRCS
   src/FilterSelector/FiltersView/FiltersView.h
   src/FilterSelector/FiltersView/TreeView.h
   src/FilterSelector/FiltersVisibilityMap.h
+  src/FilterSelector/FilterTagMap.h
   src/CroppedImageListProxy.h
   src/CroppedActiveLayerProxy.h
   src/FilterSyncRunner.h
   src/FilterThread.h
   src/FilterTextTranslator.h
   src/Globals.h
-  src/gmic_qt.h
+  src/GmicQt.h
   src/GmicStdlib.h
   src/GmicProcessor.h
   src/HeadlessProcessor.h
-  src/Host/host.h
+  src/Host/GmicQtHost.h
   src/HtmlTranslator.h
   src/IconLoader.h
-  src/ImageConverter.h
   src/ImageTools.h
   src/InputOutputState.h
   src/KeypointList.h
@@ -356,9 +436,13 @@ set (gmic_qt_SRCS
   src/Logger.h
   src/MainWindow.h
   src/ParametersCache.h
+  src/PersistentMemory.h
+  src/Settings.h
   src/TimeLogger.h
+  src/Tags.h
   src/Updater.h
   src/Utils.h
+  src/Misc.h
   src/FilterSelector/FiltersView/FilterTreeFolder.h
   src/FilterSelector/FiltersView/FilterTreeItem.h
   src/FilterSelector/FavesModel.h
@@ -373,12 +457,21 @@ set (gmic_qt_SRCS
   src/Widgets/SearchFieldWidget.h
   src/Widgets/LanguageSelectionWidget.h
   src/Widgets/ProgressInfoWindow.h
+  src/Widgets/VisibleTagSelector.h
   src/ZoomConstraint.h
+)
 
-  ${GMIC_PATH}/gmic.h
-  ${GMIC_PATH}/CImg.h
-  ${GMIC_PATH}/gmic_stdlib.h
+if (NOT ENABLE_SYSTEM_GMIC)
+    set(gmic_qt_SRCS
+        ${gmic_qt_SRCS}
+        ${GMIC_PATH}/gmic.h
+        ${GMIC_PATH}/CImg.h
+        ${GMIC_PATH}/gmic_stdlib_community.h
+    )
+endif()
 
+set(gmic_qt_SRCS
+  ${gmic_qt_SRCS}
   src/ClickableLabel.cpp
   src/Common.cpp
   src/OverrideCursor.cpp
@@ -390,6 +483,7 @@ set (gmic_qt_SRCS
   src/FilterParameters/ColorParameter.cpp
   src/FilterParameters/ConstParameter.cpp
   src/FilterParameters/CustomDoubleSpinBox.cpp
+  src/FilterParameters/CustomSpinBox.cpp
   src/FilterParameters/FileParameter.cpp
   src/FilterParameters/FilterParametersWidget.cpp
   src/FilterParameters/FloatParameter.cpp
@@ -407,19 +501,19 @@ set (gmic_qt_SRCS
   src/FilterSelector/FiltersView/FiltersView.cpp
   src/FilterSelector/FiltersView/TreeView.cpp
   src/FilterSelector/FiltersVisibilityMap.cpp
+  src/FilterSelector/FilterTagMap.cpp
   src/CroppedImageListProxy.cpp
   src/CroppedActiveLayerProxy.cpp
   src/FilterSyncRunner.cpp
   src/FilterThread.cpp
   src/FilterTextTranslator.cpp
-  src/gmic_qt.cpp
+  src/GmicQt.cpp
   src/Globals.cpp
   src/GmicStdlib.cpp
   src/GmicProcessor.cpp
   src/HeadlessProcessor.cpp
   src/HtmlTranslator.cpp
   src/IconLoader.cpp
-  src/ImageConverter.cpp
   src/ImageTools.cpp
   src/InputOutputState.cpp
   src/KeypointList.cpp
@@ -428,9 +522,13 @@ set (gmic_qt_SRCS
   src/Logger.cpp
   src/MainWindow.cpp
   src/ParametersCache.cpp
+  src/PersistentMemory.cpp
+  src/Settings.cpp
   src/TimeLogger.cpp
+  src/Tags.cpp
   src/Updater.cpp
   src/Utils.cpp
+  src/Misc.cpp
   src/FilterSelector/FiltersView/FilterTreeItem.cpp
   src/FilterSelector/FiltersView/FilterTreeFolder.cpp
   src/FilterSelector/FavesModel.cpp
@@ -445,23 +543,10 @@ set (gmic_qt_SRCS
   src/Widgets/SearchFieldWidget.cpp
   src/Widgets/LanguageSelectionWidget.cpp
   src/Widgets/ProgressInfoWindow.cpp
+  src/Widgets/VisibleTagSelector.cpp
 )
 
-if(ENABLE_DYNAMIC_LINKING)
-  set(CMAKE_SKIP_RPATH TRUE)
-  set(gmic_qt_LIBRARIES
-    ${gmic_qt_LIBRARIES}
-    "gmic"
-    )
-  link_directories(${GMIC_LIB_PATH})
-else(ENABLE_DYNAMIC_LINKING)
-  set(gmic_qt_SRCS
-    ${gmic_qt_SRCS}
-    ${GMIC_PATH}/gmic.cpp
-    )
-endif(ENABLE_DYNAMIC_LINKING)
-
-qt5_wrap_ui(gmic_qt_SRCS
+set (gmic_qt_FORMS
   ui/dialogsettings.ui
   ui/filtersview.ui
   ui/headlessprogressdialog.ui
@@ -475,72 +560,63 @@ qt5_wrap_ui(gmic_qt_SRCS
   ui/zoomlevelselector.ui
 )
 
-set(gmic_translation_files
+if(ENABLE_DYNAMIC_LINKING)
+  set(CMAKE_SKIP_RPATH TRUE)
+  set(gmic_qt_LIBRARIES
+    ${gmic_qt_LIBRARIES}
+    "gmic"
+    )
+  if (NOT ENABLE_SYSTEM_GMIC)
+    link_directories(${GMIC_LIB_PATH})
+  endif()
+else(ENABLE_DYNAMIC_LINKING)
+  set(gmic_qt_SRCS
+    ${gmic_qt_SRCS}
+    ${GMIC_PATH}/gmic.cpp
+    )
+endif(ENABLE_DYNAMIC_LINKING)
 
-    translations/cs.ts
-    translations/de.ts
-    translations/es.ts
-    translations/fr.ts
-    translations/id.ts
-    translations/it.ts
-    translations/nl.ts
-    translations/pl.ts
-    translations/pt.ts
-    translations/ru.ts
-    translations/ua.ts
-    translations/ja.ts
-    translations/zh.ts
-)
-
-set_source_files_properties(${gmic_translation_files} PROPERTIES OUTPUT_LOCATION translations)
-
-set(gmic_filters_translation_files
-    translations/filters/fr.ts
-)
-
-set_source_files_properties(${gmic_filters_translation_files} PROPERTIES OUTPUT_LOCATION translations/filters)
-
-# qt5_create_translation(
-#     qmic_qt_QM
-#     ${CMAKE_SOURCE_DIR}/translations
-#     ${gmic_qt_SRCS}
-#     ${gmic_translation_files}
-# )
-
-qt5_add_translation(gmic_qt_QM
-    ${gmic_translation_files}
-)
-
-# install(FILES ${gmic_qt_QM} DESTINATION ${CMAKE_SOURCE_DIR}/translations)
+message("Producing translation .qm files")
+execute_process(COMMAND make WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/translations OUTPUT_QUIET)
+message("Producing filter translation .qm files")
+execute_process(COMMAND make WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/translations/filters OUTPUT_QUIET)
 
 set(gmic_qt_QRC
     gmic_qt.qrc
     translations.qrc
+    wip_translations.qrc
 )
 
-if (${GMIC_QT_HOST} STREQUAL "gimp")
+if (${GMIC_QT_HOST} STREQUAL "gimp" OR ${GMIC_QT_HOST} STREQUAL "gimp3")
+    if (${GMIC_QT_HOST} STREQUAL "gimp3")
+        set(TARGET_GIMP_VERSION 3)
+    else()
+        set(TARGET_GIMP_VERSION 2)
+    endif()
 
-    execute_process(COMMAND ${PKG_CONFIG_EXECUTABLE} --libs gimp-2.0 OUTPUT_VARIABLE GIMP2_LIBRARIES OUTPUT_STRIP_TRAILING_WHITESPACE)
-    execute_process(COMMAND ${PKG_CONFIG_EXECUTABLE} --cflags gimp-2.0 OUTPUT_VARIABLE GIMP2_INCLUDE_DIRS OUTPUT_STRIP_TRAILING_WHITESPACE)
-    execute_process(COMMAND ${PKG_CONFIG_EXECUTABLE} gimp-2.0 --define-variable=prefix=${CMAKE_INSTALL_PREFIX} --variable gimplibdir OUTPUT_VARIABLE GIMP2_PKGLIBDIR OUTPUT_STRIP_TRAILING_WHITESPACE)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GIMP2_INCLUDE_DIRS}")
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(GIMP REQUIRED gimp-${TARGET_GIMP_VERSION}.0 IMPORTED_TARGET)
+    # CMake does not support passing --define-variable through pkg_get_variable.
+    execute_process(COMMAND ${PKG_CONFIG_EXECUTABLE} gimp-${TARGET_GIMP_VERSION}.0 --define-variable=prefix=${CMAKE_INSTALL_PREFIX} --variable gimplibdir OUTPUT_VARIABLE GIMP_PKGLIBDIR OUTPUT_STRIP_TRAILING_WHITESPACE)
 
     set (gmic_qt_SRCS ${gmic_qt_SRCS} src/Host/Gimp/host_gimp.cpp)
+    qt5_wrap_ui(gmic_qt_SRCS ${gmic_qt_FORMS})
     add_definitions(-DGMIC_HOST=gimp -DGIMP_DISABLE_DEPRECATED)
-    add_executable(gmic_gimp_qt ${gmic_qt_SRCS} ${gmic_qt_QRC} ${qmic_qt_QM})
+    add_executable(gmic_gimp_qt ${gmic_qt_SRCS} ${gmic_qt_QRC})
     target_link_libraries(
       gmic_gimp_qt
       PRIVATE
-      ${GIMP2_LIBRARIES}
+      PkgConfig::GIMP
       ${gmic_qt_LIBRARIES}
       )
-    install(TARGETS gmic_gimp_qt RUNTIME DESTINATION "${GIMP2_PKGLIBDIR}/plug-ins")
+    install(TARGETS gmic_gimp_qt RUNTIME DESTINATION "${GIMP_PKGLIBDIR}/plug-ins/gmic_gimp_qt")
 
 elseif (${GMIC_QT_HOST} STREQUAL "krita")
 
     set (gmic_qt_SRCS ${gmic_qt_SRCS} src/Host/Krita/host_krita.cpp)
+    qt5_wrap_ui(gmic_qt_SRCS ${gmic_qt_FORMS})
     add_definitions(-DGMIC_HOST=krita)
-    add_executable(gmic_krita_qt ${gmic_qt_SRCS} ${gmic_qt_QRC} ${qmic_qt_QM})
+    add_executable(gmic_krita_qt ${gmic_qt_SRCS} ${gmic_qt_QRC})
     target_link_libraries(
       gmic_krita_qt
       PRIVATE
@@ -550,94 +626,47 @@ elseif (${GMIC_QT_HOST} STREQUAL "krita")
 
 elseif (${GMIC_QT_HOST} STREQUAL "none")
 
-    set (gmic_qt_SRCS ${gmic_qt_SRCS} src/Host/None/host_none.cpp src/Host/None/ImageDialog.h src/Host/None/ImageDialog.cpp)
-    add_definitions(-DGMIC_HOST=standalone)
-    add_executable(gmic_qt ${gmic_qt_SRCS} ${gmic_qt_QRC}  ${qmic_qt_QM})
-    target_link_libraries(gmic_qt PRIVATE ${gmic_qt_LIBRARIES})
-    install(TARGETS gmic_qt RUNTIME DESTINATION bin)
+  set (gmic_qt_SRCS ${gmic_qt_SRCS}
+    src/Host/None/host_none.cpp
+    src/Host/None/ImageDialog.h
+    src/Host/None/ImageDialog.cpp
+    src/Host/None/JpegQualityDialog.h
+    src/Host/None/JpegQualityDialog.cpp
+    )
+  set(gmic_qt_FORMS ${gmic_qt_FORMS}
+    src/Host/None/jpegqualitydialog.ui
+    )
+  qt5_wrap_ui(gmic_qt_SRCS ${gmic_qt_FORMS})
+  add_definitions(-DGMIC_HOST=standalone)
+  add_executable(gmic_qt ${gmic_qt_SRCS} ${gmic_qt_QRC})
+  target_link_libraries(gmic_qt PRIVATE ${gmic_qt_LIBRARIES})
+  install(TARGETS gmic_qt RUNTIME DESTINATION bin)
 
 elseif (${GMIC_QT_HOST} STREQUAL "paintdotnet")
 
-    set (gmic_qt_SRCS ${gmic_qt_SRCS} src/Host/PaintDotNet/host_paintdotnet.cpp)
-    add_definitions(-DGMIC_HOST=paintdotnet)
-    add_executable(gmic_paintdotnet_qt ${gmic_qt_SRCS} ${gmic_qt_QRC} ${qmic_qt_QM})
+  set (gmic_qt_SRCS ${gmic_qt_SRCS} src/Host/PaintDotNet/host_paintdotnet.cpp)
+  qt5_wrap_ui(gmic_qt_SRCS ${gmic_qt_FORMS})
+  add_definitions(-DGMIC_HOST=paintdotnet)
+  add_executable(gmic_paintdotnet_qt ${gmic_qt_SRCS} ${gmic_qt_QRC})
+  target_link_libraries(
+    gmic_paintdotnet_qt
+    PRIVATE ${gmic_qt_LIBRARIES}
+    )
+
+elseif (${GMIC_QT_HOST} STREQUAL "8bf")
+
+    set (gmic_qt_SRCS ${gmic_qt_SRCS} src/Host/8bf/host_8bf.cpp)
+    qt5_wrap_ui(gmic_qt_SRCS ${gmic_qt_FORMS})
+    add_definitions(-DGMIC_HOST=plugin8bf)
+    add_executable(gmic_8bf_qt ${gmic_qt_SRCS} ${gmic_qt_QRC})
     target_link_libraries(
-      gmic_paintdotnet_qt
+      gmic_8bf_qt
       PRIVATE
       ${gmic_qt_LIBRARIES}
       )
 
-elseif (${GMIC_QT_HOST} STREQUAL "digikam")
-
-    include(GNUInstallDirs)
-
-    find_package(DigikamCore CONFIG REQUIRED)
-
-    set_package_properties(DigikamCore PROPERTIES
-                           URL "http://www.digikam.org"
-                           DESCRIPTION "digiKam core library"
-    )
-
-    # --- Manage C++ exception rules -------
-
-    string(REPLACE " -DQT_NO_EXCEPTIONS " " " CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} ")
-    string(REPLACE " -fno-exceptions "    " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    string(STRIP "${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS)
-
-    if (MSVC)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -EHsc")
-    elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-        if (WIN32)
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -EHsc")
-        else()
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions")
-        endif()
-    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions")
-    elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions")
-    endif()
-
-    string(STRIP "${CMAKE_CXX_FLAGS}" ${CMAKE_CXX_FLAGS})
-
-    # ---
-
-    include_directories($<TARGET_PROPERTY:Digikam::digikamcore,INTERFACE_INCLUDE_DIRECTORIES>/digikam)
-
-    set (gmic_qt_SRCS ${gmic_qt_SRCS} src/Host/digiKam/host_digikam.cpp src/Host/digiKam/gmicqttoolplugin.cpp)
-    add_definitions(-DGMIC_HOST=digikam)
-    add_library(Editor_GmicQt_Plugin
-                MODULE ${gmic_qt_SRCS} ${gmic_qt_QRC} ${qmic_qt_QM})
-
-    set_target_properties(Editor_GmicQt_Plugin PROPERTIES PREFIX "")
-
-    target_link_libraries(Editor_GmicQt_Plugin
-                          PRIVATE
-                          ${gmic_qt_LIBRARIES}
-                          Digikam::digikamcore)
-
-    # --- Install rules ---------------------------------
-
-    get_target_property(QT_QMAKE_EXECUTABLE ${Qt5Core_QMAKE_EXECUTABLE} IMPORTED_LOCATION)
-
-    if(NOT QT_QMAKE_EXECUTABLE)
-        message(FATAL_ERROR "qmake is not found.")
-    endif()
-
-    # execute the command "qmake -query QT_INSTALL_PLUGINS" to get the path of plugins dir.
-    execute_process(COMMAND ${QT_QMAKE_EXECUTABLE} -query QT_INSTALL_PLUGINS
-                    OUTPUT_VARIABLE QT_PLUGINS_DIR
-                    OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-    if(NOT QT_PLUGINS_DIR)
-        message(FATAL_ERROR "Qt5 plugin directory cannot be detected.")
-    endif()
-
-    install(TARGETS Editor_GmicQt_Plugin
-            DESTINATION ${QT_PLUGINS_DIR}/digikam/editor)
-
 else()
-    message(FATAL_ERROR "GMIC_QT_HOST is not defined as gimp, krita, none, paintdotnet, or digikam")
+    message(FATAL_ERROR "GMIC_QT_HOST is not defined as gimp, gimp3, krita, none, paintdotnet or 8bf")
 endif()
 
 feature_summary(WHAT ALL FATAL_ON_MISSING_REQUIRED_PACKAGES)
