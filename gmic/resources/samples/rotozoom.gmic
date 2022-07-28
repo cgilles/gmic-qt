@@ -23,7 +23,7 @@ go :
       dy = 3*h#0*t;
       zoom = 0.35 + 0.3*sin(pit2);
       angle = pit2*180/pi;
-      rot = rot(angle)/zoom;
+      rot = rot(angle°)/zoom;
 
       P = [ w#0,h#0 ]/2 + [ dx,dy ] + rot*[ x - w/2,y -h/2 ];
       i(#0,P)"

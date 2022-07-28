@@ -25,7 +25,7 @@ go :
 
   # Generate animation frames.
   nbf=50
-  repeat $nbf,f
+  repeat $nbf f=$>
     e[] "\r  > Frame "{$f+1}/$nbf
     input $wr,$hr,1,1
     repeat ceil($hr/$ht)

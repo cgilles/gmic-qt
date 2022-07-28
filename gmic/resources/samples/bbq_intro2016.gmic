@@ -56,7 +56,7 @@ go : skip ${1=0}
       v + e[] "  > ... done!" v -
     onfail
       v + e[] "  > ... failed!" v -
-    endl fi
+    done fi
     v + e[] "\n  > Run 'BBQ Intro 2016' demo, by ARKHAM (live mode)." v -
     rm
     parallel "x \"cvlc "${-path_tmp}"bbq_intro2016.mp3\"","_go $""1"
@@ -93,7 +93,7 @@ outvideo :
     w. wait 40
     fi
     if !{*} v + quit fi
-  rm endl
+  rm done
 
 # Notice.
 #---------
@@ -128,7 +128,7 @@ bbq_intro_intro :
     x=0 N=$! repeat $N 0 t. {$>,t},0,0,48,1,1 x$>=$x y$>=0 z$>={-3200-150*$>} x={$x+w+8} done k[50%--1]
     expand_xy 6,0 dilate_circ 5 b 0.5 expand_z 1,0 isosurface3d 10% -*3d 1,1,5 rv3d
     repeat $N col3d[$>] ${-RGB} done
-  endl
+  done
   0 t. "invites you to",0,0,48,1,1 r2dy. 18 +f. 255 to_rgb.
   random3d 2500 col3d. 255 -*3d. 320,200,1000 --3d. 160,100
   l3d 0,0,-600
@@ -142,7 +142,7 @@ bbq_intro_intro :
       +/[4] 1000 -*. -1 n. 0,2 c. 0,1 sqr. j.. . rm.
       a[2-4] x
       y a y
-    endl
+    done
     j3d. ..,50%,50%,-600,1,0,0,0,240 --3d.. 0,0,{min(12,$t/10-10)}
 
     # Torus.
@@ -409,7 +409,7 @@ bbq_intro4 :
       repeat $! shift[$>] {if($>%2,1,-1)*2*$s}%,0,0,0,0 done
       a y
       water $s
-    endl fi
+    done fi
 
     if !($_t%2) outvideo. fi
     rm.
@@ -553,7 +553,7 @@ bbq_intro7 :
     zoom={1.6+1.2*sin($_t/20)}
     if $_t>450 zoom={$zoom/(1+0.3*($_t-450))} fi
     f. "
-      begin(R = rot(-(180+1.7*"$_t"))/"$zoom"; C=[(50+"$_t"/5)*w/100,0.5*h]);
+      begin(R = rot(-(180+1.7*"$_t")°)/"$zoom"; C=[(50+"$_t"/5)*w/100,0.5*h]);
       I((R*([x,y]-=C))+=C,0,2)"
     outvideo.
     rm.
@@ -570,7 +570,7 @@ bbq_intro8 :
     16,1,1,3,u r. 256,1,1,3,3 shift. 1
     map[0] . rm. r2dx 100
     +mirror y +mirror x -+ n 0,255
-  endl else k[0] r[0] 100,100,1,3,2 fi
+  done else k[0] r[0] 100,100,1,3,2 fi
   i[0] (20;80;0^20;80;0^20;80;0) r[0] 400,300,1,3,3 water[0] 100,2
   w={w} elevation3d. 0 rv3d.
   sh. 8,{7+3*i[6]},0,0 r. 3,{h/3},1,1,-1
@@ -589,7 +589,7 @@ bbq_intro8 :
       i[0] ({'CImg3d'}) i[1] ($nb,$nb) transpose[2]
       (1,0;1,{$nb-1}) r. 2,$nb,1,1,3 round.
       1,{4*$nb},1,1,1 y a y
-    endl [4] sprites3d.. .,1 rm. -+3d[-2,-1] fi
+    done [4] sprites3d.. .,1 rm. -+3d[-2,-1] fi
     --3d. {$w/2},{$w/2} -*3d. {0,0.9*max(w,h)/$w} # Center and scale 3d object.
     r3d. 0,0,1,{if({*,b}&2,{*,x}*360/{*,w},$dt*30)} r3d. 1,0,0,120 # Get rotated 3d object.
     +j3d[0] .,50%,65%,30,1,3,0,0
@@ -615,7 +615,7 @@ bbq_intro8 :
       sh[0] 2,2,0,0 sh[0] 3,3,0,0 -.. . -+. 0.2 rm[-2,-1]
       s[0] x repeat $!-1 coords={$<,@0-1} if {$<,@2}<i($coords) -=. {80+{i($coords)}},$coords rm[$<] fi done
       if $!==1 i[0] 0 else a[0--2] x fi
-      endl
+      done
     fi
     t={$t+1}
   while $t<450

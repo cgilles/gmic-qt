@@ -20,7 +20,7 @@ go :
 
   # Generate frames
   nbf=50
-  repeat $nbf,f
+  repeat $nbf f=$>
     e[] "\r  > Frame "{$f+1}/$nbf
     y={h#0/4*(1+$f/$nbf)}
     ang={6*sin(2*pi*$f/$nbf)}

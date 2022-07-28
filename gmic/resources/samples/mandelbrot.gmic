@@ -19,7 +19,7 @@ go :
   target=-0.77175402641296387,0.10690001025795937
   zoom=1e-2
   nbf=100
-  repeat $nbf,f
+  repeat $nbf f=$>
     e[] "\r  > Frame "$f"/"$nbf
     input 512,512
     mandelbrot. {"C = ["$target"]; z = "$zoom"; [C - z, C + z ]"},16384

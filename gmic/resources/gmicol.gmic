@@ -56,7 +56,7 @@
 #@web : sep = separator()
 #@web : note = note{"<b>G'MIC</b> is also available as a free plug-in for the image retouching software <b>GIMP</b>. Download it to get more filters
 #@web : and features than in the online version, at:"}
-#@web : note = link{"The G'MIC plug-in for GIMP","https://gmic.eu/gimp.shtml"}
+#@web : note = link{"The G'MIC plug-in for GIMP","https://gmic.eu/download.html"}
 #@web : sep = separator(), note = note("<small>Authors: <i>S&#233;bastien Fourey</i> and <i>David Tschumperl&#233;</i>.      Latest Update: <i>10/11/2012</i>.</small>")
 
 #@web clone("Contributors")

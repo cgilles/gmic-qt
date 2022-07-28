@@ -167,7 +167,7 @@
 #   A G'MIC command can set new values for each filter parameter, through the status (see command 'status').
 #   To do so, the returned status must follow the syntax :
 #   '{params1}{params2}{..}{paramsN}' where N must be exactly equal to the number of parameters
-#   for the current filter. Optionnally, you can append to each {param} its visibility state suffix ( e.g: {param}_1 ).
+#   for the current filter. Optionally, you can append to each {param} its visibility state suffix ( e.g: {param}_1 ).
 #
 #   A G'MIC command can also specify the output blending mode, the opacity and the position of each of the output image
 #   (i.e. layer in the plug-in). To do so, set the image name to something like:

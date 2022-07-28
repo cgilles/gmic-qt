@@ -24,7 +24,7 @@ go :
   (0,0,0;255,255,255;255,255,0) permute. yzcx
 
   nbf=20
-  repeat $nbf,f
+  repeat $nbf f=$>
     e[] "\r  > Frame "{$f+1}/$nbf
     [0],[0] circle[-1] 30%,50%,15%,1,2
     y={h/2-2*h*($f<$nbf/2?$f:$nbf-$f)/$nbf}

@@ -106,7 +106,7 @@ go :
   while !{*,ESC}" && "!{*,Q}" && "{*}   # Continue until keys 'ESC' or 'Q' have been pressed and window stays opened
 
   remove    # Remove all images used for the demo
-  endlocal  # End local environment (is empty at this point)
+  done      # End local environment (is empty at this point)
   verbose + # Go back to previous level of verbosity
 
 # Local Variables:

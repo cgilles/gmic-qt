@@ -1,6 +1,6 @@
 #!/bin/bash
-export GMIC_LOGIN=`gmic v - echo_stdout[] \$\{\"gmic_ftp 0\"\}`
-export GMIC_PASSWD=`gmic v - echo_stdout[] \$\{\"gmic_ftp 1\"\}`
+export GMIC_LOGIN=`gmic v - +e[] \$\{\"gmic_ftp 0\"\}`
+export GMIC_PASSWD=`gmic v - +e[] \$\{\"gmic_ftp 1\"\}`
 export GMIC_FTP=ftp.cluster011.hosting.ovh.net
 
 echo "START : "`date` >> /tmp/log_gmic_upload_filters
