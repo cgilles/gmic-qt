@@ -3,7 +3,7 @@
 *  editors, offering hundreds of filters thanks to the underlying G'MIC
 *  image processing framework.
 *
-*  Copyright (C) 2019 Gilles Caulier <caulier dot gilles at gmail dot com>
+*  Copyright (C) 2019-2022 Gilles Caulier <caulier dot gilles at gmail dot com>
 *
 *  Description: digiKam image editor plugin for GmicQt.
 *
@@ -32,7 +32,7 @@
 // Local includes
 
 #include "Common.h"
-#include "Host/host.h"
+#include "Host/GmicQtHost.h"
 #include "gmic.h"
 
 // digiKam includes
@@ -291,7 +291,7 @@ void gmic_qt_get_layers_extent(int* width,
                                int* height,
                                GmicQt::InputMode mode)
 {
-    qDebug() << "Calling gmic_qt_get_layers_extent() : InputMode=" << mode;
+    qDebug() << "Calling gmic_qt_get_layers_extent() : InputMode=" << (int)mode;
 
     gmic_qt_get_image_size(width, height);
 

@@ -3,7 +3,7 @@
 *  editors, offering hundreds of filters thanks to the underlying G'MIC
 *  image processing framework.
 *
-*  Copyright (C) 2019 Gilles Caulier <caulier dot gilles at gmail dot com>
+*  Copyright (C) 2019-2022 Gilles Caulier <caulier dot gilles at gmail dot com>
 *
 *  Description: digiKam image editor plugin for GmicQt.
 *
@@ -37,7 +37,9 @@
 #include "MainWindow.h"
 #include "LanguageSettings.h"
 #include "DialogSettings.h"
-#include "gmic_qt.h"
+#include "GmicQt.h"
+
+using namespace GmicQt;
 
 namespace DigikamEditorGmicQtPlugin
 {
@@ -87,7 +89,7 @@ QList<DPluginAuthor> GmicQtToolPlugin::authors() const
     return QList<DPluginAuthor>()
             << DPluginAuthor(QString::fromUtf8("Gilles Caulier"),
                              QString::fromUtf8("caulier dot gilles at gmail dot com"),
-                             QString::fromUtf8("(C) 2019-2020"))
+                             QString::fromUtf8("(C) 2019-2022"))
             << DPluginAuthor(QString::fromUtf8("Sébastien Fourey"),
                              QString::fromUtf8("Sebastien dot Fourey at ensicaen dot fr"),
                              QString::fromUtf8("(C) 2017-2020"),

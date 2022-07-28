@@ -703,6 +703,7 @@ elseif (${GMIC_QT_HOST} STREQUAL "digikam")
     include_directories($<TARGET_PROPERTY:Digikam::digikamcore,INTERFACE_INCLUDE_DIRECTORIES>/digikam)
 
     set (gmic_qt_SRCS ${gmic_qt_SRCS} src/Host/digiKam/host_digikam.cpp src/Host/digiKam/gmicqttoolplugin.cpp)
+    qt5_wrap_ui(gmic_qt_SRCS ${gmic_qt_FORMS})
     add_definitions(-DGMIC_HOST=digikam)
     add_library(Editor_GmicQt_Plugin
                 MODULE ${gmic_qt_SRCS} ${gmic_qt_QRC} ${qmic_qt_QM})
