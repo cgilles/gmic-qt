@@ -302,8 +302,8 @@ void getLayersExtent(int* width,
     qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "H=" << *height;
 }
 
-void getCroppedImages(gmic_list<gmic_pixel_type>& images,
-                      gmic_list<char>& imageNames,
+void getCroppedImages(cimg_library::CImgList<gmic_pixel_type> & images,
+                      cimg_library::CImgList<char> & imageNames,
                       double x,
                       double y,
                       double width,
@@ -321,8 +321,7 @@ void getCroppedImages(gmic_list<gmic_pixel_type>& images,
 
     ImageIface iface;
     DImg* const input_image = iface.original();
-
-    const bool entireImage = (x < 0) && (y < 0) && (width < 0) && (height < 0);
+    const bool entireImage  = ((x < 0) && (y < 0) && (width < 0) && (height < 0));
 
     if (entireImage)
     {
@@ -347,10 +346,9 @@ void getCroppedImages(gmic_list<gmic_pixel_type>& images,
     convertDImgtoCImg(input_image->copy(ix, iy, iw, ih), images[0]);
 }
 
-void outputImages(gmic_list<gmic_pixel_type>& images,
-                  const gmic_list<char>& imageNames,
-                  GmicQt::OutputMode mode,
-                  const char* verboseLayersLabel)
+void outputImages(cimg_library::CImgList<gmic_pixel_type>& images,
+                  const cimg_library::CImgList<char>& imageNames,
+                  GmicQt::OutputMode mode)
 {
     qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Calling GmicQt outputImages()";
 
