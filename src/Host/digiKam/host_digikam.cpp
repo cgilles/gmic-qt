@@ -41,11 +41,11 @@
 
 using namespace Digikam;
 
-namespace GmicQt
+namespace GmicQtHost
 {
-    const QString HostApplicationName    = QString("digiKam");
-    const char* HostApplicationShortname = GMIC_QT_XSTRINGIFY(GMIC_HOST);
-    const bool DarkThemeIsDefault        = false;
+    const QString ApplicationName          = QString("digiKam");
+    const char* const ApplicationShortname = GMIC_QT_XSTRINGIFY(GMIC_HOST);
+    const bool DarkThemeIsDefault          = false;
 }
 
 // Helper method for DImg to CImg container conversions
