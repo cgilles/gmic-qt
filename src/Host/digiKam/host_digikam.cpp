@@ -27,7 +27,6 @@
 #include <QDataStream>
 #include <QString>
 #include <QTextStream>
-#include <QDebug>
 
 // Local includes
 
@@ -38,6 +37,7 @@
 // digiKam includes
 
 #include "imageiface.h"
+#include "digikam_debug.h"
 
 using namespace Digikam;
 
@@ -46,7 +46,7 @@ namespace GmicQtHost
     const QString ApplicationName          = QString("digiKam");
     const char* const ApplicationShortname = GMIC_QT_XSTRINGIFY(GMIC_HOST);
     const bool DarkThemeIsDefault          = false;
-}
+} // namespace GmicQtHost
 
 // Helper method for DImg to CImg container conversions
 
@@ -72,7 +72,7 @@ void convertCImgtoDImg(const cimg_library::CImg<float>& in, DImg& out, bool sixt
 
     if      (in.spectrum() == 4) // RGB + Alpha
     {
-        qDebug() << "GMicQt: convert CImg to DImg: RGB+Alpha image" << "(" << (sixteenBit+1) * 8 << "bits)";
+        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert CImg to DImg: RGB+Alpha image" << "(" << (sixteenBit+1) * 8 << "bits)";
 
         const float* srcR = in.data(0, 0, 0, 0);
         const float* srcG = in.data(0, 0, 0, 1);
@@ -114,7 +114,7 @@ void convertCImgtoDImg(const cimg_library::CImg<float>& in, DImg& out, bool sixt
     }
     else if (in.spectrum() == 3) // RGB
     {
-        qDebug() << "GMicQt: convert CImg to DImg: RGB image" << "(" << (sixteenBit+1) * 8 << "bits)";
+        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert CImg to DImg: RGB image" << "(" << (sixteenBit+1) * 8 << "bits)";
 
         const float* srcR = in.data(0, 0, 0, 0);
         const float* srcG = in.data(0, 0, 0, 1);
@@ -190,7 +190,7 @@ void convertCImgtoDImg(const cimg_library::CImg<float>& in, DImg& out, bool sixt
     }
     else // Gray levels
     {
-        qDebug() << "GMicQt: convert CImg to DImg: Gray image" << "(" << (sixteenBit+1) * 8 << "bits)";
+        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert CImg to DImg: Gray image" << "(" << (sixteenBit+1) * 8 << "bits)";
 
         const float* src  = in.data(0, 0, 0, 0);
         int height        = out.height();
@@ -236,7 +236,7 @@ void convertDImgtoCImg(const DImg& in, cimg_library::CImg<float>& out)
     float* dstB = out.data(0, 0, 0, 2);
     float* dstA = out.data(0, 0, 0, 3);
 
-    qDebug() << "GMicQt: convert DImg to CImg:" << (in.sixteenBit()+1) * 8 << "bits image";
+    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert DImg to CImg:" << (in.sixteenBit()+1) * 8 << "bits image";
 
     for (int y = 0 ; y < h ; ++y)
     {
@@ -275,10 +275,13 @@ void convertDImgtoCImg(const DImg& in, cimg_library::CImg<float>& out)
 
 // --- GMic-Qt plugin functions ----------------------
 
-void gmic_qt_get_image_size(int* width,
-                            int* height)
+namespace GmicQtHost
 {
-    qDebug() << "Calling gmic_qt_get_image_size()";
+
+void getImageSize(int* width,
+                  int* height)
+{
+    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Calling GmicQt getImageSize()";
 
     ImageIface iface;
     QSize size = iface.originalSize();
@@ -287,27 +290,27 @@ void gmic_qt_get_image_size(int* width,
     *height    = size.height();
 }
 
-void gmic_qt_get_layers_extent(int* width,
-                               int* height,
-                               GmicQt::InputMode mode)
+void getLayersExtent(int* width,
+                     int* height,
+                     GmicQt::InputMode mode)
 {
-    qDebug() << "Calling gmic_qt_get_layers_extent() : InputMode=" << (int)mode;
+    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Calling GmicQt getLayersExtent() : InputMode=" << (int)mode;
 
-    gmic_qt_get_image_size(width, height);
+    getImageSize(width, height);
 
-    qDebug() << "W=" << *width;
-    qDebug() << "H=" << *height;
+    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "W=" << *width;
+    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "H=" << *height;
 }
 
-void gmic_qt_get_cropped_images(gmic_list<gmic_pixel_type>& images,
-                                gmic_list<char>& imageNames,
-                                double x,
-                                double y,
-                                double width,
-                                double height,
-                                GmicQt::InputMode mode)
+void getCroppedImages(gmic_list<gmic_pixel_type>& images,
+                      gmic_list<char>& imageNames,
+                      double x,
+                      double y,
+                      double width,
+                      double height,
+                      GmicQt::InputMode mode)
 {
-    qDebug() << "Calling gmic_qt_get_cropped_images()";
+    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Calling GmicQt getCroppedImages()";
 
     if (mode == GmicQt::InputMode::NoInput)
     {
@@ -344,12 +347,12 @@ void gmic_qt_get_cropped_images(gmic_list<gmic_pixel_type>& images,
     convertDImgtoCImg(input_image->copy(ix, iy, iw, ih), images[0]);
 }
 
-void gmic_qt_output_images(gmic_list<gmic_pixel_type>& images,
-                           const gmic_list<char>& imageNames,
-                           GmicQt::OutputMode mode,
-                           const char* verboseLayersLabel)
+void outputImages(gmic_list<gmic_pixel_type>& images,
+                  const gmic_list<char>& imageNames,
+                  GmicQt::OutputMode mode,
+                  const char* verboseLayersLabel)
 {
-    qDebug() << "Calling gmic_qt_output_images()";
+    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Calling GmicQt outputImages()";
 
     if (images.size() > 0)
     {
@@ -361,15 +364,17 @@ void gmic_qt_output_images(gmic_list<gmic_pixel_type>& images,
     }
 }
 
-void gmic_qt_apply_color_profile(cimg_library::CImg<gmic_pixel_type>& images)
+void applyColorProfile(cimg_library::CImg<gmic_pixel_type>& images)
 {
-    qDebug() << "Calling gmic_qt_apply_color_profile()";
+    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Calling GmicQt applyColorProfile()";
 
     Q_UNUSED(images);
 }
 
-void gmic_qt_show_message(const char* message)
+void showMessage(const char* message)
 {
-    qDebug() << "Calling gmic_qt_show_message()";
-    qDebug() << "GMic-Qt:" << message;
+    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Calling GmicQt showMessage()";
+    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMic-Qt:" << message;
 }
+
+} // namespace GmicQtHost
