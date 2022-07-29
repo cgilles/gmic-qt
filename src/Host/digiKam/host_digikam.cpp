@@ -309,7 +309,7 @@ void gmic_qt_get_cropped_images(gmic_list<gmic_pixel_type>& images,
 {
     qDebug() << "Calling gmic_qt_get_cropped_images()";
 
-    if (mode == GmicQt::NoInput)
+    if (mode == GmicQt::InputMode::NoInput)
     {
         images.assign();
         imageNames.assign();

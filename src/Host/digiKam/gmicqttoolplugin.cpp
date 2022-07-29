@@ -36,8 +36,9 @@
 
 #include "MainWindow.h"
 #include "LanguageSettings.h"
-#include "DialogSettings.h"
+#include "Settings.h"
 #include "GmicQt.h"
+#include "Widgets/InOutPanel.h"
 
 using namespace GmicQt;
 
@@ -117,23 +118,44 @@ void GmicQtToolPlugin::setup(QObject* const parent)
 
 void GmicQtToolPlugin::slotGmicQt()
 {
-    DialogSettings::loadSettings(GmicQt::GuiApplication);
+    // Code inspired from GmicQt.cpp::run() and host_none.cpp::main()
+
+    Settings::load(GmicQt::UserInterfaceMode::Full);
     LanguageSettings::installTranslators();
 
-    disableInputMode(GmicQt::NoInput);
-    // disableInputMode(GmicQt::Active);
-    disableInputMode(GmicQt::All);
-    disableInputMode(GmicQt::ActiveAndBelow);
-    disableInputMode(GmicQt::ActiveAndAbove);
-    disableInputMode(GmicQt::AllVisible);
-    disableInputMode(GmicQt::AllInvisible);
+    // ---
 
-    // disableOutputMode(GmicQt::InPlace);
-    disableOutputMode(GmicQt::NewImage);
-    disableOutputMode(GmicQt::NewLayers);
-    disableOutputMode(GmicQt::NewActiveLayers);
+    std::list<GmicQt::InputMode> disabledInputModes;
+    disabledInputModes.push_back(GmicQt::InputMode::NoInput);
+    // disabledInputModes.push_back(InputMode::Active);
+    disabledInputModes.push_back(GmicQt::InputMode::All);
+    disabledInputModes.push_back(GmicQt::InputMode::ActiveAndBelow);
+    disabledInputModes.push_back(GmicQt::InputMode::ActiveAndAbove);
+    disabledInputModes.push_back(GmicQt::InputMode::AllVisible);
+    disabledInputModes.push_back(GmicQt::InputMode::AllInvisible);
 
-    QPointer<MainWindow> mainWindow = new MainWindow(0);
+    std::list<GmicQt::OutputMode> disabledOutputModes;
+    // disabledOutputModes.push_back(GmicQt::OutputMode::InPlace);
+    disabledOutputModes.push_back(GmicQt::OutputMode::NewImage);
+    disabledOutputModes.push_back(GmicQt::OutputMode::NewLayers);
+    disabledOutputModes.push_back(GmicQt::OutputMode::NewActiveLayers);
+
+    for (const GmicQt::InputMode& mode : disabledInputModes)
+    {
+        GmicQt::InOutPanel::disableInputMode(mode);
+    }
+
+    for (const GmicQt::OutputMode& mode : disabledOutputModes)
+    {
+        GmicQt::InOutPanel::disableOutputMode(mode);
+    }
+
+    // ---
+
+    QPointer<MainWindow> mainWindow = new MainWindow(nullptr);
+    RunParameters parameters        = lastAppliedFilterRunParameters(GmicQt::ReturnedRunParametersFlag::AfterFilterExecution);
+    mainWindow->setPluginParameters(parameters);
+
     // We want a non modal dialog here.
     mainWindow->setWindowFlags(Qt::Tool | Qt::Dialog);
     mainWindow->setWindowModality(Qt::ApplicationModal);
