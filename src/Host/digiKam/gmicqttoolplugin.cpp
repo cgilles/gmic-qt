@@ -152,11 +152,76 @@ void GmicQtToolPlugin::slotGmicQt()
 
     // ---
 
-    QPointer<MainWindow> mainWindow = new MainWindow(nullptr);
-    RunParameters parameters        = lastAppliedFilterRunParameters(GmicQt::ReturnedRunParametersFlag::AfterFilterExecution);
+    /**
+     * We need to backup QApplication instace properties between plugin sessions else we can
+     * seen side effects, for example with the settings to host in RC file.
+     */
+    class Q_DECL_HIDDEN GMicQtWindow : public MainWindow
+    {
+        public:
+
+            GMicQtWindow(QWidget* const parent)
+                : MainWindow(parent)
+            {
+                m_hostOrg  = QCoreApplication::organizationName();
+                m_hostDom  = QCoreApplication::organizationDomain();
+                m_hostName = QCoreApplication::applicationName();
+            }
+
+            ~GMicQtWindow()
+            {
+            }
+
+        protected:
+
+            void showEvent(QShowEvent* event) override
+            {
+                if (m_plugOrg.isEmpty())
+                {
+                    m_plugOrg  = QCoreApplication::organizationName();
+                }
+
+                if (m_plugDom.isEmpty())
+                {
+                    m_plugDom  = QCoreApplication::organizationDomain();
+                }
+
+                if (m_plugName.isEmpty())
+                {
+                    m_plugName = QCoreApplication::applicationName();
+                }
+
+                QCoreApplication::setOrganizationName(m_plugOrg);
+                QCoreApplication::setOrganizationDomain(m_plugDom);
+                QCoreApplication::setApplicationName(m_plugName);
+
+                QWidget::showEvent(event);
+            }
+
+            void closeEvent(QCloseEvent* event) override
+            {
+                QCoreApplication::setOrganizationName(m_hostOrg);
+                QCoreApplication::setOrganizationDomain(m_hostDom);
+                QCoreApplication::setApplicationName(m_hostName);
+                QWidget::closeEvent(event);
+            }
+
+        private:
+
+            QString m_hostName;
+            QString m_hostOrg;
+            QString m_hostDom;
+            QString m_plugName;
+            QString m_plugOrg;
+            QString m_plugDom;
+    };
+
+    QPointer<GMicQtWindow> mainWindow = new GMicQtWindow(nullptr);
+    RunParameters parameters          = lastAppliedFilterRunParameters(GmicQt::ReturnedRunParametersFlag::AfterFilterExecution);
     mainWindow->setPluginParameters(parameters);
 
     // We want a non modal dialog here.
+
     mainWindow->setWindowFlags(Qt::Tool | Qt::Dialog);
     mainWindow->setWindowModality(Qt::ApplicationModal);
 
@@ -170,9 +235,12 @@ void GmicQtToolPlugin::slotGmicQt()
     }
 
     // Wait than main widget is closed.
+
     QEventLoop loop;
+
     connect(mainWindow, SIGNAL(destroyed()),
             &loop, SLOT(quit()));
+
     loop.exec();
 }
 
