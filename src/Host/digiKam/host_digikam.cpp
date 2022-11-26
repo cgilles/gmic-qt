@@ -358,13 +358,14 @@ void outputImages(cimg_library::CImgList<gmic_pixel_type>& images,
         DImg dest;
         convertCImgtoDImg(images[0], dest, iface.originalSixteenBit());
 
-        RunParameters parameters = lastAppliedFilterRunParameters(GmicQt::ReturnedRunParametersFlag::AfterFilterExecution);
+        GmicQt::RunParameters parameters = lastAppliedFilterRunParameters(GmicQt::ReturnedRunParametersFlag::AfterFilterExecution);
         FilterAction action(QLatin1String("GMic-Qt"), 1);
-        action.addParameter(QLatin1String("Command"),    QString::fromStdString(parameters.command));
-        action.addParameter(QLatin1String("FilterPath"), QString::fromStdString(parameters.filterPath));
-        action.addParameter(QLatin1String("InputMode"),  parameters.inputMode);
-        action.addParameter(QLatin1String("OutputMode"), parameters.outputMode);
-        action.addParameter(QLatin1String("FilterName"), QString::fromStdString(parameters.filterName()));
+        action.addParameter(QLatin1String("Command"),       QString::fromStdString(parameters.command));
+        action.addParameter(QLatin1String("FilterPath"),    QString::fromStdString(parameters.filterPath));
+        action.addParameter(QLatin1String("InputMode"),     (int)parameters.inputMode);
+        action.addParameter(QLatin1String("OutputMode"),    (int)parameters.outputMode);
+        action.addParameter(QLatin1String("FilterName"),    QString::fromStdString(parameters.filterName()));
+        action.addParameter(QLatin1String("GmicQtVersion"), GmicQt::gmicVersionString());
 
         iface.setOriginal(QLatin1String("GMic-Qt"), action, dest);
     }
