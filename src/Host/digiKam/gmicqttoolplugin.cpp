@@ -153,7 +153,7 @@ void GmicQtToolPlugin::slotGmicQt()
     // ---
 
     /**
-     * We need to backup QApplication instace properties between plugin sessions else we can
+     * We need to backup QApplication instance properties between plugin sessions else we can
      * seen side effects, for example with the settings to host in RC file.
      */
     class Q_DECL_HIDDEN GMicQtWindow : public MainWindow
