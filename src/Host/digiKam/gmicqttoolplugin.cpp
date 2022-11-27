@@ -34,16 +34,18 @@
 
 // Local includes
 
-#include "MainWindow.h"
 #include "LanguageSettings.h"
 #include "Settings.h"
 #include "GmicQt.h"
 #include "Widgets/InOutPanel.h"
+#include "gmicqtwindow.h"
 
 using namespace GmicQt;
 
 namespace DigikamEditorGmicQtPlugin
 {
+
+GMicQtWindow* s_mainWindow = nullptr;
 
 GmicQtToolPlugin::GmicQtToolPlugin(QObject* const parent)
     : DPluginEditor(parent)
@@ -156,92 +158,35 @@ void GmicQtToolPlugin::slotGmicQt()
      * We need to backup QApplication instance properties between plugin sessions else we can
      * seen side effects, for example with the settings to host in RC file.
      */
-    class Q_DECL_HIDDEN GMicQtWindow : public MainWindow
-    {
-        public:
 
-            GMicQtWindow(QWidget* const parent)
-                : MainWindow(parent)
-            {
-                m_hostOrg  = QCoreApplication::organizationName();
-                m_hostDom  = QCoreApplication::organizationDomain();
-                m_hostName = QCoreApplication::applicationName();
-            }
-
-            ~GMicQtWindow()
-            {
-            }
-
-        protected:
-
-            void showEvent(QShowEvent* event) override
-            {
-                if (m_plugOrg.isEmpty())
-                {
-                    m_plugOrg  = QCoreApplication::organizationName();
-                }
-
-                if (m_plugDom.isEmpty())
-                {
-                    m_plugDom  = QCoreApplication::organizationDomain();
-                }
-
-                if (m_plugName.isEmpty())
-                {
-                    m_plugName = QCoreApplication::applicationName();
-                }
-
-                QCoreApplication::setOrganizationName(m_plugOrg);
-                QCoreApplication::setOrganizationDomain(m_plugDom);
-                QCoreApplication::setApplicationName(m_plugName);
-
-                QWidget::showEvent(event);
-            }
-
-            void closeEvent(QCloseEvent* event) override
-            {
-                QCoreApplication::setOrganizationName(m_hostOrg);
-                QCoreApplication::setOrganizationDomain(m_hostDom);
-                QCoreApplication::setApplicationName(m_hostName);
-                QWidget::closeEvent(event);
-            }
-
-        private:
-
-            QString m_hostName;
-            QString m_hostOrg;
-            QString m_hostDom;
-            QString m_plugName;
-            QString m_plugOrg;
-            QString m_plugDom;
-    };
-
-    QPointer<GMicQtWindow> mainWindow = new GMicQtWindow(nullptr);
-    RunParameters parameters          = lastAppliedFilterRunParameters(GmicQt::ReturnedRunParametersFlag::AfterFilterExecution);
-    mainWindow->setPluginParameters(parameters);
+    s_mainWindow             = new GMicQtWindow(nullptr);
+    RunParameters parameters = lastAppliedFilterRunParameters(GmicQt::ReturnedRunParametersFlag::AfterFilterExecution);
+    s_mainWindow->setPluginParameters(parameters);
 
     // We want a non modal dialog here.
 
-    mainWindow->setWindowFlags(Qt::Tool | Qt::Dialog);
-    mainWindow->setWindowModality(Qt::ApplicationModal);
+    s_mainWindow->setWindowFlags(Qt::Tool | Qt::Dialog);
+    s_mainWindow->setWindowModality(Qt::ApplicationModal);
 
     if (QSettings().value("Config/MainWindowMaximized", false).toBool())
     {
-        mainWindow->showMaximized();
+        s_mainWindow->showMaximized();
     }
     else
     {
-        mainWindow->show();
+        s_mainWindow->show();
     }
 
     // Wait than main widget is closed.
 
     QEventLoop loop;
 
-    connect(mainWindow, SIGNAL(destroyed()),
+    connect(s_mainWindow, SIGNAL(destroyed()),
             &loop, SLOT(quit()));
 
     loop.exec();
+
+    delete s_mainWindow;
 }
 
 } // namespace DigikamEditorGmicQtPlugin

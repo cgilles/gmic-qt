@@ -22,45 +22,47 @@
 *
 */
 
-#ifndef DIGIKAM_GMICQT_TOOL_PLUGIN_H
-#define DIGIKAM_GMICQT_TOOL_PLUGIN_H
+#ifndef DIGIKAM_GMICQT_WINDOW_H
+#define DIGIKAM_GMICQT_WINDOW_H
+
+// Qt includes
+
+#include <QString>
+#include <QCloseEvent>
+#include <QShowEvent>
+#include <QWidget>
 
 // Local includes
 
-#include "dplugineditor.h"
-
-#define DPLUGIN_IID "org.kde.digikam.plugin.editor.GmicQt"
-
-using namespace Digikam;
+#include "MainWindow.h"
 
 namespace DigikamEditorGmicQtPlugin
 {
 
-class GmicQtToolPlugin : public DPluginEditor
+class GMicQtWindow : public GmicQt::MainWindow
 {
-    Q_OBJECT
-    Q_PLUGIN_METADATA(IID DPLUGIN_IID)
-    Q_INTERFACES(Digikam::DPluginEditor)
-
 public:
 
-    explicit GmicQtToolPlugin(QObject* const parent = nullptr);
-    ~GmicQtToolPlugin();
+    GMicQtWindow(QWidget* const parent);
+    ~GMicQtWindow();
 
-    QString name()                 const override;
-    QString iid()                  const override;
-    QIcon   icon()                 const override;
-    QString details()              const override;
-    QString description()          const override;
-    QList<DPluginAuthor> authors() const override;
+    void saveParameters();
 
-    void setup(QObject* const)           override;
+protected:
 
-private Q_SLOTS:
+    void showEvent(QShowEvent* event)   override;
+    void closeEvent(QCloseEvent* event) override;
 
-    void slotGmicQt();
+private:
+
+    QString m_hostName;
+    QString m_hostOrg;
+    QString m_hostDom;
+    QString m_plugName;
+    QString m_plugOrg;
+    QString m_plugDom;
 };
 
 } // namespace DigikamEditorGmicQtPlugin
 
-#endif // DIGIKAM_GMICQT_TOOL_PLUGIN_H
+#endif // DIGIKAM_GMICQT_WINDOW_H

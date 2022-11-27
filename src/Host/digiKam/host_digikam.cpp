@@ -30,6 +30,7 @@
 
 // Local includes
 
+#include "gmicqtwindow.h"
 #include "Common.h"
 #include "Host/GmicQtHost.h"
 #include "gmic.h"
@@ -38,6 +39,13 @@
 
 #include "imageiface.h"
 #include "digikam_debug.h"
+
+namespace DigikamEditorGmicQtPlugin
+{
+
+extern GMicQtWindow* s_mainWindow;
+
+} // namespace DigikamEditorGmicQtPlugin
 
 using namespace Digikam;
 
@@ -346,6 +354,19 @@ void getCroppedImages(cimg_library::CImgList<gmic_pixel_type> & images,
     convertDImgtoCImg(input_image->copy(ix, iy, iw, ih), images[0]);
 }
 
+void applyColorProfile(cimg_library::CImg<gmic_pixel_type>& images)
+{
+    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Calling GmicQt applyColorProfile()";
+
+    Q_UNUSED(images);
+}
+
+void showMessage(const char* message)
+{
+    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Calling GmicQt showMessage()";
+    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMic-Qt:" << message;
+}
+
 void outputImages(cimg_library::CImgList<gmic_pixel_type>& images,
                   const cimg_library::CImgList<char>& imageNames,
                   GmicQt::OutputMode mode)
@@ -358,6 +379,11 @@ void outputImages(cimg_library::CImgList<gmic_pixel_type>& images,
         DImg dest;
         convertCImgtoDImg(images[0], dest, iface.originalSixteenBit());
 
+        if (DigikamEditorGmicQtPlugin::s_mainWindow)
+        {
+            DigikamEditorGmicQtPlugin::s_mainWindow->saveParameters();
+        }
+
         GmicQt::RunParameters parameters = lastAppliedFilterRunParameters(GmicQt::ReturnedRunParametersFlag::AfterFilterExecution);
         FilterAction action(QLatin1String("GMic-Qt"), 1);
         action.addParameter(QLatin1String("Command"),       QString::fromStdString(parameters.command));
@@ -369,19 +395,6 @@ void outputImages(cimg_library::CImgList<gmic_pixel_type>& images,
 
         iface.setOriginal(QLatin1String("GMic-Qt"), action, dest);
     }
-}
-
-void applyColorProfile(cimg_library::CImg<gmic_pixel_type>& images)
-{
-    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Calling GmicQt applyColorProfile()";
-
-    Q_UNUSED(images);
-}
-
-void showMessage(const char* message)
-{
-    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Calling GmicQt showMessage()";
-    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMic-Qt:" << message;
 }
 
 } // namespace GmicQtHost
