@@ -177,6 +177,10 @@ void GmicQtToolPlugin::slotGmicQt()
         s_mainWindow->show();
     }
 
+    // Bug #462066 : force to load filters list at start-up.
+
+    s_mainWindow->updateFiltersFromSources(0, false);
+
     // Wait than main widget is closed.
 
     QEventLoop loop;

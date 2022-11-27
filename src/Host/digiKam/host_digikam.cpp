@@ -379,6 +379,8 @@ void outputImages(cimg_library::CImgList<gmic_pixel_type>& images,
         DImg dest;
         convertCImgtoDImg(images[0], dest, iface.originalSixteenBit());
 
+        // See bug #462137 : force to save current filter applied to the image to store settings in history.
+
         if (DigikamEditorGmicQtPlugin::s_mainWindow)
         {
             DigikamEditorGmicQtPlugin::s_mainWindow->saveParameters();
