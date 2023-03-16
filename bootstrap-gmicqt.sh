@@ -19,6 +19,8 @@ fi
 cd build
 
 cmake -G "$MAKEFILES_TYPE" . \
+      -DCMAKE_CXX_COMPILER=g++ \
+      -DCMAKE_C_COMPILER=gcc \
       -DCMAKE_BUILD_TYPE=Debug \
       -DCMAKE_INSTALL_PREFIX=/usr \
       -DENABLE_ASAN=OFF \
