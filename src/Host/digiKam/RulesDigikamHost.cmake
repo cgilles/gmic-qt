@@ -52,11 +52,10 @@ string(STRIP "${CMAKE_CXX_FLAGS}" ${CMAKE_CXX_FLAGS})
 
 # Increase the stack size on MacOS targets
 # https://github.com/c-koi/gmic-qt/issues/160#issuecomment-1211248615
+# https://github.com/ethereum/solidity/blob/develop/cmake/EthCompilerSettings.cmake
 
 if (APPLE)
-    set(CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS} -Wl,--stack,16777216")
-    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--stack,16777216")
-    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,--stack,16777216")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-stack_size -Wl,0x1000000")
 endif()
 
 # --- Compilation Rules --------------------------------------------------------
