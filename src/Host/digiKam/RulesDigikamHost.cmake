@@ -64,8 +64,6 @@ if (APPLE)
         set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--stack,16777216")
         set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,--stack,16777216")
 
-    endif()
-
     elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
 
         message(STATUS "Increase Clang linker stack size to 16MB under MacOS")
