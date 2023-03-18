@@ -3,7 +3,7 @@
 *  editors, offering hundreds of filters thanks to the underlying G'MIC
 *  image processing framework.
 *
-*  Copyright (C) 2019-2022 Gilles Caulier <caulier dot gilles at gmail dot com>
+*  Copyright (C) 2019-2023 Gilles Caulier <caulier dot gilles at gmail dot com>
 *
 *  Description: digiKam image editor plugin for GmicQt.
 *
@@ -78,7 +78,7 @@ QString GmicQtToolPlugin::description() const
 
 QString GmicQtToolPlugin::details() const
 {
-    return tr("<p>This Image Editor tool for G'MIC-Qt.</p>"
+    return tr("<p>An Image Editor tool for G'MIC-Qt.</p>"
               "<p>G'MIC-Qt is a versatile front-end to the image processing framework G'MIC</p>"
               "<p>G'MIC is a full-featured open-source framework for image processing. "
               "It provides several user interfaces to convert / manipulate / filter / "
@@ -92,14 +92,14 @@ QList<DPluginAuthor> GmicQtToolPlugin::authors() const
     return QList<DPluginAuthor>()
             << DPluginAuthor(QString::fromUtf8("Gilles Caulier"),
                              QString::fromUtf8("caulier dot gilles at gmail dot com"),
-                             QString::fromUtf8("(C) 2019-2022"))
+                             QString::fromUtf8("(C) 2019-2023"))
             << DPluginAuthor(QString::fromUtf8("Sébastien Fourey"),
                              QString::fromUtf8("Sebastien dot Fourey at ensicaen dot fr"),
-                             QString::fromUtf8("(C) 2017-2020"),
+                             QString::fromUtf8("(C) 2017-2023"),
                              QString::fromUtf8("G'MIC plugin"))
             << DPluginAuthor(QString::fromUtf8("David Tschumperlé"),
                              QString::fromUtf8("David dot Tschumperle at ensicaen dot fr"),
-                             QString::fromUtf8("(C) 2008-2020"),
+                             QString::fromUtf8("(C) 2008-2023"),
                              QString::fromUtf8("G'MIC core"))
             ;
 }
@@ -177,7 +177,7 @@ void GmicQtToolPlugin::slotGmicQt()
         s_mainWindow->show();
     }
 
-    // Bug #462066 : force to load filters list at start-up.
+    // Bug #462066: force to load filters list at start-up.
 
     s_mainWindow->updateFiltersFromSources(0, false);
 
