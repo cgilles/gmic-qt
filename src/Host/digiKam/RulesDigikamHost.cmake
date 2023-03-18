@@ -57,6 +57,7 @@ string(STRIP "${CMAKE_CXX_FLAGS}" ${CMAKE_CXX_FLAGS})
 if (APPLE)
     message(STATUS "Increase linker stack size to 16MB under MacOS")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-stack_size -Wl,0x1000000")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-stack_size -Wl,0x1000000")
 endif()
 
 # --- Compilation Rules --------------------------------------------------------
