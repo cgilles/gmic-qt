@@ -58,7 +58,7 @@ if (APPLE)
     message(STATUS "Increase linker stack size to 16MB under MacOS")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-stack_size -Wl,0x1000000")
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-stack_size -Wl,0x1000000")
-    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,-stack_size -Wl,0x1000000")
+#    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,-stack_size -Wl,0x1000000")
 endif()
 
 # --- Compilation Rules --------------------------------------------------------
@@ -72,6 +72,7 @@ set (gmic_qt_SRCS ${gmic_qt_SRCS} src/Host/digiKam/host_digikam.cpp
 
 qt5_wrap_ui(gmic_qt_SRCS ${gmic_qt_FORMS})
 add_definitions(-DGMIC_HOST=digikam)
+add_definitions(-D_GMIC_QT_DISABLE_THEMING_)
 add_library(Editor_GmicQt_Plugin
             MODULE ${gmic_qt_SRCS} ${gmic_qt_QRC} ${qmic_qt_QM})
 
