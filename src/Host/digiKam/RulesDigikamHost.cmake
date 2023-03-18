@@ -55,10 +55,27 @@ string(STRIP "${CMAKE_CXX_FLAGS}" ${CMAKE_CXX_FLAGS})
 # https://github.com/ethereum/solidity/blob/develop/cmake/EthCompilerSettings.cmake
 
 if (APPLE)
-    message(STATUS "Increase linker stack size to 16MB under MacOS")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-stack_size -Wl,0x1000000")
-    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-stack_size -Wl,0x1000000")
-#    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,-stack_size -Wl,0x1000000")
+
+    if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
+
+        message(STATUS "Increase GCC linker stack size to 16MB under MacOS")
+
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--stack,16777216")
+        set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--stack,16777216")
+        set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,--stack,16777216")
+
+    endif()
+
+    elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+
+        message(STATUS "Increase Clang linker stack size to 16MB under MacOS")
+
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-stack_size -Wl,0x1000000")
+        set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-stack_size -Wl,0x1000000")
+#       set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,-stack_size -Wl,0x1000000")
+
+    endif()
+
 endif()
 
 # --- Compilation Rules --------------------------------------------------------
