@@ -55,6 +55,7 @@ string(STRIP "${CMAKE_CXX_FLAGS}" ${CMAKE_CXX_FLAGS})
 # https://github.com/ethereum/solidity/blob/develop/cmake/EthCompilerSettings.cmake
 
 if (APPLE)
+    message(STATUS "Increase linker stack size to 16MB under MacOS")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-stack_size -Wl,0x1000000")
 endif()
 
