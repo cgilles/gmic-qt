@@ -193,13 +193,22 @@ void GmicQtToolPlugin::slotGmicQt()
      * seen side effects, for example with the settings to host in RC file.
      */
 
-    s_mainWindow             = new GMicQtWindow(this, nullptr);
+    s_mainWindow             = new GMicQtWindow(this, qApp->activeWindow());
     RunParameters parameters = lastAppliedFilterRunParameters(GmicQt::ReturnedRunParametersFlag::AfterFilterExecution);
     s_mainWindow->setPluginParameters(parameters);
 
     // We want a non modal dialog here.
 
+#ifdef Q_OS_MACOS
+
     s_mainWindow->setWindowFlags(Qt::Tool | Qt::Dialog);
+
+#else
+
+    s_mainWindow->setWindowFlags(Qt::Dialog);
+
+#endif
+
     s_mainWindow->setWindowModality(Qt::ApplicationModal);
 
     if (QSettings().value("Config/MainWindowMaximized", false).toBool())
@@ -215,6 +224,10 @@ void GmicQtToolPlugin::slotGmicQt()
 
     s_mainWindow->updateFiltersFromSources(0, false);
 
+    // Make it destroy itself on close (signaling the event loop)
+
+    s_mainWindow->setAttribute(Qt::WA_DeleteOnClose);
+
     // Wait than main widget is closed.
 
     QEventLoop loop;
@@ -223,8 +236,6 @@ void GmicQtToolPlugin::slotGmicQt()
             &loop, SLOT(quit()));
 
     loop.exec();
-
-    delete s_mainWindow;
 }
 
 } // namespace DigikamEditorGmicQtPlugin
