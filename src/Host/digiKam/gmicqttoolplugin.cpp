@@ -32,6 +32,12 @@
 #include <QEventLoop>
 #include <QPointer>
 
+// Libfftw includes
+
+#ifdef cimg_use_fftw3
+#   include <fftw3.h>
+#endif
+
 // Local includes
 
 #include "LanguageSettings.h"
@@ -86,7 +92,12 @@ QString GmicQtToolPlugin::details() const
               "visualize generic image datasets, ranging from 1D scalar signals to 3D+t sequences "
               "of multi-spectral volumetric images, hence including 2D color images.</p>"
               "<p>More details: https://gmic.eu/</p>"
-              "<p>GMic version: %1</p>").arg(gmic_version);
+              "<p>GMic version: %1</p>"
+             ).arg(gmic_version)
+#ifdef cimg_use_fftw3
+             + QString::fromUtf8("<p>Libfftw version: %1</p>").arg(fftw_version)
+#endif
+    ;
 }
 
 QList<DPluginAuthor> GmicQtToolPlugin::authors() const
