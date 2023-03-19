@@ -7,18 +7,33 @@ Under a Linux Ubuntu 22.04:
 5/ when configuration is done copy the gmic directory contents to the DK::gmic-qt/gmic.
 6/ remove DK::gmic-qt/gmic/.gitignore.
 7/ copy the gmic-qt contents to the DK::gmic-qt/gmic.
-8/ add the "digikam" host rules at end DK::gmic-qt/CmakeLists.txt:
+8/ patch the end of DK::gmic-qt/CmakeLists.txt to add the "digikam" host rules:
 
-elseif (${GMIC_QT_HOST} STREQUAL "digikam")                                                             +
-                                                                                                        +
-    include("src/Host/digiKam/MacroUtils.cmake")                                                        +
-    include("src/Host/digiKam/RulesDigikamHost.cmake")                                                  +
-                                                                                                        +
++ elseif (${GMIC_QT_HOST} STREQUAL "digikam")
++
++    include("src/Host/digiKam/MacroUtils.cmake")
++    include("src/Host/digiKam/RulesDigikamHost.cmake")
++
 else()
     message(FATAL_ERROR "GMIC_QT_HOST is not defined as gimp, gimp3, krita, none, paintdotnet or 8bf")
 endif()
 
 feature_summary(WHAT ALL FATAL_ON_MISSING_REQUIRED_PACKAGES)
 
-9/ check if new files are append with "git status" and add file to git reporsitory
-10/ check compilation with "digikam" host.
+9/ patch DK::gmic-qt/CmakeLists.txt to use local gmic dir:
+
+  option(ENABLE_DYNAMIC_LINKING "Dynamically link the binaries to the GMIC shared library" OFF)
+
+  set (GMIC_LIB_PATH "${GMIC_PATH}" CACHE STRING "Define the path to the GMIC shared library")
+-  if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../src/gmic.cpp")
+-  set (GMIC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../src" CACHE STRING "Define the path to the gmic headers")
++  if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/gmic/src/gmic.cpp")
++  set (GMIC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/gmic/src" CACHE STRING "Define the path to the gmic headers")
+  else()
+  set (GMIC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../gmic/src" CACHE STRING "Define the path to the gmic headers")
+  endif()
+
+  message("G'MIC path: " ${GMIC_PATH})
+
+10/ check if new files are append with "git status" and add file to git reporsitory
+11/ check compilation with "digikam" host.
