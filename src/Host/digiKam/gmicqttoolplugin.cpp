@@ -161,7 +161,7 @@ void GmicQtToolPlugin::slotGmicQt()
      * seen side effects, for example with the settings to host in RC file.
      */
 
-    s_mainWindow             = new GMicQtWindow(nullptr);
+    s_mainWindow             = new GMicQtWindow(this, nullptr);
     RunParameters parameters = lastAppliedFilterRunParameters(GmicQt::ReturnedRunParametersFlag::AfterFilterExecution);
     s_mainWindow->setPluginParameters(parameters);
 

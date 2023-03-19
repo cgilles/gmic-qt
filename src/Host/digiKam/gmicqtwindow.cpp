@@ -27,20 +27,75 @@
 // Qt includes
 
 #include <QApplication>
+#include <QHBoxLayout>
+#include <QPushButton>
+#include <QMenu>
+#include <QUrl>
+#include <QLabel>
+#include <QAction>
+#include <QPointer>
+#include <QDesktopServices>
+
+// digiKam includes
+
+#include "digikam_debug.h"
+#include "dpluginaboutdlg.h"
 
 namespace DigikamEditorGmicQtPlugin
 {
 
-GMicQtWindow::GMicQtWindow(QWidget* const parent)
-    : GmicQt::MainWindow(parent)
+GMicQtWindow::GMicQtWindow(DPlugin*const tool, QWidget* const parent)
+    : GmicQt::MainWindow(parent),
+      m_tool            (tool)
 {
-    m_hostOrg  = QCoreApplication::organizationName();
-    m_hostDom  = QCoreApplication::organizationDomain();
-    m_hostName = QCoreApplication::applicationName();
+    m_hostOrg               = QCoreApplication::organizationName();
+    m_hostDom               = QCoreApplication::organizationDomain();
+    m_hostName              = QCoreApplication::applicationName();
+
+    QHBoxLayout* const hlay = findChild<QHBoxLayout*>("horizontalLayout");
+
+    if (hlay)
+    {
+        QPushButton* const help    = new QPushButton(this);
+        help->setText(tr("Help"));
+        help->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+
+        QMenu* const menu          = new QMenu(help);
+        QAction* const webAction   = menu->addAction(tr("GMic Website..."));
+        QAction* const aboutAction = menu->addAction(tr("About..."));
+        help->setMenu(menu);
+
+        connect(webAction, SIGNAL(triggered()),
+                this, SLOT(slotOpenWebSite()));
+
+        connect(aboutAction, SIGNAL(triggered()),
+                this, SLOT(slotAboutPlugin()));
+
+        hlay->insertWidget(0, help);
+
+        QLabel* const lbl = findChild<QLabel*>("messageLabel");
+
+        if (lbl)
+        {
+            hlay->setStretchFactor(lbl, 10);
+        }
+    }
 }
 
 GMicQtWindow::~GMicQtWindow()
 {
+}
+
+void GMicQtWindow::slotAboutPlugin()
+{
+    QPointer<DPluginAboutDlg> dlg = new DPluginAboutDlg(m_tool);
+    dlg->exec();
+    delete dlg;
+}
+
+void GMicQtWindow::slotOpenWebSite()
+{
+    QDesktopServices::openUrl(QUrl(QLatin1String("https://gmic.eu/")));
 }
 
 void GMicQtWindow::saveParameters()

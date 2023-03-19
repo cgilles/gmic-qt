@@ -35,15 +35,20 @@
 // Local includes
 
 #include "MainWindow.h"
+#include "gmicqttoolplugin.h"
+
+using namespace Digikam;
 
 namespace DigikamEditorGmicQtPlugin
 {
 
 class GMicQtWindow : public GmicQt::MainWindow
 {
+    Q_OBJECT
+
 public:
 
-    GMicQtWindow(QWidget* const parent);
+    explicit GMicQtWindow(DPlugin* const tool, QWidget* const parent);
     ~GMicQtWindow();
 
     void saveParameters();
@@ -53,14 +58,21 @@ protected:
     void showEvent(QShowEvent* event)   override;
     void closeEvent(QCloseEvent* event) override;
 
+private Q_SLOTS:
+
+    void slotAboutPlugin();
+    void slotOpenWebSite();
+
 private:
 
-    QString m_hostName;
-    QString m_hostOrg;
-    QString m_hostDom;
-    QString m_plugName;
-    QString m_plugOrg;
-    QString m_plugDom;
+    QString  m_hostName;
+    QString  m_hostOrg;
+    QString  m_hostDom;
+    QString  m_plugName;
+    QString  m_plugOrg;
+    QString  m_plugDom;
+
+    DPlugin* m_tool = nullptr;
 };
 
 } // namespace DigikamEditorGmicQtPlugin
