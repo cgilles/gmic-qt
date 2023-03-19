@@ -3,10 +3,11 @@ Under a Linux Ubuntu 22.04:
 1/ checkout gmic at the desired release tag.
 2/ checkout gmic-qt at the same desired release tag.
 3/ fix dependencies to complete the configuration of source code.
-4/ use the bootstrap-gmicqt.sh to configure with "none" host.
+4/ use the bootstrap-gmicqt.sh to configure gmic directory with "none" host.
 5/ when configuration is done copy the gmic directory contents to the DK::gmic-qt/gmic.
-6/ copy the gmic-qt contents to the DK::gmic-qt/gmic.
-7/ add the "digikam" host rules at end DK::gmic-qt/CmakeLists.txt:
+6/ remove DK::gmic-qt/gmic/.gitignore.
+7/ copy the gmic-qt contents to the DK::gmic-qt/gmic.
+8/ add the "digikam" host rules at end DK::gmic-qt/CmakeLists.txt:
 
 elseif (${GMIC_QT_HOST} STREQUAL "digikam")                                                             +
                                                                                                         +
@@ -19,5 +20,5 @@ endif()
 
 feature_summary(WHAT ALL FATAL_ON_MISSING_REQUIRED_PACKAGES)
 
-8/ check if new files are append with "git status" and add file to git reporsitory
-9/ check compilation with "digikam" host.
+9/ check if new files are append with "git status" and add file to git reporsitory
+10/ check compilation with "digikam" host.
