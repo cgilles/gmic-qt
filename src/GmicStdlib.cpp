@@ -23,17 +23,20 @@
  *
  */
 #include "GmicStdlib.h"
+#include <QCryptographicHash>
 #include <QDebug>
+#include <QDir>
 #include <QFile>
 #include <QFileInfo>
 #include <QList>
+#include <QRegularExpression>
+#include <QRegularExpressionMatch>
 #include <QString>
 #include <QStringList>
+#include <QtGlobal>
 #include "Common.h"
+#include "GmicQt.h"
 #include "Utils.h"
-#ifndef gmic_core
-#include "CImg.h"
-#endif
 #include "gmic.h"
 
 namespace GmicQt
@@ -41,7 +44,7 @@ namespace GmicQt
 
 QByteArray GmicStdLib::Array;
 
-void GmicStdLib::loadStdLib() // TODO : Is this useful ?
+void GmicStdLib::loadStdLib() // TODO : Remove
 {
   QString path = QString("%1update%2.gmic").arg(gmicConfigPath(false)).arg(gmic_version);
   QFileInfo info(path);
@@ -53,6 +56,47 @@ void GmicStdLib::loadStdLib() // TODO : Is this useful ?
   } else {
     Array = stdlib.readAll();
   }
+}
+
+QString GmicStdLib::substituteSourceVariables(QString text)
+{
+  QRegularExpression reVariables[] = {
+#ifdef _IS_WINDOWS_
+      QRegularExpression{"%([A-Za-z_][A-Za-z0-9_]+)%"} //
+#else
+      QRegularExpression{"\\$([A-Za-z_][A-Za-z0-9_]+)"},  //
+      QRegularExpression{"\\${([A-Za-z_][A-Za-z0-9_]+)}"} //
+#endif
+  };
+
+#ifdef _IS_WINDOWS_
+  text.replace("%VERSION%", QString::number(GmicQt::GmicVersion));
+#else
+  text.replace("$VERSION", QString::number(GmicQt::GmicVersion));
+  text.replace("${VERSION}", QString::number(GmicQt::GmicVersion));
+#endif
+
+  for (QRegularExpression re : reVariables) {
+    QRegularExpressionMatch match;
+    while ((match = re.match(text)).hasMatch()) {
+      text.replace(match.captured(0), QString::fromLocal8Bit(qgetenv(match.captured(1).toLocal8Bit().constData())));
+    }
+  }
+  return text;
+}
+
+QStringList GmicStdLib::substituteSourceVariables(QStringList list)
+{
+  QStringList result;
+  for (const QString & str : list) {
+    result << substituteSourceVariables(str);
+  }
+  return result;
+}
+
+QByteArray GmicStdLib::hash()
+{
+  return QCryptographicHash::hash(Array, QCryptographicHash::Sha1);
 }
 
 } // namespace GmicQt

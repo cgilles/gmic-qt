@@ -26,7 +26,6 @@
 #define GMIC_QT_DIALOGSETTINGS_H
 
 #include <QDialog>
-#include "GmicQt.h"
 class QCloseEvent;
 class QSettings;
 
@@ -44,6 +43,7 @@ class DialogSettings : public QDialog {
 public:
   explicit DialogSettings(QWidget * parent);
   ~DialogSettings() override;
+  void sourcesStatus(bool & modified, bool & internetUpdateRequired);
 
 public slots:
   void onRadioLeftPreviewToggled(bool);
@@ -53,6 +53,7 @@ public slots:
   void enableUpdateButton();
   void onUpdatePeriodicityChanged(int i);
   void onColorDialogsToggled(bool);
+  void onFileDialogsToggled(bool);
   void done(int r) override;
   void onVisibleLogosToggled(bool);
   void onPreviewTimeoutChange(int);

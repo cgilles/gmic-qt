@@ -25,7 +25,6 @@
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QDebug>
-#include <QDesktopWidget>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QFont>
@@ -34,15 +33,14 @@
 #include <QMessageBox>
 #include <QPainter>
 #include <QRegularExpression>
+#include <QVector>
 #include <algorithm>
 #include <fstream>
 #include <iostream>
 #include "GmicQt.h"
 #include "Host/GmicQtHost.h"
 #include "Host/None/ImageDialog.h"
-#ifndef gmic_core
-#include "CImg.h"
-#endif
+#include "Settings.h"
 #include "gmic.h"
 
 #define STRINGIFY(X) #X
@@ -51,11 +49,11 @@
 namespace gmic_qt_standalone
 {
 
-QImage input_image;
-QString current_image_filename;
-QString input_image_filename;
+QVector<QImage> input_images;
+QVector<QString> current_image_filenames;
+QVector<QString> input_image_filenames;
 QString output_image_filename;
-int jpeg_quality = -1;
+int jpeg_quality = ImageDialog::UNSPECIFIED_JPEG_QUALITY;
 
 QWidget * visibleMainWindow()
 {
@@ -74,17 +72,20 @@ void askForInputImageFilename()
   QStringList extensions;
   QString filters;
   gmic_qt_standalone::ImageDialog::supportedImageFormats(extensions, filters);
-  QString filename = QFileDialog::getOpenFileName(mainWidget, QObject::tr("Select an image to open..."), ".", filters, nullptr);
-  if (!filename.isEmpty() && QFileInfo(filename).isReadable() && input_image.load(filename)) {
-    input_image = input_image.convertToFormat(QImage::Format_ARGB32);
-    current_image_filename = QFileInfo(filename).fileName();
+  const QFileDialog::Options options = GmicQt::Settings::nativeFileDialogs() ? QFileDialog::Options() : QFileDialog::DontUseNativeDialog;
+  QString filename = QFileDialog::getOpenFileName(mainWidget, QObject::tr("Select an image to open..."), ".", filters, nullptr, options);
+  input_images.resize(1);
+  current_image_filenames.resize(1);
+  if (!filename.isEmpty() && QFileInfo(filename).isReadable() && input_images.first().load(filename)) {
+    input_images.first() = input_images.first().convertToFormat(QImage::Format_ARGB32);
+    current_image_filenames.first() = QFileInfo(filename).fileName();
   } else {
     if (!filename.isEmpty()) {
       QMessageBox::warning(mainWidget, QObject::tr("Error"), QObject::tr("Could not open file."));
     }
-    input_image.load(":/resources/gmicky.png");
-    input_image = input_image.convertToFormat(QImage::Format_ARGB32);
-    current_image_filename = QObject::tr("Default image");
+    input_images.first().load(":/resources/gmicky.png");
+    input_images.first() = input_images.first().convertToFormat(QImage::Format_ARGB32);
+    current_image_filenames.first() = QObject::tr("Default image");
   }
 }
 const QImage & transparentImage()
@@ -115,9 +116,9 @@ QString imageName(const char * text)
       result = QString::fromUtf8(start + 5, (unsigned int)(ps - start - 5));
       result.chop(1);
       for (QChar & c : result) {
-        if (c == 21) {
+        if (c == char(21)) {
           c = '(';
-        } else if (c == 22) {
+        } else if (c == char(22)) {
           c = ')';
         }
       }
@@ -136,35 +137,42 @@ std::string basename(const std::string & text)
   }
 }
 
+const QImage & inputImage(int n)
+{
+  if (n < gmic_qt_standalone::input_images.size() && !gmic_qt_standalone::input_images[n].isNull()) {
+    return gmic_qt_standalone::input_images[n];
+  } else {
+    return gmic_qt_standalone::transparentImage();
+  }
+}
+
 } // namespace gmic_qt_standalone
 
 namespace GmicQtHost
 {
 const QString ApplicationName;
 const char * const ApplicationShortname = XSTRINGIFY(GMIC_HOST);
-const bool DarkThemeIsDefault = false;
+const bool DarkThemeIsDefault = true;
 
 void getLayersExtent(int * width, int * height, GmicQt::InputMode)
 {
-  if (gmic_qt_standalone::input_image.isNull()) {
+  if (gmic_qt_standalone::input_images.isEmpty()) {
     if (gmic_qt_standalone::visibleMainWindow()) {
       gmic_qt_standalone::askForInputImageFilename();
-      *width = gmic_qt_standalone::input_image.width();
-      *height = gmic_qt_standalone::input_image.height();
+      *width = gmic_qt_standalone::input_images.first().width();
+      *height = gmic_qt_standalone::input_images.first().height();
     } else {
       *width = 640;
       *height = 480;
     }
   } else {
-    *width = gmic_qt_standalone::input_image.width();
-    *height = gmic_qt_standalone::input_image.height();
+    *width = gmic_qt_standalone::input_images.first().width();
+    *height = gmic_qt_standalone::input_images.first().height();
   }
 }
 
-void getCroppedImages(gmic_list<float> & images, gmic_list<char> & imageNames, double x, double y, double width, double height, GmicQt::InputMode mode)
+void getCroppedImages(gmic_library::gmic_list<float> & images, gmic_library::gmic_list<char> & imageNames, double x, double y, double width, double height, GmicQt::InputMode mode)
 {
-  const QImage & input_image = gmic_qt_standalone::input_image.isNull() ? gmic_qt_standalone::transparentImage() : gmic_qt_standalone::input_image;
-
   const bool entireImage = x < 0 && y < 0 && width < 0 && height < 0;
   if (entireImage) {
     x = 0.0;
@@ -178,24 +186,27 @@ void getCroppedImages(gmic_list<float> & images, gmic_list<char> & imageNames, d
     return;
   }
 
-  images.assign(1);
-  imageNames.assign(1);
+  images.assign(gmic_qt_standalone::input_images.size());
+  imageNames.assign(gmic_qt_standalone::input_images.size());
 
-  QString noParenthesisName(gmic_qt_standalone::current_image_filename);
-  noParenthesisName.replace(QChar('('), QChar(21)).replace(QChar(')'), QChar(22));
+  for (int i = 0; i < gmic_qt_standalone::input_images.size(); ++i) {
+    QString noParenthesisName(gmic_qt_standalone::current_image_filenames[i]);
+    noParenthesisName.replace(QChar('('), QChar(21)).replace(QChar(')'), QChar(22));
 
-  QString name = QString("pos(0,0),name(%1)").arg(noParenthesisName);
-  QByteArray ba = name.toUtf8();
-  gmic_image<char>::string(ba.constData()).move_to(imageNames[0]);
+    QString name = QString("pos(0,0),name(%1)").arg(noParenthesisName);
+    QByteArray ba = name.toUtf8();
+    gmic_library::gmic_image<char>::string(ba.constData()).move_to(imageNames[i]);
 
-  const int ix = static_cast<int>(entireImage ? 0 : std::floor(x * input_image.width()));
-  const int iy = static_cast<int>(entireImage ? 0 : std::floor(y * input_image.height()));
-  const int iw = entireImage ? input_image.width() : std::min(input_image.width() - ix, static_cast<int>(1 + std::ceil(width * input_image.width())));
-  const int ih = entireImage ? input_image.height() : std::min(input_image.height() - iy, static_cast<int>(1 + std::ceil(height * input_image.height())));
-  GmicQt::convertQImageToCImg(input_image.copy(ix, iy, iw, ih), images[0]);
+    const QImage & input_image = gmic_qt_standalone::inputImage(i);
+    const int ix = static_cast<int>(entireImage ? 0 : std::floor(x * input_image.width()));
+    const int iy = static_cast<int>(entireImage ? 0 : std::floor(y * input_image.height()));
+    const int iw = entireImage ? input_image.width() : std::min(input_image.width() - ix, static_cast<int>(1 + std::ceil(width * input_image.width())));
+    const int ih = entireImage ? input_image.height() : std::min(input_image.height() - iy, static_cast<int>(1 + std::ceil(height * input_image.height())));
+    GmicQt::convertQImageToGmicImage(input_image.copy(ix, iy, iw, ih), images[i]);
+  }
 }
 
-void outputImages(gmic_list<float> & images, const gmic_list<char> & imageNames, GmicQt::OutputMode mode)
+void outputImages(gmic_library::gmic_list<float> & images, const gmic_library::gmic_list<char> & imageNames, GmicQt::OutputMode mode)
 {
   if (images.size() > 0) {
     if (gmic_qt_standalone::output_image_filename.isEmpty()) {
@@ -208,24 +219,32 @@ void outputImages(gmic_list<float> & images, const gmic_list<char> & imageNames,
           dialog->addImage(images[i], name);
         }
         dialog->exec();
-        gmic_qt_standalone::input_image = dialog->currentImage();
-        gmic_qt_standalone::current_image_filename = gmic_qt_standalone::imageName((const char *)imageNames[dialog->currentImageIndex()]);
+        gmic_qt_standalone::input_images.resize(1);
+        gmic_qt_standalone::input_images.first() = dialog->currentImage();
+        gmic_qt_standalone::current_image_filenames.resize(1);
+        gmic_qt_standalone::current_image_filenames.first() = gmic_qt_standalone::imageName((const char *)imageNames[dialog->currentImageIndex()]);
         delete dialog;
       }
     } else {
-      GmicQt::convertCImgToQImage(images[0], gmic_qt_standalone::input_image);
-      QString outputFilename = gmic_qt_standalone::output_image_filename;
-      if (outputFilename.contains("%b")) {
-        const QString basename = QFileInfo(gmic_qt_standalone::input_image_filename).completeBaseName();
-        outputFilename.replace("%b", basename);
+      gmic_qt_standalone::input_images.resize(images.size());
+      gmic_qt_standalone::current_image_filenames.resize(images.size());
+      const unsigned int layerLimit = gmic_qt_standalone::output_image_filename.contains("%l") ? images.size() : 1;
+      for (unsigned int layer = 0; layer < layerLimit; ++layer) {
+        GmicQt::convertGmicImageToQImage(images[layer], gmic_qt_standalone::input_images[layer]);
+        QString outputFilename = gmic_qt_standalone::output_image_filename;
+        if (outputFilename.contains("%b")) {
+          const QString basename = QFileInfo(gmic_qt_standalone::input_image_filenames.first()).completeBaseName();
+          outputFilename.replace("%b", basename);
+        }
+        if (outputFilename.contains("%f")) {
+          const QString filename = QFileInfo(gmic_qt_standalone::input_image_filenames.first()).fileName();
+          outputFilename.replace("%f", filename);
+        }
+        outputFilename.replace("%l", QString::number(layer));
+        std::cout << "[gmic_qt] Writing output file for layer " << layer << ": " << outputFilename.toStdString() << std::endl;
+        gmic_qt_standalone::input_images[layer].save(outputFilename, nullptr, gmic_qt_standalone::jpeg_quality);
+        gmic_qt_standalone::current_image_filenames[layer] = gmic_qt_standalone::imageName((const char *)imageNames[layer]);
       }
-      if (outputFilename.contains("%f")) {
-        const QString filename = QFileInfo(gmic_qt_standalone::input_image_filename).fileName();
-        outputFilename.replace("%f", filename);
-      }
-      std::cout << "[gmic_qt] Writing output file " << outputFilename.toStdString() << std::endl;
-      gmic_qt_standalone::input_image.save(outputFilename, nullptr, gmic_qt_standalone::jpeg_quality);
-      gmic_qt_standalone::current_image_filename = gmic_qt_standalone::imageName((const char *)imageNames[0]);
     }
   }
   unused(mode);
@@ -236,7 +255,7 @@ void showMessage(const char * message)
   std::cout << message << std::endl;
 }
 
-void applyColorProfile(cimg_library::CImg<gmic_pixel_type> &) {}
+void applyColorProfile(gmic_library::gmic_image<gmic_pixel_type> &) {}
 
 } // namespace GmicQtHost
 
@@ -250,6 +269,7 @@ void usage(const std::string & argv0)
                "                        -o --output FILE : Write output image to FILE\n"
                "                                            %b will be replaced by the input file basename (i.e. without path and extension)\n"
                "                                            %f will be replaced by the input filename (without path)\n"
+               "                                            %l will be replaced by the layer number (0 is top layer)\n"
                "                        -q --quality NNN : JPEG quality of output file(s) in 0..100\n"
                "                             -r --repeat : Use last applied filter and parameters\n"
                "     -p --path FILTER_PATH | FILTER_NAME : Select filter\n"
@@ -260,6 +280,7 @@ void usage(const std::string & argv0)
                "                              -a --apply : Apply filter or command and quit (requires one of -r -p -c)\n"
                "                      -R --reapply-first : Launch GUI once for first input file, then apply selected filter\n"
                "                                           and parameters to all other files\n"
+               "                             -l --layers : Treat multiple input files as layers of a single image (top first)\n"
                "                             --show-last : Print last applied plugin parameters\n"
                "                       --show-last-after : Print last applied plugin parameters (after filter execution)\n";
 }
@@ -282,6 +303,7 @@ int main(int argc, char * argv[])
   bool reapplyFirst = false;
   bool printLast = false;
   bool printLastAfter = false;
+  bool layers = false;
   std::string filterPath;
   std::string command;
   QStringList filenames;
@@ -292,6 +314,8 @@ int main(int argc, char * argv[])
       return EXIT_SUCCESS;
     } else if ((arg == "--apply") || (arg == "-a")) {
       apply = true;
+    } else if ((arg == "--layers") || (arg == "-l")) {
+      layers = true;
     } else if ((arg == "--reapply-first") || (arg == "-R")) {
       reapplyFirst = true;
     } else if ((arg == "--output") || (arg == "-o")) {
@@ -368,8 +392,11 @@ int main(int argc, char * argv[])
 
   std::list<GmicQt::InputMode> disabledInputModes;
   disabledInputModes.push_back(GmicQt::InputMode::NoInput);
-  // disabledInputModes.push_back(InputMode::Active);
-  disabledInputModes.push_back(GmicQt::InputMode::All);
+  if (layers && (filenames.size() > 1)) {
+    disabledInputModes.push_back(GmicQt::InputMode::Active);
+  } else {
+    disabledInputModes.push_back(GmicQt::InputMode::All);
+  }
   disabledInputModes.push_back(GmicQt::InputMode::ActiveAndBelow);
   disabledInputModes.push_back(GmicQt::InputMode::ActiveAndAbove);
   disabledInputModes.push_back(GmicQt::InputMode::AllVisible);
@@ -397,28 +424,54 @@ int main(int argc, char * argv[])
     return GmicQt::run(GmicQt::UserInterfaceMode::Full, parameters, disabledInputModes, disabledOutputModes);
   }
   bool firstLaunch = true;
-  for (const QString & filename : filenames) {
-    if (loadImage(gmic_qt_standalone::input_image, filename, argc, argv)) {
-      gmic_qt_standalone::input_image = gmic_qt_standalone::input_image.convertToFormat(QImage::Format_ARGB32);
-      gmic_qt_standalone::current_image_filename = QFileInfo(filename).fileName();
-      gmic_qt_standalone::input_image_filename = gmic_qt_standalone::current_image_filename;
-      GmicQt::UserInterfaceMode uiMode;
-      if (apply || (reapplyFirst && !firstLaunch)) {
-        uiMode = GmicQt::UserInterfaceMode::ProgressDialog;
+  if (layers) {
+    gmic_qt_standalone::input_images.resize(filenames.size());
+    gmic_qt_standalone::current_image_filenames.resize(filenames.size());
+    gmic_qt_standalone::input_image_filenames.resize(filenames.size());
+    int n = 0;
+    for (const QString & filename : filenames) {
+      if (loadImage(gmic_qt_standalone::input_images[n], filename, argc, argv)) {
+        gmic_qt_standalone::input_images[n] = gmic_qt_standalone::input_images[n].convertToFormat(QImage::Format_ARGB32);
+        gmic_qt_standalone::current_image_filenames[n] = QFileInfo(filename).fileName();
+        gmic_qt_standalone::input_image_filenames[n] = gmic_qt_standalone::current_image_filenames[n];
       } else {
-        uiMode = GmicQt::UserInterfaceMode::Full;
+        std::cerr << "Could not open image file " << filename.toStdString() << std::endl;
       }
-      if (reapplyFirst && !firstLaunch) {
-        parameters = GmicQt::lastAppliedFilterRunParameters(GmicQt::ReturnedRunParametersFlag::BeforeFilterExecution);
+      ++n;
+    }
+    GmicQt::UserInterfaceMode uiMode = apply ? GmicQt::UserInterfaceMode::ProgressDialog : GmicQt::UserInterfaceMode::Full;
+    int status = GmicQt::run(uiMode, parameters, disabledInputModes, disabledOutputModes);
+    if (status) {
+      std::cerr << "GmicQt::launchPlugin() returned status " << status << std::endl;
+      return status;
+    }
+  } else {
+    for (const QString & filename : filenames) {
+      gmic_qt_standalone::input_images.resize(1);
+      gmic_qt_standalone::current_image_filenames.resize(1);
+      gmic_qt_standalone::input_image_filenames.resize(1);
+      if (loadImage(gmic_qt_standalone::input_images.first(), filename, argc, argv)) {
+        gmic_qt_standalone::input_images.first() = gmic_qt_standalone::input_images.first().convertToFormat(QImage::Format_ARGB32);
+        gmic_qt_standalone::current_image_filenames.first() = QFileInfo(filename).fileName();
+        gmic_qt_standalone::input_image_filenames.first() = gmic_qt_standalone::current_image_filenames.first();
+        GmicQt::UserInterfaceMode uiMode;
+        if (apply || (reapplyFirst && !firstLaunch)) {
+          uiMode = GmicQt::UserInterfaceMode::ProgressDialog;
+        } else {
+          uiMode = GmicQt::UserInterfaceMode::Full;
+        }
+        if (reapplyFirst && !firstLaunch) {
+          parameters = GmicQt::lastAppliedFilterRunParameters(GmicQt::ReturnedRunParametersFlag::BeforeFilterExecution);
+        }
+        int status = GmicQt::run(uiMode, parameters, disabledInputModes, disabledOutputModes);
+        if (status) {
+          std::cerr << "GmicQt::launchPlugin() returned status " << status << std::endl;
+          return status;
+        }
+        firstLaunch = false;
+      } else {
+        std::cerr << "Could not open image file " << filename.toStdString() << std::endl;
       }
-      int status = GmicQt::run(uiMode, parameters);
-      if (status) {
-        std::cerr << "GmicQt::launchPlugin() returned status " << status << std::endl;
-        return status;
-      }
-      firstLaunch = false;
-    } else {
-      std::cerr << "Could not open image file " << filename.toStdString() << std::endl;
     }
   }
   return EXIT_SUCCESS;

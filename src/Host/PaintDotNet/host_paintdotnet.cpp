@@ -33,9 +33,6 @@
 #include "Host/GmicQtHost.h"
 #include "MainWindow.h"
 #include "GmicQt.h"
-#ifndef gmic_core
-#include "CImg.h"
-#endif
 #include "gmic.h"
 #include <Windows.h>
 
@@ -74,7 +71,7 @@ namespace GmicQtHost
 {
     const QString ApplicationName = QString("Paint.NET");
     const char * const ApplicationShortname = GMIC_QT_XSTRINGIFY(GMIC_HOST);
-    const bool DarkThemeIsDefault = false;
+    const bool DarkThemeIsDefault = true;
 }
 
 namespace
@@ -342,7 +339,7 @@ void getCroppedImages(gmic_list<float> & images, gmic_list<char> & imageNames, d
             if (mappedData)
             {
                 const quint8* scan0 = static_cast<const quint8*>(mappedData.get());
-                cimg_library::CImg<float>& dest = images[i];
+                gmic_library::gmic_image<float>& dest = images[i];
 
                 dest.assign(width, height, 1, 4);
                 float* dstR = dest.data(0, 0, 0, 0);
@@ -399,7 +396,7 @@ void outputImages(gmic_list<float> & images, const gmic_list<char> & imageNames,
         {
             QString mappingName = QString("pdn_%1").arg(QUuid::createUuid().toString(QUuid::StringFormat::WithoutBraces));
 
-            const cimg_library::CImg<float>& out = images[i];
+            const gmic_library::gmic_image<float>& out = images[i];
 
             const int width = out.width();
             const int height = out.height();
@@ -538,7 +535,7 @@ void outputImages(gmic_list<float> & images, const gmic_list<char> & imageNames,
     }
 }
 
-void applyColorProfile(cimg_library::CImg<gmic_pixel_type> & images)
+void applyColorProfile(gmic_library::gmic_image<gmic_pixel_type> & images)
 {
     unused(images);
 }
@@ -572,22 +569,6 @@ int main(int argc, char *argv[])
     {
         return 2;
     }
-
-    // Check that the layer data length is within the limit for the size_t type on 32-bit builds.
-    // This prevents an overflow when calculating the total image size if the image is larger than 4GB.
-#if defined(_M_IX86) || defined(__i386__)
-    quint64 maxDataLength = 0;
-
-    QString message = QString("command=gmic_qt_get_max_layer_data_length");
-    QDataStream stream(SendMessageSynchronously(message.toUtf8()));
-    stream.setByteOrder(QDataStream::ByteOrder::LittleEndian);
-    stream >> maxDataLength;
-
-    if (maxDataLength > std::numeric_limits<size_t>::max())
-    {
-        return 3;
-    }
-#endif
 
     int exitCode = 0;
 
@@ -659,14 +640,14 @@ int main(int argc, char *argv[])
         {
             gmicCommandName = QString::fromStdString(parameters.command);
         }
-        
+
         QString message = QString("command=gmic_qt_set_gmic_command_name\n%1\n").arg(gmicCommandName);
-        
+
         SendMessageSynchronously(message.toUtf8());
     }
     else
     {
-        exitCode = 4;
+        exitCode = 3;
     }
 
     return exitCode;

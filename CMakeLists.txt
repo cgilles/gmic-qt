@@ -22,7 +22,7 @@ endif()
 
 message("Build type is " ${CMAKE_BUILD_TYPE})
 
-set (GMIC_QT_HOST "gimp" CACHE STRING "Define for which host gmic-qt will be built: gimp, gimp3 (experimental), krita, none, paintdotnet or 8bf.")
+set (GMIC_QT_HOST "gimp" CACHE STRING "Define for which host gmic-qt will be built: gimp, gimp3 (experimental), none, paintdotnet or 8bf.")
 if (${GMIC_QT_HOST} STREQUAL "none")
   message("Building standalone version.")
 else()
@@ -37,8 +37,8 @@ else()
   option(ENABLE_DYNAMIC_LINKING "Dynamically link the binaries to the GMIC shared library" OFF)
 
   set (GMIC_LIB_PATH "${GMIC_PATH}" CACHE STRING "Define the path to the GMIC shared library")
-  if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/gmic/src/gmic.cpp")
-  set (GMIC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/gmic/src" CACHE STRING "Define the path to the gmic headers")
+  if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../src/gmic.cpp")
+  set (GMIC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../src" CACHE STRING "Define the path to the gmic headers")
   else()
   set (GMIC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../gmic/src" CACHE STRING "Define the path to the gmic headers")
   endif()
@@ -290,6 +290,7 @@ if(ENABLE_CURL)
     endif()
 endif()
 
+add_definitions(-Dgmic_core)
 add_definitions(-Dgmic_community)
 add_definitions(-Dcimg_use_abort)
 add_definitions(-Dgmic_is_parallel)
@@ -378,16 +379,15 @@ else()
 endif()
 
 if (NOT ENABLE_SYSTEM_GMIC)
-    add_definitions(-Dgmic_core)
     include_directories(${GMIC_PATH})
 endif (NOT ENABLE_SYSTEM_GMIC)
 include_directories(${CMAKE_SOURCE_DIR}/src)
 
 set (gmic_qt_SRCS
-
   src/ClickableLabel.h
   src/Common.h
-  src/OverrideCursor.h
+  src/CroppedActiveLayerProxy.h
+  src/CroppedImageListProxy.h
   src/DialogSettings.h
   src/FilterParameters/AbstractParameter.h
   src/FilterParameters/BoolParameter.h
@@ -408,22 +408,29 @@ set (gmic_qt_SRCS
   src/FilterParameters/PointParameter.h
   src/FilterParameters/SeparatorParameter.h
   src/FilterParameters/TextParameter.h
+  src/FilterSelector/FavesModel.h
+  src/FilterSelector/FavesModelReader.h
+  src/FilterSelector/FavesModelWriter.h
+  src/FilterSelector/FiltersModelBinaryReader.h
+  src/FilterSelector/FiltersModelBinaryWriter.h
   src/FilterSelector/FiltersModel.h
   src/FilterSelector/FiltersModelReader.h
   src/FilterSelector/FiltersPresenter.h
   src/FilterSelector/FiltersView/FiltersView.h
+  src/FilterSelector/FiltersView/FilterTreeAbstractItem.h
+  src/FilterSelector/FiltersView/FilterTreeFolder.h
+  src/FilterSelector/FiltersView/FilterTreeItemDelegate.h
+  src/FilterSelector/FiltersView/FilterTreeItem.h
   src/FilterSelector/FiltersView/TreeView.h
   src/FilterSelector/FiltersVisibilityMap.h
   src/FilterSelector/FilterTagMap.h
-  src/CroppedImageListProxy.h
-  src/CroppedActiveLayerProxy.h
   src/FilterSyncRunner.h
-  src/FilterThread.h
   src/FilterTextTranslator.h
+  src/FilterThread.h
   src/Globals.h
+  src/GmicProcessor.h
   src/GmicQt.h
   src/GmicStdlib.h
-  src/GmicProcessor.h
   src/HeadlessProcessor.h
   src/Host/GmicQtHost.h
   src/HtmlTranslator.h
@@ -431,33 +438,28 @@ set (gmic_qt_SRCS
   src/ImageTools.h
   src/InputOutputState.h
   src/KeypointList.h
-  src/LayersExtentProxy.h
   src/LanguageSettings.h
+  src/LayersExtentProxy.h
   src/Logger.h
   src/MainWindow.h
+  src/Misc.h
+  src/OverrideCursor.h
   src/ParametersCache.h
   src/PersistentMemory.h
   src/Settings.h
-  src/TimeLogger.h
+  src/SourcesWidget.h
   src/Tags.h
+  src/TimeLogger.h
   src/Updater.h
   src/Utils.h
-  src/Misc.h
-  src/FilterSelector/FiltersView/FilterTreeFolder.h
-  src/FilterSelector/FiltersView/FilterTreeItem.h
-  src/FilterSelector/FavesModel.h
-  src/FilterSelector/FavesModelReader.h
-  src/FilterSelector/FiltersView/FilterTreeAbstractItem.h
-  src/FilterSelector/FiltersView/FilterTreeItemDelegate.h
-  src/FilterSelector/FavesModelWriter.h
-  src/Widgets/ProgressInfoWidget.h
-  src/Widgets/PreviewWidget.h
   src/Widgets/InOutPanel.h
-  src/Widgets/ZoomLevelSelector.h
-  src/Widgets/SearchFieldWidget.h
   src/Widgets/LanguageSelectionWidget.h
+  src/Widgets/PreviewWidget.h
+  src/Widgets/ProgressInfoWidget.h
   src/Widgets/ProgressInfoWindow.h
+  src/Widgets/SearchFieldWidget.h
   src/Widgets/VisibleTagSelector.h
+  src/Widgets/ZoomLevelSelector.h
   src/ZoomConstraint.h
 )
 
@@ -474,7 +476,8 @@ set(gmic_qt_SRCS
   ${gmic_qt_SRCS}
   src/ClickableLabel.cpp
   src/Common.cpp
-  src/OverrideCursor.cpp
+  src/CroppedActiveLayerProxy.cpp
+  src/CroppedImageListProxy.cpp
   src/DialogSettings.cpp
   src/FilterParameters/AbstractParameter.cpp
   src/FilterParameters/BoolParameter.cpp
@@ -495,55 +498,57 @@ set(gmic_qt_SRCS
   src/FilterParameters/PointParameter.cpp
   src/FilterParameters/SeparatorParameter.cpp
   src/FilterParameters/TextParameter.cpp
+  src/FilterSelector/FavesModel.cpp
+  src/FilterSelector/FavesModelReader.cpp
+  src/FilterSelector/FavesModelWriter.cpp
+  src/FilterSelector/FiltersModelBinaryReader.cpp
+  src/FilterSelector/FiltersModelBinaryWriter.cpp
   src/FilterSelector/FiltersModel.cpp
   src/FilterSelector/FiltersModelReader.cpp
   src/FilterSelector/FiltersPresenter.cpp
   src/FilterSelector/FiltersView/FiltersView.cpp
+  src/FilterSelector/FiltersView/FilterTreeAbstractItem.cpp
+  src/FilterSelector/FiltersView/FilterTreeFolder.cpp
+  src/FilterSelector/FiltersView/FilterTreeItem.cpp
+  src/FilterSelector/FiltersView/FilterTreeItemDelegate.cpp
   src/FilterSelector/FiltersView/TreeView.cpp
   src/FilterSelector/FiltersVisibilityMap.cpp
   src/FilterSelector/FilterTagMap.cpp
-  src/CroppedImageListProxy.cpp
-  src/CroppedActiveLayerProxy.cpp
   src/FilterSyncRunner.cpp
-  src/FilterThread.cpp
   src/FilterTextTranslator.cpp
-  src/GmicQt.cpp
+  src/FilterThread.cpp
   src/Globals.cpp
-  src/GmicStdlib.cpp
   src/GmicProcessor.cpp
+  src/GmicQt.cpp
+  src/GmicStdlib.cpp
   src/HeadlessProcessor.cpp
   src/HtmlTranslator.cpp
   src/IconLoader.cpp
   src/ImageTools.cpp
   src/InputOutputState.cpp
   src/KeypointList.cpp
-  src/LayersExtentProxy.cpp
   src/LanguageSettings.cpp
+  src/LayersExtentProxy.cpp
   src/Logger.cpp
   src/MainWindow.cpp
+  src/Misc.cpp
+  src/OverrideCursor.cpp
   src/ParametersCache.cpp
   src/PersistentMemory.cpp
   src/Settings.cpp
-  src/TimeLogger.cpp
+  src/SourcesWidget.cpp
   src/Tags.cpp
+  src/TimeLogger.cpp
   src/Updater.cpp
   src/Utils.cpp
-  src/Misc.cpp
-  src/FilterSelector/FiltersView/FilterTreeItem.cpp
-  src/FilterSelector/FiltersView/FilterTreeFolder.cpp
-  src/FilterSelector/FavesModel.cpp
-  src/FilterSelector/FavesModelReader.cpp
-  src/FilterSelector/FiltersView/FilterTreeAbstractItem.cpp
-  src/FilterSelector/FiltersView/FilterTreeItemDelegate.cpp
-  src/FilterSelector/FavesModelWriter.cpp
+  src/Widgets/InOutPanel.cpp
+  src/Widgets/LanguageSelectionWidget.cpp
   src/Widgets/PreviewWidget.cpp
   src/Widgets/ProgressInfoWidget.cpp
-  src/Widgets/InOutPanel.cpp
-  src/Widgets/ZoomLevelSelector.cpp
-  src/Widgets/SearchFieldWidget.cpp
-  src/Widgets/LanguageSelectionWidget.cpp
   src/Widgets/ProgressInfoWindow.cpp
+  src/Widgets/SearchFieldWidget.cpp
   src/Widgets/VisibleTagSelector.cpp
+  src/Widgets/ZoomLevelSelector.cpp
 )
 
 set (gmic_qt_FORMS
@@ -557,17 +562,59 @@ set (gmic_qt_FORMS
   ui/progressinfowidget.ui
   ui/progressinfowindow.ui
   ui/SearchFieldWidget.ui
+  ui/sourceswidget.ui
   ui/zoomlevelselector.ui
 )
 
 if(ENABLE_DYNAMIC_LINKING)
   set(CMAKE_SKIP_RPATH TRUE)
-  set(gmic_qt_LIBRARIES
-    ${gmic_qt_LIBRARIES}
-    "gmic"
+  # G'MIC-Qt needs visibility into the private symbols defined
+  # by the gmic.cpp plugin. However, this is only possible
+  # if the library is static OR if it's dynamic and built by
+  # a compiler that supports .so-style exports.
+  if (TARGET libgmicstatic OR MSVC OR NOT ENABLE_SYSTEM_GMIC)
+    set(gmic_qt_LIBRARIES
+      ${gmic_qt_LIBRARIES}
+      libgmicstatic
     )
+  elseif(TARGET libgmic)
+    set(gmic_qt_LIBRARIES
+      ${gmic_qt_LIBRARIES}
+      libgmic
+    )
+  elseif(GMIC_LIB_PATH)
+    set(gmic_qt_LIBRARIES
+      ${gmic_qt_LIBRARIES}
+      "gmic"
+    )
+  else()
+    message(FATAL_ERROR "No G'MIC library is available for linking. Please build libgmic as a static library.")
+  endif()
   if (NOT ENABLE_SYSTEM_GMIC)
-    link_directories(${GMIC_LIB_PATH})
+    if (GMIC_LIB_PATH)
+      link_directories(${GMIC_LIB_PATH})
+      # Inject the G'MIC CImg plugin.
+      include_directories(../src)
+    else()
+      # Mimic an external G'MIC library build for catching link ABI errors.
+      add_library(libgmicstatic STATIC ../src/gmic.cpp)
+      target_include_directories(libgmicstatic PUBLIC ../src)
+      # We need internal access into the gmic-core API.
+      target_compile_definitions(libgmicstatic PUBLIC gmic_core)
+      set_target_properties(libgmicstatic
+        PROPERTIES
+          AUTOMOC OFF
+      )
+      target_link_libraries(libgmicstatic PUBLIC
+        ${PNG_LIBRARIES}
+        ${FFTW3_LIBRARIES}
+        ${ZLIB_LIBRARIES}
+        ${CURL_LIBRARIES}
+        ${EXTRA_LIBRARIES})
+    endif()
+  else()
+    # Inject the G'MIC CImg plugin.
+    include_directories(../src)
   endif()
 else(ENABLE_DYNAMIC_LINKING)
   set(gmic_qt_SRCS
@@ -611,19 +658,6 @@ if (${GMIC_QT_HOST} STREQUAL "gimp" OR ${GMIC_QT_HOST} STREQUAL "gimp3")
       )
     install(TARGETS gmic_gimp_qt RUNTIME DESTINATION "${GIMP_PKGLIBDIR}/plug-ins/gmic_gimp_qt")
 
-elseif (${GMIC_QT_HOST} STREQUAL "krita")
-
-    set (gmic_qt_SRCS ${gmic_qt_SRCS} src/Host/Krita/host_krita.cpp)
-    qt5_wrap_ui(gmic_qt_SRCS ${gmic_qt_FORMS})
-    add_definitions(-DGMIC_HOST=krita)
-    add_executable(gmic_krita_qt ${gmic_qt_SRCS} ${gmic_qt_QRC})
-    target_link_libraries(
-      gmic_krita_qt
-      PRIVATE
-      ${gmic_qt_LIBRARIES}
-      )
-    install(TARGETS gmic_krita_qt RUNTIME DESTINATION bin)
-
 elseif (${GMIC_QT_HOST} STREQUAL "none")
 
   set (gmic_qt_SRCS ${gmic_qt_SRCS}
@@ -655,15 +689,25 @@ elseif (${GMIC_QT_HOST} STREQUAL "paintdotnet")
 
 elseif (${GMIC_QT_HOST} STREQUAL "8bf")
 
-    set (gmic_qt_SRCS ${gmic_qt_SRCS} src/Host/8bf/host_8bf.cpp)
-    qt5_wrap_ui(gmic_qt_SRCS ${gmic_qt_FORMS})
-    add_definitions(-DGMIC_HOST=plugin8bf)
-    add_executable(gmic_8bf_qt ${gmic_qt_SRCS} ${gmic_qt_QRC})
-    target_link_libraries(
-      gmic_8bf_qt
-      PRIVATE
-      ${gmic_qt_LIBRARIES}
-      )
+  # Look for a CMake package on MSVC or a PkgConfig file on MinGW etc.
+  if (MSVC)
+    find_package(lcms2 CONFIG REQUIRED)
+    include_directories(${LCMS2_INCLUDE_DIR})
+  else()
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(LCMS2 REQUIRED lcms2)
+  endif()
+
+  set (gmic_qt_SRCS ${gmic_qt_SRCS} src/Host/8bf/host_8bf.cpp)
+  qt5_wrap_ui(gmic_qt_SRCS ${gmic_qt_FORMS})
+  add_definitions(-DGMIC_HOST=plugin8bf)
+  add_executable(gmic_8bf_qt ${gmic_qt_SRCS} ${gmic_qt_QRC})
+  target_link_libraries(
+    gmic_8bf_qt
+    PRIVATE
+    ${gmic_qt_LIBRARIES}
+	${LCMS2_LIBRARIES}
+    )
 
 elseif (${GMIC_QT_HOST} STREQUAL "digikam")
 
@@ -671,7 +715,7 @@ elseif (${GMIC_QT_HOST} STREQUAL "digikam")
     include("src/Host/digiKam/RulesDigikamHost.cmake")
 
 else()
-    message(FATAL_ERROR "GMIC_QT_HOST is not defined as gimp, gimp3, krita, none, paintdotnet or 8bf")
+    message(FATAL_ERROR "GMIC_QT_HOST is not defined as gimp, gimp3, none, paintdotnet or 8bf")
 endif()
 
 feature_summary(WHAT ALL FATAL_ON_MISSING_REQUIRED_PACKAGES)

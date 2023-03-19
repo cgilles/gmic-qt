@@ -80,14 +80,15 @@
 
 # Try to auto-detect target OS.
 OS = $(shell uname)
-USR = /usr
-LIB = lib
-BIN = bin
-INCLUDE = include
+PREFIX ?= /usr
+LIB ?= lib
+BIN ?= bin
+INCLUDE ?= include
 PIC = -fPIC
 EXE =
 WGET = wget --no-check-certificate --quiet -O
 PLUGINDIR = $(shell gimptool-2.0 --gimpplugindir)/plug-ins
+BASH_COMPLETIONSDIR = $(shell pkg-config --variable completionsdir bash-completion || echo $(PREFIX)/share/bash-completion/completions)
 VERSION = $(shell grep 'gmic_version\ ' gmic.h | tail -c4 | head -c3)
 VERSION1 = $(shell grep 'gmic_version\ ' gmic.h | tail -c4 | head -c1)
 VERSION2 = $(shell grep 'gmic_version\ ' gmic.h | tail -c3 | head -c1)
@@ -120,12 +121,12 @@ endif
 
 ifeq ($(OS),FreeBSD)
 OS = Unix
-USR = /usr/local
+PREFIX = /usr/local
 endif
 
 ifeq ($(OS),DragonFly)
 OS = Unix
-USR = /usr/local
+PREFIX = /usr/local
 endif
 
 ifeq ($(OS),NetBSD)
@@ -134,15 +135,15 @@ endif
 
 ifneq (,$(findstring MINGW,$(OS)))
 OS = Windows
-USR = /mingw64
+PREFIX = /mingw64
 endif
 
 ifeq ($(OS),Darwin)
 ifeq (,$(wildcard /opt/local))
-USR = /usr/local
+PREFIX = /usr/local
 PLUGINDIR = $(HOME)/Library/Application\ Support/Gimp/plug-ins
 else
-USR = /opt/local
+PREFIX = /opt/local
 endif
 WGET = curl -k -L --silent -o
 endif
@@ -152,13 +153,13 @@ EXE = .exe
 PIC =
 endif
 
-ifeq ($(shell echo $(notdir $(CXX)) | head -c3),g++)
+ifneq (,$(findstring g++,$(CXX)))
 IS_GCC = 1
 endif
-ifeq ($(shell echo $(notdir $(CXX)) | head -c7),clang++)
+ifneq (,$(findstring clang++,$(CXX)))
 IS_CLANG = 1
 endif
-ifeq ($(shell echo $(notdir $(CXX)) | head -c4),icpc)
+ifneq (,$(findstring icpc,$(CXX)))
 IS_ICPC = 1
 endif
 
@@ -181,13 +182,13 @@ PRERELEASE = $(shell date +%y%m%d)
 PRERELEASE_CFLAGS = -Dgmic_prerelease="\\\"$(PRERELEASE)\\\""
 
 # Minimal set of flags mandatory to compile G'MIC.
-MANDATORY_CFLAGS = -Dcimg_date=\\\"\\\" -Dcimg_time=\\\"\\\" -Dcimg_use_zlib -I. $(shell pkg-config --cflags zlib || echo -I$(USR)/$(INCLUDE)) $(PRERELEASE_CFLAGS) $(EXTRA_CFLAGS)
+MANDATORY_CFLAGS = -Dcimg_date=\\\"\\\" -Dcimg_time=\\\"\\\" -Dcimg_use_zlib -I. $(shell pkg-config --cflags zlib || echo -I$(PREFIX)/$(INCLUDE)) $(PRERELEASE_CFLAGS) $(EXTRA_CFLAGS)
 MANDATORY_LIBS = $(shell pkg-config --libs zlib || echo -lz) $(EXTRA_LIBS)
 
 ifndef NO_SRIPDLIB
 MANDATORY_CFLAGS += -std=c++11 -pedantic
 endif
-MANDATORY_LIBS += -L. -L$(USR)/$(LIB) -Wl,-rpath,.
+MANDATORY_LIBS += -L. -L$(PREFIX)/$(LIB) -Wl,-rpath,.
 ifdef IS_GCC
 MANDATORY_CFLAGS += -Wall -Wextra -Wfatal-errors -Werror=unknown-pragmas -Werror=unused-label
 GCC_VER_GTEQ5 = $(shell expr `$(CXX) -dumpversion | cut -f1 -d.` \>= 5)
@@ -211,8 +212,11 @@ endif
 FLTO = -flto
 OPT_CFLAGS =
 ifdef IS_GCC
-OPT_CFLAGS += -Ofast -mtune=generic # $(FLTO)
+OPT_CFLAGS += -O3 -mtune=generic # $(FLTO)
 OPT_LIBS = # $(FLTO)
+endif
+ifdef IS_CLANG
+OPT_CFLAGS += -O3 -mtune=generic # $(FLTO)
 endif
 ifdef icpc
 OPT_CFLAGS += -fast
@@ -226,8 +230,13 @@ endif
 
 # Enable parallelization in CImg, using OpenMP.
 # (http://www.openmp.org/)
+ifdef IS_CLANG
+OPENMP_CFLAGS = -I/usr/lib/gcc/x86_64-linux-gnu/9/include -Dcimg_use_openmp -fopenmp=libomp
+OPENMP_LIBS =
+else
 OPENMP_CFLAGS = -fopenmp -Dcimg_use_openmp
 OPENMP_LIBS = -lgomp
+endif
 
 # Enable software debugging.
 # (Use address sanitizer and thus slows down the code)
@@ -264,7 +273,7 @@ endif
 # Enable faster X11 display, using XShm extension.
 # (ftp://www.x.org/pub/X11R7.7/doc/man/man3/XShm.3.xhtml)
 XSHM_CFLAGS = -Dcimg_use_xshm $(shell pkg-config --cflags xcb-shm)
-XSHM_LIBS = $(shell pkg-config --libs xcb-shm || echo -L$(USR)/X11R6/lib) -lXext
+XSHM_LIBS = $(shell pkg-config --libs xcb-shm || echo -L$(PREFIX)/X11R6/lib) -lXext
 
 # Enable image display, using GDI32 (Windows).
 GDI32_CFLAGS = -Dcimg_display=2
@@ -317,12 +326,12 @@ OPENCV_LIBS = $(shell pkg-config opencv --libs || echo -lopencv_core -lopencv_hi
 
 # Enable support of most classical image file formats, using the GraphicsMagick++ library.
 # (http://www.graphicsmagick.org/Magick++/)
-MAGICK_CFLAGS = -Dcimg_use_magick $(shell pkg-config --cflags GraphicsMagick++ || echo -I$(USR)/$(INCLUDE)/GraphicsMagick)
+MAGICK_CFLAGS = -Dcimg_use_magick $(shell pkg-config --cflags GraphicsMagick++ || echo -I$(PREFIX)/$(INCLUDE)/GraphicsMagick)
 MAGICK_LIBS = $(shell pkg-config --libs GraphicsMagick++ || echo -lGraphicsMagick++)
 
 # Enable native support of EXR image files, using the OpenEXR library.
 # (http://www.openexr.com/)
-OPENEXR_CFLAGS = -Dcimg_use_openexr $(shell pkg-config --cflags OpenEXR || echo -I$(USR)/$(INCLUDE)/OpenEXR)
+OPENEXR_CFLAGS = -Dcimg_use_openexr $(shell pkg-config --cflags OpenEXR || echo -I$(PREFIX)/$(INCLUDE)/OpenEXR)
 OPENEXR_LIBS = $(shell pkg-config --libs OpenEXR || echo -lIlmImf -lHalf)
 
 # Enable Fast Fourier Transforms, using the FFTW3 library.
@@ -374,7 +383,7 @@ endif
 	$(MAKE) lib cli gimp gmic_qt libc zart
 
 native:
-	$(MAKE) "CFLAGS+=$(GMIC_STD_CFLAGS) -Ofast -march=native" "LIBS+=$(GMIC_STD_LIBS)" cli
+	$(MAKE) "CFLAGS+=$(GMIC_STD_CFLAGS) -O3 -march=native" "LIBS+=$(GMIC_STD_LIBS)" cli
 
 # libgmic.
 #---------
@@ -398,7 +407,7 @@ endif
 libgmic.o: gmic.cpp gmic.h gmic_stdlib.h CImg.h
 	$(CXX) -o libgmic.o -c gmic.cpp -Dgmic_core $(PIC) $(CFLAGS)
 
-use_libgmic : use_libgmic.cpp
+use_libgmic : use_libgmic.cpp libgmic.so
 	$(CXX) -o use_libgmic use_libgmic.cpp -std=c++11 -pedantic -lgmic $(LIBS)
 
 # CLI.
@@ -439,7 +448,7 @@ cli_shared:
 
 # CLI (static).
 #--------------
-GMIC_STATIC_CLI_PATH = $(USR)/$(LIB)/x86_64-linux-gnu
+GMIC_STATIC_CLI_PATH = $(PREFIX)/$(LIB)/x86_64-linux-gnu
 GMIC_STATIC_CLI_EXTRA =
 GMIC_STATIC_CLI_CFLAGS = -Dcimg_display=0 $(MANDATORY_CFLAGS) $(OPENMP_CFLAGS) $(ABORT_CFLAGS) $(PARALLEL_CFLAGS) $(ZLIB_CFLAGS) $(PNG_CFLAGS) $(JPEG_CFLAGS) $(FFTW_CFLAGS)
 GMIC_STATIC_CLI_LIBS = ./libgmic.o $(PARALLEL_LIBS) \
@@ -469,9 +478,9 @@ libcgmic_files:
 	    ln -fs ../../gmic-community/libcgmic/gmic_libc.h .; \
 	    ln -fs ../../gmic-community/libcgmic/use_libcgmic.c .; \
 	  else \
-            $(WGET) gmic_libc.cpp https://raw.githubusercontent.com/dtschump/gmic-community/master/libcgmic/gmic_libc.cpp; \
-            $(WGET) gmic_libc.h https://raw.githubusercontent.com/dtschump/gmic-community/master/libcgmic/gmic_libc.h; \
-            $(WGET) use_libcgmic.c https://raw.githubusercontent.com/dtschump/gmic-community/master/libcgmic/use_libcgmic.c; \
+            $(WGET) gmic_libc.cpp https://raw.githubusercontent.com/GreycLab/gmic-community/master/libcgmic/gmic_libc.cpp; \
+            $(WGET) gmic_libc.h https://raw.githubusercontent.com/GreycLab/gmic-community/master/libcgmic/gmic_libc.h; \
+            $(WGET) use_libcgmic.c https://raw.githubusercontent.com/GreycLab/gmic-community/master/libcgmic/use_libcgmic.c; \
             touch gmic_libc.cpp gmic_libc.h use_libcgmic.c; \
 	  fi; \
 	fi
@@ -494,7 +503,7 @@ ifneq ($(OS),Windows)
 endif
 
 libcgmic.o: gmic_libc.cpp CImg.h gmic_libc.h gmic.h
-	$(CXX) -o libcgmic.o -c gmic_libc.cpp $(PIC) $(CFLAGS)
+	$(CXX) -o libcgmic.o -c gmic_libc.cpp -Dgmic_core $(PIC) $(CFLAGS)
 
 use_libcgmic: use_libcgmic.c gmic_libc.h
 	$(CC) -std=c99 -o use_libcgmic use_libcgmic.c -lcgmic $(LIBS)
@@ -659,7 +668,7 @@ CImg.h:
 	@if [ -f ../../CImg/CImg.h ]; then \
           if [ ! -f ./CImg.h ]; then ln -s ../../CImg/CImg.h .; fi; \
         elif [ ! -e ./CImg.h ]; then \
-          $(WGET) CImg.h https://github.com/dtschump/CImg/raw/master/CImg.h; \
+          $(WGET) CImg.h https://github.com/GreycLab/CImg/raw/master/CImg.h; \
           touch CImg.h; \
         fi
 	@echo " done!"
@@ -818,84 +827,78 @@ man:
 # Install / uninstall / clean.
 #-----------------------------
 install:
-	mkdir -p $(DESTDIR)$(USR)/$(INCLUDE)
-	mkdir -p $(DESTDIR)$(USR)/$(BIN)
+	mkdir -p $(DESTDIR)$(PREFIX)/$(INCLUDE)
+	mkdir -p $(DESTDIR)$(PREFIX)/$(BIN)
 	mkdir -p $(DESTDIR)$(PLUGINDIR)
-	mkdir -p $(DESTDIR)$(USR)/share
-	mkdir -p $(DESTDIR)$(USR)/$(LIB)
-	@if [ -f gmic ]; then cp -f gmic $(DESTDIR)$(USR)/$(BIN); fi
-	@if [ -f gmic_libc.h ]; then cp -f gmic_libc.h $(DESTDIR)$(USR)/$(INCLUDE)/; fi
+	mkdir -p $(DESTDIR)$(PREFIX)/share
+	mkdir -p $(DESTDIR)$(PREFIX)/$(LIB)
+	@if [ -f gmic ]; then cp -f gmic $(DESTDIR)$(PREFIX)/$(BIN); fi
+	@if [ -f gmic_libc.h ]; then cp -f gmic_libc.h $(DESTDIR)$(PREFIX)/$(INCLUDE)/; fi
 	@if [ -f ../resources/gmic_cluts.gmz ]; then cp -f ../resources/gmic_cluts.gmz $(DESTDIR)$(PLUGINDIR); fi
 	@if [ -f ../resources/gmic_denoise_cnn.gmz ]; then cp -f ../resources/gmic_denoise_cnn.gmz $(DESTDIR)$(PLUGINDIR); fi
-	@if [ -f ../zart/zart ]; then cp -f ../zart/zart $(DESTDIR)$(USR)/$(BIN); fi
-	@if [ -f ../gmic-qt/gmic_qt ]; then cp -f ../gmic-qt/gmic_qt $(DESTDIR)$(USR)/$(BIN); fi
+	@if [ -f ../zart/zart ]; then cp -f ../zart/zart $(DESTDIR)$(PREFIX)/$(BIN); fi
+	@if [ -f ../gmic-qt/gmic_qt ]; then cp -f ../gmic-qt/gmic_qt $(DESTDIR)$(PREFIX)/$(BIN); fi
 	@if [ -f ../gmic-qt/gmic_gimp_qt ]; then cp -f ../gmic-qt/gmic_gimp_qt $(DESTDIR)$(PLUGINDIR); fi
 	@if [ -f libgmic.so ]; then \
-	  cp -f gmic.h $(DESTDIR)$(USR)/$(INCLUDE); \
-          cp -f libgmic.so $(DESTDIR)$(USR)/$(LIB)/libgmic.so.$(VERSION); \
-	  ln -fs libgmic.so.$(VERSION) $(DESTDIR)$(USR)/$(LIB)/libgmic.so.$(VERSION1); \
-	  ln -fs libgmic.so.$(VERSION1) $(DESTDIR)$(USR)/$(LIB)/libgmic.so; \
+	  cp -f gmic.h $(DESTDIR)$(PREFIX)/$(INCLUDE); \
+          cp -f libgmic.so $(DESTDIR)$(PREFIX)/$(LIB)/libgmic.so.$(VERSION); \
+	  ln -fs libgmic.so.$(VERSION) $(DESTDIR)$(PREFIX)/$(LIB)/libgmic.so.$(VERSION1); \
+	  ln -fs libgmic.so.$(VERSION1) $(DESTDIR)$(PREFIX)/$(LIB)/libgmic.so; \
 	fi
 	@if [ -f libcgmic.so ]; then \
-	  cp -f gmic_libc.h $(DESTDIR)$(USR)/$(INCLUDE); \
-	  cp -f libcgmic.so $(DESTDIR)$(USR)/$(LIB)/libcgmic.so.$(VERSION); \
-          ln -fs libcgmic.so.$(VERSION) $(DESTDIR)$(USR)/$(LIB)/libcgmic.so.$(VERSION1); \
-          ln -fs libcgmic.so.$(VERSION1) $(DESTDIR)$(USR)/$(LIB)/libcgmic.so; \
+	  cp -f gmic_libc.h $(DESTDIR)$(PREFIX)/$(INCLUDE); \
+	  cp -f libcgmic.so $(DESTDIR)$(PREFIX)/$(LIB)/libcgmic.so.$(VERSION); \
+          ln -fs libcgmic.so.$(VERSION) $(DESTDIR)$(PREFIX)/$(LIB)/libcgmic.so.$(VERSION1); \
+          ln -fs libcgmic.so.$(VERSION1) $(DESTDIR)$(PREFIX)/$(LIB)/libcgmic.so; \
         fi
 	@if [ -f ../man/gmic.1.gz ]; then \
-	  mkdir -p $(DESTDIR)$(USR)/share/man/man1; \
-	  mkdir -p $(DESTDIR)$(USR)/share/man/fr/man1; \
-	  cp -f ../man/gmic.1.gz $(DESTDIR)$(USR)/share/man/man1/gmic.1.gz; \
-	  cp -f ../man/gmic.1.gz $(DESTDIR)$(USR)/share/man/fr/man1/gmic.1.gz; \
+	  mkdir -p $(DESTDIR)$(PREFIX)/share/man/man1; \
+	  mkdir -p $(DESTDIR)$(PREFIX)/share/man/fr/man1; \
+	  cp -f ../man/gmic.1.gz $(DESTDIR)$(PREFIX)/share/man/man1/gmic.1.gz; \
+	  cp -f ../man/gmic.1.gz $(DESTDIR)$(PREFIX)/share/man/fr/man1/gmic.1.gz; \
 	fi
 	@if [ -f ../resources/gmic_bashcompletion.sh ]; then \
-	  if [ -d /usr/share/bash-completion/completions ]; then \
-	    mkdir -p $(DESTDIR)/usr/share/bash-completion/completions; \
-            cp -f ../resources/gmic_bashcompletion.sh $(DESTDIR)/usr/share/bash-completion/completions/gmic; \
-	  fi; \
-	  if [ -d /opt/local/etc/bash_completion.d/ ]; then \
-            mkdir -p $(DESTDIR)/opt/local/etc/bash_completion.d; \
-            cp -f ../resources/gmic_bashcompletion.sh $(DESTDIR)/opt/local/etc/bash_completion.d/gmic; \
-          fi; \
+	  mkdir -p $(DESTDIR)$(BASH_COMPLETIONSDIR); \
+          cp -f ../resources/gmic_bashcompletion.sh $(DESTDIR)$(BASH_COMPLETIONSDIR)/gmic; \
         fi
 	@if [ -f ../zart/zart ]; then \
-	  mkdir -p $(DESTDIR)$(USR)/share/applications; \
-	  mkdir -p $(DESTDIR)$(USR)/share/icons/hicolor/48x48/apps; \
-	  mkdir -p $(DESTDIR)$(USR)/share/icons/hicolor/scalable/apps; \
-	  cp -f ../zart/zart.desktop $(DESTDIR)$(USR)/share/applications; \
-	  cp -f ../zart/icons/48-zart.png $(DESTDIR)$(USR)/share/icons/hicolor/48x48/apps/zart.png; \
-	  cp -f ../zart/icons/zart.svg $(DESTDIR)$(USR)/share/icons/hicolor/scalable/apps; \
+	  mkdir -p $(DESTDIR)$(PREFIX)/share/applications; \
+	  mkdir -p $(DESTDIR)$(PREFIX)/share/icons/hicolor/48x48/apps; \
+	  mkdir -p $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps; \
+	  cp -f ../zart/zart.desktop $(DESTDIR)$(PREFIX)/share/applications; \
+	  cp -f ../zart/icons/48-zart.png $(DESTDIR)$(PREFIX)/share/icons/hicolor/48x48/apps/zart.png; \
+	  cp -f ../zart/icons/zart.svg $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps; \
 	fi
 	@if [ -f ../gmic-qt/gmic_qt ]; then \
-	  mkdir -p $(DESTDIR)$(USR)/share/applications; \
-	  mkdir -p $(DESTDIR)$(USR)/share/icons/hicolor/48x48/apps; \
-	  mkdir -p $(DESTDIR)$(USR)/share/icons/hicolor/scalable/apps; \
-	  cp -f ../gmic-qt/gmic_qt.desktop $(DESTDIR)$(USR)/share/applications; \
-	  cp -f ../gmic-qt/icons/application/48-gmic_qt.png $(DESTDIR)$(USR)/share/icons/hicolor/48x48/apps/gmic_qt.png; \
-	  cp -f ../gmic-qt/icons/application/gmic_qt.svg $(DESTDIR)$(USR)/share/icons/hicolor/scalable/apps; \
+	  mkdir -p $(DESTDIR)$(PREFIX)/share/applications; \
+	  mkdir -p $(DESTDIR)$(PREFIX)/share/icons/hicolor/48x48/apps; \
+	  mkdir -p $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps; \
+	  cp -f ../gmic-qt/gmic_qt.desktop $(DESTDIR)$(PREFIX)/share/applications; \
+	  cp -f ../gmic-qt/icons/application/48-gmic_qt.png $(DESTDIR)$(PREFIX)/share/icons/hicolor/48x48/apps/gmic_qt.png; \
+	  cp -f ../gmic-qt/icons/application/gmic_qt.svg $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps; \
 	fi
 
 uninstall:
 	rm -f $(DESTDIR)$(PLUGINDIR)/gmic_gimp_qt
-	rm -f $(DESTDIR)$(USR)/$(BIN)/gmic
-	rm -f $(DESTDIR)$(USR)/$(BIN)/zart
-	rm -f $(DESTDIR)$(USR)/$(BIN)/gmic_qt
-	rm -f $(DESTDIR)$(USR)/$(INCLUDE)/gmic.h
-	rm -f $(DESTDIR)$(USR)/$(LIB)/libgmic.so.$(VERSION)
-	rm -f $(DESTDIR)$(USR)/$(LIB)/libgmic.so.$(VERSION1)
-	rm -f $(DESTDIR)$(USR)/$(LIB)/libgmic.so
-	rm -f $(DESTDIR)$(USR)/$(LIB)/libcgmic.so.$(VERSION)
-	rm -f $(DESTDIR)$(USR)/$(LIB)/libcgmic.so.$(VERSION1)
-	rm -f $(DESTDIR)$(USR)/$(LIB)/libcgmic.so
-	rm -rf $(DESTDIR)$(USR)/share/doc/gmic/
-	rm -f $(DESTDIR)$(USR)/share/man/man1/gmic.1.gz
-	rm -f $(DESTDIR)$(USR)/share/man/fr/man1/gmic.1.gz
-	rm -f $(DESTDIR)$(USR)/share/applications/zart.desktop
-	rm -f $(DESTDIR)$(USR)/share/icons/hicolor/48x48/apps/zart.png
-	rm -f $(DESTDIR)$(USR)/share/icons/hicolor/scalable/apps/zart.svg
-	rm -f $(DESTDIR)$(USR)/share/applications/gmic_qt.desktop
-	rm -f $(DESTDIR)$(USR)/share/icons/hicolor/48x48/apps/gmic_qt.png
-	rm -f $(DESTDIR)$(USR)/share/icons/hicolor/scalable/apps/gmic_qt.svg
+	rm -f $(DESTDIR)$(PREFIX)/$(BIN)/gmic
+	rm -f $(DESTDIR)$(PREFIX)/$(BIN)/zart
+	rm -f $(DESTDIR)$(PREFIX)/$(BIN)/gmic_qt
+	rm -f $(DESTDIR)$(PREFIX)/$(INCLUDE)/gmic.h
+	rm -f $(DESTDIR)$(PREFIX)/$(LIB)/libgmic.so.$(VERSION)
+	rm -f $(DESTDIR)$(PREFIX)/$(LIB)/libgmic.so.$(VERSION1)
+	rm -f $(DESTDIR)$(PREFIX)/$(LIB)/libgmic.so
+	rm -f $(DESTDIR)$(PREFIX)/$(LIB)/libcgmic.so.$(VERSION)
+	rm -f $(DESTDIR)$(PREFIX)/$(LIB)/libcgmic.so.$(VERSION1)
+	rm -f $(DESTDIR)$(PREFIX)/$(LIB)/libcgmic.so
+	rm -rf $(DESTDIR)$(PREFIX)/share/doc/gmic/
+	rm -f $(DESTDIR)$(PREFIX)/share/man/man1/gmic.1.gz
+	rm -f $(DESTDIR)$(PREFIX)/share/man/fr/man1/gmic.1.gz
+	rm -f $(DESTDIR)$(PREFIX)/share/applications/zart.desktop
+	rm -f $(DESTDIR)$(PREFIX)/share/icons/hicolor/48x48/apps/zart.png
+	rm -f $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/zart.svg
+	rm -f $(DESTDIR)$(PREFIX)/share/applications/gmic_qt.desktop
+	rm -f $(DESTDIR)$(PREFIX)/share/icons/hicolor/48x48/apps/gmic_qt.png
+	rm -f $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/gmic_qt.svg
 
 distclean: clean
 

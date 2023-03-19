@@ -30,7 +30,7 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QPushButton>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QWidget>
 #include "Common.h"
 #include "FilterTextTranslator.h"
@@ -111,8 +111,8 @@ bool FolderParameter::initFromText(const QString & filterName, const char * text
     return false;
   }
   _name = HtmlTranslator::html2txt(FilterTextTranslator::translate(list[0], filterName));
-  QRegExp re("^\".*\"$");
-  if (re.exactMatch(list[1])) {
+  QRegularExpression re("^\".*\"$");
+  if (re.match(list[1]).hasMatch()) {
     list[1].chop(1);
     list[1].remove(0, 1);
   }
@@ -133,7 +133,9 @@ bool FolderParameter::isQuoted() const
 void FolderParameter::onButtonPressed()
 {
   QString oldValue = _value;
-  QString path = QFileDialog::getExistingDirectory(dynamic_cast<QWidget *>(parent()), tr("Select a folder"), _value);
+  QFileDialog::Options options = Settings::nativeFileDialogs() ? QFileDialog::Options() : QFileDialog::DontUseNativeDialog;
+  options |= QFileDialog::ShowDirsOnly;
+  QString path = QFileDialog::getExistingDirectory(dynamic_cast<QWidget *>(parent()), tr("Select a folder"), _value, options);
   if (path.isEmpty()) {
     setValue(oldValue);
   } else {

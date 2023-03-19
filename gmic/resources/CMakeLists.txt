@@ -152,8 +152,9 @@ if(BUILD_LIB)
   target_compile_options(libgmic PRIVATE ${GMIC_CXX_COMPILE_FLAGS} -Dgmic_core)
   set_target_properties(libgmic PROPERTIES SOVERSION "1" OUTPUT_NAME "gmic")
   target_link_libraries(libgmic
-    CImg::CImg
-    GMicStdlib::Stdlib
+    PRIVATE
+      CImg::CImg
+      GMicStdlib::Stdlib
   )
   target_include_directories(libgmic
     PUBLIC
@@ -194,7 +195,12 @@ if(BUILD_CLI)
   add_executable(gmic src/gmic_cli.cpp)
   target_compile_options(gmic PRIVATE ${GMIC_CXX_COMPILE_FLAGS})
   if(ENABLE_DYNAMIC_LINKING)
-    target_link_libraries(gmic libgmic)
+    target_link_libraries(gmic
+      PUBLIC
+        libgmic
+      PRIVATE
+        CImg::CImg
+    )
   else()
     target_link_libraries(gmic libgmicstatic)
   endif()

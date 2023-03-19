@@ -26,6 +26,8 @@
 #define GMIC_QT_GMICSTDLIB_H
 
 #include <QByteArray>
+#include <QString>
+#include <QStringList>
 
 namespace GmicQt
 {
@@ -35,6 +37,9 @@ public:
   GmicStdLib() = delete;
   static void loadStdLib();
   static QByteArray Array;
+  static QString substituteSourceVariables(QString text);
+  static QStringList substituteSourceVariables(QStringList list);
+  static QByteArray hash();
 };
 
 } // namespace GmicQt

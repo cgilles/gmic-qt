@@ -23,7 +23,9 @@
  *
  */
 #include "Updater.h"
+#include <QByteArray>
 #include <QDebug>
+#include <QFile>
 #include <QNetworkRequest>
 #include <QTextStream>
 #include <QUrl>
@@ -32,10 +34,8 @@
 #include "GmicStdlib.h"
 #include "Logger.h"
 #include "Misc.h"
+#include "Settings.h"
 #include "Utils.h"
-#ifndef gmic_core
-#include "CImg.h"
-#endif
 #include "gmic.h"
 
 namespace GmicQt
@@ -43,10 +43,17 @@ namespace GmicQt
 std::unique_ptr<Updater> Updater::_instance = std::unique_ptr<Updater>(nullptr);
 OutputMessageMode Updater::_outputMessageMode = OutputMessageMode::Quiet;
 
+const char * Updater::OfficialFilterSourceURL = "https://gmic.eu/update" GMIC_QT_XSTRINGIFY(gmic_version) ".gmic";
+
 Updater::Updater(QObject * parent) : QObject(parent)
 {
   _networkAccessManager = nullptr;
   _someNetworkUpdatesAchieved = false;
+}
+
+bool Updater::isCImgCompressed(const QByteArray & data)
+{
+  return data.startsWith("1 uint8 ");
 }
 
 Updater * Updater::getInstance()
@@ -59,61 +66,19 @@ Updater * Updater::getInstance()
 
 Updater::~Updater() = default;
 
-void Updater::updateSources(bool useNetwork)
-{
-  _sources.clear();
-  _sourceIsStdLib.clear();
-  // Build sources map
-  QString prefix = commandFromOutputMessageMode(_outputMessageMode);
-  if (!prefix.isEmpty()) {
-    prefix.push_back(QChar(' '));
-  }
-  cimg_library::CImgList<gmic_pixel_type> gptSources;
-  cimg_library::CImgList<char> names;
-  QString command = QString("%1gui_filter_sources %2").arg(prefix).arg(useNetwork);
-  try {
-    gmic(command.toLocal8Bit().constData(), gptSources, names, nullptr, true);
-  } catch (...) {
-    Logger::error(QString("Command '%1' failed.").arg(command));
-    gptSources.assign();
-  }
-  cimg_library::CImgList<char> sources;
-  gptSources.move_to(sources);
-  cimglist_for(sources, l)
-  {
-    cimg_library::CImg<char> & str = sources[l];
-    str.unroll('x');
-    bool isStdlib = (str.back() == 1);
-    if (isStdlib) {
-      str.back() = 0;
-    } else {
-      str.columns(0, str.width());
-    }
-    QString source = QString::fromUtf8(str);
-    _sources << source;
-    _sourceIsStdLib[source] = isStdlib;
-  }
-
-  // NOTE : For testing purpose
-  //  _sources.clear();
-  //  _sourceIsStdLib.clear();
-  //  //  _sources.push_back("http://localhost:2222/update300.gmic");
-  //  //  _sourceIsStdLib["http://localhost:2222/update300.gmic"] = true;
-  //  _sources.push_back("https://gmic.eu/update271.gmic");
-  //  _sourceIsStdLib["https://gmic.eu/update271.gmic"] = true;
-}
-
 void Updater::startUpdate(int ageLimit, int timeout, bool useNetwork)
 {
   TIMING;
-  updateSources(useNetwork);
+  QStringList sources = GmicStdLib::substituteSourceVariables(Settings::filterSources());
+  prependOfficialSourceIfRelevant(sources);
+  SHOW(sources);
   _errorMessages.clear();
   _networkAccessManager = new QNetworkAccessManager(this);
   connect(_networkAccessManager, &QNetworkAccessManager::finished, this, &Updater::onNetworkReplyFinished);
   _someNetworkUpdatesAchieved = false;
   if (useNetwork) {
     QDateTime limit = QDateTime::currentDateTime().addSecs(-3600 * (qint64)ageLimit);
-    for (const QString & str : _sources) {
+    for (const QString & str : sources) {
       if (str.startsWith("http://") || str.startsWith("https://")) {
         QString filename = localFilename(str);
         QFileInfo info(filename);
@@ -150,37 +115,6 @@ void Updater::startUpdate(int ageLimit, int timeout, bool useNetwork)
   TIMING;
 }
 
-QList<QString> Updater::remotesThatNeedUpdate(int ageLimit) const
-{
-  QDateTime limit = QDateTime::currentDateTime().addSecs(-3600 * ageLimit);
-  QList<QString> list;
-  for (const QString & str : _sources) {
-    if (str.startsWith("http://") || str.startsWith("https://")) {
-      QString filename = localFilename(str);
-      QFileInfo info(filename);
-      if (!info.exists() || info.lastModified() < limit) {
-        list << str;
-      }
-    }
-  }
-  return list;
-}
-
-bool Updater::someUpdatesNeeded(int ageLimit) const
-{
-  QDateTime limit = QDateTime::currentDateTime().addSecs(-3600 * ageLimit);
-  for (const QString & str : _sources) {
-    if (str.startsWith("http://") || str.startsWith("https://")) {
-      QString filename = localFilename(str);
-      QFileInfo info(filename);
-      if (!info.exists() || info.lastModified() < limit) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
 QList<QString> Updater::errorMessages()
 {
   return _errorMessages;
@@ -202,12 +136,12 @@ void Updater::processReply(QNetworkReply * reply)
     _errorMessages << QString(tr("Error downloading %1 (empty file?)")).arg(url);
     return;
   }
-  if (!array.startsWith("#@gmic")) {
+  if (isCImgCompressed(array)) {
     TRACE << QString("Decompressing reply from") << url;
     QByteArray tmp = cimgzDecompress(array);
     array = tmp;
   }
-  if (array.isNull() || !array.startsWith("#@gmic")) {
+  if (array.isNull() || !array.contains("#@gui")) {
     _errorMessages << QString(tr("Could not read/decompress %1")).arg(url);
     return;
   }
@@ -230,7 +164,7 @@ void Updater::onNetworkReplyFinished(QNetworkReply * reply)
     QDebug d(&str);
     d << error;
     str = str.trimmed();
-    _errorMessages << QString(tr("Error downloading %1<br/>Error %2: %3")).arg(reply->request().url().toString()).arg(static_cast<int>(error)).arg(str);
+    _errorMessages << tr("Error downloading %1<br/>Error %2: %3").arg(reply->request().url().toString()).arg(static_cast<int>(error)).arg(str);
     Logger::error("Update failed");
     Logger::note(QString("Error string: %1").arg(reply->errorString()));
     Logger::note("******* Full reply contents ******\n");
@@ -278,33 +212,25 @@ void Updater::onUpdateNotNecessary()
 
 QByteArray Updater::cimgzDecompress(const QByteArray & array)
 {
-  QTemporaryFile tmpZ(QDir::tempPath() + QDir::separator() + "gmic_qt_update_XXXXXX_cimgz");
-  if (!tmpZ.open()) {
-    Logger::warning("Updater::cimgzDecompress(): Error creating " + tmpZ.fileName());
-    return QByteArray();
-  }
-  if (!writeAll(array, tmpZ)) {
-    Logger::warning("Updater::cimgzDecompress(): Error writing temporary " + tmpZ.fileName());
-    return QByteArray();
-  }
-  tmpZ.close();
-  cimg_library::CImg<unsigned char> buffer;
   try {
-    buffer.load_cimg(tmpZ.fileName().toUtf8().constData());
+    gmic_library::gmic_image<char> buffer(array.constData(), array.size(), 1, 1, 1, true);
+    gmic_library::gmic_list<char> list = gmic_library::gmic_list<char>::get_unserialize(buffer);
+    if (list.size() == 1) {
+      return {list[0].data(), int(list[0].size())};
+    }
   } catch (...) {
-    Logger::warning("Updater::cimgzDecompress(): CImg<>::load_cimg error for file " + tmpZ.fileName());
-    return QByteArray();
+    Logger::warning("Updater::cimgzDecompress(): Error decompressing data");
   }
-  return QByteArray((char *)buffer.data(), (int)buffer.size());
+  return {};
 }
 
 QByteArray Updater::cimgzDecompressFile(const QString & filename)
 {
-  cimg_library::CImg<unsigned char> buffer;
+  gmic_library::gmic_image<unsigned char> buffer;
   try {
     buffer.load_cimg(filename.toLocal8Bit().constData());
   } catch (...) {
-    Logger::warning("Updater::cimgzDecompressFile(): CImg<>::load_cimg error for file " + filename);
+    Logger::warning("Updater::cimgzDecompressFile(): gmic_image<>::load_cimg error for file " + filename);
     return QByteArray();
   }
   return QByteArray((char *)buffer.data(), (int)buffer.size());
@@ -319,63 +245,65 @@ QString Updater::localFilename(QString url)
   return url;
 }
 
-bool Updater::isStdlib(const QString & source) const
+bool Updater::appendLocalGmicFile(QByteArray & array, QString filename) const
 {
-  QMap<QString, bool>::const_iterator it = _sourceIsStdLib.find(source);
-  if (it != _sourceIsStdLib.end()) {
-    return it.value();
+  QFile file(filename);
+  if (!file.open(QIODevice::ReadOnly)) {
+    return false;
   }
-  return false;
+  QByteArray fileData;
+  if (isCImgCompressed(file.peek(10))) {
+    file.close();
+    TRACE << "Appending compressed file:" << filename;
+    fileData = cimgzDecompressFile(filename);
+    if (!fileData.size()) {
+      return false;
+    }
+  } else { // Try to uncompress
+    TRACE << "Appending:" << filename;
+    fileData = file.readAll();
+  }
+  array.append(fileData);
+  array.append('\n');
+  return true;
 }
 
-QList<QString> Updater::sources() const
+void Updater::prependOfficialSourceIfRelevant(QStringList & list)
 {
-  return _sources;
+  if (Settings::officialFilterSource() == SourcesWidget::OfficialFilters::EnabledWithUpdates) {
+    list.push_front(QString::fromUtf8(OfficialFilterSourceURL));
+  }
 }
 
 QByteArray Updater::buildFullStdlib() const
 {
   QByteArray result;
-  if (_sources.isEmpty()) {
-    gmic_image<char> stdlib_h = gmic::decompress_stdlib();
-    QByteArray tmp = QByteArray::fromRawData(stdlib_h, (int)stdlib_h.size());
-    tmp[tmp.size() - 1] = '\n';
-    result.append(tmp);
-    return result;
-  }
-  for (const QString & source : _sources) {
-    QString filename = localFilename(source);
-    QFile file(filename);
-    if (file.open(QFile::ReadOnly)) {
-      QByteArray array;
-      if (isStdlib(source) && !file.peek(10).startsWith("#@gmic")) {
-        // Try to uncompress
-        file.close();
-        TRACE << "Appending compressed file:" << filename;
-        array = cimgzDecompressFile(filename);
-        if (array.size() && !array.startsWith("#@gmic")) {
-          array.clear();
-        }
-        if (!array.size()) {
-          gmic_image<char> stdlib_h = gmic::decompress_stdlib();
-          QByteArray tmp = QByteArray::fromRawData(stdlib_h, (int)stdlib_h.size());
-          tmp[tmp.size() - 1] = '\n';
-          array.append(tmp);
-        }
-      } else {
-        TRACE << "Appending:" << filename;
-        array = file.readAll();
-      }
-      result.append(array);
-      result.append('\n');
-    } else if (isStdlib(source)) {
-      gmic_image<char> stdlib_h = gmic::decompress_stdlib();
-      QByteArray tmp = QByteArray::fromRawData(stdlib_h, (int)stdlib_h.size());
-      tmp[tmp.size() - 1] = '\n';
-      result.append(tmp);
+  const QByteArray ToTopLevelSeparator = QString("#@gui %1\n").arg(QString("_").repeated(80)).toUtf8();
+
+  QStringList sources = GmicStdLib::substituteSourceVariables(Settings::filterSources());
+
+  switch (Settings::officialFilterSource()) {
+  case SourcesWidget::OfficialFilters::Disabled:
+    // No stdlib included
+    break;
+  case SourcesWidget::OfficialFilters::EnabledWithoutUpdates:
+    appendBuiltinGmicStdlib(result);
+    result.append(ToTopLevelSeparator);
+    break;
+  case SourcesWidget::OfficialFilters::EnabledWithUpdates:
+    if (!appendLocalGmicFile(result, localFilename(QString::fromUtf8(OfficialFilterSourceURL)))) {
+      // Fallback on builtin stdlib
+      appendBuiltinGmicStdlib(result);
     }
-    const QString toTopLevel = QString("#@gui ") + QString("_").repeated(80) + QString("\n");
-    result.append(toTopLevel.toUtf8());
+    result.append(ToTopLevelSeparator);
+    break;
+  }
+
+  for (const QString & source : sources) {
+    QString filename = localFilename(source);
+    if (appendLocalGmicFile(result, filename)) {
+      result.append(ToTopLevelSeparator);
+    }
   }
   return result;
 }
@@ -388,6 +316,14 @@ bool Updater::someNetworkUpdateAchieved() const
 void Updater::setOutputMessageMode(OutputMessageMode mode)
 {
   _outputMessageMode = mode;
+}
+
+void Updater::appendBuiltinGmicStdlib(QByteArray & array) const
+{
+  gmic_image<char> stdlib_h = gmic::decompress_stdlib();
+  QByteArray tmp = QByteArray::fromRawData(stdlib_h, (int)stdlib_h.size());
+  tmp[tmp.size() - 1] = '\n';
+  array.append(tmp);
 }
 
 } // namespace GmicQt

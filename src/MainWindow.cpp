@@ -46,9 +46,7 @@
 #include "CroppedImageListProxy.h"
 #include "DialogSettings.h"
 #include "FilterSelector/FavesModelReader.h"
-#include "FilterSelector/FilterTagMap.h"
 #include "FilterSelector/FiltersPresenter.h"
-#include "FilterSelector/FiltersVisibilityMap.h"
 #include "FilterTextTranslator.h"
 #include "Globals.h"
 #include "GmicStdlib.h"
@@ -64,9 +62,6 @@
 #include "Utils.h"
 #include "Widgets/VisibleTagSelector.h"
 #include "ui_mainwindow.h"
-#ifndef gmic_core
-#include "CImg.h"
-#endif
 #include "gmic.h"
 
 namespace
@@ -119,7 +114,7 @@ MainWindow::MainWindow(QWidget * parent) : QMainWindow(parent), ui(new Ui::MainW
 
   QShortcut * copyShortcut = new QShortcut(QKeySequence::Copy, this);
   copyShortcut->setContext(Qt::ApplicationShortcut);
-  connect(copyShortcut, &QShortcut::activated, [this] { ui->tbCopyCommand->animateClick(100); });
+  connect(copyShortcut, &QShortcut::activated, [this] { ui->tbCopyCommand->animateClick(); });
   ui->tbCopyCommand->setToolTip(appendShortcutText(tr("Copy G'MIC command to clipboard"), copyShortcut->key()));
   ui->tbCopyCommand->setVisible(false);
 
@@ -151,6 +146,7 @@ MainWindow::MainWindow(QWidget * parent) : QMainWindow(parent), ui(new Ui::MainW
   ui->progressInfoWidget->hide();
   ui->messageLabel->setText(QString());
   ui->messageLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+  ui->rightMessageLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
   ui->filterParams->setNoFilter();
   _pendingActionAfterCurrentProcessing = ProcessingAction::NoAction;
@@ -318,6 +314,7 @@ void MainWindow::setDarkTheme()
                       "QMenu::item:selected { background: rgb(110,110,110); }"
                       "QTextEdit { background: #505050; }"
                       "QSpinBox  { background: #505050; }"
+                      "QListWidget { background: #505050; }"
                       "QDoubleSpinBox { background: #505050; }"
                       "QToolButton:checked { background: #383838; }"
                       "QToolButton:pressed { background: #383838; }"
@@ -478,6 +475,12 @@ QString MainWindow::screenGeometries()
   return geometries.join(QString());
 }
 
+void MainWindow::updateFilters(bool internet)
+{
+  ui->tbUpdateFilters->setEnabled(false);
+  updateFiltersFromSources(0, internet);
+}
+
 void MainWindow::onStartupFiltersUpdateFinished(int status)
 {
   bool ok = QObject::disconnect(Updater::getInstance(), &Updater::updateIsDone, this, &MainWindow::onStartupFiltersUpdateFinished);
@@ -584,12 +587,24 @@ void MainWindow::onEscapeKeyPressed()
 
 void MainWindow::clearMessage()
 {
+  ui->messageLabel->setText(QString());
   if (!_messageTimerID) {
     return;
   }
   killTimer(_messageTimerID);
-  ui->messageLabel->setText(QString());
   _messageTimerID = 0;
+}
+
+void MainWindow::clearRightMessage()
+{
+  ui->rightMessageLabel->hide();
+  ui->rightMessageLabel->clear();
+}
+
+void MainWindow::showRightMessage(const QString & text)
+{
+  ui->rightMessageLabel->setText(text);
+  ui->rightMessageLabel->show();
 }
 
 void MainWindow::timerEvent(QTimerEvent * e)
@@ -604,9 +619,11 @@ void MainWindow::timerEvent(QTimerEvent * e)
 void MainWindow::showMessage(const QString & text, int ms)
 {
   clearMessage();
-  if (!text.isEmpty() && ms) {
+  if (!text.isEmpty()) {
     ui->messageLabel->setText(text);
-    _messageTimerID = startTimer(ms);
+    if (ms) {
+      _messageTimerID = startTimer(ms);
+    }
   }
 }
 
@@ -663,6 +680,8 @@ void MainWindow::makeConnections()
 
 void MainWindow::onPreviewUpdateRequested()
 {
+  clearMessage();
+  clearRightMessage();
   onPreviewUpdateRequested(false);
 }
 
@@ -816,6 +835,7 @@ void MainWindow::onFullImageProcessingError(const QString & message)
 
 void MainWindow::onInputModeChanged(InputMode mode)
 {
+  PersistentMemory::clear();
   ui->previewWidget->setFullImageSize(LayersExtentProxy::getExtent(mode));
   ui->previewWidget->sendUpdateRequest();
 }
@@ -871,6 +891,9 @@ void MainWindow::onFullImageProcessingDone()
     ui->previewWidget->updateFullImageSizeIfDifferent(extent);
     ui->previewWidget->sendUpdateRequest();
     _okButtonShouldApply = false;
+    if (_pendingActionAfterCurrentProcessing == ProcessingAction::Apply) {
+      showRightMessage(QString(tr("[Elapsed time: %1]")).arg(readableDuration(_processor.lastCompletedExecutionTime())));
+    }
   }
 }
 
@@ -894,6 +917,8 @@ void MainWindow::search(const QString & text)
 
 void MainWindow::onApplyClicked()
 {
+  clearMessage();
+  clearRightMessage();
   _pendingActionAfterCurrentProcessing = ProcessingAction::Apply;
   processImage();
 }
@@ -906,6 +931,8 @@ void MainWindow::onOkClicked()
     return;
   }
   if (_okButtonShouldApply) {
+    clearMessage();
+    clearRightMessage();
     _pendingActionAfterCurrentProcessing = ProcessingAction::Ok;
     processImage();
   } else {
@@ -916,7 +943,6 @@ void MainWindow::onOkClicked()
 
 void MainWindow::onCancelClicked()
 {
-  TIMING;
   if (_processor.isProcessing() && confirmAbortProcessingOnCloseRequest()) {
     if (_processor.isProcessing()) {
       _pendingActionAfterCurrentProcessing = ProcessingAction::Close;
@@ -981,8 +1007,7 @@ void MainWindow::onPreviewZoomReset()
 
 void MainWindow::onUpdateFiltersClicked()
 {
-  ui->tbUpdateFilters->setEnabled(false);
-  updateFiltersFromSources(0, ui->cbInternetUpdate->isChecked());
+  updateFilters(ui->cbInternetUpdate->isChecked());
 }
 
 void MainWindow::saveCurrentParameters()
@@ -1041,7 +1066,6 @@ void MainWindow::loadSettings()
 {
   QSettings settings;
   _filtersPresenter->loadSettings(settings);
-
   _lastExecutionOK = settings.value("LastExecution/ExitedNormally", true).toBool();
   _newSession = host_app_pid() != settings.value("LastExecution/HostApplicationID", 0).toUInt();
   settings.setValue("LastExecution/ExitedNormally", false);
@@ -1399,6 +1423,13 @@ void MainWindow::onSettingsClicked()
     }
   }
   showZoomWarningIfNeeded();
+  // Sources modification may require an update
+  bool sourcesModified = false;
+  bool sourcesRequireInternetUpdate = false;
+  dialog.sourcesStatus(sourcesModified, sourcesRequireInternetUpdate);
+  if (sourcesModified) {
+    updateFilters(sourcesRequireInternetUpdate && ui->cbInternetUpdate->isChecked());
+  }
 }
 
 bool MainWindow::confirmAbortProcessingOnCloseRequest()

@@ -28,9 +28,11 @@
 #include <QColor>
 #include <QIcon>
 #include <QObject>
-#include "Globals.h"
+#include <QString>
+#include <QStringList>
 #include "GmicQt.h"
 #include "MainWindow.h"
+#include "SourcesWidget.h"
 class QSettings;
 
 namespace GmicQt
@@ -52,6 +54,8 @@ public:
   static void setPreviewPosition(MainWindow::PreviewPosition);
   static bool nativeColorDialogs();
   static void setNativeColorDialogs(bool);
+  static bool nativeFileDialogs();
+  static void setNativeFileDialogs(bool);
   static int updatePeriodicity();
   static void setUpdatePeriodicity(int hours);
   static int previewTimeout();
@@ -64,6 +68,10 @@ public:
   static void setNotifyFailedStartupUpdate(bool);
   static bool highDPIEnabled();
   static void setHighDPIEnabled(bool);
+  static const QStringList & filterSources();
+  static void setFilterSources(const QStringList &);
+  static SourcesWidget::OfficialFilters officialFilterSource();
+  static void setOfficialFilterSource(SourcesWidget::OfficialFilters);
 
   static void save(QSettings &);
   static void load(UserInterfaceMode userInterfaceMode);
@@ -87,12 +95,15 @@ private:
   static bool _filterTranslationEnabled;
   static MainWindow::PreviewPosition _previewPosition;
   static bool _nativeColorDialogs;
+  static bool _nativeFileDialogs;
   static int _updatePeriodicity;
   static int _previewTimeout;
   static OutputMessageMode _outputMessageMode;
   static bool _previewZoomAlwaysEnabled;
   static bool _notifyFailedStartupUpdate;
   static bool _highDPI;
+  static QStringList _filterSources;
+  static SourcesWidget::OfficialFilters _officialFilterSource;
 };
 
 } // namespace GmicQt

@@ -50,9 +50,13 @@
 
 #undef gmic_core
 #include <signal.h>
+#define cimg_appname "gmic"
+#define cimg_library gmic_library
+#define CImg gmic_image
+#define CImgList gmic_list
 #include "CImg.h"
 #include "gmic.h"
-using namespace cimg_library;
+using namespace gmic_library;
 
 // Fallback function for segfault signals.
 #if cimg_OS==1
@@ -61,7 +65,7 @@ void gmic_segfault_sigaction(int signal, siginfo_t *si, void *arg) {
   cimg::mutex(29);
   std::fprintf(cimg::output(),
                "\n\n%s[gmic] G'MIC encountered a %sfatal error%s%s. "
-               "Please submit a bug report, at: %shttps://github.com/dtschump/gmic/issues%s\n\n",
+               "Please submit a bug report, at: %shttps://github.com/GreycLab/gmic/issues%s\n\n",
                cimg::t_red,cimg::t_bold,cimg::t_normal,cimg::t_red,
                cimg::t_bold,cimg::t_normal);
   std::fflush(cimg::output());
@@ -106,7 +110,8 @@ int main(int argc, char **argv) {
 #endif
 
   // Declare main G'MIC instance.
-  gmic gmic_instance;
+  static bool is_abort;
+  gmic gmic_instance((char*)0,(char*)0,true,(float*)0,&is_abort,(gmic_pixel_type)0);
   gmic_instance.set_variable("_host",0,"cli");
   gmic_instance.add_commands("cli_start : ");
 
@@ -162,17 +167,27 @@ int main(int argc, char **argv) {
       if (!*ext || !std::strcmp(ext,"gmic")) {
         std::FILE *gmic_file = std::fopen(argv[1],"rb");
         if (gmic_file) {
-          bool allow_entrypoint = false;
-          gmic gi(0,0,false,0,0,(gmic_pixel_type)0);
-          gi.add_commands(gmic_file,argv[1],is_debug,0,0,&allow_entrypoint);
-          if (allow_entrypoint && argc==3) { // Check if command '_main_' has arguments
-            const unsigned int hash = (int)gmic::hashcode("_main_",false);
-            unsigned int ind = 0;
-            if (gmic::search_sorted("_main_",gi.commands_names[hash],
-                                    gi.commands_names[hash].size(),ind)) // Command found
-              allow_entrypoint = (bool)gi.commands_has_arguments[hash](ind,0);
+          bool is_command_file = (bool)*ext;
+          if (!*ext) { // In case file has no extension, check it starts with a shebang
+            char head[2];
+            if (std::fread(head,1,2,gmic_file)==2) {
+              std::fseek(gmic_file,0,SEEK_SET);
+              if (*head=='#' && head[1]=='!') is_command_file = true;
+            }
           }
-          gmic_instance.allow_entrypoint = allow_entrypoint;
+          if (is_command_file) {
+            bool allow_entrypoint = false;
+            gmic gi(0,0,false,0,0,(gmic_pixel_type)0);
+            gi.add_commands(gmic_file,argv[1],is_debug,0,0,&allow_entrypoint);
+            if (allow_entrypoint && argc==3) { // Check if command '_main_' has arguments
+              const unsigned int hash = (int)gmic::hashcode("_main_",false);
+              unsigned int ind = 0;
+              if (gmic::search_sorted("_main_",gi.commands_names[hash],
+                                      gi.commands_names[hash].size(),ind)) // Command found
+                allow_entrypoint = (bool)gi.commands_has_arguments[hash](ind,0);
+            }
+            gmic_instance.allow_entrypoint = allow_entrypoint;
+          }
           std::fclose(gmic_file);
         }
       }
@@ -235,16 +250,16 @@ int main(int argc, char **argv) {
         std::fflush(cimg::output());
       }
       if (*e.command()) {
-        std::fprintf(cimg::output(),"\n[gmic] Command '%s' has the following description: \n",
-                     e.command());
+        std::fprintf(cimg::output(),"\n[gmic] Command '%s%s%s' has the following description: \n",
+                     cimg::t_red,e.command(),cimg::t_normal);
         std::fflush(cimg::output());
         CImgList<gmic_pixel_type> images;
         CImgList<char> images_names;
         images.insert(gmic::stdlib);
         CImg<char> tmp_line(1024);
         cimg_snprintf(tmp_line,tmp_line.width(),
-                      "l[] i raw:\"%s\",char m \"%s\" onfail rm done "
-                      "l[] i raw:\"%s\",char m \"%s\" onfail rm done "
+                      "l[] i raw:\"%s\",uint8 m \"%s\" onfail rm done "
+                      "l[] i raw:\"%s\",uint8 m \"%s\" onfail rm done "
                       "rv help \"%s\",0",
                       filename_update.data(),filename_update.data(),
                       filename_user,filename_user,

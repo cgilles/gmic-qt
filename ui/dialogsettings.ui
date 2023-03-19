@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="interface">
       <attribute name="title">
@@ -204,6 +204,13 @@
              </widget>
             </item>
             <item>
+             <widget class="QCheckBox" name="cbNativeFileDialogs">
+              <property name="text">
+               <string>Use native file dialog</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QCheckBox" name="cbHighDPI">
               <property name="text">
                <string>&amp;Enable High-DPI support</string>
@@ -211,7 +218,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="label_4">
+             <widget class="QLabel" name="labelHighDPI">
               <property name="text">
                <string>&lt;i&gt;(Restart needed)&lt;/i&gt;</string>
               </property>
@@ -226,6 +233,11 @@
         </layout>
        </item>
       </layout>
+     </widget>
+     <widget class="GmicQt::SourcesWidget" name="sources">
+      <attribute name="title">
+       <string>Filter sources</string>
+      </attribute>
      </widget>
      <widget class="QWidget" name="other">
       <attribute name="title">
@@ -336,6 +348,12 @@
    <class>GmicQt::LanguageSelectionWidget</class>
    <extends>QWidget</extends>
    <header>Widgets/LanguageSelectionWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>GmicQt::SourcesWidget</class>
+   <extends>QWidget</extends>
+   <header>SourcesWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

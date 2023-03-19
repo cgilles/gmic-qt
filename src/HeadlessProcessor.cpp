@@ -40,9 +40,6 @@
 #include "Settings.h"
 #include "Updater.h"
 #include "Widgets/ProgressInfoWindow.h"
-#ifndef gmic_core
-#include "CImg.h"
-#endif
 #include "gmic.h"
 
 #ifdef _IS_WINDOWS_
@@ -59,11 +56,10 @@ namespace GmicQt
  * @param parent
  */
 HeadlessProcessor::HeadlessProcessor(QObject * parent) //
-    : QObject(parent), _filterThread(nullptr), _gmicImages(new cimg_library::CImgList<gmic_pixel_type>)
+    : QObject(parent), _filterThread(nullptr), _gmicImages(new gmic_library::gmic_list<gmic_pixel_type>)
 {
   _progressWindow = nullptr;
   _processingCompletedProperly = false;
-  Updater::getInstance()->updateSources(false);
   GmicStdLib::Array = Updater::getInstance()->buildFullStdlib();
 }
 
@@ -74,7 +70,6 @@ HeadlessProcessor::~HeadlessProcessor()
 
 bool HeadlessProcessor::setPluginParameters(const RunParameters & parameters)
 {
-  QSettings settings;
   _path = QString::fromStdString(parameters.filterPath);
   _inputMode = (parameters.inputMode == InputMode::Unspecified) ? DefaultInputMode : parameters.inputMode;
   _outputMode = (parameters.outputMode == OutputMode::Unspecified) ? DefaultOutputMode : parameters.outputMode;

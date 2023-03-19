@@ -206,6 +206,7 @@ void FiltersView::clear()
   _model.setColumnCount(1);
   _cachedFolder = _model.invisibleRootItem();
   _cachedFolderPath.clear();
+  _indexBeforeClick = QModelIndex{};
 }
 
 void FiltersView::sort()
@@ -399,7 +400,11 @@ void FiltersView::editSelectedFaveName()
 
 void FiltersView::expandAll()
 {
+  auto index = ui->treeView->currentIndex();
   ui->treeView->expandAll();
+  if (index.isValid()) {
+    ui->treeView->scrollTo(index, QAbstractItemView::PositionAtCenter);
+  }
 }
 
 void FiltersView::collapseAll()

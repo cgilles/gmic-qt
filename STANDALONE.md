@@ -17,6 +17,7 @@ suggested to include one of the `%b` or `%f` placeholders in the specified filen
   - `%b` is the input file basename, that is the filename with no extension and no path.
   - `%f` is the input file filename (without path).
 
+If, on the other hand, multiple layers are expected as output, the `%l` placeholder will be replaced by the layer number in each output file (0 is top layer).
 
 #### Examples
 
@@ -25,6 +26,8 @@ suggested to include one of the `%b` or `%f` placeholders in the specified filen
 $ ./gmic_qt --output output.png input.png
 # Select a filter and its parameters twice (i.e. once for each input), save each output to a distinct file.
 $ ./gmic_qt --output processed-%f input1.png input2.png
+# Save the expected output layers in layer_0.png, layer_1.png, ...
+$ ./gmic_qt -o /tmp/layer_%l.png -p "Layers/Tiles to Layers" gmicky.png
 ```
 
 ### Option `-q --quality N`
@@ -137,3 +140,11 @@ OutputMode: 0
 ### Option `--show-last-after`
 
 Print last applied plugin parameters after filter execution. (Indeed, some filters may change the value of their parameters.)
+
+### Option `--layers`
+
+Consider multiple input files as layers of the same image (first image is the top layer).
+
+```sh
+$ ./gmic_qt -p "Blend [Average All]" --layers --apply -o output.png toplayer.png middlelayer.png bottomlayer.png
+```

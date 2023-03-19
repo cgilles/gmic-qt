@@ -31,8 +31,8 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QPushButton>
+#include <QRegularExpression>
 #include <QWidget>
-#include "Common.h"
 #include "FilterTextTranslator.h"
 #include "HtmlTranslator.h"
 #include "IconLoader.h"
@@ -125,10 +125,10 @@ bool FileParameter::initFromText(const QString & filterName, const char * text, 
     return false;
   }
   _name = HtmlTranslator::html2txt(FilterTextTranslator::translate(list[0], filterName));
-  QRegExp re("^\".*\"$");
-  if (re.exactMatch(list[1])) {
-    list[1].chop(1);
-    list[1].remove(0, 1);
+  QRegularExpression re("^\"(.*)\"$");
+  QRegularExpressionMatch match = re.match(list[1]);
+  if (match.hasMatch()) {
+    list[1] = match.captured(1);
   }
   _default = _value = list[1];
   return true;
@@ -152,17 +152,18 @@ void FileParameter::onButtonPressed()
   }
 
   QString filename;
+  const QFileDialog::Options options = Settings::nativeFileDialogs() ? QFileDialog::Options() : QFileDialog::DontUseNativeDialog;
 
   switch (_dialogMode) {
   case DialogMode::Input:
-    filename = QFileDialog::getOpenFileName(QApplication::topLevelWidgets().at(0), tr("Select a file"), folder, QString(), nullptr);
+    filename = QFileDialog::getOpenFileName(QApplication::topLevelWidgets().at(0), tr("Select a file"), folder, QString(), nullptr, options);
     break;
   case DialogMode::Output:
-    filename = QFileDialog::getSaveFileName(QApplication::topLevelWidgets().at(0), tr("Select a file"), folder, QString(), nullptr);
+    filename = QFileDialog::getSaveFileName(QApplication::topLevelWidgets().at(0), tr("Select a file"), folder, QString(), nullptr, options);
     break;
   case DialogMode::InputOutput: {
     QFileDialog dialog(dynamic_cast<QWidget *>(parent()), tr("Select a file"), folder, QString());
-    dialog.setOptions(QFileDialog::DontConfirmOverwrite | QFileDialog::DontUseNativeDialog);
+    dialog.setOptions(QFileDialog::DontConfirmOverwrite | options);
     dialog.setFileMode(QFileDialog::AnyFile);
     if (!_value.isEmpty()) {
       dialog.selectFile(_value);

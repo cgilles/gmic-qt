@@ -169,7 +169,6 @@ fi
 
 # Build package from a virtual Debian/Ubuntu machine.
 #-----------------------------------------------------
-#HOSTNAME=`hostname`
 DIST=`lsb_release -d | tail -c+13 | xargs`
 BITS=`uname -m`
 
@@ -178,7 +177,7 @@ if [ "$IS_210" == "1" ]; then GIMPVER=2.10
 else GIMPVER=2.8
 fi
 
-if [ "$HOSTNAME" != "elara" ] ; then
+if [ "$HOSTNAME" != "C302L-G17P17.png.unicaen.fr" ] && [ "$HOSTNAME" != "C302L-G14F15.png.unicaen.fr" ]; then
     SF_HOME=/media/sf_dtschump/
     cd ${SF_HOME}/work/src
     RELEASE0=`grep "#define gmic_version" gmic/src/gmic.h | tail -c5`
@@ -238,9 +237,7 @@ fi
 #-----------------------------------------
 cd ${HOME}/work/src
 rm -rf gmic-qt zart
-#git clone https://github.com/dtschump/gmic-qt
 git clone https://github.com/c-koi/gmic-qt.git
-#git clone https://github.com/c-koi/zart.git
 RELEASE0=`grep "#define gmic_version" gmic/src/gmic.h | tail -c5`
 RELEASE1=`echo $RELEASE0 | head -c1`
 RELEASE2=`echo $RELEASE0 | head -c2 | tail -c1`
@@ -313,11 +310,10 @@ if [ "$1" == "final" ]; then
     git push --tags
     COMMIT=$(git -C $HOME/work/src/gmic-qt log -1 | head -1 | cut -d' ' -f 2)  # Get the SHA1 of the latest commit
     wget -O /dev/null --timeout=10 "${GMIC_FOUREY_URL}?version=v.${SVERSION}&commit=${COMMIT}"
-else
-    gmic _update_header_html ../html/header.html,${VERSION},1
-    gmic _update_header_html ../html/header1.html,${VERSION},1
-    gmic_commit "Auto-commit for release "${SVERSION}${SUFFIX}
 fi
+gmic _update_header_html ../html/header.html,${VERSION},1
+gmic _update_header_html ../html/header1.html,${VERSION},1
+gmic_commit "Auto-commit for release "${SVERSION}${SUFFIX}
 
 # Create man page and bash autocompletion script.
 #-------------------------------------------------
@@ -330,11 +326,12 @@ cd ..
 #-----------------
 echo " - Upload G'MIC web page."
 cd html
-lftp ftp://$GMIC_LOGIN:$GMIC_PASSWD@$GMIC_FTP -e "mirror -RL . /www/gmic/ ; quit"
+rm -rf gallery color_presets reference tutorial
+lftp sftp://$GMIC_LOGIN:@ovh -e "mirror -RL . /home/"$GMIC_LOGIN"/www/gmic/ ; quit"
 rm -f gmic_stdlib.gmic gmic_stdlib.$VERSION
 cd ..
 cd resources/samples
-lftp ftp://$GMIC_LOGIN:$GMIC_PASSWD@$GMIC_FTP -e "mirror -RL . /www/gmic/samples/ ; quit"
+lftp sftp://$GMIC_LOGIN:@ovh -e "mirror -RL . /home/"$GMIC_LOGIN"/www/gmic/samples/ ; quit"
 cd ../..
 
 # Construct a clean version of the G'MIC folder.
@@ -437,12 +434,12 @@ gzip ${TARFILE}
 cp -f ${TARFILE}.gz ${HOME}/work/src/
 
 if [ "$1" == "final" ]; then
-    lftp ftp://$GMIC_LOGIN:$GMIC_PASSWD@$GMIC_FTP -e "put -O /www/gmic/files/source/ ${HOME}/work/src/${TARFILE}.gz; quit";
+    lftp sftp://$GMIC_LOGIN:@ovh -e "put -O /home/"$GMIC_LOGIN"/www/gmic/files/source/ ${HOME}/work/src/${TARFILE}.gz; quit";
 fi
 
-lftp ftp://$GMIC_LOGIN:$GMIC_PASSWD@$GMIC_FTP -e "mrm /www/gmic/files/prerelease/*.tar.gz; quit"
-lftp ftp://$GMIC_LOGIN:$GMIC_PASSWD@$GMIC_FTP -e "put -O /www/gmic/files/prerelease ${HOME}/work/src/${TARFILE}.gz -o gmic_prerelease.tar.gz; quit"
-lftp ftp://$GMIC_LOGIN:$GMIC_PASSWD@$GMIC_FTP -e "put -O /www/gmic/files/prerelease ${HOME}/work/src/${TARFILE}.gz -o gmic_${SVERSION}${LSUFFIX}.tar.gz; quit"
+lftp sftp://$GMIC_LOGIN:@ovh -e "mrm /home/"$GMIC_LOGIN"/www/gmic/files/prerelease/*.tar.gz; quit"
+lftp sftp://$GMIC_LOGIN:@ovh -e "put -O /home/"$GMIC_LOGIN"/www/gmic/files/prerelease ${HOME}/work/src/${TARFILE}.gz -o gmic_prerelease.tar.gz; quit"
+lftp sftp://$GMIC_LOGIN:@ovh -e "put -O /home/"$GMIC_LOGIN"/www/gmic/files/prerelease ${HOME}/work/src/${TARFILE}.gz -o gmic_${SVERSION}${LSUFFIX}.tar.gz; quit"
 
 # Create debian packages for debian/ubuntu 64 bits.
 #--------------------------------------------------
@@ -477,9 +474,7 @@ echo ELARA_DONE
 echo " - Waiting for all packages.".
 
 cd ${HOME}/work/src/
-if [ "$1" != "final" ]; then
-    gmic upload_binaries ${SVERSION}${SUFFIX}
-fi
+gmic upload_binaries ${SVERSION}${SUFFIX}
 
 #
 # End of file.

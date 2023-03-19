@@ -20,6 +20,7 @@
         <file>icons/dark/selection_mode.png</file>
         <file>icons/dark/system-run.png</file>
         <file>icons/dark/undo.png</file>
+        <file>icons/dark/user-trash.png</file>
         <file>icons/dark/view-fullscreen.png</file>
         <file>icons/dark/view-refresh.png</file>
         <file>icons/dark/zoom-in.png</file>
@@ -40,6 +41,7 @@
         <file>icons/selection_mode.png</file>
         <file>icons/system-run.png</file>
         <file>icons/undo.png</file>
+        <file>icons/user-trash.png</file>
         <file>icons/view-fullscreen.png</file>
         <file>icons/view-refresh.png</file>
         <file>icons/zoom-in.png</file>

@@ -25,11 +25,11 @@
 #ifndef GMIC_QT_GMIC_QT_H
 #define GMIC_QT_GMIC_QT_H
 
-namespace cimg_library
+namespace gmic_library
 {
-template <typename T> struct CImg;
-template <typename T> struct CImgList;
-} // namespace cimg_library
+template <typename T> struct gmic_image;
+template <typename T> struct gmic_list;
+} // namespace gmic_library
 
 #ifndef gmic_pixel_type
 #define gmic_pixel_type float
@@ -96,6 +96,8 @@ extern const OutputMessageMode DefaultOutputMessageMode;
 
 const QString & gmicVersionString();
 
+extern const int GmicVersion;
+
 struct RunParameters {
   std::string command;
   std::string filterPath;
@@ -138,11 +140,11 @@ int run(UserInterfaceMode interfaceMode = UserInterfaceMode::Full,              
  * Instantiated for T in {unsigned char, gmic_pixel_type}
  */
 template <typename T> //
-void calibrateImage(cimg_library::CImg<T> & img, const int spectrum, const bool isPreview);
+void calibrateImage(gmic_library::gmic_image<T> & img, const int spectrum, const bool isPreview);
 
-void convertCImgToQImage(const cimg_library::CImg<float> & in, QImage & out);
+void convertGmicImageToQImage(const gmic_library::gmic_image<float> & in, QImage & out);
 
-void convertQImageToCImg(const QImage & in, cimg_library::CImg<float> & out);
+void convertQImageToGmicImage(const QImage & in, gmic_library::gmic_image<float> & out);
 
 } // namespace GmicQt
 

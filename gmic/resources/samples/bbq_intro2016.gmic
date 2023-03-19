@@ -230,11 +230,11 @@ bbq_intro2 :
       rx={u(-1,1)} ry={u(-1,1)} rz={u(-1,1)} rt={u(-1,1)} rcx={u(-0.6*0.6)} t=0
       N={120+round(u(80))} R={(2+round(u(10)))*min({*,w},{*,h})/300}
       if $obj3d rm[colormap,img,obj3d] fi
-      {10+round(u(12))},1,1,3 noise[0] 255,2 r[0] 256,1,1,3,3 -*[0] 255 shift[0] 1 nm. colormap
+      {10+round(u(12))},1,1,3 noise[0] 255,2 r[0] 256,1,1,3,3 -*[0] 255 shift[0] 1 => colormap
       (67.5;73.5;109.5;103.5;51.5;100.5;{2*$N};$N) 3,{2*$N},1,1,0
       1,$N,1,1,5 2,$N,1,1,'y+x*$N' a[-2--1] x -z. 0,5
-      4,$N,1,1,1 y[-3--1] a[-4--1] y nm. obj3d
-      {{*,w}/2},{{*,h}/2} nm. img
+      4,$N,1,1,1 y[-3--1] a[-4--1] y => obj3d
+      {{*,w}/2},{{*,h}/2} => img
     fi
 
     # Compute bobs coordinates.
@@ -271,25 +271,25 @@ bbq_intro3 :
   W=150 H=350
 
   # Generate global map + colors.
-  900,900 plasma. 1,1,6 b. 0.07% n. 0,255 nm. map
+  900,900 plasma. 1,1,6 b. 0.07% n. 0,255 => map
   +g. -*. 0.5 -+[-2,-1] n. 0,1 -^. 2 n. -150,330
   equalize[map] 256 n[map] -400,160 c[map] 0,100% # Add water.
   (0,102,51;149,175,124;102,42,0;255,255,255) permute. yzcx srgb2rgb. r. 256,1,1,3,3 rgb2srgb. +n[map] 0,255 map. .. rm..
-  -+. .. rm.. c. 0,255 nm. colors # Colors.
+  -+. .. rm.. c. 0,255 => colors # Colors.
 
   # Pre-compute some images used on each frame.
-  $W,$H,1,1,'x' y. x nm. x # Increasing x.
-  $W,$H,1,1,'1+x+y*w' y. x nm. offsets # Offsets (+1).
-  $W,$H,1,1,'0.5*y' nm. gmap Mgmap={iM} # Z-increment for altitude map.
-  $W,$H,1,3 fc. 60,80,135 nm. ccolors # Color for the horizon.
-  $W,$H,1,1,'(y/$H)^2' nm. mcolors # Mask for the horizon.
+  $W,$H,1,1,'x' y. x => x # Increasing x.
+  $W,$H,1,1,'1+x+y*w' y. x => offsets # Offsets (+1).
+  $W,$H,1,1,'0.5*y' => gmap Mgmap={iM} # Z-increment for altitude map.
+  $W,$H,1,3 fc. 60,80,135 => ccolors # Color for the horizon.
+  $W,$H,1,1,'(y/$H)^2' => mcolors # Mask for the horizon.
   $W,400,1,1,'b=h-1-$Mgmap;if(y>=b,256+(y-b)*255/(h-1-b),y*255/b)' round. # Background.
   (96^16^128) (0^200^255) a[-2,-1] x r. 256,1,1,3,3
   (0^32^0) (0^64^128) a[-2,-1] x r. 256,1,1,3,3
   a[-2,-1] x map.. . rm.
-  nm. background
-  quadrangle3d[] -0.45,0,0,0.45,0,0,0.55,1,0,-0.55,1,0 -*3d. {$W/2},{$H/2} nm. viewrange3d # View range.
-  (64^16^0) r. $W nm. groundcolor # Ground color.
+  => background
+  quadrangle3d[] -0.45,0,0,0.45,0,0,0.55,1,0,-0.55,1,0 -*3d. {$W/2},{$H/2} => viewrange3d # View range.
+  (64^16^0) r. $W => groundcolor # Ground color.
 
   _t=0
   do
@@ -305,22 +305,22 @@ bbq_intro3 :
     +r3d[viewrange3d] 0,0,1,{-$a} y. x
     ({$xm+i[8]},{$xm+i[11]};{$xm+i[17]},{$xm+i[14]}^{$ym+i[9]},{$ym+i[12]};{$ym+i[18]},{$ym+i[15]}) rm..
     r. $W,$H,1,2,3 +warp[map,colors] .,0,1,0 rm...
-    nm.. lmap nm. lcolors
+    => lmap,lcolors
 
     # Add color shading and altitude to local maps.
-    +!=[lmap] 0 nm. ground
+    +!=[lmap] 0 => ground
     -+[lmap] [gmap]
     j[lcolors] [ccolors],0,0,0,0,1,[mcolors]
     j[lcolors] [groundcolor]
-    +round[lmap] f. '>m=abs(j(0,-1));if(i>m,i,-m)' nm. y0  # Compute visible top points.
-    +shift. 0,1 abs. -+. 1 nm. y1 # Compute visible bottom points.
+    +round[lmap] f. '>m=abs(j(0,-1));if(i>m,i,-m)' => y0  # Compute visible top points.
+    +shift. 0,1 abs. -+. 1 => y1 # Compute visible bottom points.
     -*[y0,y1] [ground] rm[ground]
     r[lcolors,y0,y1] {$W*$H},1,1,100%,-1
 
     # Keep only visible primitives.
     +>[y0] 0 -*. [offsets] discard. 0 y.
     if h # There is something to display (ground).
-      -. 1 +warp[x] .,0,0,0 nm. lx
+      -. 1 +warp[x] .,0,0,0 => lx
       warp[lcolors,y0,y1] ..,0,0,0 rm..
 
       # Generate 3d object.
@@ -632,8 +632,8 @@ bbq_intro_final :
 
   # Create 3d objects.
   torus3d 30,10 col3d. 255,200,0
-  spherical3d 47,34,"80+20*abs(cos(2*theta))" s3d. rm.. i.. 3,{h},1,1,150,220,255,200,255,255 y.. a[-6--1] y
-  spherical3d 47,34,"100*abs(1+0.6*cos(3*phi)*sin(4*theta))"
+  spherical3d "80+20*abs(cos(2*theta))",47,34 s3d. rm.. i.. 3,{h},1,1,150,220,255,200,255,255 y.. a[-6--1] y
+  spherical3d "100*abs(1+0.6*cos(3*phi)*sin(4*theta))",47,34
   r3d[-2,-1] 0,1,0,-90 db3d 0
 
   # Generate scrolling data.

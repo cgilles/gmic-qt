@@ -38,9 +38,6 @@
 #include "Globals.h"
 #include "HtmlTranslator.h"
 #include "Logger.h"
-#ifndef gmic_core
-#include "CImg.h"
-#endif
 #include "gmic.h"
 
 namespace
@@ -98,32 +95,38 @@ void downcaseCommandTitle(QString & title)
 {
   QMap<int, QString> acronyms;
   // Acronyms
-  QRegExp re("([A-Z0-9]{2,255})");
+  QRegularExpression re("([A-Z0-9]{2,255})");
   int index = 0;
-  while ((index = re.indexIn(title, index)) != -1) {
-    QString pattern = re.cap(0);
-    acronyms[index] = pattern;
-    index += pattern.length();
+  QRegularExpressionMatch match = re.match(title, index);
+  while (match.hasMatch()) {
+    QString pattern = match.captured(0);
+    acronyms[match.capturedStart(0)] = pattern;
+    index = match.capturedStart(0) + pattern.length();
+    match = re.match(title, index);
   }
 
   // 3D
   re.setPattern("([1-9])[dD] ");
-  if ((index = re.indexIn(title, 0)) != -1) {
-    acronyms[index] = re.cap(1) + "d ";
+  match = re.match(title);
+  if (match.hasMatch()) {
+    acronyms[match.capturedStart(0)] = match.captured(1) + "d ";
   }
 
-  // B&amp;W
+  // B&amp;W [Lab [YCbCr
   re.setPattern("(B&amp;W|[ \\[]Lab|[ \\[]YCbCr)");
   index = 0;
-  while ((index = re.indexIn(title, index)) != -1) {
-    acronyms[index] = re.cap(1);
-    index += re.cap(1).length();
+  match = re.match(title, index);
+  while ((index = match.capturedStart(0)) != -1) {
+    acronyms[index] = match.captured(1);
+    index += match.capturedLength(1);
+    match = re.match(title, index);
   }
 
   // Uppercase letter in last position, after a space
   re.setPattern(" ([A-Z])$");
-  if ((index = re.indexIn(title, 0)) != -1) {
-    acronyms[index] = re.cap(0);
+  match = re.match(title);
+  if (match.hasMatch()) {
+    acronyms[match.capturedStart()] = match.captured(0);
   }
   title = title.toLower();
   QMap<int, QString>::const_iterator it = acronyms.cbegin();
@@ -367,7 +370,7 @@ QStringList quotedStringList(const QStringList & stringList)
 QString unescaped(const QString & text)
 {
   QByteArray ba = text.toUtf8();
-  cimg_library::cimg::strunescape(ba.data());
+  gmic_library::cimg::strunescape(ba.data());
   return QString::fromUtf8(ba.data());
 }
 
@@ -401,6 +404,25 @@ QStringList expandParameterList(const QStringList & parameters, const QVector<in
     ++itSize;
   }
   return result;
+}
+
+QString readableDuration(qint64 ms)
+{
+  const qint64 HOUR = 3600000;
+  const qint64 MINUTE = 60000;
+  const qint64 SECOND = 1000;
+  if (ms < SECOND) {
+    return QString("%1 ms").arg(ms);
+  }
+  if (ms < MINUTE) {
+    return QString("%1 s %2 ms").arg(ms / SECOND).arg(ms % SECOND);
+  }
+  const int hours = ms / HOUR;
+  return QString("%1:%2:%3.%4")                             //
+      .arg(ms / HOUR, (hours < 10) ? 2 : 0, 10, QChar('0')) // Hours
+      .arg((ms % HOUR) / MINUTE, 2, 10, QChar('0'))         // Minutes
+      .arg((ms % MINUTE) / 1000, 2, 10, QChar('0'))         // Seconds
+      .arg(ms % SECOND, 3, 10, QChar('0'));                 // Milliseconds
 }
 
 } // namespace GmicQt

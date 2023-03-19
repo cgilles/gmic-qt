@@ -86,11 +86,12 @@ DialogSettings::DialogSettings(QWidget * parent) : QDialog(parent), ui(new Ui::D
   ui->rbDefaultTheme->setChecked(!savedDarkTheme);
   ui->cbNativeColorDialogs->setChecked(Settings::nativeColorDialogs());
   ui->cbNativeColorDialogs->setToolTip(tr("Check to use Native/OS color dialog, uncheck to use Qt's"));
+  ui->cbNativeFileDialogs->setChecked(Settings::nativeFileDialogs());
+  ui->cbNativeFileDialogs->setToolTip(tr("Check to use Native/OS file dialog, uncheck to use Qt's"));
   ui->cbShowLogos->setChecked(Settings::visibleLogos());
   ui->sbPreviewTimeout->setValue(Settings::previewTimeout());
   ui->cbPreviewZoom->setChecked(Settings::previewZoomAlwaysEnabled());
   ui->cbNotifyFailedUpdate->setChecked(Settings::notifyFailedStartupUpdate());
-  ui->cbHighDPI->setChecked(Settings::highDPIEnabled());
 
   connect(ui->pbOk, &QPushButton::clicked, this, &DialogSettings::onOk);
   connect(ui->rbLeftPreview, &QRadioButton::toggled, this, &DialogSettings::onRadioLeftPreviewToggled);
@@ -99,6 +100,7 @@ DialogSettings::DialogSettings(QWidget * parent) : QDialog(parent), ui(new Ui::D
   connect(ui->labelPreviewLeft, &ClickableLabel::clicked, ui->rbLeftPreview, &QRadioButton::click);
   connect(ui->labelPreviewRight, &ClickableLabel::clicked, ui->rbRightPreview, &QRadioButton::click);
   connect(ui->cbNativeColorDialogs, &QCheckBox::toggled, this, &DialogSettings::onColorDialogsToggled);
+  connect(ui->cbNativeFileDialogs, &QCheckBox::toggled, this, &DialogSettings::onFileDialogsToggled);
   connect(Updater::getInstance(), &Updater::updateIsDone, this, &DialogSettings::enableUpdateButton);
   connect(ui->rbDarkTheme, &QRadioButton::toggled, this, &DialogSettings::onDarkThemeToggled);
   connect(ui->cbShowLogos, &QCheckBox::toggled, this, &DialogSettings::onVisibleLogosToggled);
@@ -106,7 +108,14 @@ DialogSettings::DialogSettings(QWidget * parent) : QDialog(parent), ui(new Ui::D
   connect(ui->sbPreviewTimeout, QOverload<int>::of(&QSpinBox::valueChanged), this, &DialogSettings::onPreviewTimeoutChange);
   connect(ui->outputMessages, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DialogSettings::onOutputMessageModeChanged);
   connect(ui->cbNotifyFailedUpdate, &QCheckBox::toggled, this, &DialogSettings::onNotifyStartupUpdateFailedToggle);
+
+#if QT_VERSION_GTE(6, 0, 0)
+  ui->cbHighDPI->hide();
+  ui->labelHighDPI->hide();
+#else
+  ui->cbHighDPI->setChecked(Settings::highDPIEnabled());
   connect(ui->cbHighDPI, &QCheckBox::toggled, this, &DialogSettings::onHighDPIToggled);
+#endif
 
   ui->languageSelector->selectLanguage(Settings::languageCode());
   ui->languageSelector->enableFilterTranslation(Settings::filterTranslationEnabled());
@@ -116,6 +125,7 @@ DialogSettings::DialogSettings(QWidget * parent) : QDialog(parent), ui(new Ui::D
     p.setColor(QPalette::Text, Settings::CheckBoxTextColor);
     p.setColor(QPalette::Base, Settings::CheckBoxBaseColor);
     ui->cbNativeColorDialogs->setPalette(p);
+    ui->cbNativeFileDialogs->setPalette(p);
     ui->cbPreviewZoom->setPalette(p);
     ui->cbUpdatePeriodicity->setPalette(p);
     ui->rbDarkTheme->setPalette(p);
@@ -135,6 +145,11 @@ DialogSettings::~DialogSettings()
   delete ui;
 }
 
+void DialogSettings::sourcesStatus(bool & modified, bool & internetUpdateRequired)
+{
+  modified = ui->sources->sourcesModified(internetUpdateRequired);
+}
+
 void DialogSettings::onOk()
 {
   done(QDialog::Accepted);
@@ -143,6 +158,7 @@ void DialogSettings::onOk()
 void DialogSettings::done(int r)
 {
   QSettings settings;
+  ui->sources->saveSettings();
   Settings::save(settings);
   QDialog::done(r);
 }
@@ -215,6 +231,11 @@ void DialogSettings::onUpdatePeriodicityChanged(int)
 void DialogSettings::onColorDialogsToggled(bool on)
 {
   Settings::setNativeColorDialogs(on);
+}
+
+void DialogSettings::onFileDialogsToggled(bool on)
+{
+  Settings::setNativeFileDialogs(on);
 }
 
 } // namespace GmicQt

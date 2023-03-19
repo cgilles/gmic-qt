@@ -31,28 +31,407 @@
 #include <QRegularExpression>
 #include <QSettings>
 #include <QString>
+#include <cstring>
 #include "Common.h"
 #include "FilterSelector/FiltersModel.h"
 #include "Globals.h"
 #include "GmicQt.h"
 #include "LanguageSettings.h"
 #include "Logger.h"
-#include "Utils.h"
-#ifndef gmic_core
-#include "CImg.h"
+
+namespace
+{
+const QChar CHAR_OPENING_PARENTHESIS('(');
+const QChar CHAR_CLOSING_PARENTHESIS(')');
+const QChar CHAR_SPACE(' ');
+const QChar CHAR_TAB('\t');
+const QChar CHAR_COLON(':');
+const QChar CHAR_UNDERSCORE('_');
+const QChar CHAR_CROSS_SIGN('#');
+const QChar CHAR_NEWLINE('\n');
+const QString AT_GUI("#@gui");
+
+#ifdef __GNUC__
+inline bool isSpace(const QChar & c) __attribute__((always_inline));
+inline bool isSpace(const char c) __attribute__((always_inline));
+inline void traverseSpaces(const QChar *& pc, const QChar * limit) __attribute__((always_inline));
+inline void traverseSpaces(const char *& pc, const char * limit) __attribute__((always_inline));
+inline bool traverseOneChar(const QChar *& pc, const QChar * limit, const QChar & c) __attribute__((always_inline));
+inline bool traverseOneChar(const char *& pc, const char * limit, const char c) __attribute__((always_inline));
+inline bool traverseOneCharDifferentFrom(const QChar *& pc, const QChar * limit, const QChar & c) __attribute__((always_inline));
+inline void traverseCharSequenceDifferentFrom(const QChar *& pc, const QChar * limit, const QChar & c) __attribute__((always_inline));
+inline bool equals(const QChar *& pc, const QChar * limit, const QString & text) __attribute__((always_inline));
 #endif
-#include "gmic.h"
+
+inline bool isSpace(const QChar & c)
+{
+  return (c == CHAR_SPACE) || (c == CHAR_TAB);
+}
+
+inline bool isSpace(const char c)
+{
+  return (c == ' ') || (c == '\t');
+}
+
+inline void traverseSpaces(const QChar *& pc, const QChar * limit)
+{
+  while ((pc != limit) && isSpace(*pc)) {
+    ++pc;
+  }
+}
+
+inline void traverseSpaces(const char *& pc, const char * limit)
+{
+  while ((pc != limit) && isSpace(*pc)) {
+    ++pc;
+  }
+}
+
+inline bool traverseOneChar(const QChar *& pc, const QChar * limit, const QChar & c)
+{
+  if ((pc != limit) && (*pc == c)) {
+    ++pc;
+    return true;
+  }
+  return false;
+}
+
+inline bool traverseOneChar(const char *& pc, const char * limit, const char c)
+{
+  if ((pc != limit) && (*pc == c)) {
+    ++pc;
+    return true;
+  }
+  return false;
+}
+
+inline bool traverseOneCharDifferentFrom(const QChar *& pc, const QChar * limit, const QChar & c)
+{
+  if ((pc != limit) && (*pc != c)) {
+    ++pc;
+    return true;
+  }
+  return false;
+}
+
+inline void traverseCharSequenceDifferentFrom(const QChar *& pc, const QChar * limit, const QChar & c)
+{
+  while ((pc != limit) && (*pc != c)) {
+    ++pc;
+  }
+}
+
+inline bool traverseOneAlphabeticLetter(const QChar *& pc, const QChar * limit)
+{
+  if (pc != limit) {
+    char c = pc->toLatin1();
+    if (((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z'))) {
+      ++pc;
+      return true;
+    }
+  }
+  return false;
+}
+
+inline bool equals(const QChar *& pc, const QChar * limit, const QString & text)
+{
+  const QChar * textPc = text.constData();
+  const QChar * textLimit = textPc + text.size();
+  while ((pc != limit) && (textPc != textLimit) && (*pc == *textPc)) {
+    ++pc;
+    ++textPc;
+  }
+  return (textPc == textLimit);
+}
+
+// "^\\s*#@gui"
+bool containsGuiComment(const QString & text)
+{
+  const QChar * pc = text.constData();
+  const QChar * limit = pc + text.size();
+  traverseSpaces(pc, limit);
+  return equals(pc, limit, AT_GUI);
+}
+
+// "^\\s*#@gui[ ][^:]+$"
+bool isFolderNoLanguage(const QString & text)
+{
+  const QChar * pc = text.constData();
+  const QChar * limit = pc + text.size();
+  traverseSpaces(pc, limit);
+  if (!equals(pc, limit, QString("#@gui "))) {
+    return false;
+  }
+  if (!traverseOneCharDifferentFrom(pc, limit, CHAR_COLON)) {
+    return false;
+  }
+  traverseCharSequenceDifferentFrom(pc, limit, CHAR_COLON);
+  return (pc == limit);
+}
+
+// QString("^\\s*#@gui_%1[ ][^:]+$").arg(language);
+bool isFolderLanguage(const QString & text, const QString & language)
+{
+  const QChar * pc = text.constData();
+  const QChar * limit = pc + text.size();
+  traverseSpaces(pc, limit);
+  if (!equals(pc, limit, QString("#@gui_"))) {
+    return false;
+  }
+  if (!equals(pc, limit, language)) {
+    return false;
+  }
+  if (!traverseOneChar(pc, limit, CHAR_SPACE)) {
+    return false;
+  }
+  if (!traverseOneCharDifferentFrom(pc, limit, CHAR_COLON)) {
+    return false;
+  }
+  traverseCharSequenceDifferentFrom(pc, limit, CHAR_COLON);
+  return (pc == limit);
+}
+
+// "^\\s*#@gui[ ][^:]+[ ]*:.*"
+// Replaced here by "^\\s*#@gui[ ][^:]+:.*"
+bool isFilterNoLanguage(const QString & text)
+{
+  const QChar * pc = text.constData();
+  const QChar * limit = pc + text.size();
+  traverseSpaces(pc, limit);
+  if (!equals(pc, limit, QString("#@gui "))) {
+    return false;
+  }
+  if (!traverseOneCharDifferentFrom(pc, limit, CHAR_COLON)) {
+    return false;
+  }
+  traverseCharSequenceDifferentFrom(pc, limit, CHAR_COLON);
+  return traverseOneChar(pc, limit, CHAR_COLON);
+}
+
+// QString("^\\s*#@gui_%1[ ][^:]+[ ]*:.*").arg(language);
+// Replaced here by "^\\s*#@gui_%1[ ][^:]+:".arg(language);
+bool isFilterLanguage(const QString & text, const QString & language)
+{
+  const QChar * pc = text.constData();
+  const QChar * limit = pc + text.size();
+  traverseSpaces(pc, limit);
+  if (!equals(pc, limit, QString("#@gui_"))) {
+    return false;
+  }
+  if (!equals(pc, limit, language)) {
+    return false;
+  }
+  if (!traverseOneChar(pc, limit, CHAR_SPACE)) {
+    return false;
+  }
+  if (!traverseOneCharDifferentFrom(pc, limit, CHAR_COLON)) {
+    return false;
+  }
+  traverseCharSequenceDifferentFrom(pc, limit, CHAR_COLON);
+  return traverseOneChar(pc, limit, CHAR_COLON);
+}
+
+// "\\s*:\\s*([xX.*+vViI-])\\s*$"
+bool containsInputMode(const QString & text, QString & inputMode)
+{
+  const QChar * pc = text.constData();
+  const QChar * limit = pc + text.size();
+  traverseCharSequenceDifferentFrom(pc, limit, CHAR_COLON);
+  if (!traverseOneChar(pc, limit, CHAR_COLON)) {
+    return false;
+  }
+  traverseSpaces(pc, limit);
+  if (pc != limit) {
+    char c = pc->toLatin1();
+    if (strchr("xX.*+vViI-", c)) {
+      inputMode = *pc;
+      return true;
+    }
+  }
+  return false;
+}
+
+// QString("^\\s*#@gui_%1[ ]+hide\\((.*)\\)").arg(language)); // Capture 'path'
+bool containsHidePath(const QString & text, const QString & language, QString & path)
+{
+  const QChar * begin = text.constData();
+  const QChar * pc = begin;
+  const QChar * limit = pc + text.size();
+  traverseSpaces(pc, limit);
+  if (!equals(pc, limit, AT_GUI)) {
+    return false;
+  }
+  if (!traverseOneChar(pc, limit, CHAR_UNDERSCORE)) {
+    return false;
+  }
+  if (!equals(pc, limit, language)) {
+    return false;
+  }
+  if (!traverseOneChar(pc, limit, CHAR_SPACE)) {
+    return false;
+  }
+  traverseSpaces(pc, limit);
+  if (!equals(pc, limit, QString("hide("))) {
+    return false;
+  }
+  const QChar * captureBegin = pc;
+  traverseCharSequenceDifferentFrom(pc, limit, CHAR_CLOSING_PARENTHESIS);
+  if ((pc == limit) || (*pc != CHAR_CLOSING_PARENTHESIS)) {
+    return false;
+  }
+  const QChar * captureEnd = pc;
+  path = QString(captureBegin, captureEnd - captureBegin);
+  return true;
+}
+
+// "^\\s*#"
+bool containsLeadingSpaceAndCrossSign(const char * text, const char * limit)
+{
+  traverseSpaces(text, limit);
+  return traverseOneChar(text, limit, '#');
+}
+
+// Remove "\\s*:.*$"
+void removeColonAndText(QString & text)
+{
+  int i = text.indexOf(':');
+  while ((i > 0) && isSpace(text[i - 1])) {
+    --i;
+  }
+  text.remove(i, text.size() - i);
+}
+
+// Remove "^\\s*#@gui[_a-zA-Z]{0,3}[ ]"
+void removeAtGuiLangPrefix(QString & text)
+{
+  const QChar * begin = text.constData();
+  const QChar * pc = begin;
+  const QChar * limit = pc + text.size();
+  traverseSpaces(pc, limit);
+  if (!equals(pc, limit, AT_GUI)) {
+    return;
+  }
+  if (traverseOneChar(pc, limit, CHAR_UNDERSCORE)) {
+    traverseOneAlphabeticLetter(pc, limit);
+    traverseOneAlphabeticLetter(pc, limit);
+  }
+  if (!traverseOneChar(pc, limit, CHAR_SPACE)) {
+    return;
+  }
+  text.remove(0, pc - begin);
+}
+
+// "^\\s*#@gui[_a-zA-Z]{0,3}[ ][^:]+:[ ]*"
+void removeAtGuiTextAndColon(QString & text)
+{
+  const QChar * begin = text.constData();
+  const QChar * pc = begin;
+  const QChar * limit = pc + text.size();
+  traverseSpaces(pc, limit);
+  if (!equals(pc, limit, AT_GUI)) {
+    return;
+  }
+  if (traverseOneChar(pc, limit, CHAR_UNDERSCORE)) {
+    traverseOneAlphabeticLetter(pc, limit);
+    traverseOneAlphabeticLetter(pc, limit);
+  }
+  if (!traverseOneChar(pc, limit, CHAR_SPACE)) {
+    return;
+  }
+  if (!traverseOneCharDifferentFrom(pc, limit, CHAR_COLON)) {
+    return;
+  }
+  traverseCharSequenceDifferentFrom(pc, limit, CHAR_COLON);
+  if (!traverseOneChar(pc, limit, CHAR_COLON)) {
+    return;
+  }
+  traverseSpaces(pc, limit);
+  text.remove(0, pc - begin);
+}
+
+// "^\\s*#@gui[_a-zA-Z]{0,3}[ ]*:[ ]*"
+void removeAtGuiSpacesAndColon(QString & text)
+{
+  const QChar * begin = text.constData();
+  const QChar * pc = begin;
+  const QChar * limit = pc + text.size();
+  traverseSpaces(pc, limit);
+  if (!equals(pc, limit, AT_GUI)) {
+    return;
+  }
+  if (traverseOneChar(pc, limit, CHAR_UNDERSCORE)) {
+    traverseOneAlphabeticLetter(pc, limit);
+    traverseOneAlphabeticLetter(pc, limit);
+  }
+  traverseSpaces(pc, limit);
+  if (!traverseOneChar(pc, limit, CHAR_COLON)) {
+    return;
+  }
+  traverseSpaces(pc, limit);
+  text.remove(0, pc - begin);
+}
+
+// "^\\s*"
+void removeLeadingSpaces(QString & text)
+{
+  const QChar * begin = text.constData();
+  const QChar * pc = begin;
+  const QChar * limit = pc + text.size();
+  traverseSpaces(pc, limit);
+  if (pc != begin) {
+    text.remove(0, pc - begin);
+  }
+}
+
+// " .*"
+void removeSpaceAndText(QString & text)
+{
+  int index = text.indexOf(CHAR_SPACE);
+  if (index != -1) {
+    text.remove(index, text.size() - index);
+  }
+}
+
+// "\\s*:\\s*([xX.*+vViI-])\\s*$"  // Capture
+void removeInputMode(QString & text)
+{
+  int index = text.indexOf(CHAR_COLON);
+  if (index != -1) {
+    while ((index > 0) && (text[index - 1] == CHAR_SPACE)) {
+      --index;
+    }
+    text.remove(index, text.size() - index);
+  }
+}
+
+// Replace QRegExp(" .*") by "[ ]?:" to obtain #@gui[ ]?: or #@gui_fr[ ]?:
+// then check the regexp "^\s*#@gui[ ]?:" or "^\s*#@gui_fr[ ]?:"
+// Check \s*PREFIX[ ]?:    (PREFIX is e.g. #@gui or #@gui_fr)
+bool isPrefixAndColon(const QString & text, const QString & prefix)
+{
+  const QChar * begin = text.constData();
+  const QChar * pc = begin;
+  const QChar * limit = pc + text.size();
+  traverseSpaces(pc, limit);
+  if (!equals(pc, limit, prefix)) {
+    return false;
+  }
+  traverseOneChar(pc, limit, CHAR_SPACE);
+  return traverseOneChar(pc, limit, CHAR_COLON);
+}
+
+} // namespace
 
 namespace GmicQt
 {
 
 FiltersModelReader::FiltersModelReader(FiltersModel & model) : _model(model) {}
 
-void FiltersModelReader::parseFiltersDefinitions(QByteArray & stdlibArray)
+void FiltersModelReader::parseFiltersDefinitions(const QByteArray & stdlibArray)
 {
   TIMING;
-  QBuffer stdlib(&stdlibArray);
-  stdlib.open(QBuffer::ReadOnly | QBuffer::Text);
+  const char * stdlib = stdlibArray.constData();
+  const char * stdLibLimit = stdlib + stdlibArray.size();
   QList<QString> filterPath;
 
   QString language = LanguageSettings::configuredTranslator();
@@ -66,33 +445,24 @@ void FiltersModelReader::parseFiltersDefinitions(QByteArray & stdlibArray)
     language = "en";
   }
 
-  QString buffer = readBufferLine(stdlib);
+  QString buffer = readBufferLine(stdlib, stdLibLimit);
   QString line;
-
-  QRegExp folderRegexpNoLanguage("^\\s*#@gui[ ][^:]+$");
-  QRegExp folderRegexpLanguage(QString("^\\s*#@gui_%1[ ][^:]+$").arg(language));
-
-  QRegExp filterRegexpNoLanguage("^\\s*#@gui[ ][^:]+[ ]*:.*");
-  QRegExp filterRegexpLanguage(QString("^\\s*#@gui_%1[ ][^:]+[ ]*:.*").arg(language));
-
-  QRegExp hideCommandRegExp(QString("^\\s*#@gui_%1[ ]+hide\\((.*)\\)").arg(language));
-  QRegExp guiComment("^\\s*#@gui");
   QVector<QString> hiddenPaths;
 
   const QChar WarningPrefix('!');
   do {
     line = buffer.trimmed();
-    if (guiComment.indexIn(line) == 0) {
-      if (hideCommandRegExp.exactMatch(line)) {
-        QString path = hideCommandRegExp.cap(1);
+    if (containsGuiComment(line)) {
+      QString path;
+      if (containsHidePath(line, language, path)) {
         hiddenPaths.push_back(path);
-        buffer = readBufferLine(stdlib);
-      } else if (folderRegexpNoLanguage.exactMatch(line) || folderRegexpLanguage.exactMatch(line)) {
+        buffer = readBufferLine(stdlib, stdLibLimit);
+      } else if (isFolderNoLanguage(line) || isFolderLanguage(line, language)) {
         //
         // A folder
         //
         QString folderName = line;
-        folderName.replace(QRegExp("^\\s*#@gui[_a-zA-Z]{0,3}[ ]"), "");
+        removeAtGuiLangPrefix(folderName);
 
         while (folderName.startsWith("_") && !filterPath.isEmpty()) {
           folderName.remove(0, 1);
@@ -104,29 +474,28 @@ void FiltersModelReader::parseFiltersDefinitions(QByteArray & stdlibArray)
         if (!folderName.isEmpty()) {
           filterPath.push_back(folderName);
         }
-        buffer = readBufferLine(stdlib);
-      } else if (filterRegexpNoLanguage.exactMatch(line) || filterRegexpLanguage.exactMatch(line)) {
+        buffer = readBufferLine(stdlib, stdLibLimit);
+      } else if (isFilterNoLanguage(line) || isFilterLanguage(line, language)) {
         //
         // A filter
         //
         QString filterName = line;
-        filterName.remove(QRegExp("[ ]*:.*$"));
-        filterName.remove(QRegExp("^\\s*#@gui[_a-zA-Z]{0,3}[ ]"));
+        removeColonAndText(filterName);
+        removeAtGuiLangPrefix(filterName);
         const bool warning = filterName.startsWith(WarningPrefix);
         if (warning) {
           filterName.remove(0, 1);
         }
 
         QString filterCommands = line;
-        filterCommands.replace(QRegExp("^\\s*#@gui[_a-zA-Z]{0,3}[ ][^:]+[ ]*:[ ]*"), "");
+        removeAtGuiTextAndColon(filterCommands);
 
         // Extract default input mode
         InputMode defaultInputMode = InputMode::Unspecified;
-        QRegExp reInputMode("\\s*:\\s*([xX.*+vViI-])\\s*$");
-        if (reInputMode.indexIn(filterCommands) != -1) {
-          QString mode = reInputMode.cap(1);
-          filterCommands.remove(reInputMode);
-          defaultInputMode = symbolToInputMode(mode);
+        QString inputMode;
+        if (containsInputMode(filterCommands, inputMode)) {
+          removeInputMode(filterCommands);
+          defaultInputMode = symbolToInputMode(inputMode);
         }
 
         QList<QString> commands = filterCommands.split(",");
@@ -153,7 +522,10 @@ void FiltersModelReader::parseFiltersDefinitions(QByteArray & stdlibArray)
             accurateIfZoomed = false;
           }
           bool ok = false;
-          preview[1].replace(QRegExp("\\).*"), "");
+          const int closingParenthesisIndex = preview[1].indexOf(QChar(')'));
+          if (closingParenthesisIndex != -1) {
+            preview[1].remove(closingParenthesisIndex, preview[1].size() - closingParenthesisIndex);
+          }
           previewFactor = preview[1].toFloat(&ok);
           if (!ok) {
             Logger::error(QString("Cannot parse zoom factor for filter [%1]:\n%2").arg(filterName).arg(line));
@@ -164,24 +536,23 @@ void FiltersModelReader::parseFiltersDefinitions(QByteArray & stdlibArray)
 
         QString filterPreviewCommand = preview[0].trimmed();
         QString start = line;
-        start.replace(QRegExp("^\\s*"), "");
-        start.replace(QRegExp(" .*"), "[ ]?:");
-        QRegExp startRegexp(QString("^\\s*%1").arg(start));
+        removeLeadingSpaces(start);
+        removeSpaceAndText(start); // #@gui or #@gui_fr
 
         // Read parameters
         QString parameters;
         do {
-          buffer = readBufferLine(stdlib);
-          if (startRegexp.indexIn(buffer) == 0) {
+          buffer = readBufferLine(stdlib, stdLibLimit);
+          if (isPrefixAndColon(buffer, start)) { //
             QString parameterLine = buffer;
-            parameterLine.replace(QRegExp("^\\s*#@gui[_a-zA-Z]{0,3}[ ]*:[ ]*"), "");
+            removeAtGuiSpacesAndColon(parameterLine);
             parameters += parameterLine;
           }
-        } while (!stdlib.atEnd()                               //
-                 && !folderRegexpNoLanguage.exactMatch(buffer) //
-                 && !folderRegexpLanguage.exactMatch(buffer)   //
-                 && !filterRegexpNoLanguage.exactMatch(buffer) //
-                 && !filterRegexpLanguage.exactMatch(buffer));
+        } while ((stdlib != stdLibLimit)                //
+                 && !isFolderNoLanguage(buffer)         //
+                 && !isFolderLanguage(buffer, language) //
+                 && !isFilterNoLanguage(buffer)         //
+                 && !isFilterLanguage(buffer, language));
         FiltersModel::Filter filter;
         filter.setName(filterName);
         filter.setCommand(filterCommand);
@@ -196,10 +567,10 @@ void FiltersModelReader::parseFiltersDefinitions(QByteArray & stdlibArray)
         filter.build();
         _model.addFilter(filter);
       } else {
-        buffer = readBufferLine(stdlib);
+        buffer = readBufferLine(stdlib, stdLibLimit);
       }
     } else {
-      buffer = readBufferLine(stdlib);
+      buffer = readBufferLine(stdlib, stdLibLimit);
     }
   } while (!buffer.isEmpty());
 
@@ -266,41 +637,38 @@ InputMode FiltersModelReader::symbolToInputMode(const QString & str)
   }
 }
 
-QString FiltersModelReader::readBufferLine(QBuffer & buffer)
-{
-  // QBuffer::readline(max_size) may be very slow, in debug mode, when max_size
-  // is too big (e.g. 1MB). We read large lines in multiple calls.
-  QString result;
-  QString text;
-  QRegExp commentStart("^\\s*#");
-  do {
-    text = buffer.readLine(1024);
-    result.append(text);
-  } while (!text.isEmpty() && !text.endsWith("\n"));
+// QString FiltersModelReader::readBufferLine(const char * & pc, const char * limit)
 
-  // Merge comment lines ending with '\'
-  if (commentStart.indexIn(result) == 0) {
-    while (result.endsWith("\\\n")) {
-      QString nextLinePeek = buffer.peek(1024);
-      if (commentStart.indexIn(nextLinePeek) == -1) {
-        return result;
+QString FiltersModelReader::readBufferLine(const char *& ptr, const char * limit)
+{
+  if (ptr == limit) {
+    return QString();
+  }
+  QString line;
+  const char * eol = strchr(ptr, '\n');
+  const char * start = ptr;
+  ptr = eol ? (eol + 1) : limit;
+  const int lineSize = int(ptr - start);
+  line = QString::fromUtf8(start, lineSize);
+
+  if (containsLeadingSpaceAndCrossSign(start, start + lineSize)) {
+    while (line.endsWith("\\\n")) {
+      line.chop(2);
+      if (!containsLeadingSpaceAndCrossSign(ptr, limit)) {
+        line.append(CHAR_NEWLINE);
+        break;
       }
-      const QString nextCommentPrefix = commentStart.cap(0);
-      result.chop(2);
-      QString nextLine;
-      do {
-        text = buffer.readLine(1024);
-        nextLine.append(text);
-      } while (!text.isEmpty() && !text.endsWith("\n"));
-      int ignoreCount = nextCommentPrefix.length();
-      const int limit = nextLine.length() - nextLine.endsWith("\n");
-      while (ignoreCount < limit && nextLine[ignoreCount] <= ' ') {
-        ++ignoreCount;
+      while (isSpace(*ptr)) { // Skip spaces
+        ++ptr;
       }
-      result.append(nextLine.rightRef(nextLine.length() - ignoreCount));
+      ++ptr; // Skip '#'
+      eol = strchr(ptr, '\n');
+      start = ptr;
+      ptr = eol ? (eol + 1) : limit;
+      line.append(QString::fromUtf8(start, int(ptr - start)));
     }
   }
-  return result;
+  return line;
 }
 
 } // namespace GmicQt

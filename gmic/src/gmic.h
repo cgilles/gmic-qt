@@ -52,14 +52,11 @@
 */
 
 #ifndef gmic_version
-#define gmic_version 316
+#define gmic_version 322
 
 #ifndef gmic_pixel_type
 #define gmic_pixel_type float
 #endif
-
-#include <cstdio>
-#include <cstring>
 
 // Define gmic_uint64 type.
 #ifndef gmic_uint64
@@ -78,18 +75,17 @@
 const char gmic_dollar = 23, gmic_lbrace = 24, gmic_rbrace = 25, gmic_comma = 26, gmic_dquote = 28,
   gmic_store = 29; // <- this one is only used in variable names.
 
+//---------------------------------------------------------
+// Public API for the 'gmic_image' and 'gmic_list' classes.
+//---------------------------------------------------------
 #ifndef gmic_core
 
-// Define classes 'gmic_image<T>' and 'gmic_list<T>'.
-//---------------------------------------------------
-#ifndef cimg_version
+#ifndef cimg_library
 
-#define gmic_image CImg
-#define gmic_list CImgList
-
-namespace cimg_library {
+namespace gmic_library {
 
   // Class 'gmic_image<T>'.
+  //-----------------------
   template<typename T> struct gmic_image {
     unsigned int _width;       // Number of image columns (dimension along the X-axis)
     unsigned int _height;      // Number of image lines (dimension along the Y-axis)
@@ -134,10 +130,10 @@ namespace cimg_library {
     const T& operator()(const unsigned int x, const unsigned int y=0, const unsigned z=0, const unsigned c=0) const {
       return _data[x + y*_width + z*_width*_height + c*_width*_height*_depth ];
     }
-
   };
 
   // Class 'gmic_list<T>'.
+  //----------------------
   template<typename T> struct gmic_list {
     unsigned int _width;           // Number of images in the list
     unsigned int _allocated_width; // Allocated items in the list (must be 2^N and >size)
@@ -170,22 +166,17 @@ namespace cimg_library {
     const gmic_image<T>& operator()(const unsigned int l) const {
       return _data[l];
     }
-
   };
+
 }
-#undef gmic_image
-#undef gmic_list
-#endif // #ifndef cimg_version
+
+#endif // #ifndef cimg_library
 
 #else // #ifndef gmic_core
 
-// Define private functions, used to compile libgmic.
-//---------------------------------------------------
-
-#ifndef cimg_verbosity
-#define cimg_verbosity 1
-#endif
-
+//-------------------------------------------------------------
+// Private API (used when compiling gmic core components only).
+//-------------------------------------------------------------
 #ifdef _MSC_VER
 #pragma comment(linker,"/STACK:6291456")
 #pragma inline_depth(2)
@@ -195,24 +186,48 @@ namespace cimg_library {
 #ifdef cimg_version
 #error "[gmic] *** Error *** File 'CImg.h' has been already included (should have been done first in file 'gmic.h')."
 #endif
+
 #ifndef cimg_plugin
 #define cimg_plugin "gmic.cpp"
 #endif
+
 #ifndef cimglist_plugin
 #define cimglist_plugin "gmic.cpp"
 #endif
 
-#ifdef cimg_use_abort
+#ifndef cimg_verbosity
+#define cimg_verbosity 1
+#endif
+
+#ifndef cimg_display
+#define cimg_display 0
+#endif
+
+#ifndef cimg_appname
+#define cimg_appname "gmic"
+#endif
+
+#ifdef gmic_is_parallel
+#define cimg_use_pthread
+#endif
+
+#define cimg_library gmic_library
+#define CImg gmic_image
+#define CImgList gmic_list
+
+#if defined(cimg_use_abort) && !defined(__MACOSX__) && !defined(__APPLE__)
 inline bool *gmic_current_is_abort();
-#define cimg_abort_init \
-  bool *const gmic_is_abort = ::gmic_current_is_abort()
-#define cimg_abort_test \
-  if (*gmic_is_abort) throw CImgAbortException()
+#define cimg_abort_init bool *const gmic_is_abort = ::gmic_current_is_abort()
+#define cimg_abort_test if (*gmic_is_abort) throw CImgAbortException()
 #endif
 
 inline double gmic_mp_dollar(const char *const str, void *const p_list);
 #define cimg_mp_operator_dollar(str) \
   ::gmic_mp_dollar(str,&imglist)
+
+inline double gmic_mp_abort();
+#define cimg_mp_func_abort() \
+  return ::gmic_mp_abort()
 
 template<typename T>
 inline double gmic_mp_get(double *const ptrd, const unsigned int siz, const bool to_string, const char *const str,
@@ -243,12 +258,6 @@ inline double gmic_mp_store(const double *const ptrs, const unsigned int siz,
 #define cimg_mp_func_store(ptrs,siz,w,h,d,s,is_compressed,str) \
   return ::gmic_mp_store(ptrs,siz,w,h,d,s,is_compressed,str,&mp.imglist,(T)0)
 
-#ifndef cimg_display
-#define cimg_display 0
-#endif
-#ifndef cimg_appname
-#define cimg_appname "gmic"
-#endif
 #include "CImg.h"
 
 #if cimg_OS==2
@@ -262,14 +271,21 @@ inline double gmic_mp_store(const double *const ptrs, const unsigned int siz,
 #include <signal.h>
 
 #endif // #if cimg_OS==2
+
 #endif // #ifndef gmic_core
 
-// Define main libgmic class 'gmic'.
-//----------------------------------
-#define gmic_image cimg_library::CImg
-#define gmic_list cimg_library::CImgList
+//--------------------------------------------------------
+// Public API for the 'gmic' and 'gmic_exception' classes.
+//--------------------------------------------------------
+#include <cstdio>
+#include <cstring>
+#define gmic_new_attr commands(0), commands_names(0), commands_has_arguments(0), \
+    _variables(0), _variables_names(0), variables(0), variables_names(0), _variables_lengths(0), variables_lengths(0)
+
+using namespace gmic_library;
 
 // Class 'gmic'.
+//--------------
 struct gmic {
 
   // Destructor.
@@ -300,12 +316,37 @@ struct gmic {
 
   // Run G'MIC pipeline on an already-constructed object.
   template<typename T>
-  gmic& run(const char *const commands_line, float *const p_progress=0, bool *const p_is_abort=0,
-            const T& pixel_type=(T)0);
+  gmic& run(const char *const commands_line, const T& pixel_type=(T)0);
 
   template<typename T>
-  gmic& run(const char *const commands_line, gmic_list<T> &images, gmic_list<char> &images_names,
-            float *const p_progress=0, bool *const p_is_abort=0);
+  gmic& run(const char *const commands_line, gmic_list<T> &images, gmic_list<char> &images_names);
+
+  // Bridge for calling gmic with classes compatible with 'gmic_list'.
+  template<typename ti, typename tn>
+  gmic(const char *const commands_line,
+       ti& images, tn& images_names,
+       const char *const custom_commands=0,
+       const bool include_stdlib=true, float *const p_progress=0, bool *const p_is_abort=0):gmic_new_attr {
+    assign(commands_line,
+           *(gmic_list<gmic_pixel_type>*)&images,*(gmic_list<char>*)&images_names,
+           custom_commands,include_stdlib,p_progress,p_is_abort);
+  }
+
+  template<typename ti, typename tn>
+  gmic& assign(const char *const commands_line,
+               ti& images, tn& images_names,
+               const char *const custom_commands=0,
+               const bool include_stdlib=true, float *const p_progress=0, bool *const p_is_abort=0) {
+    return assign(commands_line,
+                  *(gmic_list<gmic_pixel_type>*)&images,*(gmic_list<char>*)&images_names,
+                  custom_commands,include_stdlib,p_progress,p_is_abort);
+  }
+
+  template<typename ti, typename tn>
+  gmic& run(const char *const commands_line, ti& images, tn& images_names) {
+    return run(commands_line,
+               *(gmic_list<gmic_pixel_type>*)&images,*(gmic_list<char>*)&images_names);
+  }
 
   // These functions return (or init) G'MIC-specific paths.
   static const char* path_user(const char *const custom_path=0);
@@ -316,7 +357,9 @@ struct gmic {
   template<typename T>
   static bool search_sorted(const char *const str, const T& list, const unsigned int length, unsigned int &out_ind);
   static const gmic_image<void*> current_run(const char *const func_name, void *const p_list);
+  static bool* current_is_abort();
   static double mp_dollar(const char *const str, void *const p_list);
+  static double mp_abort();
   template<typename T>
   static double mp_get(double *const ptrd, const unsigned int siz, const bool to_string, const char *const str,
                        void *const p_list, const T& pixel_type);
@@ -346,9 +389,9 @@ struct gmic {
               float *const p_progress, bool *const p_is_abort);
 
   gmic_image<char> get_variable(const char *const name, const unsigned int *const variables_sizes=0,
-                                const gmic_list<char> *const images_names=0) const;
+                                const gmic_list<char> *const images_names=0, unsigned int *const varlength=0) const;
   const char *set_variable(const char *const name, const char operation='=', const char *const value=0,
-                           const double *const pvalue=0, const unsigned int *const variables_sizes=0);
+                           const double dvalue=0, const unsigned int *const variables_sizes=0);
   const char *set_variable(const char *const name, const gmic_image<unsigned char>& value,
                            const unsigned int *const variables_sizes=0);
 
@@ -437,13 +480,13 @@ struct gmic {
 
   template<typename T>
   gmic& _run(const gmic_list<char>& commands_line, gmic_list<T> &images, gmic_list<char> &images_names,
-             float *const p_progress, bool *const p_is_abort);
+             const bool push_new_run);
 
   template<typename T>
   gmic& _run(const gmic_list<char>& commands_line, unsigned int& position, gmic_list<T>& images,
              gmic_list<char>&images_names, gmic_list<T>& parent_images, gmic_list<char>& parent_images_names,
              const unsigned int *const variables_sizes, bool *const is_noargs, const char *const parent_arguments,
-             const gmic_image<unsigned int> *const command_selection);
+             const gmic_image<unsigned int> *const command_selection, const bool push_new_run);
 
   // Class attributes.
   static const char *builtin_commands_names[];
@@ -451,20 +494,20 @@ struct gmic {
   static gmic_image<char> stdlib;
   static bool is_display_available;
 
-  gmic_list<char> *commands, *commands_names, *commands_has_arguments, *_variables, *_variables_names,
-    **variables, **variables_names, commands_files, callstack;
-  gmic_image<unsigned int> dowhiles, fordones, foreachdones, repeatdones;
+  gmic_list<char> *commands, *commands_names, *commands_has_arguments, commands_files, callstack,
+    *_variables, *_variables_names, **variables, **variables_names;
+  gmic_image<unsigned int> dowhiles, fordones, foreachdones, repeatdones, *_variables_lengths, **variables_lengths;
   gmic_image<unsigned char> light3d;
   gmic_image<void*> display_windows;
   gmic_image<char> status;
 
-  float focale3d, light3d_x, light3d_y, light3d_z, specular_lightness3d, specular_shininess3d, _progress, *progress;
+  float light3d_x, light3d_y, light3d_z, _progress, *progress;
   gmic_uint64 reference_time;
   unsigned int nb_dowhiles, nb_fordones, nb_foreachdones, nb_repeatdones, nb_carriages_default, nb_carriages_stdout,
     debug_filename, debug_line, cimg_exception_mode;
-  int verbosity, render3d, renderd3d, network_timeout;
-  bool allow_entrypoint, is_change, is_debug, is_running, is_start, is_return, is_quit, is_double3d, is_debug_info,
-    _is_abort, *is_abort, is_abort_thread;
+  int verbosity, network_timeout;
+  bool allow_entrypoint, is_change, is_debug, is_running, is_start, is_return, is_quit, is_debug_info,
+    _is_abort, *is_abort, is_abort_thread, is_lbrace_command;
   const char *starting_commands_line;
 };
 
@@ -497,14 +540,18 @@ struct gmic_exception {
   }
 };
 
+// Explicit declarations of functions.
+//-------------------------------------
 inline bool *gmic_current_is_abort() {
-  static bool def = false;
-  gmic_image<void*> gr = gmic::current_run("gmic_abort_init()",0);
-  return gr?((gmic*)(gr[0]))->is_abort:&def;
+  return gmic::current_is_abort();
 }
 
 inline double gmic_mp_dollar(const char *const str, void *const p_list) {
   return gmic::mp_dollar(str,p_list);
+}
+
+inline double gmic_mp_abort() {
+  return gmic::mp_abort();
 }
 
 template<typename T>

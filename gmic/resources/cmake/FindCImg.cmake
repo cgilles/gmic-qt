@@ -9,7 +9,7 @@ if(USE_SYSTEM_CIMG)
     REQUIRED
   )
 else()
-  set(HEADER_URL "https://github.com/dtschump/CImg/raw/master/CImg.h")
+  set(HEADER_URL "https://github.com/GreycLab/CImg/raw/master/CImg.h")
   set(HEADER_DIR ${PROJECT_SOURCE_DIR}/src)
   set(HEADER_PATH ${HEADER_DIR}/${HEADER_NAME})
 
