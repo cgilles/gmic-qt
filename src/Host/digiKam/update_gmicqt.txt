@@ -37,3 +37,7 @@ feature_summary(WHAT ALL FATAL_ON_MISSING_REQUIRED_PACKAGES)
 
 10/ check if new files are append with "git status" and add file to git reporsitory
 11/ check compilation with "digikam" host.
+
+NOTE: look also code for Krita GMic-qt plugin from github:
+
+https://github.com/amyspark/gmic/
