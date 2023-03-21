@@ -138,6 +138,21 @@ QList<DPluginAuthor> GmicQtToolPlugin::authors() const
             ;
 }
 
+QString GmicQtToolPlugin::handbookSection() const
+{
+    return QLatin1String("image_editor");
+}
+
+QString GmicQtToolPlugin::handbookChapter() const
+{
+    return QLatin1String("enhancement_tools");
+}
+
+QString GmicQtToolPlugin::handbookReference() const
+{
+    return QLatin1String("enhance-gmicqt");
+}
+
 void GmicQtToolPlugin::setup(QObject* const parent)
 {
     DPluginAction* const ac = new DPluginAction(parent);

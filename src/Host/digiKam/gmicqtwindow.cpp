@@ -39,6 +39,7 @@
 // digiKam includes
 
 #include "digikam_debug.h"
+#include "digikam_globals.h"
 #include "dpluginaboutdlg.h"
 
 namespace DigikamEditorGmicQtPlugin
@@ -61,7 +62,7 @@ GMicQtWindow::GMicQtWindow(DPlugin*const tool, QWidget* const parent)
         help->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
         QMenu* const menu          = new QMenu(help);
-        QAction* const webAction   = menu->addAction(tr("GMic Website..."));
+        QAction* const webAction   = menu->addAction(tr("Online Handbook..."));
         QAction* const aboutAction = menu->addAction(tr("About..."));
         help->setMenu(menu);
 
@@ -73,7 +74,7 @@ GMicQtWindow::GMicQtWindow(DPlugin*const tool, QWidget* const parent)
 
         hlay->insertWidget(0, help);
 
-        QLabel* const lbl = findChild<QLabel*>("messageLabel");
+        QLabel* const lbl          = findChild<QLabel*>("messageLabel");
 
         if (lbl)
         {
@@ -95,7 +96,7 @@ void GMicQtWindow::slotAboutPlugin()
 
 void GMicQtWindow::slotOpenWebSite()
 {
-    QDesktopServices::openUrl(QUrl(QLatin1String("https://gmic.eu/")));
+    openOnlineDocumentation(m_tool->handbookSection(), m_tool->handbookChapter(), m_tool->handbookReference());
 }
 
 void GMicQtWindow::saveParameters()

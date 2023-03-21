@@ -53,6 +53,9 @@ public:
     QString details()              const override;
     QString description()          const override;
     QList<DPluginAuthor> authors() const override;
+    QString handbookSection()      const override;
+    QString handbookChapter()      const override;
+    QString handbookReference()    const override;
 
     void setup(QObject* const)           override;
 
