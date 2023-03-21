@@ -1,0 +1,286 @@
+diff --git a/src/DialogSettings.cpp b/src/DialogSettings.cpp
+index a30c403..3dc4a9c 100644
+--- a/src/DialogSettings.cpp
++++ b/src/DialogSettings.cpp
+@@ -84,6 +84,9 @@ DialogSettings::DialogSettings(QWidget * parent) : QDialog(parent), ui(new Ui::D
+   const bool savedDarkTheme = QSettings().value(DARK_THEME_KEY, GmicQtHost::DarkThemeIsDefault).toBool();
+   ui->rbDarkTheme->setChecked(savedDarkTheme);
+   ui->rbDefaultTheme->setChecked(!savedDarkTheme);
++#ifdef _GMIC_QT_DISABLE_THEMING_
++  ui->groupBox_3->setEnabled(false);
++#endif
+   ui->cbNativeColorDialogs->setChecked(Settings::nativeColorDialogs());
+   ui->cbNativeColorDialogs->setToolTip(tr("Check to use Native/OS color dialog, uncheck to use Qt's"));
+   ui->cbNativeFileDialogs->setChecked(Settings::nativeFileDialogs());
+@@ -102,7 +105,9 @@ DialogSettings::DialogSettings(QWidget * parent) : QDialog(parent), ui(new Ui::D
+   connect(ui->cbNativeColorDialogs, &QCheckBox::toggled, this, &DialogSettings::onColorDialogsToggled);
+   connect(ui->cbNativeFileDialogs, &QCheckBox::toggled, this, &DialogSettings::onFileDialogsToggled);
+   connect(Updater::getInstance(), &Updater::updateIsDone, this, &DialogSettings::enableUpdateButton);
++#ifndef _GMIC_QT_DISABLE_THEMING_
+   connect(ui->rbDarkTheme, &QRadioButton::toggled, this, &DialogSettings::onDarkThemeToggled);
++#endif
+   connect(ui->cbShowLogos, &QCheckBox::toggled, this, &DialogSettings::onVisibleLogosToggled);
+   connect(ui->cbPreviewZoom, &QCheckBox::toggled, this, &DialogSettings::onPreviewZoomToggled);
+   connect(ui->sbPreviewTimeout, QOverload<int>::of(&QSpinBox::valueChanged), this, &DialogSettings::onPreviewTimeoutChange);
+@@ -120,6 +125,7 @@ DialogSettings::DialogSettings(QWidget * parent) : QDialog(parent), ui(new Ui::D
+   ui->languageSelector->selectLanguage(Settings::languageCode());
+   ui->languageSelector->enableFilterTranslation(Settings::filterTranslationEnabled());
+ 
++#ifndef _GMIC_QT_DISABLE_THEMING_
+   if (Settings::darkThemeEnabled()) {
+     QPalette p = ui->cbNativeColorDialogs->palette();
+     p.setColor(QPalette::Text, Settings::CheckBoxTextColor);
+@@ -136,6 +142,7 @@ DialogSettings::DialogSettings(QWidget * parent) : QDialog(parent), ui(new Ui::D
+     ui->cbNotifyFailedUpdate->setPalette(p);
+     ui->cbHighDPI->setPalette(p);
+   }
++#endif
+   ui->pbOk->setFocus();
+   ui->tabWidget->setCurrentIndex(0);
+ }
+diff --git a/src/FilterParameters/BoolParameter.cpp b/src/FilterParameters/BoolParameter.cpp
+index 41a5f04..619a480 100644
+--- a/src/FilterParameters/BoolParameter.cpp
++++ b/src/FilterParameters/BoolParameter.cpp
+@@ -63,12 +63,14 @@ bool BoolParameter::addTo(QWidget * widget, int row)
+   _checkBox = new QCheckBox(widget);
+   _checkBox->setChecked(_value);
+   _label = new QLabel(_name, widget);
++#ifndef _GMIC_QT_DISABLE_THEMING_
+   if (Settings::darkThemeEnabled()) {
+     QPalette p = _checkBox->palette();
+     p.setColor(QPalette::Text, Settings::CheckBoxTextColor);
+     p.setColor(QPalette::Base, Settings::CheckBoxBaseColor);
+     _checkBox->setPalette(p);
+   }
++#endif
+   _grid->addWidget(_label, row, 0, 1, 1);
+   _grid->addWidget(_checkBox, row, 1, 1, 2);
+   connectCheckBox();
+diff --git a/src/FilterParameters/FloatParameter.cpp b/src/FilterParameters/FloatParameter.cpp
+index 01a01c6..4171638 100644
+--- a/src/FilterParameters/FloatParameter.cpp
++++ b/src/FilterParameters/FloatParameter.cpp
+@@ -72,12 +72,14 @@ bool FloatParameter::addTo(QWidget * widget, int row)
+   _slider->setMinimumWidth(SLIDER_MIN_WIDTH);
+   _slider->setRange(0, SLIDER_MAX_RANGE);
+   _slider->setValue(static_cast<int>(SLIDER_MAX_RANGE * (_value - _min) / (_max - _min)));
++#ifndef _GMIC_QT_DISABLE_THEMING_
+   if (Settings::darkThemeEnabled()) {
+     QPalette p = _slider->palette();
+     p.setColor(QPalette::Button, QColor(100, 100, 100));
+     p.setColor(QPalette::Highlight, QColor(130, 130, 130));
+     _slider->setPalette(p);
+   }
++#endif
+ 
+   _spinBox = new CustomDoubleSpinBox(widget, _min, _max);
+   _spinBox->setSingleStep(double(_max - _min) / 100.0);
+diff --git a/src/FilterParameters/IntParameter.cpp b/src/FilterParameters/IntParameter.cpp
+index 0bdcba7..2a657c0 100644
+--- a/src/FilterParameters/IntParameter.cpp
++++ b/src/FilterParameters/IntParameter.cpp
+@@ -80,12 +80,14 @@ bool IntParameter::addTo(QWidget * widget, int row)
+ 
+   _spinBox = new CustomSpinBox(widget, _min, _max);
+   _spinBox->setValue(_value);
++#ifndef _GMIC_QT_DISABLE_THEMING_
+   if (Settings::darkThemeEnabled()) {
+     QPalette p = _slider->palette();
+     p.setColor(QPalette::Button, QColor(100, 100, 100));
+     p.setColor(QPalette::Highlight, QColor(130, 130, 130));
+     _slider->setPalette(p);
+   }
++#endif
+   _grid->addWidget(_label = new QLabel(_name, widget), row, 0, 1, 1);
+   setTextSelectable(_label);
+   _grid->addWidget(_slider, row, 1, 1, 1);
+diff --git a/src/FilterParameters/NoteParameter.cpp b/src/FilterParameters/NoteParameter.cpp
+index e576b0f..be469de 100644
+--- a/src/FilterParameters/NoteParameter.cpp
++++ b/src/FilterParameters/NoteParameter.cpp
+@@ -88,12 +88,14 @@ bool NoteParameter::initFromText(const QString & /* filterName */, const char *
+   _text.remove(QRegularExpression("^\"")).remove(QRegularExpression("\"$")).replace(QString("\\\""), "\"");
+   _text.replace(QString("\\n"), "<br/>");
+ 
++#ifndef _GMIC_QT_DISABLE_THEMING_
+   if (Settings::darkThemeEnabled()) {
+     _text.replace(QRegularExpression("color\\s*=\\s*\"purple\""), QString("color=\"#ff00ff\""));
+     _text.replace(QRegularExpression("foreground\\s*=\\s*\"purple\""), QString("foreground=\"#ff00ff\""));
+     _text.replace(QRegularExpression("color\\s*=\\s*\"blue\""), QString("color=\"#9b9bff\""));
+     _text.replace(QRegularExpression("foreground\\s*=\\s*\"blue\""), QString("foreground=\"#9b9bff\""));
+   }
++#endif
+ 
+   _text.replace(QRegularExpression("color\\s*=\\s*\""), QString("style=\"color:"));
+   _text.replace(QRegularExpression("foreground\\s*=\\s*\""), QString("style=\"color:"));
+diff --git a/src/FilterParameters/SeparatorParameter.cpp b/src/FilterParameters/SeparatorParameter.cpp
+index fad7b0a..7f6d317 100644
+--- a/src/FilterParameters/SeparatorParameter.cpp
++++ b/src/FilterParameters/SeparatorParameter.cpp
+@@ -58,9 +58,11 @@ bool SeparatorParameter::addTo(QWidget * widget, int row)
+   _frame->setSizePolicy(sizePolicy);
+   _frame->setFrameShape(QFrame::HLine);
+   _frame->setFrameShadow(QFrame::Sunken);
++#ifndef _GMIC_QT_DISABLE_THEMING_
+   if (Settings::darkThemeEnabled()) {
+     _frame->setStyleSheet("QFrame{ border-top: 0px none #a0a0a0; border-bottom: 2px solid rgb(160,160,160);}");
+   }
++#endif
+   _grid->addWidget(_frame, row, 0, 1, 3);
+   return true;
+ }
+diff --git a/src/MainWindow.cpp b/src/MainWindow.cpp
+index 7cbe3bd..1f5e8f6 100644
+--- a/src/MainWindow.cpp
++++ b/src/MainWindow.cpp
+@@ -275,6 +275,7 @@ void MainWindow::setIcons()
+   ui->tbExpandCollapse->setIcon(_expandIcon);
+ }
+ 
++#ifndef _GMIC_QT_DISABLE_THEMING_
+ void MainWindow::setDarkTheme()
+ {
+   // SHOW(QStyleFactory::keys());
+@@ -328,6 +329,7 @@ void MainWindow::setDarkTheme()
+   ui->vSplitterLine->setStyleSheet("QFrame{ border-top: 0px none #a0a0a0; border-bottom: 1px solid rgb(160,160,160);}");
+   Settings::UnselectedFilterTextColor = Settings::UnselectedFilterTextColor.darker(150);
+ }
++#endif
+ 
+ void MainWindow::setPluginParameters(const RunParameters & parameters)
+ {
+@@ -1079,9 +1081,11 @@ void MainWindow::loadSettings()
+   if (settings.value("Config/PreviewPosition", "Left").toString() == "Left") {
+     setPreviewPosition(PreviewPosition::Left);
+   }
++#ifndef _GMIC_QT_DISABLE_THEMING_
+   if (Settings::darkThemeEnabled()) {
+     setDarkTheme();
+   }
++#endif
+   if (!Settings::visibleLogos()) {
+     ui->logosLabel->hide();
+   }
+@@ -1316,12 +1320,14 @@ bool MainWindow::askUserForGTKFavesImport()
+                          QMessageBox::Yes | QMessageBox::No, this);
+   messageBox.setDefaultButton(QMessageBox::Yes);
+   QCheckBox * cb = new QCheckBox(tr("Don't ask again"));
++#ifndef _GMIC_QT_DISABLE_THEMING_
+   if (Settings::darkThemeEnabled()) {
+     QPalette p = cb->palette();
+     p.setColor(QPalette::Text, Settings::CheckBoxTextColor);
+     p.setColor(QPalette::Base, Settings::CheckBoxBaseColor);
+     cb->setPalette(p);
+   }
++#endif
+   messageBox.setCheckBox(cb);
+   int choice = messageBox.exec();
+   if (choice != QMessageBox::Yes) {
+diff --git a/src/MainWindow.h b/src/MainWindow.h
+index dcc76e6..545bac0 100644
+--- a/src/MainWindow.h
++++ b/src/MainWindow.h
+@@ -71,7 +71,9 @@ public:
+   explicit MainWindow(QWidget * parent = nullptr);
+   ~MainWindow() override;
+   void updateFiltersFromSources(int ageLimit, bool useNetwork);
++#ifndef _GMIC_QT_DISABLE_THEMING_
+   void setDarkTheme();
++#endif
+   void setPluginParameters(const RunParameters & parameters);
+ 
+ public slots:
+diff --git a/src/Settings.cpp b/src/Settings.cpp
+index 00ec64b..5e9e78e 100644
+--- a/src/Settings.cpp
++++ b/src/Settings.cpp
+@@ -129,7 +129,11 @@ void Settings::setVisibleLogos(bool on)
+ 
+ bool Settings::darkThemeEnabled()
+ {
++#ifdef _GMIC_QT_DISABLE_THEMING_
++  return GmicQtHost::DarkThemeIsDefault;
++#else
+   return _darkThemeEnabled;
++#endif
+ }
+ 
+ void Settings::setDarkThemeEnabled(bool on)
+diff --git a/src/Widgets/InOutPanel.cpp b/src/Widgets/InOutPanel.cpp
+index 6d77179..4fc20cd 100644
+--- a/src/Widgets/InOutPanel.cpp
++++ b/src/Widgets/InOutPanel.cpp
+@@ -157,10 +157,12 @@ void InOutPanel::onResetButtonClicked()
+   setState(InputOutputState::Default, true);
+ }
+ 
++#ifndef _GMIC_QT_DISABLE_THEMING_
+ void InOutPanel::setDarkTheme()
+ {
+   ui->tbReset->setIcon(LOAD_ICON("view-refresh"));
+ }
++#endif
+ 
+ void InOutPanel::setDefaultInputMode()
+ {
+diff --git a/src/Widgets/InOutPanel.h b/src/Widgets/InOutPanel.h
+index 381bc64..7939d3a 100644
+--- a/src/Widgets/InOutPanel.h
++++ b/src/Widgets/InOutPanel.h
+@@ -79,7 +79,9 @@ public slots:
+   void onInputModeSelected(int);
+   void onOutputModeSelected(int);
+   void onResetButtonClicked();
++#ifndef _GMIC_QT_DISABLE_THEMING_
+   void setDarkTheme();
++#endif
+ 
+ private:
+   static void setDefaultInputMode();
+diff --git a/src/Widgets/ProgressInfoWindow.cpp b/src/Widgets/ProgressInfoWindow.cpp
+index 533d257..604cf47 100644
+--- a/src/Widgets/ProgressInfoWindow.cpp
++++ b/src/Widgets/ProgressInfoWindow.cpp
+@@ -59,9 +59,11 @@ ProgressInfoWindow::ProgressInfoWindow(HeadlessProcessor * processor) : QMainWin
+   connect(processor, &HeadlessProcessor::done, this, &ProgressInfoWindow::onProcessingFinished);
+   _isShown = false;
+ 
++#ifndef _GMIC_QT_DISABLE_THEMING_
+   if (Settings::darkThemeEnabled()) {
+     setDarkTheme();
+   }
++#endif
+ }
+ 
+ ProgressInfoWindow::~ProgressInfoWindow()
+@@ -85,6 +87,7 @@ void ProgressInfoWindow::closeEvent(QCloseEvent * event)
+   event->accept();
+ }
+ 
++#ifndef _GMIC_QT_DISABLE_THEMING_
+ void ProgressInfoWindow::setDarkTheme()
+ {
+   qApp->setStyle(QStyleFactory::create("Fusion"));
+@@ -107,6 +110,7 @@ void ProgressInfoWindow::setDarkTheme()
+   p.setColor(QPalette::Disabled, QPalette::WindowText, QColor(110, 110, 110));
+   qApp->setPalette(p);
+ }
++#endif
+ 
+ void ProgressInfoWindow::onCancelClicked(bool)
+ {
+diff --git a/src/Widgets/ProgressInfoWindow.h b/src/Widgets/ProgressInfoWindow.h
+index 615dd16..9db9a1a 100644
+--- a/src/Widgets/ProgressInfoWindow.h
++++ b/src/Widgets/ProgressInfoWindow.h
+@@ -57,7 +57,9 @@ public:
+ protected:
+   void showEvent(QShowEvent *) override;
+   void closeEvent(QCloseEvent *) override;
++#ifndef _GMIC_QT_DISABLE_THEMING_
+   void setDarkTheme();
++#endif
+ 
+ public slots:
+   void onCancelClicked(bool);

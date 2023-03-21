@@ -57,7 +57,9 @@ public:
 protected:
   void showEvent(QShowEvent *) override;
   void closeEvent(QCloseEvent *) override;
+#ifndef _GMIC_QT_DISABLE_THEMING_
   void setDarkTheme();
+#endif
 
 public slots:
   void onCancelClicked(bool);

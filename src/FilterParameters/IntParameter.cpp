@@ -80,12 +80,14 @@ bool IntParameter::addTo(QWidget * widget, int row)
 
   _spinBox = new CustomSpinBox(widget, _min, _max);
   _spinBox->setValue(_value);
+#ifndef _GMIC_QT_DISABLE_THEMING_
   if (Settings::darkThemeEnabled()) {
     QPalette p = _slider->palette();
     p.setColor(QPalette::Button, QColor(100, 100, 100));
     p.setColor(QPalette::Highlight, QColor(130, 130, 130));
     _slider->setPalette(p);
   }
+#endif
   _grid->addWidget(_label = new QLabel(_name, widget), row, 0, 1, 1);
   setTextSelectable(_label);
   _grid->addWidget(_slider, row, 1, 1, 1);

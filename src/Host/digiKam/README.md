@@ -1,4 +1,4 @@
-Port QMicQt tool to digiKam plugin infrastructure:
+Port QMicQt tool to digiKam plugin architecture.
 
 This require at least digiKam 7.x plugin interface dependency installed. See at https://www.digikam.org for details.
 

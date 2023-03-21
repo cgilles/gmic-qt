@@ -79,7 +79,9 @@ public slots:
   void onInputModeSelected(int);
   void onOutputModeSelected(int);
   void onResetButtonClicked();
+#ifndef _GMIC_QT_DISABLE_THEMING_
   void setDarkTheme();
+#endif
 
 private:
   static void setDefaultInputMode();

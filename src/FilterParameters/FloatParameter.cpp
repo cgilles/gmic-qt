@@ -72,12 +72,14 @@ bool FloatParameter::addTo(QWidget * widget, int row)
   _slider->setMinimumWidth(SLIDER_MIN_WIDTH);
   _slider->setRange(0, SLIDER_MAX_RANGE);
   _slider->setValue(static_cast<int>(SLIDER_MAX_RANGE * (_value - _min) / (_max - _min)));
+#ifndef _GMIC_QT_DISABLE_THEMING_
   if (Settings::darkThemeEnabled()) {
     QPalette p = _slider->palette();
     p.setColor(QPalette::Button, QColor(100, 100, 100));
     p.setColor(QPalette::Highlight, QColor(130, 130, 130));
     _slider->setPalette(p);
   }
+#endif
 
   _spinBox = new CustomDoubleSpinBox(widget, _min, _max);
   _spinBox->setSingleStep(double(_max - _min) / 100.0);

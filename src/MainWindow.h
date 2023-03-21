@@ -71,7 +71,9 @@ public:
   explicit MainWindow(QWidget * parent = nullptr);
   ~MainWindow() override;
   void updateFiltersFromSources(int ageLimit, bool useNetwork);
+#ifndef _GMIC_QT_DISABLE_THEMING_
   void setDarkTheme();
+#endif
   void setPluginParameters(const RunParameters & parameters);
 
 public slots:

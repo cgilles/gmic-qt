@@ -1,0 +1,27 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 3375b72..50dca3a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -37,8 +37,8 @@ else()
+   option(ENABLE_DYNAMIC_LINKING "Dynamically link the binaries to the GMIC shared library" OFF)
+ 
+   set (GMIC_LIB_PATH "${GMIC_PATH}" CACHE STRING "Define the path to the GMIC shared library")
+-  if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../src/gmic.cpp")
+-  set (GMIC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../src" CACHE STRING "Define the path to the gmic headers")
++  if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/gmic/src/gmic.cpp")
++  set (GMIC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/gmic/src" CACHE STRING "Define the path to the gmic headers")
+   else()
+   set (GMIC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../gmic/src" CACHE STRING "Define the path to the gmic headers")
+   endif()
+@@ -717,6 +717,11 @@ elseif (${GMIC_QT_HOST} STREQUAL "8bf")
+ 	${LCMS2_LIBRARIES}
+     )
+ 
++ elseif (${GMIC_QT_HOST} STREQUAL "digikam")
++
++    include("src/Host/digiKam/MacroUtils.cmake")
++    include("src/Host/digiKam/RulesDigikamHost.cmake")
++
+ else()
+     message(FATAL_ERROR "GMIC_QT_HOST is not defined as gimp, gimp3, none, paintdotnet or 8bf")
+ endif()

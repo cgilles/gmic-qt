@@ -157,10 +157,12 @@ void InOutPanel::onResetButtonClicked()
   setState(InputOutputState::Default, true);
 }
 
+#ifndef _GMIC_QT_DISABLE_THEMING_
 void InOutPanel::setDarkTheme()
 {
   ui->tbReset->setIcon(LOAD_ICON("view-refresh"));
 }
+#endif
 
 void InOutPanel::setDefaultInputMode()
 {

@@ -58,9 +58,11 @@ bool SeparatorParameter::addTo(QWidget * widget, int row)
   _frame->setSizePolicy(sizePolicy);
   _frame->setFrameShape(QFrame::HLine);
   _frame->setFrameShadow(QFrame::Sunken);
+#ifndef _GMIC_QT_DISABLE_THEMING_
   if (Settings::darkThemeEnabled()) {
     _frame->setStyleSheet("QFrame{ border-top: 0px none #a0a0a0; border-bottom: 2px solid rgb(160,160,160);}");
   }
+#endif
   _grid->addWidget(_frame, row, 0, 1, 3);
   return true;
 }

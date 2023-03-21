@@ -59,9 +59,11 @@ ProgressInfoWindow::ProgressInfoWindow(HeadlessProcessor * processor) : QMainWin
   connect(processor, &HeadlessProcessor::done, this, &ProgressInfoWindow::onProcessingFinished);
   _isShown = false;
 
+#ifndef _GMIC_QT_DISABLE_THEMING_
   if (Settings::darkThemeEnabled()) {
     setDarkTheme();
   }
+#endif
 }
 
 ProgressInfoWindow::~ProgressInfoWindow()
@@ -85,6 +87,7 @@ void ProgressInfoWindow::closeEvent(QCloseEvent * event)
   event->accept();
 }
 
+#ifndef _GMIC_QT_DISABLE_THEMING_
 void ProgressInfoWindow::setDarkTheme()
 {
   qApp->setStyle(QStyleFactory::create("Fusion"));
@@ -107,6 +110,7 @@ void ProgressInfoWindow::setDarkTheme()
   p.setColor(QPalette::Disabled, QPalette::WindowText, QColor(110, 110, 110));
   qApp->setPalette(p);
 }
+#endif
 
 void ProgressInfoWindow::onCancelClicked(bool)
 {

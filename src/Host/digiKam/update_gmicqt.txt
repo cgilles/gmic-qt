@@ -1,42 +1,22 @@
 Under a Linux Ubuntu 22.04:
 
-1/ checkout gmic at the desired release tag.
-2/ checkout gmic-qt at the same desired release tag.
-3/ fix dependencies to complete the configuration of source code.
-4/ use the bootstrap-gmicqt.sh to configure gmic directory with "none" host.
-5/ when configuration is done copy the gmic directory contents to the DK::gmic-qt/gmic.
-6/ remove DK::gmic-qt/gmic/.gitignore.
-7/ copy the gmic-qt contents to the DK::gmic-qt/gmic.
-8/ patch the end of DK::gmic-qt/CmakeLists.txt to add the "digikam" host rules:
+1/ Checkout gmic at the desired release tag.
+2/ Checkout gmic-qt at the same desired release tag.
+3/ Fix dependencies to complete the configuration of source code.
+4/ Use the bootstrap-gmicqt.sh to configure gmic directory with "none" host.
+5/ When configuration is done copy the gmic directory contents to the DK::gmic-qt/gmic.
+6/ Remove DK::gmic-qt/gmic/.gitignore.
+7/ Copy the gmic-qt contents to the DK::gmic-qt/gmic.
+8/ Patch DK::gmic-qt/CmakeLists.txt to add the "digikam" host rules and to use local gmic dir:
 
-+ elseif (${GMIC_QT_HOST} STREQUAL "digikam")
-+
-+    include("src/Host/digiKam/MacroUtils.cmake")
-+    include("src/Host/digiKam/RulesDigikamHost.cmake")
-+
-else()
-    message(FATAL_ERROR "GMIC_QT_HOST is not defined as gimp, gimp3, krita, none, paintdotnet or 8bf")
-endif()
+patch -p1 < 01_digikam_root_cmakelists.patch
 
-feature_summary(WHAT ALL FATAL_ON_MISSING_REQUIRED_PACKAGES)
+9/ Patch DK::gmic-qt codes to disable theming:
 
-9/ patch DK::gmic-qt/CmakeLists.txt to use local gmic dir:
+patch -p1 < 02_digikam_disable_theming.patch
 
-  option(ENABLE_DYNAMIC_LINKING "Dynamically link the binaries to the GMIC shared library" OFF)
-
-  set (GMIC_LIB_PATH "${GMIC_PATH}" CACHE STRING "Define the path to the GMIC shared library")
--  if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../src/gmic.cpp")
--  set (GMIC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../src" CACHE STRING "Define the path to the gmic headers")
-+  if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/gmic/src/gmic.cpp")
-+  set (GMIC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/gmic/src" CACHE STRING "Define the path to the gmic headers")
-  else()
-  set (GMIC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../gmic/src" CACHE STRING "Define the path to the gmic headers")
-  endif()
-
-  message("G'MIC path: " ${GMIC_PATH})
-
-10/ check if new files are append with "git status" and add file to git reporsitory
-11/ check compilation with "digikam" host.
+10/ Check if new files are append with "git status" and add file to git repository
+11/ Check compilation with "digikam" host.
 
 NOTE: look also code for Krita GMic-qt plugin from github:
 
