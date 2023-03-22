@@ -1,22 +1,26 @@
 diff --git a/src/DialogSettings.cpp b/src/DialogSettings.cpp
-index a30c403..8fd0177 100644
+index a30c403..1359a9d 100644
 --- a/src/DialogSettings.cpp
 +++ b/src/DialogSettings.cpp
-@@ -109,12 +109,14 @@ DialogSettings::DialogSettings(QWidget * parent) : QDialog(parent), ui(new Ui::D
+@@ -109,6 +109,7 @@ DialogSettings::DialogSettings(QWidget * parent) : QDialog(parent), ui(new Ui::D
    connect(ui->outputMessages, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DialogSettings::onOutputMessageModeChanged);
    connect(ui->cbNotifyFailedUpdate, &QCheckBox::toggled, this, &DialogSettings::onNotifyStartupUpdateFailedToggle);
  
-+#ifdef _GMIC_USE_HOSTED_SETTINGS_
++#ifndef _GMIC_USE_HOSTED_SETTINGS_
  #if QT_VERSION_GTE(6, 0, 0)
    ui->cbHighDPI->hide();
    ui->labelHighDPI->hide();
- #else
+@@ -116,6 +117,10 @@ DialogSettings::DialogSettings(QWidget * parent) : QDialog(parent), ui(new Ui::D
    ui->cbHighDPI->setChecked(Settings::highDPIEnabled());
    connect(ui->cbHighDPI, &QCheckBox::toggled, this, &DialogSettings::onHighDPIToggled);
-+#endif
  #endif
++#else
++  ui->cbHighDPI->hide();
++  ui->labelHighDPI->hide();
++#endif
  
    ui->languageSelector->selectLanguage(Settings::languageCode());
+   ui->languageSelector->enableFilterTranslation(Settings::filterTranslationEnabled());
 diff --git a/src/GmicQt.cpp b/src/GmicQt.cpp
 index 3af90b3..77b1559 100644
 --- a/src/GmicQt.cpp

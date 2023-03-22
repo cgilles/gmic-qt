@@ -114,7 +114,7 @@ DialogSettings::DialogSettings(QWidget * parent) : QDialog(parent), ui(new Ui::D
   connect(ui->outputMessages, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DialogSettings::onOutputMessageModeChanged);
   connect(ui->cbNotifyFailedUpdate, &QCheckBox::toggled, this, &DialogSettings::onNotifyStartupUpdateFailedToggle);
 
-#ifdef _GMIC_USE_HOSTED_SETTINGS_
+#ifndef _GMIC_USE_HOSTED_SETTINGS_
 #if QT_VERSION_GTE(6, 0, 0)
   ui->cbHighDPI->hide();
   ui->labelHighDPI->hide();
@@ -122,6 +122,9 @@ DialogSettings::DialogSettings(QWidget * parent) : QDialog(parent), ui(new Ui::D
   ui->cbHighDPI->setChecked(Settings::highDPIEnabled());
   connect(ui->cbHighDPI, &QCheckBox::toggled, this, &DialogSettings::onHighDPIToggled);
 #endif
+#else
+  ui->cbHighDPI->hide();
+  ui->labelHighDPI->hide();
 #endif
 
   ui->languageSelector->selectLanguage(Settings::languageCode());
