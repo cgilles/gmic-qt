@@ -15,9 +15,9 @@ patch -p1 < 01_digikam_root_cmakelists.patch
 
 patch -p1 < 02_digikam_disable_theming.patch
 
-10/ Patch DK::gmic-qt codes to use host settings:
+10/ Patch DK::gmic-qt codes to disable HDPI settings:
 
-patch -p1 < 02_digikam_host_settings.patch
+patch -p1 < 02_digikam_disable_hdpi.patch
 
 11/ Check if new files are append with "git status" and add file to git repository
 12/ Check compilation with "digikam" host.

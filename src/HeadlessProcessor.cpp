@@ -267,9 +267,7 @@ void HeadlessProcessor::endApplication(const QString & errorMessage)
   if (!errorMessage.isEmpty()) {
     Logger::error(errorMessage);
   }
-#ifndef _GMIC_USE_HOSTED_SETTINGS_
   QCoreApplication::exit(!errorMessage.isEmpty());
-#endif
 }
 
 } // namespace GmicQt

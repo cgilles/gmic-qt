@@ -1,12 +1,12 @@
 diff --git a/src/DialogSettings.cpp b/src/DialogSettings.cpp
-index a30c403..1359a9d 100644
+index a30c403..09ae59f 100644
 --- a/src/DialogSettings.cpp
 +++ b/src/DialogSettings.cpp
 @@ -109,6 +109,7 @@ DialogSettings::DialogSettings(QWidget * parent) : QDialog(parent), ui(new Ui::D
    connect(ui->outputMessages, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DialogSettings::onOutputMessageModeChanged);
    connect(ui->cbNotifyFailedUpdate, &QCheckBox::toggled, this, &DialogSettings::onNotifyStartupUpdateFailedToggle);
  
-+#ifndef _GMIC_USE_HOSTED_SETTINGS_
++#ifndef _GMIC_QT_DISABLE_HDPI_
  #if QT_VERSION_GTE(6, 0, 0)
    ui->cbHighDPI->hide();
    ui->labelHighDPI->hide();
@@ -22,18 +22,16 @@ index a30c403..1359a9d 100644
    ui->languageSelector->selectLanguage(Settings::languageCode());
    ui->languageSelector->enableFilterTranslation(Settings::filterTranslationEnabled());
 diff --git a/src/GmicQt.cpp b/src/GmicQt.cpp
-index 3af90b3..77b1559 100644
+index 3af90b3..b47c299 100644
 --- a/src/GmicQt.cpp
 +++ b/src/GmicQt.cpp
-@@ -545,6 +545,7 @@ namespace
- 
- void configureApplication()
- {
-+#ifndef _GMIC_USE_HOSTED_SETTINGS_
-   QCoreApplication::setOrganizationName(GMIC_QT_ORGANISATION_NAME);
+@@ -549,11 +549,13 @@ void configureApplication()
    QCoreApplication::setOrganizationDomain(GMIC_QT_ORGANISATION_DOMAIN);
    QCoreApplication::setApplicationName(GMIC_QT_APPLICATION_NAME);
-@@ -554,6 +555,7 @@ void configureApplication()
+   QCoreApplication::setAttribute(Qt::AA_DontUseNativeMenuBar);
++#ifndef _GMIC_QT_DISABLE_HDPI_
+ #if !QT_VERSION_GTE(6, 0, 0)
+   if (QSettings().value(HIGHDPI_KEY, false).toBool()) {
      QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
    }
  #endif
@@ -41,17 +39,3 @@ index 3af90b3..77b1559 100644
  }
  
  void disableModes(const std::list<GmicQt::InputMode> & disabledInputModes, //
-diff --git a/src/HeadlessProcessor.cpp b/src/HeadlessProcessor.cpp
-index de6dc90..a0f140e 100644
---- a/src/HeadlessProcessor.cpp
-+++ b/src/HeadlessProcessor.cpp
-@@ -267,7 +267,9 @@ void HeadlessProcessor::endApplication(const QString & errorMessage)
-   if (!errorMessage.isEmpty()) {
-     Logger::error(errorMessage);
-   }
-+#ifndef _GMIC_USE_HOSTED_SETTINGS_
-   QCoreApplication::exit(!errorMessage.isEmpty());
-+#endif
- }
- 
- } // namespace GmicQt
