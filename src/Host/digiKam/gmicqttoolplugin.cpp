@@ -91,7 +91,7 @@ QString GmicQtToolPlugin::details() const
               "It provides several user interfaces to convert / manipulate / filter / "
               "visualize generic image datasets, ranging from 1D scalar signals to 3D+t sequences "
               "of multi-spectral volumetric images, hence including 2D color images.</p>"
-              "<p>See more details on project page: https://gmic.eu/</p>"
+              "<p>See more details <a href='on the project page'>https://gmic.eu/</a></p>"
               "<p><b>Configuration:</b></p>"
               "<p>Libgmic version: %1</p>"
              ).arg(gmic_version)
