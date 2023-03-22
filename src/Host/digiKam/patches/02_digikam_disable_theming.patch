@@ -1,5 +1,5 @@
 diff --git a/src/DialogSettings.cpp b/src/DialogSettings.cpp
-index a30c403..3dc4a9c 100644
+index a30c403..fec5da0 100644
 --- a/src/DialogSettings.cpp
 +++ b/src/DialogSettings.cpp
 @@ -84,6 +84,9 @@ DialogSettings::DialogSettings(QWidget * parent) : QDialog(parent), ui(new Ui::D
@@ -7,7 +7,7 @@ index a30c403..3dc4a9c 100644
    ui->rbDarkTheme->setChecked(savedDarkTheme);
    ui->rbDefaultTheme->setChecked(!savedDarkTheme);
 +#ifdef _GMIC_QT_DISABLE_THEMING_
-+  ui->groupBox_3->setEnabled(false);
++  ui->groupBox_3->setVisible(false);
 +#endif
    ui->cbNativeColorDialogs->setChecked(Settings::nativeColorDialogs());
    ui->cbNativeColorDialogs->setToolTip(tr("Check to use Native/OS color dialog, uncheck to use Qt's"));

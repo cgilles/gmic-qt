@@ -85,7 +85,7 @@ DialogSettings::DialogSettings(QWidget * parent) : QDialog(parent), ui(new Ui::D
   ui->rbDarkTheme->setChecked(savedDarkTheme);
   ui->rbDefaultTheme->setChecked(!savedDarkTheme);
 #ifdef _GMIC_QT_DISABLE_THEMING_
-  ui->groupBox_3->setEnabled(false);
+  ui->groupBox_3->setVisible(false);
 #endif
   ui->cbNativeColorDialogs->setChecked(Settings::nativeColorDialogs());
   ui->cbNativeColorDialogs->setToolTip(tr("Check to use Native/OS color dialog, uncheck to use Qt's"));
