@@ -81,7 +81,8 @@ void convertCImgtoDImg(const cimg_library::CImg<float>& in, DImg& out, bool sixt
 
     if      (in.spectrum() == 4) // RGB + Alpha
     {
-        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert CImg to DImg: RGB+Alpha image" << "(" << (sixteenBit+1) * 8 << "bits)";
+        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert CImg to DImg: RGB+Alpha image" << "(" << (sixteenBit+1) * 8 << "bits)"
+                                            << "with alpha channel:" << alpha;
 
         const float* srcR = in.data(0, 0, 0, 0);
         const float* srcG = in.data(0, 0, 0, 1);
@@ -123,7 +124,8 @@ void convertCImgtoDImg(const cimg_library::CImg<float>& in, DImg& out, bool sixt
     }
     else if (in.spectrum() == 3) // RGB
     {
-        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert CImg to DImg: RGB image" << "(" << (sixteenBit+1) * 8 << "bits)";
+        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert CImg to DImg: RGB image" << "(" << (sixteenBit+1) * 8 << "bits)"
+                                            << "with alpha channel:" << alpha;
 
         const float* srcR = in.data(0, 0, 0, 0);
         const float* srcG = in.data(0, 0, 0, 1);
@@ -164,7 +166,8 @@ void convertCImgtoDImg(const cimg_library::CImg<float>& in, DImg& out, bool sixt
     }
     else if (in.spectrum() == 2) // Gray levels + Alpha
     {
-        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert CImg to DImg: Gray+Alpha image" << "(" << (sixteenBit+1) * 8 << "bits)";
+        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert CImg to DImg: Gray+Alpha image" << "(" << (sixteenBit+1) * 8 << "bits)"
+                                            << "with alpha channel:" << alpha;
 
         const float* src  = in.data(0, 0, 0, 0);
         const float* srcA = in.data(0, 0, 0, 1);
@@ -200,7 +203,8 @@ void convertCImgtoDImg(const cimg_library::CImg<float>& in, DImg& out, bool sixt
     }
     else // Gray levels
     {
-        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert CImg to DImg: Gray image" << "(" << (sixteenBit+1) * 8 << "bits)";
+        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert CImg to DImg: Gray image" << "(" << (sixteenBit+1) * 8 << "bits)"
+                                            << "with alpha channel:" << alpha;
 
         const float* src  = in.data(0, 0, 0, 0);
         int height        = out.height();
@@ -239,14 +243,20 @@ void convertDImgtoCImg(const DImg& in, cimg_library::CImg<float>& out)
 {
     const int w = in.width();
     const int h = in.height();
-    out.assign(w, h, 1, 4);
+    out.assign(w, h, 1, in.hasAlpha() ? 4 : 3);
 
     float* dstR = out.data(0, 0, 0, 0);
     float* dstG = out.data(0, 0, 0, 1);
     float* dstB = out.data(0, 0, 0, 2);
-    float* dstA = out.data(0, 0, 0, 3);
+    float* dstA = nullptr;
 
-    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert DImg to CImg:" << (in.sixteenBit()+1) * 8 << "bits image";
+    if (in.hasAlpha())
+    {
+        dstA = out.data(0, 0, 0, 3);
+    }
+
+    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert DImg to CImg:" << (in.sixteenBit() + 1) * 8 << "bits image"
+                                        << "with alpha channel:" << in.hasAlpha();
 
     for (int y = 0 ; y < h ; ++y)
     {
@@ -260,7 +270,12 @@ void convertDImgtoCImg(const DImg& in, cimg_library::CImg<float>& out)
                 *dstB++ = static_cast<float>(src[0] / 255.0);
                 *dstG++ = static_cast<float>(src[1] / 255.0);
                 *dstR++ = static_cast<float>(src[2] / 255.0);
-                *dstA++ = static_cast<float>(src[3] / 255.0);
+
+                if (in.hasAlpha())
+                {
+                    *dstA++ = static_cast<float>(src[3] / 255.0);
+                }
+
                 src    += 4;
             }
         }
@@ -274,7 +289,12 @@ void convertDImgtoCImg(const DImg& in, cimg_library::CImg<float>& out)
                 *dstB++ = static_cast<float>(src[0]);
                 *dstG++ = static_cast<float>(src[1]);
                 *dstR++ = static_cast<float>(src[2]);
-                *dstA++ = static_cast<float>(src[3]);
+
+                if (in.hasAlpha())
+                {
+                    *dstA++ = static_cast<float>(src[3]);
+                }
+
                 src    += 4;
             }
         }
@@ -326,6 +346,7 @@ void getCroppedImages(cimg_library::CImgList<gmic_pixel_type> & images,
     {
         images.assign();
         imageNames.assign();
+
         return;
     }
 
