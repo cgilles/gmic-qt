@@ -1,0 +1,31 @@
+diff --git a/src/DialogSettings.cpp b/src/DialogSettings.cpp
+index a30c403..e86739f 100644
+--- a/src/DialogSettings.cpp
++++ b/src/DialogSettings.cpp
+@@ -89,6 +89,10 @@ DialogSettings::DialogSettings(QWidget * parent) : QDialog(parent), ui(new Ui::D
+   ui->cbNativeFileDialogs->setChecked(Settings::nativeFileDialogs());
+   ui->cbNativeFileDialogs->setToolTip(tr("Check to use Native/OS file dialog, uncheck to use Qt's"));
+   ui->cbShowLogos->setChecked(Settings::visibleLogos());
++#ifdef _GMIC_QT_DISABLE_LOGO_
++  ui->line->setVisible(false);
++  ui->cbShowLogos->setVisible(false);
++#endif
+   ui->sbPreviewTimeout->setValue(Settings::previewTimeout());
+   ui->cbPreviewZoom->setChecked(Settings::previewZoomAlwaysEnabled());
+   ui->cbNotifyFailedUpdate->setChecked(Settings::notifyFailedStartupUpdate());
+diff --git a/src/Settings.cpp b/src/Settings.cpp
+index 00ec64b..380bad6 100644
+--- a/src/Settings.cpp
++++ b/src/Settings.cpp
+@@ -119,7 +119,11 @@ void Settings::load(UserInterfaceMode userInterfaceMode)
+ 
+ bool Settings::visibleLogos()
+ {
++#ifdef _GMIC_QT_DISABLE_LOGO_
++  return false;
++#else
+   return _visibleLogos;
++#endif
+ }
+ 
+ void Settings::setVisibleLogos(bool on)

@@ -31,6 +31,9 @@
 #include <QSettings>
 #include <QEventLoop>
 #include <QPointer>
+#include <QImage>
+#include <QBuffer>
+#include <QByteArray>
 
 // Libfftw includes
 
@@ -85,37 +88,53 @@ QString GmicQtToolPlugin::description() const
 
 QString GmicQtToolPlugin::details() const
 {
+    QImage img(":resources/logos.png");
+    QByteArray byteArray;
+    QBuffer    buffer(&byteArray);
+    img.save(&buffer, "PNG");
+
+    QString logo = QString::fromLatin1("<p><img src=\"data:image/png;base64,%1\"></p>")
+                   .arg(QString::fromLatin1(byteArray.toBase64().data()));
+
     return tr("<p><b>An Image Editor tool for G'MIC-Qt.</b></p>"
-              "<p>G'MIC-Qt is a versatile front-end to the image processing framework G'MIC</p>"
-              "<p>G'MIC is a full-featured open-source framework for image processing. "
-              "It provides several user interfaces to convert / manipulate / filter / "
-              "visualize generic image datasets, ranging from 1D scalar signals to 3D+t sequences "
-              "of multi-spectral volumetric images, hence including 2D color images.</p>"
-              "<p>See more details <a href='on the project page'>https://gmic.eu/</a></p>"
+              "<p><b>Overview:</b></p>"
+                "<p>G'MIC-Qt is a versatile front-end to the image processing framework G'MIC</p>"
+                "<p>G'MIC is a full-featured open-source framework for image processing. "
+                "It provides several user interfaces to convert / manipulate / filter / "
+                "visualize generic image datasets, ranging from 1D scalar signals to 3D+t sequences "
+                "of multi-spectral volumetric images, hence including 2D color images.</p>"
+              "<p><b>Credits:</b></p>"
+                "%1<br/>"
+                "G'MIC project (https://gmic.eu/)<br/>"
+                "GREYC (https://www.greyc.fr)<<br/>"
+                "CNRS (https://www.cnrs.fr)<br/>"
+                "Normandy University (https://www.unicaen.fr)<br/>"
+                "Ensicaen (https://www.ensicaen.fr)<br/>"
               "<p><b>Configuration:</b></p>"
-              "<p>Libgmic version: %1</p>"
-             ).arg(gmic_version)
+                "Libgmic version: %2<br/>"
+             ).arg(logo)
+              .arg(gmic_version)
 
 #ifdef cimg_use_fftw3
-             + QString::fromUtf8("<p>Libfftw3 version: %1</p>").arg(fftw_version)
+             + QString::fromUtf8("Libfftw3 version: %1<br/>").arg(fftw_version)
 #endif
 
 #ifdef cimg_use_fftw3_singlethread
-             + QString::fromUtf8("<p>Use FFTW3 single thread: yes</p>")
+             + QString::fromUtf8("Use FFTW3 single thread: yes<br/>")
 #else
-             + QString::fromUtf8("<p>Use FFTW3 single thread: no</p>")
+             + QString::fromUtf8("Use FFTW3 single thread: no<br/>")
 #endif
 
 #ifdef cimg_use_curl
-             + QString::fromUtf8("<p>Use Curl: yes</p>")
+             + QString::fromUtf8("Use Curl: yes<br/>")
 #else
-             + QString::fromUtf8("<p>Use Curl: no</p>")
+             + QString::fromUtf8("Use Curl: no<br/>")
 #endif
 
 #ifdef cimg_use_openmp
-             + QString::fromUtf8("<p>Use OpenMP: yes</p>")
+             + QString::fromUtf8("Use OpenMP: yes<br/>")
 #else
-             + QString::fromUtf8("<p>Use OpenMP: no</p>")
+             + QString::fromUtf8("Use OpenMP: no<br/>")
 #endif
 
     ;

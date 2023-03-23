@@ -89,6 +89,7 @@ qt5_wrap_ui(gmic_qt_SRCS ${gmic_qt_FORMS})
 add_definitions(-DGMIC_HOST=digikam)
 add_definitions(-D_GMIC_QT_DISABLE_THEMING_)
 add_definitions(-D_GMIC_QT_DISABLE_HDPI_)
+add_definitions(-D_GMIC_QT_DISABLE_LOGO_)
 add_library(Editor_GmicQt_Plugin
             MODULE ${gmic_qt_SRCS} ${gmic_qt_QRC} ${qmic_qt_QM})
 

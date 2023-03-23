@@ -119,7 +119,11 @@ void Settings::load(UserInterfaceMode userInterfaceMode)
 
 bool Settings::visibleLogos()
 {
+#ifdef _GMIC_QT_DISABLE_LOGO_
+  return false;
+#else
   return _visibleLogos;
+#endif
 }
 
 void Settings::setVisibleLogos(bool on)
