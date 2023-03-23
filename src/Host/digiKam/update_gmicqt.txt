@@ -1,29 +1,33 @@
 Under a Linux Ubuntu 22.04:
 
-1/ Checkout gmic at the desired release tag (https://github.com/GreycLab/gmic).
-2/ Checkout gmic-qt at the same desired release tag (https://github.com/c-koi/gmic-qt).
+1/ Checkout G'MIC at the desired release tag (https://github.com/GreycLab/gmic).
+2/ Checkout G'MIC-Qt at the same desired release tag (https://github.com/c-koi/gmic-qt).
 3/ Fix dependencies to complete the configuration of source code.
-4/ Use the bootstrap-gmicqt.sh to configure gmic directory with "none" host.
-5/ When configuration is done copy the gmic directory contents to the DK::gmic-qt/gmic.
+4/ Use the bootstrap-gmicqt.sh to configure G'MIC-Qt directory with "none" host.
+5/ When configuration is done copy the GMIC directory contents to the DK::gmic-qt/gmic.
 6/ Remove DK::gmic-qt/gmic/.gitignore.
-7/ Copy the gmic-qt contents to the DK::gmic-qt/gmic.
+7/ Copy the G'MIC-Qt contents to the DK::gmic-qt/gmic.
 8/ Patch DK::gmic-qt/CmakeLists.txt to add the "digikam" host rules and to use local gmic dir:
 
 patch -p1 < 01_digikam_root_cmakelists.patch
 
-9/ Patch DK::gmic-qt codes to disable theming:
+9/ Patch DK::gmic-qt codes to disable theming (redondant with digiKam one andcrash host):
 
 patch -p1 < 02_digikam_disable_theming.patch
 
-10/ Patch DK::gmic-qt codes to disable HDPI settings:
+10/ Patch DK::gmic-qt codes to disable HDPI settings (redondant with digiKam one):
 
-patch -p1 < 02_digikam_disable_hdpi.patch
+patch -p1 < 03_digikam_disable_hdpi.patch
 
-11/ Check if new files are append with "git status" and add file to git repository
-12/ Check compilation with "digikam" host.
+11/ Patch DK::gmic-qt codes to disable logo settings and optimize space (logo moves in settings dialog):
+
+patch -p1 < 04_digikam_disable_hdpi.patch
+
+12/ Check if new files are append with "git status" and add file to git repository
+13/ Check compilation with "digikam" host.
 
 ---
 
-NOTE: look also code for Krita GMic-qt plugin from github:
+NOTE: look also code for Krita G'MIC-Qt plugin from github:
 
 https://github.com/amyspark/gmic/
