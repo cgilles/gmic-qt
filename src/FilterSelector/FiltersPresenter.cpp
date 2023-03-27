@@ -90,6 +90,7 @@ void FiltersPresenter::rebuildFilterViewWithSelection(const QList<QString> & key
   _filtersView->clear();
   _filtersView->disableModel();
   for (const FiltersModel::Filter & filter : _filtersModel) {
+    if (filter.absolutePathNoTags().contains("About") && filter.absolutePathNoTags().contains("Support Us")) continue;
     if (filter.matchKeywords(keywords)) {
       _filtersView->addFilter(filter.name(), filter.hash(), filter.path(), filter.isWarning());
     }

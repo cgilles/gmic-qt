@@ -23,8 +23,12 @@ patch -p1 < 03_digikam_disable_hdpi.patch
 
 patch -p1 < 04_digikam_disable_hdpi.patch
 
-12/ Check if new files are append with "git status" and add file to git repository
-13/ Check compilation with "digikam" host.
+12/ Patch DK::gmic-qt codes to improve plugin integration
+
+patch -p1 < 05_digikam_plugin_integration.patch
+
+13/ Check if new files are append with "git status" and add file to git repository
+14/ Check compilation with "digikam" host.
 
 ---
 
