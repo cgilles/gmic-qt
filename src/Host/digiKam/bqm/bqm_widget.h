@@ -37,6 +37,8 @@
 
 class QResizeEvent;
 
+using namespace GmicQt;
+
 namespace Ui
 {
 class Bqm_Widget;
@@ -58,6 +60,10 @@ class Updater;
 class FilterThread;
 class FiltersPresenter;
 class VisibleTagSelector;
+}
+
+namespace DigikamBqmGmicQtPlugin
+{
 
 class Bqm_Widget : public QWidget {
   Q_OBJECT
@@ -177,6 +183,6 @@ private:
   VisibleTagSelector * _visibleTagSelector;
 };
 
-} // namespace GmicQt
+} // namespace DigikamBqmGmicQtPlugin
 
 #endif // GMIC_QT_BQM_WIDGET_H

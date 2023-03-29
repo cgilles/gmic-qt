@@ -44,6 +44,7 @@
 // Local includes
 
 #include "gmic.h"
+#include "gmicqtbqmtool.h"
 
 namespace DigikamBqmGmicQtPlugin
 {
@@ -165,12 +166,10 @@ QList<DPluginAuthor> GmicQtPlugin::authors() const
 
 void GmicQtPlugin::setup(QObject* const parent)
 {
-/*
-    Restoration* const tool = new Restoration(parent);
+    GmicQtBqmTool* const tool = new GmicQtBqmTool(parent);
     tool->setPlugin(this);
 
     addTool(tool);
-*/
 }
 
 } // namespace DigikamBqmGmicQtPlugin

@@ -22,6 +22,7 @@
  *  along with gmic_qt.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+
 #include "bqm_widget.h"
 
 #include <cassert>
@@ -81,7 +82,7 @@ QString appendShortcutText(const QString & text, const QKeySequence & key)
 
 } // namespace
 
-namespace GmicQt
+namespace DigikamBqmGmicQtPlugin
 {
 
 bool Bqm_Widget::_isAccepted = false;
@@ -470,12 +471,6 @@ void Bqm_Widget::onStartupFiltersUpdateFinished(int status)
   }
   buildFiltersTree();
   ui->searchField->setFocus();
-
-  // Let the standalone version load an image, if necessary (not pretty)
-  if (GmicQtHost::ApplicationName.isEmpty()) {
-    LayersExtentProxy::clear();
-    QSize extent = LayersExtentProxy::getExtent(ui->inOutSelector->inputMode());
-  }
 
   // Retrieve and select previously selected filter
   QString hash = QSettings().value("SelectedFilter", QString()).toString();
@@ -1406,4 +1401,4 @@ void Bqm_Widget::closeEvent(QCloseEvent * e)
   }
 }
 
-} // namespace GmicQt
+} // namespace DigikamBqmGmicQtPlugin
