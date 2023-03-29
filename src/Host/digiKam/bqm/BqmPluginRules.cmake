@@ -45,10 +45,14 @@ set_package_properties(DigikamDatabase PROPERTIES
 
 include_directories($<TARGET_PROPERTY:Digikam::digikamdatabase,INTERFACE_INCLUDE_DIRECTORIES>/digikam)
 
-set(gmic_qt_bqm_SRCS ${gmic_qt_SRCS} ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicqtplugin.cpp
+set(gmic_qt_bqm_SRCS
+    ${gmic_qt_SRCS}
+    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicqtplugin.cpp
+    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/bqm_widget.cpp
 )
 
-qt5_wrap_ui(gmic_qt_bqm_SRCS ${gmic_qt_FORMS})
+qt5_wrap_ui(gmic_qt_bqm_SRCS ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/bqm_widget.ui)
+
 add_definitions(-DGMIC_HOST=digikam)
 add_definitions(-D_GMIC_QT_DISABLE_THEMING_)
 add_definitions(-D_GMIC_QT_DISABLE_HDPI_)

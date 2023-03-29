@@ -1,6 +1,6 @@
 /** -*- mode: c++ ; c-basic-offset: 2 -*-
  *
- *  @file MainWindow.cpp
+ *  @file Bqm_Widget.cpp
  *
  *  Copyright 2017 Sebastien Fourey
  *
@@ -22,7 +22,12 @@
  *  along with gmic_qt.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#include "MainWindow.h"
+#include "bqm_widget.h"
+
+#include <cassert>
+#include <iostream>
+#include <typeinfo>
+
 #include <QAction>
 #include <QClipboard>
 #include <QCursor>
@@ -38,9 +43,7 @@
 #include <QShowEvent>
 #include <QStringList>
 #include <QStyleFactory>
-#include <cassert>
-#include <iostream>
-#include <typeinfo>
+
 #include "Common.h"
 #include "CroppedActiveLayerProxy.h"
 #include "CroppedImageListProxy.h"
@@ -61,11 +64,12 @@
 #include "Updater.h"
 #include "Utils.h"
 #include "Widgets/VisibleTagSelector.h"
-#include "ui_mainwindow.h"
 #include "gmic.h"
+#include "ui_bqm_widget.h"
 
 namespace
 {
+
 QString appendShortcutText(const QString & text, const QKeySequence & key)
 {
   if (text.isRightToLeft()) {
@@ -80,13 +84,13 @@ QString appendShortcutText(const QString & text, const QKeySequence & key)
 namespace GmicQt
 {
 
-bool MainWindow::_isAccepted = false;
+bool Bqm_Widget::_isAccepted = false;
 
 //
 // TODO : Handle window maximization properly (Windows as well as some Linux desktops)
 //
 
-MainWindow::MainWindow(QWidget * parent) : QMainWindow(parent), ui(new Ui::MainWindow)
+Bqm_Widget::Bqm_Widget(QWidget * parent) : QBqm_Widget(parent), ui(new Ui::Bqm_Widget)
 {
   TIMING;
   ui->setupUi(this);
@@ -120,7 +124,7 @@ MainWindow::MainWindow(QWidget * parent) : QMainWindow(parent), ui(new Ui::MainW
 
   QShortcut * closeShortcut = new QShortcut(QKeySequence::Close, this);
   closeShortcut->setContext(Qt::ApplicationShortcut);
-  connect(closeShortcut, &QShortcut::activated, this, &MainWindow::close);
+  connect(closeShortcut, &QShortcut::activated, this, &Bqm_Widget::close);
 
   ui->tbRenameFave->setToolTip(tr("Rename fave"));
   ui->tbRenameFave->setEnabled(false);
@@ -219,7 +223,7 @@ MainWindow::MainWindow(QWidget * parent) : QMainWindow(parent), ui(new Ui::MainW
   QAction * escAction = new QAction(this);
   escAction->setShortcut(QKeySequence(Qt::Key_Escape));
   escAction->setShortcutContext(Qt::ApplicationShortcut);
-  connect(escAction, &QAction::triggered, this, &MainWindow::onEscapeKeyPressed);
+  connect(escAction, &QAction::triggered, this, &Bqm_Widget::onEscapeKeyPressed);
   addAction(escAction);
 
   CroppedImageListProxy::clear();
@@ -241,7 +245,7 @@ MainWindow::MainWindow(QWidget * parent) : QMainWindow(parent), ui(new Ui::MainW
   TIMING;
 }
 
-MainWindow::~MainWindow()
+Bqm_Widget::~Bqm_Widget()
 {
   //  QSet<QString> hashes;
   //  FiltersTreeAbstractItem::buildHashesList(_filtersTreeModel.invisibleRootItem(),hashes);
@@ -254,7 +258,7 @@ MainWindow::~MainWindow()
   delete ui;
 }
 
-void MainWindow::setIcons()
+void Bqm_Widget::setIcons()
 {
   ui->tbTags->setIcon(LOAD_ICON("color-wheel"));
   ui->tbRenameFave->setIcon(LOAD_ICON("rename"));
@@ -276,7 +280,7 @@ void MainWindow::setIcons()
 }
 
 #ifndef _GMIC_QT_DISABLE_THEMING_
-void MainWindow::setDarkTheme()
+void Bqm_Widget::setDarkTheme()
 {
   // SHOW(QStyleFactory::keys());
   qApp->setStyle(QStyleFactory::create("Fusion"));
@@ -331,21 +335,21 @@ void MainWindow::setDarkTheme()
 }
 #endif
 
-void MainWindow::setPluginParameters(const RunParameters & parameters)
+void Bqm_Widget::setPluginParameters(const RunParameters & parameters)
 {
   _pluginParameters = parameters;
 }
 
-void MainWindow::updateFiltersFromSources(int ageLimit, bool useNetwork)
+void Bqm_Widget::updateFiltersFromSources(int ageLimit, bool useNetwork)
 {
   if (useNetwork) {
     ui->progressInfoWidget->startFiltersUpdateAnimationAndShow();
   }
-  connect(Updater::getInstance(), &Updater::updateIsDone, this, &MainWindow::onUpdateDownloadsFinished, Qt::UniqueConnection);
+  connect(Updater::getInstance(), &Updater::updateIsDone, this, &Bqm_Widget::onUpdateDownloadsFinished, Qt::UniqueConnection);
   Updater::getInstance()->startUpdate(ageLimit, 60, useNetwork);
 }
 
-void MainWindow::onUpdateDownloadsFinished(int status)
+void Bqm_Widget::onUpdateDownloadsFinished(int status)
 {
   ui->progressInfoWidget->stopAnimationAndHide();
 
@@ -370,7 +374,7 @@ void MainWindow::onUpdateDownloadsFinished(int status)
   }
 }
 
-void MainWindow::buildFiltersTree()
+void Bqm_Widget::buildFiltersTree()
 {
   saveCurrentParameters();
   GmicStdLib::Array = Updater::getInstance()->buildFullStdlib();
@@ -397,7 +401,7 @@ void MainWindow::buildFiltersTree()
   }
 }
 
-void MainWindow::retrieveFilterAndParametersFromPluginParameters(QString & hash, QList<QString> & parameters)
+void Bqm_Widget::retrieveFilterAndParametersFromPluginParameters(QString & hash, QList<QString> & parameters)
 {
   if (_pluginParameters.command.empty() && _pluginParameters.filterPath.empty()) {
     return;
@@ -466,7 +470,7 @@ void MainWindow::retrieveFilterAndParametersFromPluginParameters(QString & hash,
   }
 }
 
-QString MainWindow::screenGeometries()
+QString Bqm_Widget::screenGeometries()
 {
   QList<QScreen *> screens = QGuiApplication::screens();
   QStringList geometries;
@@ -477,16 +481,16 @@ QString MainWindow::screenGeometries()
   return geometries.join(QString());
 }
 
-void MainWindow::updateFilters(bool internet)
+void Bqm_Widget::updateFilters(bool internet)
 {
   ui->tbUpdateFilters->setEnabled(false);
   updateFiltersFromSources(0, internet);
 }
 
-void MainWindow::onStartupFiltersUpdateFinished(int status)
+void Bqm_Widget::onStartupFiltersUpdateFinished(int status)
 {
-  bool ok = QObject::disconnect(Updater::getInstance(), &Updater::updateIsDone, this, &MainWindow::onStartupFiltersUpdateFinished);
-  Q_ASSERT_X(ok, __PRETTY_FUNCTION__, "Cannot disconnect Updater::updateIsDone from MainWindow::onStartupFiltersUpdateFinished");
+  bool ok = QObject::disconnect(Updater::getInstance(), &Updater::updateIsDone, this, &Bqm_Widget::onStartupFiltersUpdateFinished);
+  Q_ASSERT_X(ok, __PRETTY_FUNCTION__, "Cannot disconnect Updater::updateIsDone from Bqm_Widget::onStartupFiltersUpdateFinished");
 
   ui->progressInfoWidget->stopAnimationAndHide();
   if (status == (int)Updater::UpdateStatus::SomeFailed) {
@@ -543,23 +547,23 @@ void MainWindow::onStartupFiltersUpdateFinished(int status)
   // after the very first resize event).
 }
 
-void MainWindow::showZoomWarningIfNeeded()
+void Bqm_Widget::showZoomWarningIfNeeded()
 {
   const FiltersPresenter::Filter & currentFilter = _filtersPresenter->currentFilter();
   ui->zoomLevelSelector->showWarning(!currentFilter.hash.isEmpty() && !currentFilter.isAccurateIfZoomed && !ui->previewWidget->isAtDefaultZoom());
 }
 
-void MainWindow::updateZoomLabel(double zoom)
+void Bqm_Widget::updateZoomLabel(double zoom)
 {
   ui->zoomLevelSelector->display(zoom);
 }
 
-void MainWindow::onFiltersSelectionModeToggled(bool on)
+void Bqm_Widget::onFiltersSelectionModeToggled(bool on)
 {
   _filtersPresenter->toggleSelectionMode(on);
 }
 
-void MainWindow::onPreviewCheckBoxToggled(bool on)
+void Bqm_Widget::onPreviewCheckBoxToggled(bool on)
 {
   if (!on) {
     _processor.cancel();
@@ -567,13 +571,13 @@ void MainWindow::onPreviewCheckBoxToggled(bool on)
   ui->previewWidget->onPreviewToggled(on);
 }
 
-void MainWindow::onFilterSelectionChanged()
+void Bqm_Widget::onFilterSelectionChanged()
 {
   activateFilter(false);
   ui->previewWidget->sendUpdateRequest();
 }
 
-void MainWindow::onEscapeKeyPressed()
+void Bqm_Widget::onEscapeKeyPressed()
 {
   ui->searchField->clear();
   if (_processor.isProcessing()) {
@@ -587,7 +591,7 @@ void MainWindow::onEscapeKeyPressed()
   }
 }
 
-void MainWindow::clearMessage()
+void Bqm_Widget::clearMessage()
 {
   ui->messageLabel->setText(QString());
   if (!_messageTimerID) {
@@ -597,19 +601,19 @@ void MainWindow::clearMessage()
   _messageTimerID = 0;
 }
 
-void MainWindow::clearRightMessage()
+void Bqm_Widget::clearRightMessage()
 {
   ui->rightMessageLabel->hide();
   ui->rightMessageLabel->clear();
 }
 
-void MainWindow::showRightMessage(const QString & text)
+void Bqm_Widget::showRightMessage(const QString & text)
 {
   ui->rightMessageLabel->setText(text);
   ui->rightMessageLabel->show();
 }
 
-void MainWindow::timerEvent(QTimerEvent * e)
+void Bqm_Widget::timerEvent(QTimerEvent * e)
 {
   if (e->timerId() == _messageTimerID) {
     clearMessage();
@@ -618,7 +622,7 @@ void MainWindow::timerEvent(QTimerEvent * e)
   e->ignore();
 }
 
-void MainWindow::showMessage(const QString & text, int ms)
+void Bqm_Widget::showMessage(const QString & text, int ms)
 {
   clearMessage();
   if (!text.isEmpty()) {
@@ -629,7 +633,7 @@ void MainWindow::showMessage(const QString & text, int ms)
   }
 }
 
-void MainWindow::showUpdateErrors()
+void Bqm_Widget::showUpdateErrors()
 {
   QString message(tr("The update could not be achieved<br>"
                      "because of the following errors:<br>"));
@@ -640,54 +644,54 @@ void MainWindow::showUpdateErrors()
   QMessageBox::information(this, tr("Update error"), message);
 }
 
-void MainWindow::makeConnections()
+void Bqm_Widget::makeConnections()
 {
   connect(ui->zoomLevelSelector, &ZoomLevelSelector::valueChanged, ui->previewWidget, &PreviewWidget::setZoomLevel);
 
-  connect(ui->previewWidget, &PreviewWidget::zoomChanged, this, &MainWindow::showZoomWarningIfNeeded);
-  connect(ui->previewWidget, &PreviewWidget::zoomChanged, this, &MainWindow::updateZoomLabel);
+  connect(ui->previewWidget, &PreviewWidget::zoomChanged, this, &Bqm_Widget::showZoomWarningIfNeeded);
+  connect(ui->previewWidget, &PreviewWidget::zoomChanged, this, &Bqm_Widget::updateZoomLabel);
   connect(ui->previewWidget, &PreviewWidget::previewVisibleRectIsChanging, &_processor, &GmicProcessor::cancel);
-  connect(_filtersPresenter, &FiltersPresenter::filterSelectionChanged, this, &MainWindow::onFilterSelectionChanged);
-  connect(ui->pbOk, &QPushButton::clicked, this, &MainWindow::onOkClicked);
-  connect(ui->pbCancel, &QPushButton::clicked, this, &MainWindow::onCancelClicked);
-  connect(ui->pbApply, &QPushButton::clicked, this, &MainWindow::onApplyClicked);
-  connect(ui->tbResetParameters, &QToolButton::clicked, this, &MainWindow::onReset);
-  connect(ui->tbCopyCommand, &QToolButton::clicked, this, &MainWindow::onCopyGMICCommand);
-  connect(ui->tbUpdateFilters, &QToolButton::clicked, this, &MainWindow::onUpdateFiltersClicked);
-  connect(ui->pbSettings, &QPushButton::clicked, this, &MainWindow::onSettingsClicked);
-  connect(ui->pbFullscreen, &QPushButton::toggled, this, &MainWindow::onToggleFullScreen);
-  connect(ui->filterParams, &FilterParametersWidget::valueChanged, this, &MainWindow::onParametersChanged);
-  connect(ui->previewWidget, &PreviewWidget::previewUpdateRequested, this, QOverload<>::of(&MainWindow::onPreviewUpdateRequested));
-  connect(ui->previewWidget, &PreviewWidget::keypointPositionsChanged, this, &MainWindow::onPreviewKeypointsEvent);
+  connect(_filtersPresenter, &FiltersPresenter::filterSelectionChanged, this, &Bqm_Widget::onFilterSelectionChanged);
+  connect(ui->pbOk, &QPushButton::clicked, this, &Bqm_Widget::onOkClicked);
+  connect(ui->pbCancel, &QPushButton::clicked, this, &Bqm_Widget::onCancelClicked);
+  connect(ui->pbApply, &QPushButton::clicked, this, &Bqm_Widget::onApplyClicked);
+  connect(ui->tbResetParameters, &QToolButton::clicked, this, &Bqm_Widget::onReset);
+  connect(ui->tbCopyCommand, &QToolButton::clicked, this, &Bqm_Widget::onCopyGMICCommand);
+  connect(ui->tbUpdateFilters, &QToolButton::clicked, this, &Bqm_Widget::onUpdateFiltersClicked);
+  connect(ui->pbSettings, &QPushButton::clicked, this, &Bqm_Widget::onSettingsClicked);
+  connect(ui->pbFullscreen, &QPushButton::toggled, this, &Bqm_Widget::onToggleFullScreen);
+  connect(ui->filterParams, &FilterParametersWidget::valueChanged, this, &Bqm_Widget::onParametersChanged);
+  connect(ui->previewWidget, &PreviewWidget::previewUpdateRequested, this, QOverload<>::of(&Bqm_Widget::onPreviewUpdateRequested));
+  connect(ui->previewWidget, &PreviewWidget::keypointPositionsChanged, this, &Bqm_Widget::onPreviewKeypointsEvent);
   connect(ui->zoomLevelSelector, &ZoomLevelSelector::zoomIn, ui->previewWidget, QOverload<>::of(&PreviewWidget::zoomIn));
   connect(ui->zoomLevelSelector, &ZoomLevelSelector::zoomOut, ui->previewWidget, QOverload<>::of(&PreviewWidget::zoomOut));
-  connect(ui->zoomLevelSelector, &ZoomLevelSelector::zoomReset, this, &MainWindow::onPreviewZoomReset);
-  connect(ui->tbAddFave, &QToolButton::clicked, this, &MainWindow::onAddFave);
-  connect(_filtersPresenter, &FiltersPresenter::faveAdditionRequested, this, &MainWindow::onAddFave);
-  connect(ui->tbRemoveFave, &QToolButton::clicked, this, &MainWindow::onRemoveFave);
-  connect(ui->tbRenameFave, &QToolButton::clicked, this, &MainWindow::onRenameFave);
-  connect(ui->inOutSelector, &InOutPanel::inputModeChanged, this, &MainWindow::onInputModeChanged);
-  connect(ui->cbPreview, &QCheckBox::toggled, this, &MainWindow::onPreviewCheckBoxToggled);
-  connect(ui->searchField, &SearchFieldWidget::textChanged, this, &MainWindow::search);
-  connect(ui->tbExpandCollapse, &QToolButton::clicked, this, &MainWindow::expandOrCollapseFolders);
-  connect(ui->progressInfoWidget, &ProgressInfoWidget::cancel, this, &MainWindow::onProgressionWidgetCancelClicked);
-  connect(ui->tbSelectionMode, &QToolButton::toggled, this, &MainWindow::onFiltersSelectionModeToggled);
-  connect(&_processor, &GmicProcessor::previewImageAvailable, this, &MainWindow::onPreviewImageAvailable);
-  connect(&_processor, &GmicProcessor::previewCommandFailed, this, &MainWindow::onPreviewError);
-  connect(&_processor, &GmicProcessor::fullImageProcessingFailed, this, &MainWindow::onFullImageProcessingError);
-  connect(&_processor, &GmicProcessor::fullImageProcessingDone, this, &MainWindow::onFullImageProcessingDone);
+  connect(ui->zoomLevelSelector, &ZoomLevelSelector::zoomReset, this, &Bqm_Widget::onPreviewZoomReset);
+  connect(ui->tbAddFave, &QToolButton::clicked, this, &Bqm_Widget::onAddFave);
+  connect(_filtersPresenter, &FiltersPresenter::faveAdditionRequested, this, &Bqm_Widget::onAddFave);
+  connect(ui->tbRemoveFave, &QToolButton::clicked, this, &Bqm_Widget::onRemoveFave);
+  connect(ui->tbRenameFave, &QToolButton::clicked, this, &Bqm_Widget::onRenameFave);
+  connect(ui->inOutSelector, &InOutPanel::inputModeChanged, this, &Bqm_Widget::onInputModeChanged);
+  connect(ui->cbPreview, &QCheckBox::toggled, this, &Bqm_Widget::onPreviewCheckBoxToggled);
+  connect(ui->searchField, &SearchFieldWidget::textChanged, this, &Bqm_Widget::search);
+  connect(ui->tbExpandCollapse, &QToolButton::clicked, this, &Bqm_Widget::expandOrCollapseFolders);
+  connect(ui->progressInfoWidget, &ProgressInfoWidget::cancel, this, &Bqm_Widget::onProgressionWidgetCancelClicked);
+  connect(ui->tbSelectionMode, &QToolButton::toggled, this, &Bqm_Widget::onFiltersSelectionModeToggled);
+  connect(&_processor, &GmicProcessor::previewImageAvailable, this, &Bqm_Widget::onPreviewImageAvailable);
+  connect(&_processor, &GmicProcessor::previewCommandFailed, this, &Bqm_Widget::onPreviewError);
+  connect(&_processor, &GmicProcessor::fullImageProcessingFailed, this, &Bqm_Widget::onFullImageProcessingError);
+  connect(&_processor, &GmicProcessor::fullImageProcessingDone, this, &Bqm_Widget::onFullImageProcessingDone);
   connect(&_processor, &GmicProcessor::aboutToSendImagesToHost, ui->progressInfoWidget, &ProgressInfoWidget::stopAnimationAndHide);
-  connect(_filtersPresenter, &FiltersPresenter::faveNameChanged, this, &MainWindow::setFilterName);
+  connect(_filtersPresenter, &FiltersPresenter::faveNameChanged, this, &Bqm_Widget::setFilterName);
 }
 
-void MainWindow::onPreviewUpdateRequested()
+void Bqm_Widget::onPreviewUpdateRequested()
 {
   clearMessage();
   clearRightMessage();
   onPreviewUpdateRequested(false);
 }
 
-void MainWindow::onPreviewUpdateRequested(bool synchronous)
+void Bqm_Widget::onPreviewUpdateRequested(bool synchronous)
 {
   if (!ui->cbPreview->isChecked()) {
     ui->previewWidget->invalidateSavedPreview();
@@ -724,7 +728,7 @@ void MainWindow::onPreviewUpdateRequested(bool synchronous)
   _okButtonShouldApply = true;
 }
 
-void MainWindow::onPreviewKeypointsEvent(unsigned int flags, unsigned long time)
+void Bqm_Widget::onPreviewKeypointsEvent(unsigned int flags, unsigned long time)
 {
   if (flags & PreviewWidget::KeypointMouseReleaseEvent) {
     if (flags & PreviewWidget::KeypointBurstEvent) {
@@ -751,7 +755,7 @@ void MainWindow::onPreviewKeypointsEvent(unsigned int flags, unsigned long time)
   }
 }
 
-void MainWindow::onPreviewImageAvailable()
+void Bqm_Widget::onPreviewImageAvailable()
 {
   ui->filterParams->setValues(_processor.gmicStatus(), false);
   ui->filterParams->setVisibilityStates(_processor.parametersVisibilityStates());
@@ -767,7 +771,7 @@ void MainWindow::onPreviewImageAvailable()
   }
 }
 
-void MainWindow::onPreviewError(const QString & message)
+void Bqm_Widget::onPreviewError(const QString & message)
 {
   ui->previewWidget->setPreviewErrorMessage(message);
   ui->previewWidget->enableRightClick();
@@ -777,7 +781,7 @@ void MainWindow::onPreviewError(const QString & message)
   }
 }
 
-void MainWindow::onParametersChanged()
+void Bqm_Widget::onParametersChanged()
 {
   if (ui->filterParams->hasKeypoints()) {
     ui->previewWidget->setKeypoints(ui->filterParams->keypoints());
@@ -785,17 +789,17 @@ void MainWindow::onParametersChanged()
   ui->previewWidget->sendUpdateRequest();
 }
 
-bool MainWindow::isAccepted()
+bool Bqm_Widget::isAccepted()
 {
   return _isAccepted;
 }
 
-void MainWindow::setFilterName(const QString & text)
+void Bqm_Widget::setFilterName(const QString & text)
 {
   ui->filterName->setText(QString("<b>%1</b>").arg(text));
 }
 
-void MainWindow::processImage()
+void Bqm_Widget::processImage()
 {
   // Abort any already running thread
   _processor.init();
@@ -825,7 +829,7 @@ void MainWindow::processImage()
   _processor.execute();
 }
 
-void MainWindow::onFullImageProcessingError(const QString & message)
+void Bqm_Widget::onFullImageProcessingError(const QString & message)
 {
   ui->progressInfoWidget->stopAnimationAndHide();
   QMessageBox::warning(this, tr("Error"), message, QMessageBox::Close);
@@ -835,20 +839,20 @@ void MainWindow::onFullImageProcessingError(const QString & message)
   }
 }
 
-void MainWindow::onInputModeChanged(InputMode mode)
+void Bqm_Widget::onInputModeChanged(InputMode mode)
 {
   PersistentMemory::clear();
   ui->previewWidget->setFullImageSize(LayersExtentProxy::getExtent(mode));
   ui->previewWidget->sendUpdateRequest();
 }
 
-void MainWindow::onVeryFirstShowEvent()
+void Bqm_Widget::onVeryFirstShowEvent()
 {
   adjustVerticalSplitter();
   if (_newSession) {
     Logger::clear();
   }
-  QObject::connect(Updater::getInstance(), &Updater::updateIsDone, this, &MainWindow::onStartupFiltersUpdateFinished);
+  QObject::connect(Updater::getInstance(), &Updater::updateIsDone, this, &Bqm_Widget::onStartupFiltersUpdateFinished);
   Logger::setMode(Settings::outputMessageMode());
   Updater::setOutputMessageMode(Settings::outputMessageMode());
   int ageLimit;
@@ -861,7 +865,7 @@ void MainWindow::onVeryFirstShowEvent()
   Updater::getInstance()->startUpdate(ageLimit, 4, useNetwork);
 }
 
-void MainWindow::setZoomConstraint()
+void Bqm_Widget::setZoomConstraint()
 {
   const FiltersPresenter::Filter & currentFilter = _filtersPresenter->currentFilter();
   ZoomConstraint constraint;
@@ -877,7 +881,7 @@ void MainWindow::setZoomConstraint()
   ui->previewWidget->setZoomConstraint(constraint);
 }
 
-void MainWindow::onFullImageProcessingDone()
+void Bqm_Widget::onFullImageProcessingDone()
 {
   ui->progressInfoWidget->stopAnimationAndHide();
   enableWidgetList(true);
@@ -899,7 +903,7 @@ void MainWindow::onFullImageProcessingDone()
   }
 }
 
-void MainWindow::expandOrCollapseFolders()
+void Bqm_Widget::expandOrCollapseFolders()
 {
   if (_expandCollapseIcon == &_expandIcon) {
     _filtersPresenter->expandAll();
@@ -912,12 +916,12 @@ void MainWindow::expandOrCollapseFolders()
   }
 }
 
-void MainWindow::search(const QString & text)
+void Bqm_Widget::search(const QString & text)
 {
   _filtersPresenter->applySearchCriterion(text);
 }
 
-void MainWindow::onApplyClicked()
+void Bqm_Widget::onApplyClicked()
 {
   clearMessage();
   clearRightMessage();
@@ -925,7 +929,7 @@ void MainWindow::onApplyClicked()
   processImage();
 }
 
-void MainWindow::onOkClicked()
+void Bqm_Widget::onOkClicked()
 {
   if (_filtersPresenter->currentFilter().isNoApplyFilter()) {
     _isAccepted = _processor.completedFullImageProcessingCount();
@@ -943,12 +947,12 @@ void MainWindow::onOkClicked()
   }
 }
 
-void MainWindow::onCancelClicked()
+void Bqm_Widget::onCancelClicked()
 {
   if (_processor.isProcessing() && confirmAbortProcessingOnCloseRequest()) {
     if (_processor.isProcessing()) {
       _pendingActionAfterCurrentProcessing = ProcessingAction::Close;
-      connect(&_processor, &GmicProcessor::noMoreUnfinishedJobs, this, &MainWindow::close);
+      connect(&_processor, &GmicProcessor::noMoreUnfinishedJobs, this, &Bqm_Widget::close);
       ui->progressInfoWidget->showBusyIndicator();
       ui->previewWidget->setOverlayMessage(tr("Waiting for cancelled jobs..."));
       _processor.cancel();
@@ -960,7 +964,7 @@ void MainWindow::onCancelClicked()
   }
 }
 
-void MainWindow::onProgressionWidgetCancelClicked()
+void Bqm_Widget::onProgressionWidgetCancelClicked()
 {
   if (ui->progressInfoWidget->mode() == ProgressInfoWidget::Mode::GmicProcessing) {
     if (_processor.isProcessing()) {
@@ -975,7 +979,7 @@ void MainWindow::onProgressionWidgetCancelClicked()
   }
 }
 
-void MainWindow::onReset()
+void Bqm_Widget::onReset()
 {
   if (!_filtersPresenter->currentFilter().hash.isEmpty() && _filtersPresenter->currentFilter().isAFave) {
     PersistentMemory::clear();
@@ -989,7 +993,7 @@ void MainWindow::onReset()
   }
 }
 
-void MainWindow::onCopyGMICCommand()
+void Bqm_Widget::onCopyGMICCommand()
 {
   QClipboard * clipboard = QGuiApplication::clipboard();
   QString fullCommand = _filtersPresenter->currentFilter().command;
@@ -998,7 +1002,7 @@ void MainWindow::onCopyGMICCommand()
   clipboard->setText(fullCommand, QClipboard::Clipboard);
 }
 
-void MainWindow::onPreviewZoomReset()
+void Bqm_Widget::onPreviewZoomReset()
 {
   if (!_filtersPresenter->currentFilter().hash.isEmpty()) {
     ui->previewWidget->setPreviewFactor(_filtersPresenter->currentFilter().previewFactor, true);
@@ -1007,12 +1011,12 @@ void MainWindow::onPreviewZoomReset()
   }
 }
 
-void MainWindow::onUpdateFiltersClicked()
+void Bqm_Widget::onUpdateFiltersClicked()
 {
   updateFilters(ui->cbInternetUpdate->isChecked());
 }
 
-void MainWindow::saveCurrentParameters()
+void Bqm_Widget::saveCurrentParameters()
 {
   QString hash = ui->filterParams->filterHash();
   if (!hash.isEmpty()) {
@@ -1022,7 +1026,7 @@ void MainWindow::saveCurrentParameters()
   }
 }
 
-void MainWindow::saveSettings()
+void Bqm_Widget::saveSettings()
 {
   QSettings settings;
 
@@ -1045,9 +1049,9 @@ void MainWindow::saveSettings()
   settings.setValue("LastExecution/gmic_version", gmic_version);
   _processor.saveSettings(settings);
   settings.setValue("SelectedFilter", _filtersPresenter->currentFilter().hash);
-  settings.setValue("Config/MainWindowPosition", frameGeometry().topLeft());
-  settings.setValue("Config/MainWindowRect", rect());
-  settings.setValue("Config/MainWindowMaximized", isMaximized());
+  settings.setValue("Config/Bqm_WidgetPosition", frameGeometry().topLeft());
+  settings.setValue("Config/Bqm_WidgetRect", rect());
+  settings.setValue("Config/Bqm_WidgetMaximized", isMaximized());
   settings.setValue("Config/ScreenGeometries", screenGeometries());
   settings.setValue("Config/PreviewEnabled", ui->cbPreview->isChecked());
   settings.setValue("LastExecution/ExitedNormally", true);
@@ -1064,7 +1068,7 @@ void MainWindow::saveSettings()
   settings.setValue(REFRESH_USING_INTERNET_KEY, ui->cbInternetUpdate->isChecked());
 }
 
-void MainWindow::loadSettings()
+void Bqm_Widget::loadSettings()
 {
   QSettings settings;
   _filtersPresenter->loadSettings(settings);
@@ -1091,10 +1095,10 @@ void MainWindow::loadSettings()
   }
 
   // Mainwindow geometry
-  QPoint position = settings.value("Config/MainWindowPosition", QPoint(20, 20)).toPoint();
-  QRect r = settings.value("Config/MainWindowRect", QRect()).toRect();
+  QPoint position = settings.value("Config/Bqm_WidgetPosition", QPoint(20, 20)).toPoint();
+  QRect r = settings.value("Config/Bqm_WidgetRect", QRect()).toRect();
   const bool sameScreenGeometries = (settings.value("Config/ScreenGeometries", QString()).toString() == screenGeometries());
-  if (settings.value("Config/MainWindowMaximized", false).toBool()) {
+  if (settings.value("Config/Bqm_WidgetMaximized", false).toBool()) {
     ui->pbFullscreen->setChecked(true);
   } else {
     if (r.isValid() && sameScreenGeometries) {
@@ -1132,7 +1136,7 @@ void MainWindow::loadSettings()
   ui->cbInternetUpdate->setChecked(settings.value("Config/RefreshInternetUpdate", true).toBool());
 }
 
-void MainWindow::setPreviewPosition(MainWindow::PreviewPosition position)
+void Bqm_Widget::setPreviewPosition(Bqm_Widget::PreviewPosition position)
 {
   if (position == _previewPosition) {
     return;
@@ -1143,7 +1147,7 @@ void MainWindow::setPreviewPosition(MainWindow::PreviewPosition position)
   if (layout) {
     layout->removeWidget(ui->belowPreviewPadding);
     layout->removeWidget(ui->logosLabel);
-    if (position == MainWindow::PreviewPosition::Left) {
+    if (position == Bqm_Widget::PreviewPosition::Left) {
       layout->addWidget(ui->logosLabel);
       layout->addWidget(ui->belowPreviewPadding);
     } else {
@@ -1156,7 +1160,7 @@ void MainWindow::setPreviewPosition(MainWindow::PreviewPosition position)
   QWidget * preview;
   QWidget * list;
   QWidget * params;
-  if (position == MainWindow::PreviewPosition::Right) {
+  if (position == Bqm_Widget::PreviewPosition::Right) {
     ui->messageLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     preview = ui->splitter->widget(0);
     list = ui->splitter->widget(1);
@@ -1173,7 +1177,7 @@ void MainWindow::setPreviewPosition(MainWindow::PreviewPosition position)
   preview->setParent(this);
   list->setParent(this);
   params->setParent(this);
-  if (position == MainWindow::PreviewPosition::Right) {
+  if (position == Bqm_Widget::PreviewPosition::Right) {
     ui->splitter->addWidget(list);
     ui->splitter->addWidget(params);
     ui->splitter->addWidget(preview);
@@ -1188,7 +1192,7 @@ void MainWindow::setPreviewPosition(MainWindow::PreviewPosition position)
   ui->logosLabel->setAlignment(Qt::AlignVCenter | ((_previewPosition == PreviewPosition::Right) ? Qt::AlignRight : Qt::AlignLeft));
 }
 
-void MainWindow::adjustVerticalSplitter()
+void Bqm_Widget::adjustVerticalSplitter()
 {
   QList<int> sizes;
   QSettings settings;
@@ -1208,12 +1212,12 @@ void MainWindow::adjustVerticalSplitter()
   }
 }
 
-bool MainWindow::filtersSelectionMode()
+bool Bqm_Widget::filtersSelectionMode()
 {
   return ui->tbSelectionMode->isChecked();
 }
 
-void MainWindow::activateFilter(bool resetZoom, const QList<QString> & values)
+void Bqm_Widget::activateFilter(bool resetZoom, const QList<QString> & values)
 {
   saveCurrentParameters();
   const FiltersPresenter::Filter & filter = _filtersPresenter->currentFilter();
@@ -1278,7 +1282,7 @@ void MainWindow::activateFilter(bool resetZoom, const QList<QString> & values)
   }
 }
 
-void MainWindow::setNoFilter()
+void Bqm_Widget::setNoFilter()
 {
   PersistentMemory::clear();
   ui->filterParams->setNoFilter(_filtersPresenter->errorMessage());
@@ -1296,7 +1300,7 @@ void MainWindow::setNoFilter()
   ui->tbRenameFave->setEnabled(false);
 }
 
-void MainWindow::showEvent(QShowEvent * event)
+void Bqm_Widget::showEvent(QShowEvent * event)
 {
   TIMING;
   event->accept();
@@ -1306,7 +1310,7 @@ void MainWindow::showEvent(QShowEvent * event)
   }
 }
 
-void MainWindow::resizeEvent(QResizeEvent * e)
+void Bqm_Widget::resizeEvent(QResizeEvent * e)
 {
   // Check if size is reducing
   if ((e->size().width() < e->oldSize().width() || e->size().height() < e->oldSize().height()) && ui->pbFullscreen->isChecked() && (windowState() & Qt::WindowMaximized)) {
@@ -1314,7 +1318,7 @@ void MainWindow::resizeEvent(QResizeEvent * e)
   }
 }
 
-bool MainWindow::askUserForGTKFavesImport()
+bool Bqm_Widget::askUserForGTKFavesImport()
 {
   QMessageBox messageBox(QMessageBox::Question, tr("Import faves"), QString(tr("Do you want to import faves from file below?<br/>%1")).arg(FavesModelReader::gmicGTKFavesFilename()),
                          QMessageBox::Yes | QMessageBox::No, this);
@@ -1339,7 +1343,7 @@ bool MainWindow::askUserForGTKFavesImport()
   return true;
 }
 
-void MainWindow::onAddFave()
+void Bqm_Widget::onAddFave()
 {
   if (_filtersPresenter->currentFilter().hash.isEmpty()) {
     return;
@@ -1347,17 +1351,17 @@ void MainWindow::onAddFave()
   saveCurrentParameters();
   _filtersPresenter->addSelectedFilterAsNewFave(ui->filterParams->valueStringList(), ui->filterParams->visibilityStates(), ui->inOutSelector->state());
 }
-void MainWindow::onRemoveFave()
+void Bqm_Widget::onRemoveFave()
 {
   _filtersPresenter->removeSelectedFave();
 }
 
-void MainWindow::onRenameFave()
+void Bqm_Widget::onRenameFave()
 {
   _filtersPresenter->editSelectedFaveName();
 }
 
-void MainWindow::onToggleFullScreen(bool on)
+void Bqm_Widget::onToggleFullScreen(bool on)
 {
   if (on && !(windowState() & Qt::WindowMaximized)) {
     showMaximized();
@@ -1367,7 +1371,7 @@ void MainWindow::onToggleFullScreen(bool on)
   }
 }
 
-void MainWindow::onSettingsClicked()
+void Bqm_Widget::onSettingsClicked()
 {
   QList<int> splitterSizes = ui->splitter->sizes();
 
@@ -1438,13 +1442,13 @@ void MainWindow::onSettingsClicked()
   }
 }
 
-bool MainWindow::confirmAbortProcessingOnCloseRequest()
+bool Bqm_Widget::confirmAbortProcessingOnCloseRequest()
 {
   int button = QMessageBox::question(this, tr("Confirmation"), tr("A gmic command is running.<br>Do you really want to close the plugin?"), QMessageBox::Yes, QMessageBox::No);
   return (button == QMessageBox::Yes);
 }
 
-void MainWindow::enableWidgetList(bool on)
+void Bqm_Widget::enableWidgetList(bool on)
 {
   for (QWidget * w : _filterUpdateWidgets) {
     w->setEnabled(on);
@@ -1452,7 +1456,7 @@ void MainWindow::enableWidgetList(bool on)
   ui->inOutSelector->setEnabled(on);
 }
 
-void MainWindow::closeEvent(QCloseEvent * e)
+void Bqm_Widget::closeEvent(QCloseEvent * e)
 {
   if (_processor.isProcessing() && _pendingActionAfterCurrentProcessing != ProcessingAction::Close) {
     if (confirmAbortProcessingOnCloseRequest()) {

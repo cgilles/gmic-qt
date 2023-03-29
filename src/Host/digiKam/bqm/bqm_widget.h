@@ -1,44 +1,46 @@
-/** -*- mode: c++ ; c-basic-offset: 2 -*-
- *
- *  @file MainWindow.h
- *
- *  Copyright 2017 Sebastien Fourey
- *
- *  This file is part of G'MIC-Qt, a generic plug-in for raster graphics
- *  editors, offering hundreds of filters thanks to the underlying G'MIC
- *  image processing framework.
- *
- *  gmic_qt is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  gmic_qt is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with gmic_qt.  If not, see <http://www.gnu.org/licenses/>.
- *
- */
-#ifndef GMIC_QT_MAINWINDOW_H
-#define GMIC_QT_MAINWINDOW_H
+/*
+*  This file is part of G'MIC-Qt, a generic plug-in for raster graphics
+*  editors, offering hundreds of filters thanks to the underlying G'MIC
+*  image processing framework.
+*
+*  Copyright (C) 2019-2023 Gilles Caulier <caulier dot gilles at gmail dot com>
+*
+*  Description: digiKam image editor plugin for GmicQt.
+*
+*  G'MIC-Qt is free software: you can redistribute it and/or modify
+*  it under the terms of the GNU General Public License as published by
+*  the Free Software Foundation, either version 3 of the License, or
+*  (at your option) any later version.
+*
+*  G'MIC-Qt is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*  GNU General Public License for more details.
+*
+*  You should have received a copy of the GNU General Public License
+*  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*
+*/
+
+#ifndef GMIC_QT_BQM_WIDGET_H
+#define GMIC_QT_BQM_WIDGET_H
 
 #include <QIcon>
 #include <QList>
-#include <QMainWindow>
+#include <QBqm_Widget>
 #include <QString>
 #include <QTimer>
 #include <QWidget>
+
 #include "Common.h"
 #include "GmicProcessor.h"
 #include "Updater.h"
+
 class QResizeEvent;
 
 namespace Ui
 {
-class MainWindow;
+class Bqm_Widget;
 }
 
 namespace gmic_library
@@ -58,7 +60,7 @@ class FilterThread;
 class FiltersPresenter;
 class VisibleTagSelector;
 
-class MainWindow : public QMainWindow {
+class Bqm_Widget : public QBqm_Widget {
   Q_OBJECT
 
 public:
@@ -68,8 +70,8 @@ public:
     Right
   };
 
-  explicit MainWindow(QWidget * parent = nullptr);
-  ~MainWindow() override;
+  explicit Bqm_Widget(QWidget * parent = nullptr);
+  ~Bqm_Widget() override;
   void updateFiltersFromSources(int ageLimit, bool useNetwork);
 #ifndef _GMIC_QT_DISABLE_THEMING_
   void setDarkTheme();
@@ -155,7 +157,7 @@ private:
     Apply
   };
 
-  Ui::MainWindow * ui;
+  Ui::Bqm_Widget * ui;
   ProcessingAction _pendingActionAfterCurrentProcessing;
   PreviewPosition _previewPosition = PreviewPosition::Right;
   bool _showEventReceived = false;
@@ -178,4 +180,4 @@ private:
 
 } // namespace GmicQt
 
-#endif // GMIC_QT_MAINWINDOW_H
+#endif // GMIC_QT_BQM_WIDGET_H

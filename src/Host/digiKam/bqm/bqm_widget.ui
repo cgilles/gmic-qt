@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>centralwidget</class>
- <widget class="QWidget" name="centralwidget">
+ <class>Bqm_Widget</class>
+ <widget class="QWidget" name="Bqm_Widget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -116,7 +116,7 @@
              <string/>
             </property>
             <property name="icon">
-             <iconset resource="../../../gmic_qt.qrc">
+             <iconset>
               <normaloff>:/icons/color-wheel.png</normaloff>:/icons/color-wheel.png</iconset>
             </property>
            </widget>
@@ -372,7 +372,7 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../../../gmic_qt.qrc"/>
+  <include location="../../../../gmic_qt.qrc"/>
  </resources>
  <connections/>
 </ui>
