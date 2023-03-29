@@ -76,31 +76,7 @@ if (APPLE)
 
 endif()
 
-# --- Editor Plugin Compilation Rules -----------------------------------------
-
-include_directories($<TARGET_PROPERTY:Digikam::digikamcore,INTERFACE_INCLUDE_DIRECTORIES>/digikam)
-
-set (gmic_qt_SRCS ${gmic_qt_SRCS} ${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/host_digikam.cpp
-                                  ${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/gmicqttoolplugin.cpp
-                                  ${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/gmicqtwindow.cpp
-)
-
-qt5_wrap_ui(gmic_qt_SRCS ${gmic_qt_FORMS})
-add_definitions(-DGMIC_HOST=digikam)
-add_definitions(-D_GMIC_QT_DISABLE_THEMING_)
-add_definitions(-D_GMIC_QT_DISABLE_HDPI_)
-add_definitions(-D_GMIC_QT_DISABLE_LOGO_)
-add_library(Editor_GmicQt_Plugin
-            MODULE ${gmic_qt_SRCS} ${gmic_qt_QRC} ${qmic_qt_QM})
-
-set_target_properties(Editor_GmicQt_Plugin PROPERTIES PREFIX "")
-
-target_link_libraries(Editor_GmicQt_Plugin
-                      PRIVATE
-                      ${gmic_qt_LIBRARIES}
-                      Digikam::digikamcore)
-
-# --- Install rules ------------------------------------------------------------
+# --- For the Installation Rules ------------------------------------------------------------
 
 get_target_property(QT_QMAKE_EXECUTABLE ${Qt5Core_QMAKE_EXECUTABLE} IMPORTED_LOCATION)
 
@@ -117,5 +93,6 @@ if(NOT QT_PLUGINS_DIR)
     message(FATAL_ERROR "Qt5 plugin directory cannot be detected.")
 endif()
 
-install(TARGETS Editor_GmicQt_Plugin
-        DESTINATION ${QT_PLUGINS_DIR}/digikam/editor)
+# --- Plugins Compilation Rules -----------------------------------------
+
+include(${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/EditorPluginRules.cmake)
