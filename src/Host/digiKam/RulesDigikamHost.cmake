@@ -76,13 +76,13 @@ if (APPLE)
 
 endif()
 
-# --- Compilation Rules --------------------------------------------------------
+# --- Editor Plugin Compilation Rules -----------------------------------------
 
 include_directories($<TARGET_PROPERTY:Digikam::digikamcore,INTERFACE_INCLUDE_DIRECTORIES>/digikam)
 
-set (gmic_qt_SRCS ${gmic_qt_SRCS} src/Host/digiKam/host_digikam.cpp
-                                  src/Host/digiKam/gmicqttoolplugin.cpp
-                                  src/Host/digiKam/gmicqtwindow.cpp
+set (gmic_qt_SRCS ${gmic_qt_SRCS} ${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/host_digikam.cpp
+                                  ${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/gmicqttoolplugin.cpp
+                                  ${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/gmicqtwindow.cpp
 )
 
 qt5_wrap_ui(gmic_qt_SRCS ${gmic_qt_FORMS})
