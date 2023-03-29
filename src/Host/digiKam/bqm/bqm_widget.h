@@ -65,25 +65,20 @@ class VisibleTagSelector;
 namespace DigikamBqmGmicQtPlugin
 {
 
-class Bqm_Widget : public QWidget {
+class Bqm_Widget : public QWidget
+{
   Q_OBJECT
 
 public:
-  enum class PreviewPosition
-  {
-    Left,
-    Right
-  };
 
   explicit Bqm_Widget(QWidget * parent = nullptr);
   ~Bqm_Widget() override;
+
   void updateFiltersFromSources(int ageLimit, bool useNetwork);
-#ifndef _GMIC_QT_DISABLE_THEMING_
-  void setDarkTheme();
-#endif
   void setPluginParameters(const RunParameters & parameters);
 
-public slots:
+public Q_SLOTS:
+
   void onUpdateDownloadsFinished(int status);
   void onApplyClicked();
   void onPreviewUpdateRequested(bool synchronous);
@@ -119,6 +114,7 @@ public slots:
   void setFilterName(const QString & text);
 
 protected:
+
   void timerEvent(QTimerEvent *) override;
   void closeEvent(QCloseEvent * e) override;
   void showEvent(QShowEvent *) override;
@@ -130,15 +126,15 @@ protected:
   void processImage();
   void activateFilter(bool resetZoom, const QList<QString> & values = QList<QString>());
   void setNoFilter();
-  void setPreviewPosition(PreviewPosition position);
   void adjustVerticalSplitter();
 
-private slots:
+private Q_SLOTS:
 
   void onFullImageProcessingError(const QString & message);
   void onInputModeChanged(InputMode);
 
 private:
+
   void onVeryFirstShowEvent();
   void setZoomConstraint();
   bool filtersSelectionMode();
@@ -154,6 +150,7 @@ private:
   void retrieveFilterAndParametersFromPluginParameters(QString & hash, QList<QString> & parameters);
   static QString screenGeometries();
   void updateFilters(bool internet);
+
   enum class ProcessingAction
   {
     NoAction,
@@ -164,7 +161,6 @@ private:
 
   Ui::Bqm_Widget * ui;
   ProcessingAction _pendingActionAfterCurrentProcessing;
-  PreviewPosition _previewPosition = PreviewPosition::Right;
   bool _showEventReceived = false;
   bool _okButtonShouldApply = false;
   QIcon _expandIcon;

@@ -45,7 +45,7 @@ class GmicQtPlugin : public DPluginBqm
 public:
 
     explicit GmicQtPlugin(QObject* const parent = nullptr);
-    ~GmicQtPlugin()                 override;
+    ~GmicQtPlugin()                      override;
 
     QString name()                 const override;
     QString iid()                  const override;

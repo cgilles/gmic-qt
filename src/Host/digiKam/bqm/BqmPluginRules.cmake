@@ -47,10 +47,10 @@ include_directories($<TARGET_PROPERTY:Digikam::digikamdatabase,INTERFACE_INCLUDE
 
 set(gmic_qt_bqm_SRCS
     ${gmic_qt_SRCS}
-    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/host_digikam.cpp
-    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicqtplugin.cpp
-    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicqtbqmtool.cpp
+    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/host_digikam.cpp
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/bqm_widget.cpp
+    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicqtbqmtool.cpp
+    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicqtplugin.cpp
 )
 
 qt5_wrap_ui(gmic_qt_bqm_SRCS ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/bqm_widget.ui)

@@ -251,62 +251,6 @@ void Bqm_Widget::setIcons()
   ui->tbExpandCollapse->setIcon(_expandIcon);
 }
 
-#ifndef _GMIC_QT_DISABLE_THEMING_
-void Bqm_Widget::setDarkTheme()
-{
-  // SHOW(QStyleFactory::keys());
-  qApp->setStyle(QStyleFactory::create("Fusion"));
-  QPalette p = qApp->palette();
-  p.setColor(QPalette::Window, QColor(53, 53, 53));
-  p.setColor(QPalette::Button, QColor(73, 73, 73));
-  p.setColor(QPalette::Highlight, QColor(110, 110, 110));
-  p.setColor(QPalette::Text, QColor(255, 255, 255));
-  p.setColor(QPalette::ButtonText, QColor(255, 255, 255));
-  p.setColor(QPalette::WindowText, QColor(255, 255, 255));
-  QColor linkColor(130, 130, 150);
-  linkColor = linkColor.lighter();
-  p.setColor(QPalette::Link, linkColor);
-  p.setColor(QPalette::LinkVisited, linkColor);
-
-  const QColor disabledGray(40, 40, 40);
-  const QColor disabledTextGray(128, 128, 128);
-  p.setColor(QPalette::Disabled, QPalette::Window, disabledGray);
-  p.setColor(QPalette::Disabled, QPalette::Base, disabledGray);
-  p.setColor(QPalette::Disabled, QPalette::AlternateBase, disabledGray);
-  p.setColor(QPalette::Disabled, QPalette::Button, disabledGray);
-  p.setColor(QPalette::Disabled, QPalette::Text, disabledTextGray);
-  p.setColor(QPalette::Disabled, QPalette::ButtonText, disabledTextGray);
-  p.setColor(QPalette::Disabled, QPalette::WindowText, disabledTextGray);
-  qApp->setPalette(p);
-
-  p = ui->cbInternetUpdate->palette();
-  p.setColor(QPalette::Text, Settings::CheckBoxTextColor);
-  p.setColor(QPalette::Base, Settings::CheckBoxBaseColor);
-  ui->cbInternetUpdate->setPalette(p);
-  ui->cbPreview->setPalette(p);
-
-  const QString css = "QTreeView { background: #505050; }"
-                      "QLineEdit { background: #505050; }"
-                      "QMenu { background: #505050; border: 1px solid rgb(100,100,100); }"
-                      "QMenu::item:selected { background: rgb(110,110,110); }"
-                      "QTextEdit { background: #505050; }"
-                      "QSpinBox  { background: #505050; }"
-                      "QListWidget { background: #505050; }"
-                      "QDoubleSpinBox { background: #505050; }"
-                      "QToolButton:checked { background: #383838; }"
-                      "QToolButton:pressed { background: #383838; }"
-                      "QComboBox QAbstractItemView { background: #505050; } "
-                      "QGroupBox { border: 1px solid #808080; margin-top: 4ex; } "
-                      "QFileDialog QAbstractItemView { background: #505050; } "
-                      "QComboBox:editable { background: #505050; } "
-                      "QProgressBar { background: #505050; }";
-  qApp->setStyleSheet(css);
-  ui->inOutSelector->setDarkTheme();
-  ui->vSplitterLine->setStyleSheet("QFrame{ border-top: 0px none #a0a0a0; border-bottom: 1px solid rgb(160,160,160);}");
-  Settings::UnselectedFilterTextColor = Settings::UnselectedFilterTextColor.darker(150);
-}
-#endif
-
 void Bqm_Widget::setPluginParameters(const RunParameters & parameters)
 {
   _pluginParameters = parameters;
@@ -1066,65 +1010,6 @@ void Bqm_Widget::loadSettings()
   ui->cbInternetUpdate->setChecked(settings.value("Config/RefreshInternetUpdate", true).toBool());
 }
 
-void Bqm_Widget::setPreviewPosition(Bqm_Widget::PreviewPosition position)
-{
-/*
-  if (position == _previewPosition) {
-    return;
-  }
-  _previewPosition = position;
-
-  auto layout = dynamic_cast<QHBoxLayout *>(ui->belowPreviewWidget->layout());
-  if (layout) {
-    layout->removeWidget(ui->belowPreviewPadding);
-    layout->removeWidget(ui->logosLabel);
-    if (position == Bqm_Widget::PreviewPosition::Left) {
-      layout->addWidget(ui->logosLabel);
-      layout->addWidget(ui->belowPreviewPadding);
-    } else {
-      layout->addWidget(ui->belowPreviewPadding);
-      layout->addWidget(ui->logosLabel);
-    }
-  }
-
-  // Swap splitter widgets
-  QWidget * preview;
-  QWidget * list;
-  QWidget * params;
-  if (position == Bqm_Widget::PreviewPosition::Right) {
-    ui->messageLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-    preview = ui->splitter->widget(0);
-    list = ui->splitter->widget(1);
-    params = ui->splitter->widget(2);
-  } else {
-    ui->messageLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-    list = ui->splitter->widget(0);
-    params = ui->splitter->widget(1);
-    preview = ui->splitter->widget(2);
-  }
-  preview->hide();
-  list->hide();
-  params->hide();
-  preview->setParent(this);
-  list->setParent(this);
-  params->setParent(this);
-  if (position == Bqm_Widget::PreviewPosition::Right) {
-    ui->splitter->addWidget(list);
-    ui->splitter->addWidget(params);
-    ui->splitter->addWidget(preview);
-  } else {
-    ui->splitter->addWidget(preview);
-    ui->splitter->addWidget(list);
-    ui->splitter->addWidget(params);
-  }
-  preview->show();
-  list->show();
-  params->show();
-  ui->logosLabel->setAlignment(Qt::AlignVCenter | ((_previewPosition == PreviewPosition::Right) ? Qt::AlignRight : Qt::AlignLeft));
-*/
-  // TODO: REMOVE
-}
-
 void Bqm_Widget::adjustVerticalSplitter()
 {
   QList<int> sizes;
@@ -1305,66 +1190,10 @@ void Bqm_Widget::onSettingsClicked()
 {
   QList<int> splitterSizes = ui->splitter->sizes();
 
-  int previewWidth;
-  int paramsWidth;
-  int treeWidth;
-  if (_previewPosition == PreviewPosition::Left) {
-    previewWidth = splitterSizes.at(0);
-    paramsWidth = splitterSizes.at(2);
-    treeWidth = splitterSizes.at(1);
-  } else {
-    previewWidth = splitterSizes.at(2);
-    paramsWidth = splitterSizes.at(1);
-    treeWidth = splitterSizes.at(0);
-  }
 
   DialogSettings dialog(this);
   dialog.exec();
-/*
-  bool previewPositionChanged = (_previewPosition != Settings::previewPosition());
-  setPreviewPosition(Settings::previewPosition());
-  if (previewPositionChanged) {
-    splitterSizes.clear();
-    if (_previewPosition == PreviewPosition::Left) {
-      splitterSizes.push_back(previewWidth);
-      splitterSizes.push_back(treeWidth);
-      splitterSizes.push_back(paramsWidth);
-    } else {
-      splitterSizes.push_back(treeWidth);
-      splitterSizes.push_back(paramsWidth);
-      splitterSizes.push_back(previewWidth);
-    }
-    ui->splitter->setSizes(splitterSizes);
-  }
-  bool shouldUpdatePreview = false;
-  if (Settings::visibleLogos()) {
-    if (!ui->logosLabel->isVisible()) {
-      shouldUpdatePreview = true;
-      ui->logosLabel->show();
-    }
-  } else {
-    if (ui->logosLabel->isVisible()) {
-      shouldUpdatePreview = true;
-      ui->logosLabel->hide();
-    }
-  }
-  if (shouldUpdatePreview) {
-    ui->previewWidget->sendUpdateRequest();
-  }
-  // Manage zoom constraints
-  setZoomConstraint();
-  if (!Settings::previewZoomAlwaysEnabled()) {
-    const FiltersPresenter::Filter & filter = _filtersPresenter->currentFilter();
-    if (((ui->previewWidget->zoomConstraint() == ZoomConstraint::Fixed) && (ui->previewWidget->defaultZoomFactor() != ui->previewWidget->currentZoomFactor())) ||
-        ((ui->previewWidget->zoomConstraint() == ZoomConstraint::OneOrMore) && (ui->previewWidget->currentZoomFactor() < 1.0))) {
-      ui->previewWidget->setPreviewFactor(filter.previewFactor, true);
-      if (ui->cbPreview->isChecked()) {
-        ui->previewWidget->sendUpdateRequest();
-      }
-    }
-  }
-  showZoomWarningIfNeeded();
-*/
+
   // Sources modification may require an update
   bool sourcesModified = false;
   bool sourcesRequireInternetUpdate = false;
