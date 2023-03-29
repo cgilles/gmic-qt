@@ -81,8 +81,7 @@ void convertCImgtoDImg(const cimg_library::CImg<float>& in, DImg& out, bool sixt
 
     if      (in.spectrum() == 4) // RGB + Alpha
     {
-        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert CImg to DImg: RGB+Alpha image" << "(" << (sixteenBit+1) * 8 << "bits)"
-                                            << "with alpha channel:" << alpha;
+        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert CImg to DImg: RGB+Alpha image" << "(" << (sixteenBit+1) * 8 << "bits)";
 
         const float* srcR = in.data(0, 0, 0, 0);
         const float* srcG = in.data(0, 0, 0, 1);
@@ -124,8 +123,7 @@ void convertCImgtoDImg(const cimg_library::CImg<float>& in, DImg& out, bool sixt
     }
     else if (in.spectrum() == 3) // RGB
     {
-        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert CImg to DImg: RGB image" << "(" << (sixteenBit+1) * 8 << "bits)"
-                                            << "with alpha channel:" << alpha;
+        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert CImg to DImg: RGB image" << "(" << (sixteenBit+1) * 8 << "bits)";
 
         const float* srcR = in.data(0, 0, 0, 0);
         const float* srcG = in.data(0, 0, 0, 1);
@@ -166,8 +164,7 @@ void convertCImgtoDImg(const cimg_library::CImg<float>& in, DImg& out, bool sixt
     }
     else if (in.spectrum() == 2) // Gray levels + Alpha
     {
-        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert CImg to DImg: Gray+Alpha image" << "(" << (sixteenBit+1) * 8 << "bits)"
-                                            << "with alpha channel:" << alpha;
+        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert CImg to DImg: Gray+Alpha image" << "(" << (sixteenBit+1) * 8 << "bits)";
 
         const float* src  = in.data(0, 0, 0, 0);
         const float* srcA = in.data(0, 0, 0, 1);
@@ -203,8 +200,7 @@ void convertCImgtoDImg(const cimg_library::CImg<float>& in, DImg& out, bool sixt
     }
     else // Gray levels
     {
-        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert CImg to DImg: Gray image" << "(" << (sixteenBit+1) * 8 << "bits)"
-                                            << "with alpha channel:" << alpha;
+        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert CImg to DImg: Gray image" << "(" << (sixteenBit+1) * 8 << "bits)";
 
         const float* src  = in.data(0, 0, 0, 0);
         int height        = out.height();
@@ -387,7 +383,7 @@ void applyColorProfile(cimg_library::CImg<gmic_pixel_type>& images)
 void showMessage(const char* message)
 {
     qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Calling GmicQt showMessage()";
-    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMic-Qt:" << message;
+    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "G'MIC-Qt:" << message;
 }
 
 void outputImages(cimg_library::CImgList<gmic_pixel_type>& images,
@@ -410,7 +406,7 @@ void outputImages(cimg_library::CImgList<gmic_pixel_type>& images,
         }
 
         GmicQt::RunParameters parameters = lastAppliedFilterRunParameters(GmicQt::ReturnedRunParametersFlag::AfterFilterExecution);
-        FilterAction action(QLatin1String("GMic-Qt"),       1);
+        FilterAction action(QLatin1String("G'MIC-Qt"),      1);
         action.addParameter(QLatin1String("Command"),       QString::fromStdString(parameters.command));
         action.addParameter(QLatin1String("FilterPath"),    QString::fromStdString(parameters.filterPath));
         action.addParameter(QLatin1String("InputMode"),     (int)parameters.inputMode);
@@ -418,7 +414,7 @@ void outputImages(cimg_library::CImgList<gmic_pixel_type>& images,
         action.addParameter(QLatin1String("FilterName"),    QString::fromStdString(parameters.filterName()));
         action.addParameter(QLatin1String("GmicQtVersion"), GmicQt::gmicVersionString());
 
-        iface.setOriginal(QLatin1String("GMic-Qt"), action, dest);
+        iface.setOriginal(QString::fromUtf8("G'MIC-Qt - %1").arg(QString::fromStdString(parameters.filterName())), action, dest);
     }
 }
 
