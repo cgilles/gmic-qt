@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>556</width>
-    <height>712</height>
+    <width>694</width>
+    <height>590</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -32,7 +32,7 @@
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,1,0,0">
+      <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,1,0,0,0">
        <property name="leftMargin">
         <number>0</number>
        </property>
@@ -116,7 +116,7 @@
              <string/>
             </property>
             <property name="icon">
-             <iconset>
+             <iconset resource="../../../../gmic_qt.qrc">
               <normaloff>:/icons/color-wheel.png</normaloff>:/icons/color-wheel.png</iconset>
             </property>
            </widget>
@@ -178,6 +178,46 @@
           </item>
          </layout>
         </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,1,0,0">
+         <item>
+          <widget class="QPushButton" name="pbSettings">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Settings...</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="GmicQt::ProgressInfoWidget" name="progressInfoWidget" native="true"/>
+         </item>
+         <item>
+          <widget class="QLabel" name="messageLabel">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>TextLabel</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="rightMessageLabel">
+           <property name="text">
+            <string>TextLabel</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>
@@ -279,8 +319,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>140</width>
-                <height>500</height>
+                <width>179</width>
+                <height>398</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -368,6 +408,12 @@
    <class>GmicQt::InOutPanel</class>
    <extends>QWidget</extends>
    <header>Widgets/InOutPanel.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>GmicQt::ProgressInfoWidget</class>
+   <extends>QWidget</extends>
+   <header>Widgets/ProgressInfoWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -90,7 +90,7 @@ bool Bqm_Widget::_isAccepted = false;
 // TODO : Handle window maximization properly (Windows as well as some Linux desktops)
 //
 
-Bqm_Widget::Bqm_Widget(QWidget * parent) : QBqm_Widget(parent), ui(new Ui::Bqm_Widget)
+Bqm_Widget::Bqm_Widget(QWidget * parent) : QWidget(parent), ui(new Ui::Bqm_Widget)
 {
   TIMING;
   ui->setupUi(this);
@@ -107,9 +107,9 @@ Bqm_Widget::Bqm_Widget(QWidget * parent) : QBqm_Widget(parent), ui(new Ui::Bqm_W
   tsp.append(QString("/usr/share/icons/gnome"));
   QIcon::setThemeSearchPaths(tsp);
 
-  _filterUpdateWidgets = {ui->previewWidget, ui->zoomLevelSelector, ui->filtersView,       ui->filterParams,   ui->tbUpdateFilters, ui->pbFullscreen, ui->pbSettings,
-                          ui->pbOk,          ui->pbApply,           ui->tbResetParameters, ui->tbCopyCommand,  ui->searchField,     ui->cbPreview,    ui->tbAddFave,
-                          ui->tbRemoveFave,  ui->tbRenameFave,      ui->tbExpandCollapse,  ui->tbSelectionMode};
+  _filterUpdateWidgets = {ui->filtersView,       ui->filterParams,   ui->tbUpdateFilters,
+                          ui->tbResetParameters, ui->tbCopyCommand,  ui->searchField,       ui->tbAddFave,
+                          ui->tbRemoveFave,      ui->tbRenameFave,   ui->tbExpandCollapse,  ui->tbSelectionMode};
 
   ui->tbAddFave->setToolTip(tr("Add fave"));
 
@@ -130,16 +130,8 @@ Bqm_Widget::Bqm_Widget(QWidget * parent) : QBqm_Widget(parent), ui(new Ui::Bqm_W
   ui->tbRenameFave->setEnabled(false);
   ui->tbRemoveFave->setToolTip(tr("Remove fave"));
   ui->tbRemoveFave->setEnabled(false);
-  ui->pbFullscreen->setCheckable(true);
 
   ui->tbExpandCollapse->setToolTip(tr("Expand/Collapse all"));
-
-  ui->logosLabel->setToolTip(tr("G'MIC (https://gmic.eu)<br/>"
-                                "GREYC (https://www.greyc.fr)<br/>"
-                                "CNRS (https://www.cnrs.fr)<br/>"
-                                "Normandy University (https://www.unicaen.fr)<br/>"
-                                "Ensicaen (https://www.ensicaen.fr)"));
-  ui->logosLabel->setPixmap(QPixmap(":resources/logos.png"));
 
   ui->tbSelectionMode->setToolTip(tr("Selection mode"));
   ui->tbSelectionMode->setCheckable(true);
@@ -147,29 +139,16 @@ Bqm_Widget::Bqm_Widget(QWidget * parent) : QBqm_Widget(parent), ui(new Ui::Bqm_W
   ui->filterName->setTextFormat(Qt::RichText);
   ui->filterName->setVisible(false);
 
-  ui->progressInfoWidget->hide();
-  ui->messageLabel->setText(QString());
-  ui->messageLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-  ui->rightMessageLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-
   ui->filterParams->setNoFilter();
   _pendingActionAfterCurrentProcessing = ProcessingAction::NoAction;
   ui->inOutSelector->disable();
   ui->splitter->setChildrenCollapsible(false);
-
-  ui->zoomLevelSelector->setPreviewWidget(ui->previewWidget);
 
   auto searchAction = new QAction(this);
   searchAction->setShortcut(QKeySequence::Find);
   searchAction->setShortcutContext(Qt::ApplicationShortcut);
   connect(searchAction, &QAction::triggered, ui->searchField, QOverload<>::of(&SearchFieldWidget::setFocus));
   addAction(searchAction);
-
-  auto togglePreviewAction = new QAction(this);
-  togglePreviewAction->setShortcut(QKeySequence("Ctrl+P"));
-  togglePreviewAction->setShortcutContext(Qt::ApplicationShortcut);
-  connect(togglePreviewAction, &QAction::triggered, ui->cbPreview, &QCheckBox::toggle);
-  addAction(togglePreviewAction);
 
   searchAction = new QAction(this);
   searchAction->setShortcut(QKeySequence("/"));
@@ -212,8 +191,6 @@ Bqm_Widget::Bqm_Widget(QWidget * parent) : QBqm_Widget(parent), ui(new Ui::Bqm_W
   _filtersPresenter->setFiltersView(ui->filtersView);
   _filtersPresenter->setSearchField(ui->searchField);
 
-  ui->progressInfoWidget->setGmicProcessor(&_processor);
-
   TIMING;
   loadSettings();
   TIMING;
@@ -230,7 +207,6 @@ Bqm_Widget::Bqm_Widget(QWidget * parent) : QBqm_Widget(parent), ui(new Ui::Bqm_W
   CroppedActiveLayerProxy::clear();
   LayersExtentProxy::clear();
   QSize layersExtent = LayersExtentProxy::getExtent(ui->inOutSelector->inputMode());
-  ui->previewWidget->setFullImageSize(layersExtent);
   _lastPreviewKeypointBurstUpdateTime = 0;
   _isAccepted = false;
 
@@ -262,14 +238,9 @@ void Bqm_Widget::setIcons()
 {
   ui->tbTags->setIcon(LOAD_ICON("color-wheel"));
   ui->tbRenameFave->setIcon(LOAD_ICON("rename"));
-  ui->pbSettings->setIcon(LOAD_ICON("package_settings"));
-  ui->pbFullscreen->setIcon(LOAD_ICON("view-fullscreen"));
   ui->tbUpdateFilters->setIcon(LOAD_ICON_NO_DARKENED("view-refresh"));
-  ui->pbApply->setIcon(LOAD_ICON("system-run"));
-  ui->pbOk->setIcon(LOAD_ICON("insert-image"));
   ui->tbResetParameters->setIcon(LOAD_ICON("view-refresh"));
   ui->tbCopyCommand->setIcon(LOAD_ICON("edit-copy"));
-  ui->pbCancel->setIcon(LOAD_ICON("process-stop"));
   ui->tbAddFave->setIcon(LOAD_ICON("bookmark-add"));
   ui->tbRemoveFave->setIcon(LOAD_ICON("bookmark-remove"));
   ui->tbSelectionMode->setIcon(LOAD_ICON("selection_mode"));
@@ -342,21 +313,13 @@ void Bqm_Widget::setPluginParameters(const RunParameters & parameters)
 
 void Bqm_Widget::updateFiltersFromSources(int ageLimit, bool useNetwork)
 {
-  if (useNetwork) {
-    ui->progressInfoWidget->startFiltersUpdateAnimationAndShow();
-  }
   connect(Updater::getInstance(), &Updater::updateIsDone, this, &Bqm_Widget::onUpdateDownloadsFinished, Qt::UniqueConnection);
   Updater::getInstance()->startUpdate(ageLimit, 60, useNetwork);
 }
 
 void Bqm_Widget::onUpdateDownloadsFinished(int status)
 {
-  ui->progressInfoWidget->stopAnimationAndHide();
-
   if (status == (int)Updater::UpdateStatus::SomeFailed) {
-    if (!ui->progressInfoWidget->hasBeenCanceled()) {
-      showUpdateErrors();
-    }
   } else if (status == (int)Updater::UpdateStatus::Successful) {
     if (ui->cbInternetUpdate->isChecked()) {
       QMessageBox::information(this, tr("Update completed"), tr("Filter definitions have been updated."));
@@ -369,9 +332,6 @@ void Bqm_Widget::onUpdateDownloadsFinished(int status)
 
   buildFiltersTree();
   ui->tbUpdateFilters->setEnabled(true);
-  if (!_filtersPresenter->currentFilter().hash.isEmpty()) {
-    ui->previewWidget->sendUpdateRequest();
-  }
 }
 
 void Bqm_Widget::buildFiltersTree()
@@ -395,7 +355,6 @@ void Bqm_Widget::buildFiltersTree()
 
   if (_filtersPresenter->currentFilter().hash.isEmpty()) {
     setNoFilter();
-    ui->previewWidget->sendUpdateRequest();
   } else {
     activateFilter(false);
   }
@@ -516,8 +475,6 @@ void Bqm_Widget::onStartupFiltersUpdateFinished(int status)
   if (GmicQtHost::ApplicationName.isEmpty()) {
     LayersExtentProxy::clear();
     QSize extent = LayersExtentProxy::getExtent(ui->inOutSelector->inputMode());
-    ui->previewWidget->setFullImageSize(extent);
-    ui->previewWidget->update();
   }
 
   // Retrieve and select previously selected filter
@@ -534,13 +491,9 @@ void Bqm_Widget::onStartupFiltersUpdateFinished(int status)
   if (_filtersPresenter->currentFilter().hash.isEmpty()) {
     _filtersPresenter->expandFaveFolder();
     _filtersPresenter->adjustViewSize();
-    ui->previewWidget->setPreviewFactor(PreviewFactorFullImage, true);
   } else {
     _filtersPresenter->adjustViewSize();
     activateFilter(true, pluginParametersCommandArguments);
-    if (ui->cbPreview->isChecked()) {
-      ui->previewWidget->sendUpdateRequest();
-    }
   }
   // Preview update is triggered when PreviewWidget receives
   // the WindowActivate Event (while pendingResize is true
@@ -549,13 +502,12 @@ void Bqm_Widget::onStartupFiltersUpdateFinished(int status)
 
 void Bqm_Widget::showZoomWarningIfNeeded()
 {
-  const FiltersPresenter::Filter & currentFilter = _filtersPresenter->currentFilter();
-  ui->zoomLevelSelector->showWarning(!currentFilter.hash.isEmpty() && !currentFilter.isAccurateIfZoomed && !ui->previewWidget->isAtDefaultZoom());
+  // TODO : Remove
 }
 
 void Bqm_Widget::updateZoomLabel(double zoom)
 {
-  ui->zoomLevelSelector->display(zoom);
+  // TODO : Remove
 }
 
 void Bqm_Widget::onFiltersSelectionModeToggled(bool on)
@@ -568,13 +520,11 @@ void Bqm_Widget::onPreviewCheckBoxToggled(bool on)
   if (!on) {
     _processor.cancel();
   }
-  ui->previewWidget->onPreviewToggled(on);
 }
 
 void Bqm_Widget::onFilterSelectionChanged()
 {
   activateFilter(false);
-  ui->previewWidget->sendUpdateRequest();
 }
 
 void Bqm_Widget::onEscapeKeyPressed()
@@ -585,7 +535,6 @@ void Bqm_Widget::onEscapeKeyPressed()
       ui->progressInfoWidget->onCancelClicked();
     } else {
       _processor.cancel();
-      ui->previewWidget->displayOriginalImage();
       ui->tbUpdateFilters->setEnabled(true);
     }
   }
@@ -646,32 +595,17 @@ void Bqm_Widget::showUpdateErrors()
 
 void Bqm_Widget::makeConnections()
 {
-  connect(ui->zoomLevelSelector, &ZoomLevelSelector::valueChanged, ui->previewWidget, &PreviewWidget::setZoomLevel);
-
-  connect(ui->previewWidget, &PreviewWidget::zoomChanged, this, &Bqm_Widget::showZoomWarningIfNeeded);
-  connect(ui->previewWidget, &PreviewWidget::zoomChanged, this, &Bqm_Widget::updateZoomLabel);
-  connect(ui->previewWidget, &PreviewWidget::previewVisibleRectIsChanging, &_processor, &GmicProcessor::cancel);
   connect(_filtersPresenter, &FiltersPresenter::filterSelectionChanged, this, &Bqm_Widget::onFilterSelectionChanged);
-  connect(ui->pbOk, &QPushButton::clicked, this, &Bqm_Widget::onOkClicked);
-  connect(ui->pbCancel, &QPushButton::clicked, this, &Bqm_Widget::onCancelClicked);
-  connect(ui->pbApply, &QPushButton::clicked, this, &Bqm_Widget::onApplyClicked);
   connect(ui->tbResetParameters, &QToolButton::clicked, this, &Bqm_Widget::onReset);
   connect(ui->tbCopyCommand, &QToolButton::clicked, this, &Bqm_Widget::onCopyGMICCommand);
   connect(ui->tbUpdateFilters, &QToolButton::clicked, this, &Bqm_Widget::onUpdateFiltersClicked);
   connect(ui->pbSettings, &QPushButton::clicked, this, &Bqm_Widget::onSettingsClicked);
-  connect(ui->pbFullscreen, &QPushButton::toggled, this, &Bqm_Widget::onToggleFullScreen);
   connect(ui->filterParams, &FilterParametersWidget::valueChanged, this, &Bqm_Widget::onParametersChanged);
-  connect(ui->previewWidget, &PreviewWidget::previewUpdateRequested, this, QOverload<>::of(&Bqm_Widget::onPreviewUpdateRequested));
-  connect(ui->previewWidget, &PreviewWidget::keypointPositionsChanged, this, &Bqm_Widget::onPreviewKeypointsEvent);
-  connect(ui->zoomLevelSelector, &ZoomLevelSelector::zoomIn, ui->previewWidget, QOverload<>::of(&PreviewWidget::zoomIn));
-  connect(ui->zoomLevelSelector, &ZoomLevelSelector::zoomOut, ui->previewWidget, QOverload<>::of(&PreviewWidget::zoomOut));
-  connect(ui->zoomLevelSelector, &ZoomLevelSelector::zoomReset, this, &Bqm_Widget::onPreviewZoomReset);
   connect(ui->tbAddFave, &QToolButton::clicked, this, &Bqm_Widget::onAddFave);
   connect(_filtersPresenter, &FiltersPresenter::faveAdditionRequested, this, &Bqm_Widget::onAddFave);
   connect(ui->tbRemoveFave, &QToolButton::clicked, this, &Bqm_Widget::onRemoveFave);
   connect(ui->tbRenameFave, &QToolButton::clicked, this, &Bqm_Widget::onRenameFave);
   connect(ui->inOutSelector, &InOutPanel::inputModeChanged, this, &Bqm_Widget::onInputModeChanged);
-  connect(ui->cbPreview, &QCheckBox::toggled, this, &Bqm_Widget::onPreviewCheckBoxToggled);
   connect(ui->searchField, &SearchFieldWidget::textChanged, this, &Bqm_Widget::search);
   connect(ui->tbExpandCollapse, &QToolButton::clicked, this, &Bqm_Widget::expandOrCollapseFolders);
   connect(ui->progressInfoWidget, &ProgressInfoWidget::cancel, this, &Bqm_Widget::onProgressionWidgetCancelClicked);
@@ -693,13 +627,8 @@ void Bqm_Widget::onPreviewUpdateRequested()
 
 void Bqm_Widget::onPreviewUpdateRequested(bool synchronous)
 {
-  if (!ui->cbPreview->isChecked()) {
-    ui->previewWidget->invalidateSavedPreview();
-    return;
-  }
   _processor.init();
   if (_filtersPresenter->currentFilter().isNoPreviewFilter()) {
-    ui->previewWidget->displayOriginalImage();
     return;
   }
   ui->tbUpdateFilters->setEnabled(false);
@@ -708,13 +637,8 @@ void Bqm_Widget::onPreviewUpdateRequested(bool synchronous)
   GmicProcessor::FilterContext context;
   context.requestType = synchronous ? GmicProcessor::FilterContext::RequestType::SynchronousPreview : GmicProcessor::FilterContext::RequestType::Preview;
   GmicProcessor::FilterContext::VisibleRect & rect = context.visibleRect;
-  ui->previewWidget->normalizedVisibleRect(rect.x, rect.y, rect.w, rect.h);
 
   context.inputOutputState = ui->inOutSelector->state();
-  ui->previewWidget->getPositionStringCorrection(context.positionStringCorrection.xFactor, context.positionStringCorrection.yFactor);
-  context.zoomFactor = ui->previewWidget->currentZoomFactor();
-  context.previewWindowWidth = ui->previewWidget->width();
-  context.previewWindowHeight = ui->previewWidget->height();
   context.previewTimeout = Settings::previewTimeout();
   // context.filterName = currentFilter.plainTextName; // Unused in this context
   // context.filterHash = currentFilter.hash; // Unused in this context
@@ -730,6 +654,7 @@ void Bqm_Widget::onPreviewUpdateRequested(bool synchronous)
 
 void Bqm_Widget::onPreviewKeypointsEvent(unsigned int flags, unsigned long time)
 {
+/*
   if (flags & PreviewWidget::KeypointMouseReleaseEvent) {
     if (flags & PreviewWidget::KeypointBurstEvent) {
       // Notify the filter twice (synchronously) so that it can guess that the button has been released
@@ -753,10 +678,14 @@ void Bqm_Widget::onPreviewKeypointsEvent(unsigned int flags, unsigned long time)
       }
     }
   }
+
+  // TODO: REMOVE
+*/
 }
 
 void Bqm_Widget::onPreviewImageAvailable()
 {
+/*
   ui->filterParams->setValues(_processor.gmicStatus(), false);
   ui->filterParams->setVisibilityStates(_processor.parametersVisibilityStates());
   // Make sure keypoint positions are synchronized with gmic status
@@ -769,24 +698,32 @@ void Bqm_Widget::onPreviewImageAvailable()
   if (_pendingActionAfterCurrentProcessing == ProcessingAction::Close) {
     close();
   }
+*/
+  // TODO: REMOVE
 }
 
 void Bqm_Widget::onPreviewError(const QString & message)
 {
+/*
   ui->previewWidget->setPreviewErrorMessage(message);
   ui->previewWidget->enableRightClick();
   ui->tbUpdateFilters->setEnabled(true);
   if (_pendingActionAfterCurrentProcessing == ProcessingAction::Close) {
     close();
   }
+*/
+  // TODO: REMOVE
 }
 
 void Bqm_Widget::onParametersChanged()
 {
+/*
   if (ui->filterParams->hasKeypoints()) {
     ui->previewWidget->setKeypoints(ui->filterParams->keypoints());
   }
   ui->previewWidget->sendUpdateRequest();
+*/
+  // TODO: REMOVE
 }
 
 bool Bqm_Widget::isAccepted()
@@ -842,8 +779,6 @@ void Bqm_Widget::onFullImageProcessingError(const QString & message)
 void Bqm_Widget::onInputModeChanged(InputMode mode)
 {
   PersistentMemory::clear();
-  ui->previewWidget->setFullImageSize(LayersExtentProxy::getExtent(mode));
-  ui->previewWidget->sendUpdateRequest();
 }
 
 void Bqm_Widget::onVeryFirstShowEvent()
@@ -867,6 +802,7 @@ void Bqm_Widget::onVeryFirstShowEvent()
 
 void Bqm_Widget::setZoomConstraint()
 {
+/*
   const FiltersPresenter::Filter & currentFilter = _filtersPresenter->currentFilter();
   ZoomConstraint constraint;
   if (currentFilter.hash.isEmpty() || currentFilter.isAccurateIfZoomed || Settings::previewZoomAlwaysEnabled() || (currentFilter.previewFactor == PreviewFactorAny)) {
@@ -879,10 +815,13 @@ void Bqm_Widget::setZoomConstraint()
   showZoomWarningIfNeeded();
   ui->zoomLevelSelector->setZoomConstraint(constraint);
   ui->previewWidget->setZoomConstraint(constraint);
+*/
+  // TODO: REMOVE
 }
 
 void Bqm_Widget::onFullImageProcessingDone()
 {
+/*
   ui->progressInfoWidget->stopAnimationAndHide();
   enableWidgetList(true);
   ui->previewWidget->update();
@@ -901,6 +840,8 @@ void Bqm_Widget::onFullImageProcessingDone()
       showRightMessage(QString(tr("[Elapsed time: %1]")).arg(readableDuration(_processor.lastCompletedExecutionTime())));
     }
   }
+*/
+  // TODO: REMOVE
 }
 
 void Bqm_Widget::expandOrCollapseFolders()
@@ -949,6 +890,7 @@ void Bqm_Widget::onOkClicked()
 
 void Bqm_Widget::onCancelClicked()
 {
+/*
   if (_processor.isProcessing() && confirmAbortProcessingOnCloseRequest()) {
     if (_processor.isProcessing()) {
       _pendingActionAfterCurrentProcessing = ProcessingAction::Close;
@@ -962,6 +904,8 @@ void Bqm_Widget::onCancelClicked()
   } else {
     close();
   }
+*/
+  // TODO: REMOVE
 }
 
 void Bqm_Widget::onProgressionWidgetCancelClicked()
@@ -1004,11 +948,14 @@ void Bqm_Widget::onCopyGMICCommand()
 
 void Bqm_Widget::onPreviewZoomReset()
 {
+/*
   if (!_filtersPresenter->currentFilter().hash.isEmpty()) {
     ui->previewWidget->setPreviewFactor(_filtersPresenter->currentFilter().previewFactor, true);
     ui->previewWidget->sendUpdateRequest();
     ui->zoomLevelSelector->showWarning(false);
   }
+*/
+  // TODO: REMOVE
 }
 
 void Bqm_Widget::onUpdateFiltersClicked()
@@ -1053,7 +1000,6 @@ void Bqm_Widget::saveSettings()
   settings.setValue("Config/Bqm_WidgetRect", rect());
   settings.setValue("Config/Bqm_WidgetMaximized", isMaximized());
   settings.setValue("Config/ScreenGeometries", screenGeometries());
-  settings.setValue("Config/PreviewEnabled", ui->cbPreview->isChecked());
   settings.setValue("LastExecution/ExitedNormally", true);
   settings.setValue("LastExecution/HostApplicationID", host_app_pid());
   QList<int> splitterSizes = ui->splitter->sizes();
@@ -1077,29 +1023,18 @@ void Bqm_Widget::loadSettings()
   settings.setValue("LastExecution/ExitedNormally", false);
   ui->inOutSelector->reset();
 
-  bool previewEnabled = settings.value("Config/PreviewEnabled", true).toBool();
-  ui->cbPreview->setChecked(previewEnabled);
-  ui->previewWidget->setPreviewEnabled(previewEnabled);
-
-  // Preview position
-  if (settings.value("Config/PreviewPosition", "Left").toString() == "Left") {
-    setPreviewPosition(PreviewPosition::Left);
-  }
 #ifndef _GMIC_QT_DISABLE_THEMING_
   if (Settings::darkThemeEnabled()) {
     setDarkTheme();
   }
 #endif
-  if (!Settings::visibleLogos()) {
-    ui->logosLabel->hide();
-  }
 
   // Mainwindow geometry
   QPoint position = settings.value("Config/Bqm_WidgetPosition", QPoint(20, 20)).toPoint();
   QRect r = settings.value("Config/Bqm_WidgetRect", QRect()).toRect();
   const bool sameScreenGeometries = (settings.value("Config/ScreenGeometries", QString()).toString() == screenGeometries());
   if (settings.value("Config/Bqm_WidgetMaximized", false).toBool()) {
-    ui->pbFullscreen->setChecked(true);
+//    ui->pbFullscreen->setChecked(true);
   } else {
     if (r.isValid() && sameScreenGeometries) {
       if ((r.width() < 640) || (r.height() < 400)) {
@@ -1138,6 +1073,7 @@ void Bqm_Widget::loadSettings()
 
 void Bqm_Widget::setPreviewPosition(Bqm_Widget::PreviewPosition position)
 {
+/*
   if (position == _previewPosition) {
     return;
   }
@@ -1190,6 +1126,8 @@ void Bqm_Widget::setPreviewPosition(Bqm_Widget::PreviewPosition position)
   list->show();
   params->show();
   ui->logosLabel->setAlignment(Qt::AlignVCenter | ((_previewPosition == PreviewPosition::Right) ? Qt::AlignRight : Qt::AlignLeft));
+*/
+  // TODO: REMOVE
 }
 
 void Bqm_Widget::adjustVerticalSplitter()
@@ -1236,9 +1174,8 @@ void Bqm_Widget::activateFilter(bool resetZoom, const QList<QString> & values)
     }
     if (!ui->filterParams->build(filter.name, filter.hash, filter.parameters, savedValues, savedVisibilityStates)) {
       _filtersPresenter->setInvalidFilter();
-      ui->previewWidget->setKeypoints(KeypointList());
     } else {
-      ui->previewWidget->setKeypoints(ui->filterParams->keypoints());
+//      ui->previewWidget->setKeypoints(ui->filterParams->keypoints());
     }
     setFilterName(FilterTextTranslator::translate(filter.name));
     ui->inOutSelector->enable();
@@ -1269,10 +1206,8 @@ void Bqm_Widget::activateFilter(bool resetZoom, const QList<QString> & values)
 
     ui->inOutSelector->setState(inOutState, false);
 
-    ui->previewWidget->updateFullImageSizeIfDifferent(LayersExtentProxy::getExtent(ui->inOutSelector->inputMode()));
     ui->filterName->setVisible(true);
     ui->tbAddFave->setEnabled(true);
-    ui->previewWidget->setPreviewFactor(filter.previewFactor, resetZoom);
     setZoomConstraint();
     _okButtonShouldApply = true;
     ui->tbResetParameters->setVisible(true);
@@ -1286,15 +1221,12 @@ void Bqm_Widget::setNoFilter()
 {
   PersistentMemory::clear();
   ui->filterParams->setNoFilter(_filtersPresenter->errorMessage());
-  ui->previewWidget->disableRightClick();
-  ui->previewWidget->setKeypoints(KeypointList());
   ui->inOutSelector->hide();
   ui->inOutSelector->setState(InputOutputState::Default, false);
   ui->filterName->setVisible(false);
   ui->tbAddFave->setEnabled(false);
   ui->tbCopyCommand->setVisible(false);
   ui->tbResetParameters->setVisible(false);
-  ui->zoomLevelSelector->showWarning(false);
   _okButtonShouldApply = false;
   ui->tbRemoveFave->setEnabled(_filtersPresenter->danglingFaveIsSelected());
   ui->tbRenameFave->setEnabled(false);
@@ -1312,10 +1244,13 @@ void Bqm_Widget::showEvent(QShowEvent * event)
 
 void Bqm_Widget::resizeEvent(QResizeEvent * e)
 {
+/*
   // Check if size is reducing
   if ((e->size().width() < e->oldSize().width() || e->size().height() < e->oldSize().height()) && ui->pbFullscreen->isChecked() && (windowState() & Qt::WindowMaximized)) {
     ui->pbFullscreen->toggle();
   }
+*/
+// TODO: REMOVE
 }
 
 bool Bqm_Widget::askUserForGTKFavesImport()
@@ -1390,6 +1325,7 @@ void Bqm_Widget::onSettingsClicked()
 
   DialogSettings dialog(this);
   dialog.exec();
+/*
   bool previewPositionChanged = (_previewPosition != Settings::previewPosition());
   setPreviewPosition(Settings::previewPosition());
   if (previewPositionChanged) {
@@ -1433,6 +1369,7 @@ void Bqm_Widget::onSettingsClicked()
     }
   }
   showZoomWarningIfNeeded();
+*/
   // Sources modification may require an update
   bool sourcesModified = false;
   bool sourcesRequireInternetUpdate = false;
