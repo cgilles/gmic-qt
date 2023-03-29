@@ -21,13 +21,6 @@ include(GNUInstallDirs)
 # Debug Symbols rules under MacOS
 MACOS_DEBUG_POLICIES()
 
-find_package(DigikamCore CONFIG REQUIRED)
-
-set_package_properties(DigikamCore PROPERTIES
-                       URL "http://www.digikam.org"
-                       DESCRIPTION "digiKam core library"
-)
-
 # --- Manage C++ exception rules -----------------------------------------------
 
 string(REPLACE " -DQT_NO_EXCEPTIONS " " " CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} ")
@@ -96,3 +89,4 @@ endif()
 # --- Plugins Compilation Rules -----------------------------------------
 
 include(${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/EditorPluginRules.cmake)
+include(${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/BqmPluginRules.cmake)

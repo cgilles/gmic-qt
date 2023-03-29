@@ -5,7 +5,7 @@
 *
 *  Copyright (C) 2019-2023 Gilles Caulier <caulier dot gilles at gmail dot com>
 *
-*  Description: digiKam image editor plugin for GmicQt.
+*  Description: digiKam Batch Queue Manager plugin for GmicQt.
 *
 *  G'MIC-Qt is free software: you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -22,30 +22,30 @@
 *
 */
 
-#ifndef DIGIKAM_EDITOR_GMICQT_TOOL_PLUGIN_H
-#define DIGIKAM_EDITOR_GMICQT_TOOL_PLUGIN_H
+#ifndef DIGIKAM_BQM_GMICQT_PLUGIN_H
+#define DIGIKAM_BQM_GMICQT_PLUGIN_H
 
 // Local includes
 
-#include "dplugineditor.h"
+#include "dpluginbqm.h"
 
-#define DPLUGIN_IID "org.kde.digikam.plugin.editor.GmicQt"
+#define DPLUGIN_IID "org.kde.digikam.plugin.bqm.GmicQt"
 
 using namespace Digikam;
 
-namespace DigikamEditorGmicQtPlugin
+namespace DigikamBqmGmicQtPlugin
 {
 
-class GmicQtToolPlugin : public DPluginEditor
+class GmicQtPlugin : public DPluginBqm
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID DPLUGIN_IID)
-    Q_INTERFACES(Digikam::DPluginEditor)
+    Q_INTERFACES(Digikam::DPluginBqm)
 
 public:
 
-    explicit GmicQtToolPlugin(QObject* const parent = nullptr);
-    ~GmicQtToolPlugin();
+    explicit GmicQtPlugin(QObject* const parent = nullptr);
+    ~GmicQtPlugin()                 override;
 
     QString name()                 const override;
     QString iid()                  const override;
@@ -58,12 +58,8 @@ public:
     QString handbookReference()    const override;
 
     void setup(QObject* const)           override;
-
-private Q_SLOTS:
-
-    void slotGmicQt();
 };
 
-} // namespace DigikamEditorGmicQtPlugin
+} // namespace DigikamBqmGmicQtPlugin
 
-#endif // DIGIKAM_EDITOR_GMICQT_TOOL_PLUGIN_H
+#endif // DIGIKAM_BQM_GMICQT_PLUGIN_H
