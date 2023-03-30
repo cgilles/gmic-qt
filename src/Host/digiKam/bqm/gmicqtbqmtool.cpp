@@ -59,10 +59,10 @@ void GmicQtBqmTool::registerSettingsWidget()
 {
     m_gmicWidget     = new Bqm_Widget();
     m_settingsWidget = m_gmicWidget;
-/*
-    connect(m_comboBox, SIGNAL(activated(int)),
+
+    connect(m_gmicWidget, SIGNAL(signalSettingsChanged()),
             this, SLOT(slotSettingsChanged()));
-*/
+
     BatchTool::registerSettingsWidget();
 }
 

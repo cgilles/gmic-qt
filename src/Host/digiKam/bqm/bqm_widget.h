@@ -79,6 +79,10 @@ public:
   void setPluginParameters(const RunParameters & parameters);
   RunParameters pluginParameters() const;
 
+Q_SIGNALS:
+
+    void signalSettingsChanged();
+
 public Q_SLOTS:
 
   void onUpdateDownloadsFinished(int status);

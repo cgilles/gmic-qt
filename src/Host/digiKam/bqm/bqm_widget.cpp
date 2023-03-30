@@ -469,6 +469,8 @@ void Bqm_Widget::onPreviewCheckBoxToggled(bool on)
 void Bqm_Widget::onFilterSelectionChanged()
 {
   activateFilter(false);
+
+  Q_EMIT signalSettingsChanged();
 }
 
 void Bqm_Widget::onEscapeKeyPressed()
