@@ -36,6 +36,7 @@
 // Local includes
 
 #include "GmicQt.h"
+#include "HeadlessProcessor.h"
 
 using namespace GmicQt;
 
@@ -118,33 +119,38 @@ bool GmicQtBqmTool::toolOperations()
     parameters.filterPath = settings()[QLatin1String("GmicQtBqmToolFilterPath")].toString().toStdString();
     parameters.inputMode  = (InputMode)settings()[QLatin1String("GmicQtBqmToolInputMode")].toInt();
     parameters.outputMode = (OutputMode)settings()[QLatin1String("GmicQtBqmToolOutputMode")].toInt();
+    m_gmicProcessor       = new HeadlessProcessor(this);
 
-/*
-    GreycstorationContainer settings;
-    settings.setGmicQtBqmToolDefaultSettings();
+    if (m_gmicprocessor->setPluginParameters(parameters))
+    {
+        delete m_gmicProcessor;
+        m_gmicProcessor = nullptr;
 
-    m_cimgIface = new GreycstorationFilter(this);
-    m_cimgIface->setMode(GreycstorationFilter::Restore);
-    m_cimgIface->setOriginalImage(image());
-    m_cimgIface->setSettings(settings);
-    m_cimgIface->setup();
+        return false;
+    }
 
-    applyFilter(m_cimgIface);
+    m_gmicProcessor->startProcessing();
 
-    delete m_cimgIface;
-    m_cimgIface = nullptr;
-*/
+    QEventLoop loop;
+
+    connect(m_gmicProcessor, SIGNAL(done(QString)),
+            &loop, SLOT(quit()));
+
+    loop.exec();
+
+    delete m_gmicProcessor;
+    m_gmicProcessor = nullptr;
+
     return (savefromDImg());
 }
 
 void GmicQtBqmTool::cancel()
 {
-/*
-    if (m_cimgIface)
+    if (m_gmicProcessor)
     {
-        m_cimgIface->cancelFilter();
+        m_gmicProcessor->cancel();
     }
-*/
+
     BatchTool::cancel();
 }
 
