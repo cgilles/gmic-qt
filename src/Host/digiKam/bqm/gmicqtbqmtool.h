@@ -36,6 +36,8 @@ namespace GmicQt
     class HeadlessProcessor;
 }
 
+using namespace GmicQt;
+
 namespace DigikamBqmGmicQtPlugin
 {
 
@@ -69,8 +71,8 @@ private Q_SLOTS:
 
 private:
 
-    Bqm_Widget* m_gmicWidget         = nullptr;
-    HeadlessProcess* m_gmicProcessor = nullptr;
+    Bqm_Widget*        m_gmicWidget    = nullptr;
+    HeadlessProcessor* m_gmicProcessor = nullptr;
 };
 
 } // namespace DigikamBqmGmicQtPlugin

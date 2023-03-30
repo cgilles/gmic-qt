@@ -38,8 +38,6 @@
 #include "GmicQt.h"
 #include "HeadlessProcessor.h"
 
-using namespace GmicQt;
-
 namespace DigikamBqmGmicQtPlugin
 {
 
@@ -121,7 +119,7 @@ bool GmicQtBqmTool::toolOperations()
     parameters.outputMode = (OutputMode)settings()[QLatin1String("GmicQtBqmToolOutputMode")].toInt();
     m_gmicProcessor       = new HeadlessProcessor(this);
 
-    if (m_gmicprocessor->setPluginParameters(parameters))
+    if (m_gmicProcessor->setPluginParameters(parameters))
     {
         delete m_gmicProcessor;
         m_gmicProcessor = nullptr;
@@ -138,8 +136,15 @@ bool GmicQtBqmTool::toolOperations()
 
     loop.exec();
 
+    QString error = m_gmicProcessor->error();
+
     delete m_gmicProcessor;
     m_gmicProcessor = nullptr;
+
+    if (!error.isEmpty())
+    {
+        return false;
+    }
 
     return (savefromDImg());
 }
