@@ -34,6 +34,8 @@ using namespace Digikam;
 namespace DigikamBqmGmicQtPlugin
 {
 
+class Bqm_Widget;
+
 class GmicQtBqmTool : public BatchTool
 {
     Q_OBJECT
@@ -59,6 +61,10 @@ private Q_SLOTS:
 
     void slotAssignSettings2Widget()                        override;
     void slotSettingsChanged()                              override;
+
+private:
+
+    Bqm_Widget* m_gmicWidget = nullptr;
 };
 
 } // namespace DigikamBqmGmicQtPlugin

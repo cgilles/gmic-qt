@@ -75,7 +75,9 @@ public:
   ~Bqm_Widget() override;
 
   void updateFiltersFromSources(int ageLimit, bool useNetwork);
+
   void setPluginParameters(const RunParameters & parameters);
+  RunParameters pluginParameters() const;
 
 public Q_SLOTS:
 

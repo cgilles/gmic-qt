@@ -28,10 +28,16 @@
 
 #include <QWidget>
 
-// Local includes
+// digikam includes
 
 #include "dimg.h"
 #include "bqm_widget.h"
+
+// Local includes
+
+#include "GmicQt.h"
+
+using namespace GmicQt;
 
 namespace DigikamBqmGmicQtPlugin
 {
@@ -52,8 +58,8 @@ BatchTool* GmicQtBqmTool::clone(QObject* const parent) const
 
 void GmicQtBqmTool::registerSettingsWidget()
 {
-
-    m_settingsWidget    = new Bqm_Widget();
+    m_gmicWidget     = new Bqm_Widget();
+    m_settingsWidget = m_gmicWidget;
 /*
     connect(m_comboBox, SIGNAL(activated(int)),
             this, SLOT(slotSettingsChanged()));
@@ -64,25 +70,38 @@ void GmicQtBqmTool::registerSettingsWidget()
 BatchToolSettings GmicQtBqmTool::defaultSettings()
 {
     BatchToolSettings settings;
-/*
-    settings.insert(QLatin1String("GmicQtBqmToolMethod"), ReduceUniformNoise);
-*/
+
+    settings.insert(QLatin1String("GmicQtBqmToolCommand"),    QString());
+    settings.insert(QLatin1String("GmicQtBqmToolFilterPath"), QString());
+    settings.insert(QLatin1String("GmicQtBqmToolInputMode"),  (int)InputMode::Unspecified);
+    settings.insert(QLatin1String("GmicQtBqmToolOutputMode"), (int)OutputMode::Unspecified);
+
     return settings;
 }
 
 void GmicQtBqmTool::slotAssignSettings2Widget()
 {
-/*
-    m_comboBox->setCurrentIndex(settings()[QLatin1String("GmicQtBqmToolMethod")].toInt());
-*/
+    RunParameters parameters;
+
+    parameters.command    = settings()[QLatin1String("GmicQtBqmToolCommand")].toString().toStdString();
+    parameters.filterPath = settings()[QLatin1String("GmicQtBqmToolFilterPath")].toString().toStdString();
+    parameters.inputMode  = (InputMode)settings()[QLatin1String("GmicQtBqmToolInputMode")].toInt();
+    parameters.outputMode = (OutputMode)settings()[QLatin1String("GmicQtBqmToolOutputMode")].toInt();
+
+    m_gmicWidget->setPluginParameters(parameters);
 }
 
 void GmicQtBqmTool::slotSettingsChanged()
 {
+    RunParameters parameters = m_gmicWidget->pluginParameters();
+
     BatchToolSettings settings;
-/*
-    settings.insert(QLatin1String("GmicQtBqmToolMethod"), (int)m_comboBox->currentIndex());
-*/
+
+    settings.insert(QLatin1String("GmicQtBqmToolCommand"),    QString::fromStdString(parameters.command));
+    settings.insert(QLatin1String("GmicQtBqmToolFilterPath"), QString::fromStdString(parameters.filterPath));
+    settings.insert(QLatin1String("GmicQtBqmToolInputMode"),  (int)parameters.inputMode);
+    settings.insert(QLatin1String("GmicQtBqmToolOutputMode"), (int)parameters.outputMode);
+
     BatchTool::slotSettingsChanged(settings);
 }
 
@@ -92,38 +111,17 @@ bool GmicQtBqmTool::toolOperations()
     {
         return false;
     }
-/*
-    int type = settings()[QLatin1String("GmicQtBqmToolMethod")].toInt();
 
+    RunParameters parameters;
+
+    parameters.command    = settings()[QLatin1String("GmicQtBqmToolCommand")].toString().toStdString();
+    parameters.filterPath = settings()[QLatin1String("GmicQtBqmToolFilterPath")].toString().toStdString();
+    parameters.inputMode  = (InputMode)settings()[QLatin1String("GmicQtBqmToolInputMode")].toInt();
+    parameters.outputMode = (OutputMode)settings()[QLatin1String("GmicQtBqmToolOutputMode")].toInt();
+
+/*
     GreycstorationContainer settings;
     settings.setGmicQtBqmToolDefaultSettings();
-
-    switch (type)
-    {
-        case ReduceUniformNoise:
-        {
-            settings.amplitude = 40.0;
-            break;
-        }
-
-        case ReduceJPEGArtefacts:
-        {
-            settings.sharpness = 0.3F;
-            settings.sigma     = 1.0;
-            settings.amplitude = 100.0;
-            settings.nbIter    = 2;
-            break;
-        }
-
-        case ReduceTexturing:
-        {
-            settings.sharpness = 0.5F;
-            settings.sigma     = 1.5;
-            settings.amplitude = 100.0;
-            settings.nbIter    = 2;
-            break;
-        }
-    }
 
     m_cimgIface = new GreycstorationFilter(this);
     m_cimgIface->setMode(GreycstorationFilter::Restore);

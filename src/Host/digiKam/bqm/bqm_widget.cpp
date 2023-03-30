@@ -256,6 +256,11 @@ void Bqm_Widget::setPluginParameters(const RunParameters & parameters)
   _pluginParameters = parameters;
 }
 
+RunParameters Bqm_Widget::pluginParameters() const
+{
+  return _pluginParameters;
+}
+
 void Bqm_Widget::updateFiltersFromSources(int ageLimit, bool useNetwork)
 {
   connect(Updater::getInstance(), &Updater::updateIsDone, this, &Bqm_Widget::onUpdateDownloadsFinished, Qt::UniqueConnection);
