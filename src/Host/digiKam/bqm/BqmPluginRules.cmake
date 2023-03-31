@@ -49,6 +49,7 @@ set(gmic_qt_bqm_SRCS
     ${gmic_qt_SRCS}
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/host_digikam.cpp
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/bqm_widget.cpp
+    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/bqm_processor.cpp
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicqtbqmtool.cpp
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicqtplugin.cpp
 )

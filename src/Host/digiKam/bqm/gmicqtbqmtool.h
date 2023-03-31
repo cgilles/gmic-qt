@@ -31,17 +31,11 @@
 
 using namespace Digikam;
 
-namespace GmicQt
-{
-    class HeadlessProcessor;
-}
-
-using namespace GmicQt;
-
 namespace DigikamBqmGmicQtPlugin
 {
 
 class Bqm_Widget;
+class Bqm_Processor;
 
 class GmicQtBqmTool : public BatchTool
 {
@@ -71,8 +65,8 @@ private Q_SLOTS:
 
 private:
 
-    Bqm_Widget*        m_gmicWidget    = nullptr;
-    HeadlessProcessor* m_gmicProcessor = nullptr;
+    Bqm_Widget*    m_gmicWidget    = nullptr;
+    Bqm_Processor* m_gmicProcessor = nullptr;
 };
 
 } // namespace DigikamBqmGmicQtPlugin

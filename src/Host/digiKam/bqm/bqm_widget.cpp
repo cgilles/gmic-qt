@@ -663,13 +663,7 @@ void Bqm_Widget::onPreviewError(const QString & message)
 
 void Bqm_Widget::onParametersChanged()
 {
-/*
-  if (ui->filterParams->hasKeypoints()) {
-    ui->previewWidget->setKeypoints(ui->filterParams->keypoints());
-  }
-  ui->previewWidget->sendUpdateRequest();
-*/
-  // TODO: REMOVE
+    Q_EMIT signalSettingsChanged();
 }
 
 bool Bqm_Widget::isAccepted()

@@ -30,13 +30,14 @@
 
 // digikam includes
 
+#include "digikam_debug.h"
 #include "dimg.h"
 #include "bqm_widget.h"
 
 // Local includes
 
 #include "GmicQt.h"
-#include "HeadlessProcessor.h"
+#include "bqm_processor.h"
 
 namespace DigikamBqmGmicQtPlugin
 {
@@ -92,6 +93,8 @@ void GmicQtBqmTool::slotAssignSettings2Widget()
 
 void GmicQtBqmTool::slotSettingsChanged()
 {
+    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Receive settings changed signal from G'MIC-Qt";
+
     RunParameters parameters = m_gmicWidget->pluginParameters();
 
     BatchToolSettings settings;
@@ -117,7 +120,7 @@ bool GmicQtBqmTool::toolOperations()
     parameters.filterPath = settings()[QLatin1String("GmicQtBqmToolFilterPath")].toString().toStdString();
     parameters.inputMode  = (InputMode)settings()[QLatin1String("GmicQtBqmToolInputMode")].toInt();
     parameters.outputMode = (OutputMode)settings()[QLatin1String("GmicQtBqmToolOutputMode")].toInt();
-    m_gmicProcessor       = new HeadlessProcessor(this);
+    m_gmicProcessor       = new Bqm_Processor(this);
 
     if (m_gmicProcessor->setPluginParameters(parameters))
     {
