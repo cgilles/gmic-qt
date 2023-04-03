@@ -180,9 +180,9 @@ void convertCImgtoDImg(const cimg_library::CImg<float>& in, DImg& out, bool sixt
 
                 while (n--)
                 {
-                    dst[0] = float2ushort_bounded(*src);
-                    dst[1] = float2ushort_bounded(*src);
                     dst[2] = float2ushort_bounded(*src);
+                    dst[1] = float2ushort_bounded(*src);
+                    dst[0] = float2ushort_bounded(*src);
                     dst[3] = float2ushort_bounded(*srcA++);
                     *src++;
                     dst   += 4;
@@ -194,9 +194,9 @@ void convertCImgtoDImg(const cimg_library::CImg<float>& in, DImg& out, bool sixt
 
                 while (n--)
                 {
-                    dst[0] = float2uchar_bounded(*src);
-                    dst[1] = float2uchar_bounded(*src);
                     dst[2] = float2uchar_bounded(*src);
+                    dst[1] = float2uchar_bounded(*src);
+                    dst[0] = float2uchar_bounded(*src);
                     dst[3] = float2uchar_bounded(*srcA++);
                     *src++;
                     dst   += 4;
@@ -221,9 +221,9 @@ void convertCImgtoDImg(const cimg_library::CImg<float>& in, DImg& out, bool sixt
 
                 while (n--)
                 {
-                    dst[0] = float2ushort_bounded(*src);
-                    dst[1] = float2ushort_bounded(*src);
                     dst[2] = float2ushort_bounded(*src);
+                    dst[1] = float2ushort_bounded(*src);
+                    dst[0] = float2ushort_bounded(*src);
                     dst[3] = 0;
                     *src++;
                     dst   += 4;
@@ -235,9 +235,9 @@ void convertCImgtoDImg(const cimg_library::CImg<float>& in, DImg& out, bool sixt
 
                 while (n--)
                 {
-                    dst[0] = float2uchar_bounded(*src);
-                    dst[1] = float2uchar_bounded(*src);
                     dst[2] = float2uchar_bounded(*src);
+                    dst[1] = float2uchar_bounded(*src);
+                    dst[0] = float2uchar_bounded(*src);
                     dst[3] = 0;
                     *src++;
                     dst   += 4;
