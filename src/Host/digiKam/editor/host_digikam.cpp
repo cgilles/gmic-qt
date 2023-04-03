@@ -143,7 +143,7 @@ void convertCImgtoDImg(const cimg_library::CImg<float>& in, DImg& out, bool sixt
                     dst[2] = float2ushort_bounded(*srcR++);
                     dst[1] = float2ushort_bounded(*srcG++);
                     dst[0] = float2ushort_bounded(*srcB++);
-                    dst[3] = 0;
+                    dst[3] = 0xFFFF;
                     dst   += 4;
                 }
             }
@@ -156,7 +156,7 @@ void convertCImgtoDImg(const cimg_library::CImg<float>& in, DImg& out, bool sixt
                     dst[2] = float2uchar_bounded(*srcR++);
                     dst[1] = float2uchar_bounded(*srcG++);
                     dst[0] = float2uchar_bounded(*srcB++);
-                    dst[3] = 0;
+                    dst[3] = 0xFF;
                     dst   += 4;
                 }
             }
@@ -224,7 +224,7 @@ void convertCImgtoDImg(const cimg_library::CImg<float>& in, DImg& out, bool sixt
                     dst[2] = float2ushort_bounded(*src);
                     dst[1] = float2ushort_bounded(*src);
                     dst[0] = float2ushort_bounded(*src);
-                    dst[3] = 0;
+                    dst[3] = 0xFFFF;
                     *src++;
                     dst   += 4;
                 }
@@ -238,7 +238,7 @@ void convertCImgtoDImg(const cimg_library::CImg<float>& in, DImg& out, bool sixt
                     dst[2] = float2uchar_bounded(*src);
                     dst[1] = float2uchar_bounded(*src);
                     dst[0] = float2uchar_bounded(*src);
-                    dst[3] = 0;
+                    dst[3] = 0xFF;
                     *src++;
                     dst   += 4;
                 }
