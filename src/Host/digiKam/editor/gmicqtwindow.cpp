@@ -30,6 +30,7 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QMenu>
+#include <QIcon>
 #include <QUrl>
 #include <QLabel>
 #include <QAction>
@@ -59,11 +60,12 @@ GMicQtWindow::GMicQtWindow(DPlugin*const tool, QWidget* const parent)
     {
         QPushButton* const help    = new QPushButton(this);
         help->setText(tr("Help"));
+        help->setIcon(QIcon::fromTheme(QLatin1String("help-browser")));
         help->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
         QMenu* const menu          = new QMenu(help);
-        QAction* const webAction   = menu->addAction(tr("Online Handbook..."));
-        QAction* const aboutAction = menu->addAction(tr("About..."));
+        QAction* const webAction   = menu->addAction(QIcon::fromTheme(QLatin1String("globe")), tr("Online Handbook..."));
+        QAction* const aboutAction = menu->addAction(QIcon::fromTheme(QLatin1String("help-about")), tr("About..."));
         help->setMenu(menu);
 
         connect(webAction, SIGNAL(triggered()),
