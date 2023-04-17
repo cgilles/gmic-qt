@@ -99,10 +99,10 @@ void convertCImgtoDImg(const cimg_library::CImg<float>& in, DImg& out, bool sixt
 
                 while (n--)
                 {
-                    dst[2] = float2ushort_bounded(*srcR++);
-                    dst[1] = float2ushort_bounded(*srcG++);
-                    dst[0] = float2ushort_bounded(*srcB++);
-                    dst[3] = float2ushort_bounded(*srcA++);
+                    dst[2] = float2ushort_bounded(*srcR++) * 256;
+                    dst[1] = float2ushort_bounded(*srcG++) * 256;
+                    dst[0] = float2ushort_bounded(*srcB++) * 256;
+                    dst[3] = float2ushort_bounded(*srcA++) * 256;
                     dst   += 4;
                 }
             }
@@ -140,9 +140,9 @@ void convertCImgtoDImg(const cimg_library::CImg<float>& in, DImg& out, bool sixt
 
                 while (n--)
                 {
-                    dst[2] = float2ushort_bounded(*srcR++);
-                    dst[1] = float2ushort_bounded(*srcG++);
-                    dst[0] = float2ushort_bounded(*srcB++);
+                    dst[2] = float2ushort_bounded(*srcR++) * 256;
+                    dst[1] = float2ushort_bounded(*srcG++) * 256;
+                    dst[0] = float2ushort_bounded(*srcB++) * 256;
                     dst[3] = 0xFFFF;
                     dst   += 4;
                 }
@@ -180,10 +180,10 @@ void convertCImgtoDImg(const cimg_library::CImg<float>& in, DImg& out, bool sixt
 
                 while (n--)
                 {
-                    dst[2] = float2ushort_bounded(*src);
-                    dst[1] = float2ushort_bounded(*src);
-                    dst[0] = float2ushort_bounded(*src);
-                    dst[3] = float2ushort_bounded(*srcA++);
+                    dst[2] = float2ushort_bounded(*src) * 256;
+                    dst[1] = float2ushort_bounded(*src) * 256;
+                    dst[0] = float2ushort_bounded(*src) * 256;
+                    dst[3] = float2ushort_bounded(*srcA++) * 256;
                     src++;
                     dst   += 4;
                 }
@@ -221,9 +221,9 @@ void convertCImgtoDImg(const cimg_library::CImg<float>& in, DImg& out, bool sixt
 
                 while (n--)
                 {
-                    dst[2] = float2ushort_bounded(*src);
-                    dst[1] = float2ushort_bounded(*src);
-                    dst[0] = float2ushort_bounded(*src);
+                    dst[2] = float2ushort_bounded(*src) * 256;
+                    dst[1] = float2ushort_bounded(*src) * 256;
+                    dst[0] = float2ushort_bounded(*src) * 256;
                     dst[3] = 0xFFFF;
                     src++;
                     dst   += 4;
