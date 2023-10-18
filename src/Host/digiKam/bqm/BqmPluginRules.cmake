@@ -25,7 +25,7 @@ set_package_properties(DigikamCore PROPERTIES
                        DESCRIPTION "digiKam core library"
 )
 
-include_directories($<TARGET_PROPERTY:Digikam::digikamcore,INTERFACE_INCLUDE_DIRECTORIES>/digikam)
+include_directories($<TARGET_PROPERTY:Digikam::digikamcore,INTERFACE_INCLUDE_DIRECTORIES>)
 
 find_package(DigikamGui CONFIG REQUIRED)
 
@@ -34,7 +34,7 @@ set_package_properties(DigikamGui PROPERTIES
                        DESCRIPTION "digiKam gui library"
 )
 
-include_directories($<TARGET_PROPERTY:Digikam::digikamgui,INTERFACE_INCLUDE_DIRECTORIES>/digikam)
+include_directories($<TARGET_PROPERTY:Digikam::digikamgui,INTERFACE_INCLUDE_DIRECTORIES>)
 
 find_package(DigikamDatabase CONFIG REQUIRED)
 
@@ -43,7 +43,7 @@ set_package_properties(DigikamDatabase PROPERTIES
                        DESCRIPTION "digiKam database library"
 )
 
-include_directories($<TARGET_PROPERTY:Digikam::digikamdatabase,INTERFACE_INCLUDE_DIRECTORIES>/digikam)
+include_directories($<TARGET_PROPERTY:Digikam::digikamdatabase,INTERFACE_INCLUDE_DIRECTORIES>)
 
 set(gmic_qt_bqm_SRCS
     ${gmic_qt_SRCS}
