@@ -71,7 +71,15 @@ endif()
 
 # --- For the Installation Rules ------------------------------------------------------------
 
-get_target_property(QT_QMAKE_EXECUTABLE ${Qt5Core_QMAKE_EXECUTABLE} IMPORTED_LOCATION)
+if(BUILD_WITH_QT6)
+
+    get_target_property(QT_QMAKE_EXECUTABLE Qt6::qmake IMPORTED_LOCATION)
+
+else()
+
+    get_target_property(QT_QMAKE_EXECUTABLE Qt5::qmake IMPORTED_LOCATION)
+
+endif()
 
 if(NOT QT_QMAKE_EXECUTABLE)
     message(FATAL_ERROR "qmake is not found.")
@@ -83,7 +91,7 @@ execute_process(COMMAND ${QT_QMAKE_EXECUTABLE} -query QT_INSTALL_PLUGINS
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 if(NOT QT_PLUGINS_DIR)
-    message(FATAL_ERROR "Qt5 plugin directory cannot be detected.")
+    message(FATAL_ERROR "Qt plugin directory cannot be detected.")
 endif()
 
 # --- Plugins Compilation Rules -----------------------------------------

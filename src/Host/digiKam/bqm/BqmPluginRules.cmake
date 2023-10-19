@@ -54,7 +54,15 @@ set(gmic_qt_bqm_SRCS
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicqtplugin.cpp
 )
 
-qt5_wrap_ui(gmic_qt_bqm_SRCS ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/bqm_widget.ui)
+if(BUILD_WITH_QT6)
+
+    qt6_wrap_ui(gmic_qt_bqm_SRCS ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/bqm_widget.ui)
+
+else()
+
+    qt5_wrap_ui(gmic_qt_bqm_SRCS ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/bqm_widget.ui)
+
+endif()
 
 add_definitions(-DGMIC_HOST=digikam)
 add_definitions(-D_GMIC_QT_DISABLE_THEMING_)

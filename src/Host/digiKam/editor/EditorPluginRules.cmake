@@ -33,7 +33,16 @@ set(gmic_qt_editor_SRCS ${gmic_qt_SRCS}
                         ${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/gmicqtwindow.cpp
 )
 
-qt5_wrap_ui(gmic_qt_editor_SRCS ${gmic_qt_FORMS})
+if(BUILD_WITH_QT6)
+
+    qt6_wrap_ui(gmic_qt_editor_SRCS ${gmic_qt_FORMS})
+
+else()
+
+    qt5_wrap_ui(gmic_qt_editor_SRCS ${gmic_qt_FORMS})
+
+endif()
+
 add_definitions(-DGMIC_HOST=digikam)
 add_definitions(-D_GMIC_QT_DISABLE_THEMING_)
 add_definitions(-D_GMIC_QT_DISABLE_HDPI_)

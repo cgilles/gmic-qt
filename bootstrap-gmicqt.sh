@@ -1,13 +1,12 @@
 #!/bin/bash
 
-# Copyright (c) 2008-2022 by Gilles Caulier, <caulier dot gilles at gmail dot com>
+# Copyright (c) 2008-2023 by Gilles Caulier, <caulier dot gilles at gmail dot com>
 #
 # Redistribution and use is allowed according to the terms of the BSD license.
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 #
-# Copy this script on root folder where are source code
+# Script to configure cmake build.
 
-# We will work on command line using MinGW compiler
 export MAKEFILES_TYPE='Unix Makefiles'
 
 ln -s ../gmic ./gmic
@@ -18,7 +17,7 @@ fi
 
 cd build
 
-cmake -G "$MAKEFILES_TYPE" . \
+/opt/qt6/bin/cmake -G "$MAKEFILES_TYPE" . \
       -DCMAKE_CXX_COMPILER=g++ \
       -DCMAKE_C_COMPILER=gcc \
       -DCMAKE_BUILD_TYPE=Debug \
@@ -26,6 +25,7 @@ cmake -G "$MAKEFILES_TYPE" . \
       -DENABLE_ASAN=OFF \
       -DENABLE_SYSTEM_GMIC=OFF \
       -DGMIC_QT_HOST=digikam \
+      -DBUILD_WITH_QT6=ON \
       -Wno-dev \
       ..
 
