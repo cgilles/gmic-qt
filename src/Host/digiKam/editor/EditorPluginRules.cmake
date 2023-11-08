@@ -48,7 +48,7 @@ add_definitions(-D_GMIC_QT_DISABLE_THEMING_)
 add_definitions(-D_GMIC_QT_DISABLE_HDPI_)
 add_definitions(-D_GMIC_QT_DISABLE_LOGO_)
 add_library(Editor_GmicQt_Plugin
-            MODULE ${gmic_qt_editor_SRCS} ${gmic_qt_QRC} ${qmic_qt_QM})
+            MODULE ${gmic_qt_editor_SRCS} ${gmic_qt_QRC} ${gmic_qt_QM})
 
 set_target_properties(Editor_GmicQt_Plugin PROPERTIES PREFIX "")
 

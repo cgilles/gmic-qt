@@ -94,6 +94,46 @@ if(NOT QT_PLUGINS_DIR)
     message(FATAL_ERROR "Qt plugin directory cannot be detected.")
 endif()
 
+if(MSVC)
+
+    file(GLOB translation_files ${CMAKE_SOURCE_DIR}/translations/*.ts)
+    set_source_files_properties(${translation_files}
+                                PROPERTIES OUTPUT_LOCATION ${CMAKE_SOURCE_DIR}/translations)
+
+    if(BUILD_WITH_QT6)
+
+        qt6_add_translation(gmic_qt_QM
+                            ${translation_files}
+        )
+
+    else()
+
+        qt5_add_translation(gmic_qt_QM
+                            ${translation_files}
+        )
+
+    endif()
+
+    file(GLOB filter_files ${CMAKE_SOURCE_DIR}/translations/filters/*.ts)
+    set_source_files_properties(${filter_files}
+                                PROPERTIES OUTPUT_LOCATION ${CMAKE_SOURCE_DIR}/translations/filters)
+
+    if(BUILD_WITH_QT6)
+
+        qt6_add_translation(gmic_qt_QM
+                            ${filter_files}
+        )
+
+    else()
+
+        qt5_add_translation(gmic_qt_QM
+                            ${filter_files}
+        )
+
+    endif()
+
+endif()
+
 # --- Plugins Compilation Rules -----------------------------------------
 
 include(${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/EditorPluginRules.cmake)
