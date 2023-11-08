@@ -115,10 +115,6 @@ QString GmicQtToolPlugin::details() const
              ).arg(logo)
               .arg(gmic_version)
 
-#ifdef cimg_use_fftw3
-             + QString::fromUtf8("Libfftw3 version: %1<br/>").arg(fftw_version)
-#endif
-
 #ifdef cimg_use_fftw3_singlethread
              + QString::fromUtf8("Use FFTW3 single thread: yes<br/>")
 #else

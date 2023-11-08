@@ -55,7 +55,7 @@ cmake .. \
       -DINSTALL_ROOT=$INSTALL_DIR \
       -DENABLE_ASAN=OFF \
       -DENABLE_SYSTEM_GMIC=OFF \
-	  -DENABLE_CURL=ON \
+	  -DENABLE_CURL=OFF \
       -DGMIC_QT_HOST=digikam \
       -DBUILD_WITH_QT6=ON \
       ${OPTIONS} \

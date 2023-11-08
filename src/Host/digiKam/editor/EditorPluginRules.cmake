@@ -54,8 +54,9 @@ set_target_properties(Editor_GmicQt_Plugin PROPERTIES PREFIX "")
 
 target_link_libraries(Editor_GmicQt_Plugin
                       PRIVATE
+                      Digikam::digikamcore
                       ${gmic_qt_LIBRARIES}
-                      Digikam::digikamcore)
+)
 
 install(TARGETS Editor_GmicQt_Plugin
         DESTINATION ${QT_PLUGINS_DIR}/digikam/editor)
