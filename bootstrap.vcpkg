@@ -1,0 +1,67 @@
+#!/bin/bash
+
+# SPDX-FileCopyrightText: 2008-2023 by Gilles Caulier, <caulier dot gilles at gmail dot com>
+#
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# Arguments : $1 : VCPKG install path (default ./project/mxe/build.win32).
+#             $2 : build type : 'debugfull' to hack (default), 'release' for production, relwithdebinfo for packaging.
+#             $3 : Cmake extra configure options.
+
+# Halt and catch errors
+set -eE
+trap 'PREVIOUS_COMMAND=$THIS_COMMAND; THIS_COMMAND=$BASH_COMMAND' DEBUG
+trap 'echo "FAILED COMMAND: $PREVIOUS_COMMAND"' ERR
+
+VCPKG_DIR="/c/vcpkg"
+VCPKG_TRIPLET="x64-windows"
+
+INSTALL_DIR=$1
+
+if [[ $INSTALL_DIR == "" ]]; then
+
+    INSTALL_DIR="/e/dk/"
+
+fi
+
+BUILD_TYPE=$2
+
+if [[ $BUILD_TYPE == "" ]]; then
+    BUILD_TYPE=RelWithDebInfo
+fi
+
+OPTIONS=$3
+
+echo "Installing to $INSTALL_DIR for target $VCPKG_TRIPLET with build mode $BUILD_TYPE and configure options $OPTIONS"
+
+# Paths rules
+ORIG_PATH="$PATH"
+export PATH=$PATH:/c/bison:/c/icoutils/bin:$INSTALL_DIR/$VCPKG_TRIPLET/tools/gperf:$INSTALL_DIR/$VCPKG_TRIPLET/tools/python3:$INSTALL_DIR/$VCPKG_TRIPLET/bin
+echo "PATH=$PATH"
+
+if [ ! -d "build" ]; then
+    mkdir build
+fi
+
+cd build
+
+cmake .. \
+      -DCMAKE_TOOLCHAIN_FILE=$VCPKG_DIR/scripts/buildsystems/vcpkg.cmake \
+      -DVCPKG_TARGET_TRIPLET=$VCPKG_TRIPLET \
+      -DCMAKE_COLOR_MAKEFILE=ON \
+      -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+      -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR/$VCPKG_TRIPLET \
+      -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
+      -DINSTALL_ROOT=$INSTALL_DIR \
+      -DENABLE_ASAN=OFF \
+      -DENABLE_SYSTEM_GMIC=OFF \
+      -DGMIC_QT_HOST=digikam \
+      -DBUILD_WITH_QT6=ON \
+      ${OPTIONS} \
+      -Wno-dev
+
+CMAKE_VAL_RET=$?
+
+export PATH=$ORIG_PATH
+
+exit $CMAKE_VAL_RET
