@@ -82,3 +82,19 @@ target_link_libraries(Bqm_GmicQt_Plugin
 
 install(TARGETS Bqm_GmicQt_Plugin
         DESTINATION ${QT_PLUGINS_DIR}/digikam/bqm)
+
+# Install debug symbols
+
+if(MSVC)
+    install(FILES "$<TARGET_PDB_FILE:Bqm_GmicQt_Plugin>"
+            DESTINATION ${QT_PLUGINS_DIR}/digikam/bqm
+            CONFIGURATIONS Debug RelWithDebInfo
+    )
+endif()
+
+if(APPLE)
+    install(FILES "$<TARGET_FILE:Bqm_GmicQt_Plugin>.dSYM"
+            DESTINATION ${QT_PLUGINS_DIR}/digikam/bqm
+            CONFIGURATIONS Debug RelWithDebInfo
+    )
+endif()

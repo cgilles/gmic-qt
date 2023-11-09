@@ -60,3 +60,19 @@ target_link_libraries(Editor_GmicQt_Plugin
 
 install(TARGETS Editor_GmicQt_Plugin
         DESTINATION ${QT_PLUGINS_DIR}/digikam/editor)
+
+# Install debug symbols
+
+if(MSVC)
+    install(FILES "$<TARGET_PDB_FILE:Editor_GmicQt_Plugin>"
+            DESTINATION ${QT_PLUGINS_DIR}/digikam/editor
+            CONFIGURATIONS Debug RelWithDebInfo
+    )
+endif()
+
+if(APPLE)
+    install(FILES "$<TARGET_FILE:Editor_GmicQt_Plugin>.dSYM"
+            DESTINATION ${QT_PLUGINS_DIR}/digikam/editor
+            CONFIGURATIONS Debug RelWithDebInfo
+    )
+endif()
