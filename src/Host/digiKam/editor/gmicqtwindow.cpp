@@ -3,7 +3,7 @@
 *  editors, offering hundreds of filters thanks to the underlying G'MIC
 *  image processing framework.
 *
-*  Copyright (C) 2019-2023 Gilles Caulier <caulier dot gilles at gmail dot com>
+*  Copyright (C) 2019-2024 Gilles Caulier <caulier dot gilles at gmail dot com>
 *
 *  Description: digiKam image editor plugin for GmicQt.
 *
@@ -85,10 +85,6 @@ GMicQtWindow::GMicQtWindow(DPlugin*const tool, QWidget* const parent)
     }
 }
 
-GMicQtWindow::~GMicQtWindow()
-{
-}
-
 void GMicQtWindow::slotAboutPlugin()
 {
     QPointer<DPluginAboutDlg> dlg = new DPluginAboutDlg(m_tool);
@@ -98,7 +94,11 @@ void GMicQtWindow::slotAboutPlugin()
 
 void GMicQtWindow::slotOpenWebSite()
 {
-    openOnlineDocumentation(m_tool->handbookSection(), m_tool->handbookChapter(), m_tool->handbookReference());
+    openOnlineDocumentation(
+                            m_tool->handbookSection(),
+                            m_tool->handbookChapter(),
+                            m_tool->handbookReference()
+                           );
 }
 
 void GMicQtWindow::saveParameters()

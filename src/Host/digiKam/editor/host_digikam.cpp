@@ -3,7 +3,7 @@
 *  editors, offering hundreds of filters thanks to the underlying G'MIC
 *  image processing framework.
 *
-*  Copyright (C) 2019-2023 Gilles Caulier <caulier dot gilles at gmail dot com>
+*  Copyright (C) 2019-2024 Gilles Caulier <caulier dot gilles at gmail dot com>
 *
 *  Description: digiKam image editor plugin for GmicQt.
 *
@@ -74,14 +74,19 @@ inline unsigned short float2ushort_bounded(const float& in)
 
 void convertCImgtoDImg(const cimg_library::CImg<float>& in, DImg& out, bool sixteenBit)
 {
-    Q_ASSERT_X(in.spectrum() <= 4, "ImageConverter::convert()", QString("bad input spectrum (%1)").arg(in.spectrum()).toLatin1());
+    Q_ASSERT_X(
+               (in.spectrum() <= 4),
+               "ImageConverter::convert()",
+               QString("bad input spectrum (%1)").arg(in.spectrum()).toLatin1()
+              );
 
     bool alpha = ((in.spectrum() == 4) || (in.spectrum() == 2));
     out        = DImg(in.width(), in.height(), sixteenBit, alpha);
 
     if      (in.spectrum() == 4) // RGB + Alpha
     {
-        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert CImg to DImg: RGB+Alpha image" << "(" << (sixteenBit+1) * 8 << "bits)";
+        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert CImg to DImg: RGB+Alpha image"
+                                            << "(" << (sixteenBit+1) * 8 << "bits)";
 
         const float* srcR = in.data(0, 0, 0, 0);
         const float* srcG = in.data(0, 0, 0, 1);
@@ -123,7 +128,8 @@ void convertCImgtoDImg(const cimg_library::CImg<float>& in, DImg& out, bool sixt
     }
     else if (in.spectrum() == 3) // RGB
     {
-        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert CImg to DImg: RGB image" << "(" << (sixteenBit+1) * 8 << "bits)";
+        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert CImg to DImg: RGB image"
+                                            << "(" << (sixteenBit+1) * 8 << "bits)";
 
         const float* srcR = in.data(0, 0, 0, 0);
         const float* srcG = in.data(0, 0, 0, 1);
@@ -164,7 +170,8 @@ void convertCImgtoDImg(const cimg_library::CImg<float>& in, DImg& out, bool sixt
     }
     else if (in.spectrum() == 2) // Gray levels + Alpha
     {
-        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert CImg to DImg: Gray+Alpha image" << "(" << (sixteenBit+1) * 8 << "bits)";
+        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert CImg to DImg: Gray+Alpha image"
+                                            << "(" << (sixteenBit+1) * 8 << "bits)";
 
         const float* src  = in.data(0, 0, 0, 0);
         const float* srcA = in.data(0, 0, 0, 1);
@@ -206,7 +213,8 @@ void convertCImgtoDImg(const cimg_library::CImg<float>& in, DImg& out, bool sixt
     }
     else // Gray levels
     {
-        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert CImg to DImg: Gray image" << "(" << (sixteenBit+1) * 8 << "bits)";
+        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert CImg to DImg: Gray image"
+                                            << "(" << (sixteenBit+1) * 8 << "bits)";
 
         const float* src  = in.data(0, 0, 0, 0);
         int height        = out.height();
@@ -263,7 +271,8 @@ void convertDImgtoCImg(const DImg& in, cimg_library::CImg<float>& out)
         dstA = out.data(0, 0, 0, 3);
     }
 
-    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert DImg to CImg:" << (in.sixteenBit() + 1) * 8 << "bits image"
+    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert DImg to CImg:"
+                                        << (in.sixteenBit() + 1) * 8 << "bits image"
                                         << "with alpha channel:" << in.hasAlpha();
 
     for (int y = 0 ; y < h ; ++y)
@@ -340,8 +349,8 @@ void getLayersExtent(int* width,
     qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "H=" << *height;
 }
 
-void getCroppedImages(cimg_library::CImgList<gmic_pixel_type> & images,
-                      cimg_library::CImgList<char> & imageNames,
+void getCroppedImages(cimg_library::CImgList<gmic_pixel_type>& images,
+                      cimg_library::CImgList<char>& imageNames,
                       double x,
                       double y,
                       double width,

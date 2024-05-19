@@ -1,6 +1,6 @@
 # Some useful cmake macros for general purposes
 #
-# Copyright (c) 2010-2023 by Gilles Caulier, <caulier dot gilles at gmail dot com>
+# Copyright (c) 2010-2024 by Gilles Caulier, <caulier dot gilles at gmail dot com>
 #
 # G'MIC-Qt is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
