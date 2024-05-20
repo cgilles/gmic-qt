@@ -1,8 +1,8 @@
 diff --git a/src/DialogSettings.cpp b/src/DialogSettings.cpp
-index a30c403..09ae59f 100644
+index 206a6a4..bf6b5cb 100644
 --- a/src/DialogSettings.cpp
 +++ b/src/DialogSettings.cpp
-@@ -109,6 +109,7 @@ DialogSettings::DialogSettings(QWidget * parent) : QDialog(parent), ui(new Ui::D
+@@ -114,6 +114,7 @@ DialogSettings::DialogSettings(QWidget * parent) : QDialog(parent), ui(new Ui::D
    connect(ui->outputMessages, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DialogSettings::onOutputMessageModeChanged);
    connect(ui->cbNotifyFailedUpdate, &QCheckBox::toggled, this, &DialogSettings::onNotifyStartupUpdateFailedToggle);
  
@@ -10,7 +10,7 @@ index a30c403..09ae59f 100644
  #if QT_VERSION_GTE(6, 0, 0)
    ui->cbHighDPI->hide();
    ui->labelHighDPI->hide();
-@@ -116,6 +117,10 @@ DialogSettings::DialogSettings(QWidget * parent) : QDialog(parent), ui(new Ui::D
+@@ -121,6 +122,10 @@ DialogSettings::DialogSettings(QWidget * parent) : QDialog(parent), ui(new Ui::D
    ui->cbHighDPI->setChecked(Settings::highDPIEnabled());
    connect(ui->cbHighDPI, &QCheckBox::toggled, this, &DialogSettings::onHighDPIToggled);
  #endif
