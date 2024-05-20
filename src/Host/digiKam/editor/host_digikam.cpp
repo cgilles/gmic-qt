@@ -57,19 +57,27 @@ namespace GmicQtHost
 
 } // namespace GmicQtHost
 
-// Helper method for DImg to CImg container conversions
+// Helper methods for DImg to CImg container conversions
 
 namespace
 {
 
 inline unsigned char float2uchar_bounded(const float& in)
 {
-    return (in < 0.0f) ? 0 : ((in > 255.0f) ? 255 : static_cast<unsigned char>(in));
+    return (
+            (in < 0.0f) ? 0
+                        : (in > 255.0f) ? 255
+                                        : static_cast<unsigned char>(in)
+           );
 }
 
 inline unsigned short float2ushort_bounded(const float& in)
 {
-    return (in < 0.0f) ? 0 : ((in > 65535.0f) ? 65535 : static_cast<unsigned short>(in));
+    return (
+            (in < 0.0f) ? 0
+                        : (in > 65535.0f) ? 65535
+                                          : static_cast<unsigned short>(in)
+           );
 }
 
 void convertCImgtoDImg(const cimg_library::CImg<float>& in, DImg& out, bool sixteenBit)
@@ -419,7 +427,8 @@ void outputImages(cimg_library::CImgList<gmic_pixel_type>& images,
         DImg dest;
         convertCImgtoDImg(images[0], dest, iface.originalSixteenBit());
 
-        // See bug #462137 : force to save current filter applied to the image to store settings in history.
+        // See bug #462137 : force to save current filter applied
+        // to the image to store settings in history.
 
         if (DigikamEditorGmicQtPlugin::s_mainWindow)
         {

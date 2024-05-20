@@ -49,7 +49,7 @@ class GMicQtWindow : public GmicQt::MainWindow
 public:
 
     explicit GMicQtWindow(DPlugin* const tool, QWidget* const parent);
-    ~GMicQtWindow()                     override = default;
+    ~GMicQtWindow()                     override;
 
     void saveParameters();
 
@@ -65,14 +65,8 @@ private Q_SLOTS:
 
 private:
 
-    QString  m_hostName;
-    QString  m_hostOrg;
-    QString  m_hostDom;
-    QString  m_plugName;
-    QString  m_plugOrg;
-    QString  m_plugDom;
-
-    DPlugin* m_tool = nullptr;
+    class Private;
+    Private* const d = nullptr;
 };
 
 } // namespace DigikamEditorGmicQtPlugin

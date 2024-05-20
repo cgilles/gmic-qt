@@ -46,14 +46,30 @@
 namespace DigikamEditorGmicQtPlugin
 {
 
+class Q_DECL_HIDDEN GMicQtWindow::Private
+{
+public:
+
+    explicit Private(DPlugin*const tool)
+        : plugTool(tool)
+    {
+    }
+
+    QString  hostOrg  = QCoreApplication::organizationName();
+    QString  hostDom  = QCoreApplication::organizationDomain();
+    QString  hostName = QCoreApplication::applicationName();
+
+    QString  plugName;
+    QString  plugOrg;
+    QString  plugDom;
+
+    DPlugin* plugTool = nullptr;
+};
+
 GMicQtWindow::GMicQtWindow(DPlugin*const tool, QWidget* const parent)
     : GmicQt::MainWindow(parent),
-      m_tool            (tool)
+      d                 (new Private(tool))
 {
-    m_hostOrg               = QCoreApplication::organizationName();
-    m_hostDom               = QCoreApplication::organizationDomain();
-    m_hostName              = QCoreApplication::applicationName();
-
     QHBoxLayout* const hlay = findChild<QHBoxLayout*>("horizontalLayout");
 
     if (hlay)
@@ -87,9 +103,14 @@ GMicQtWindow::GMicQtWindow(DPlugin*const tool, QWidget* const parent)
     }
 }
 
+GMicQtWindow::~GMicQtWindow()
+{
+    delete d;
+}
+
 void GMicQtWindow::slotAboutPlugin()
 {
-    QPointer<DPluginAboutDlg> dlg = new DPluginAboutDlg(m_tool);
+    QPointer<DPluginAboutDlg> dlg = new DPluginAboutDlg(d->plugTool);
     dlg->exec();
     delete dlg;
 }
@@ -97,9 +118,9 @@ void GMicQtWindow::slotAboutPlugin()
 void GMicQtWindow::slotOpenWebSite()
 {
     openOnlineDocumentation(
-                            m_tool->handbookSection(),
-                            m_tool->handbookChapter(),
-                            m_tool->handbookReference()
+                            d->plugTool->handbookSection(),
+                            d->plugTool->handbookChapter(),
+                            d->plugTool->handbookReference()
                            );
 }
 
@@ -110,33 +131,33 @@ void GMicQtWindow::saveParameters()
 
 void GMicQtWindow::showEvent(QShowEvent* event)
 {
-    if (m_plugOrg.isEmpty())
+    if (d->plugOrg.isEmpty())
     {
-        m_plugOrg  = QCoreApplication::organizationName();
+        d->plugOrg  = QCoreApplication::organizationName();
     }
 
-    if (m_plugDom.isEmpty())
+    if (d->plugDom.isEmpty())
     {
-        m_plugDom  = QCoreApplication::organizationDomain();
+        d->plugDom  = QCoreApplication::organizationDomain();
     }
 
-    if (m_plugName.isEmpty())
+    if (d->plugName.isEmpty())
     {
-        m_plugName = QCoreApplication::applicationName();
+        d->plugName = QCoreApplication::applicationName();
     }
 
-    QCoreApplication::setOrganizationName(m_plugOrg);
-    QCoreApplication::setOrganizationDomain(m_plugDom);
-    QCoreApplication::setApplicationName(m_plugName);
+    QCoreApplication::setOrganizationName(d->plugOrg);
+    QCoreApplication::setOrganizationDomain(d->plugDom);
+    QCoreApplication::setApplicationName(d->plugName);
 
     QWidget::showEvent(event);
 }
 
 void GMicQtWindow::closeEvent(QCloseEvent* event)
 {
-    QCoreApplication::setOrganizationName(m_hostOrg);
-    QCoreApplication::setOrganizationDomain(m_hostDom);
-    QCoreApplication::setApplicationName(m_hostName);
+    QCoreApplication::setOrganizationName(d->hostOrg);
+    QCoreApplication::setOrganizationDomain(d->hostDom);
+    QCoreApplication::setApplicationName(d->hostName);
 
     QWidget::closeEvent(event);
 }
