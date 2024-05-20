@@ -1,8 +1,8 @@
 diff --git a/src/FilterSelector/FiltersPresenter.cpp b/src/FilterSelector/FiltersPresenter.cpp
-index 9e43caa..e021194 100644
+index 3d2991c..1a0c2a4 100644
 --- a/src/FilterSelector/FiltersPresenter.cpp
 +++ b/src/FilterSelector/FiltersPresenter.cpp
-@@ -90,6 +90,7 @@ void FiltersPresenter::rebuildFilterViewWithSelection(const QList<QString> & key
+@@ -91,6 +91,7 @@ void FiltersPresenter::rebuildFilterViewWithSelection(const QList<QString> & key
    _filtersView->clear();
    _filtersView->disableModel();
    for (const FiltersModel::Filter & filter : _filtersModel) {
@@ -11,7 +11,7 @@ index 9e43caa..e021194 100644
        _filtersView->addFilter(filter.name(), filter.hash(), filter.path(), filter.isWarning());
      }
 diff --git a/src/HeadlessProcessor.cpp b/src/HeadlessProcessor.cpp
-index de6dc90..53a141f 100644
+index f10efc3..c11d69f 100644
 --- a/src/HeadlessProcessor.cpp
 +++ b/src/HeadlessProcessor.cpp
 @@ -267,7 +267,7 @@ void HeadlessProcessor::endApplication(const QString & errorMessage)
