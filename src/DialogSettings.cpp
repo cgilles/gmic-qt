@@ -92,6 +92,10 @@ DialogSettings::DialogSettings(QWidget * parent) : QDialog(parent), ui(new Ui::D
   ui->cbNativeFileDialogs->setChecked(Settings::nativeFileDialogs());
   ui->cbNativeFileDialogs->setToolTip(tr("Check to use Native/OS file dialog, uncheck to use Qt's"));
   ui->cbShowLogos->setChecked(Settings::visibleLogos());
+#ifdef _GMIC_QT_DISABLE_LOGO_
+  ui->line->setVisible(false);
+  ui->cbShowLogos->setVisible(false);
+#endif
   ui->sbPreviewTimeout->setValue(Settings::previewTimeout());
   ui->cbPreviewZoom->setChecked(Settings::previewZoomAlwaysEnabled());
   ui->cbNotifyFailedUpdate->setChecked(Settings::notifyFailedStartupUpdate());
