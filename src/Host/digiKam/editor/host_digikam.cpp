@@ -377,7 +377,7 @@ void getCroppedImages(cimg_library::CImgList<gmic_pixel_type>& images,
 
     ImageIface iface;
     DImg* const input_image = iface.original();
-    const bool entireImage  = ((x < 0) && (y < 0) && (width < 0) && (height < 0));
+    const bool entireImage  = ((x < 0.0) && (y < 0.0) && (width < 0.0) && (height < 0.0));
 
     if (entireImage)
     {
