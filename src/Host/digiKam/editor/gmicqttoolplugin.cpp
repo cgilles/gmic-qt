@@ -152,11 +152,11 @@ QList<DPluginAuthor> GmicQtToolPlugin::authors() const
                              QString::fromUtf8("(C) 2019-2024"))
             << DPluginAuthor(QString::fromUtf8("Sébastien Fourey"),
                              QString::fromUtf8("Sebastien dot Fourey at ensicaen dot fr"),
-                             QString::fromUtf8("(C) 2017-2023"),
+                             QString::fromUtf8("(C) 2017-2024"),
                              QString::fromUtf8("G'MIC plugin"))
             << DPluginAuthor(QString::fromUtf8("David Tschumperlé"),
                              QString::fromUtf8("David dot Tschumperle at ensicaen dot fr"),
-                             QString::fromUtf8("(C) 2008-2023"),
+                             QString::fromUtf8("(C) 2008-2024"),
                              QString::fromUtf8("G'MIC core"))
             ;
 }
