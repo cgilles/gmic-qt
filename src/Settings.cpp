@@ -131,7 +131,11 @@ void Settings::setVisibleLogos(bool on)
 
 bool Settings::darkThemeEnabled()
 {
+#ifdef _GMIC_QT_DISABLE_THEMING_
+  return GmicQtHost::DarkThemeIsDefault;
+#else
   return _darkThemeEnabled;
+#endif
 }
 
 void Settings::setDarkThemeEnabled(bool on)

@@ -1,5 +1,5 @@
 diff --git a/src/DialogSettings.cpp b/src/DialogSettings.cpp
-index a30c403..fec5da0 100644
+index 6c1e6b9..206a6a4 100644
 --- a/src/DialogSettings.cpp
 +++ b/src/DialogSettings.cpp
 @@ -84,6 +84,9 @@ DialogSettings::DialogSettings(QWidget * parent) : QDialog(parent), ui(new Ui::D
@@ -39,10 +39,10 @@ index a30c403..fec5da0 100644
    ui->tabWidget->setCurrentIndex(0);
  }
 diff --git a/src/FilterParameters/BoolParameter.cpp b/src/FilterParameters/BoolParameter.cpp
-index 41a5f04..619a480 100644
+index ffa324e..a9dfb04 100644
 --- a/src/FilterParameters/BoolParameter.cpp
 +++ b/src/FilterParameters/BoolParameter.cpp
-@@ -63,12 +63,14 @@ bool BoolParameter::addTo(QWidget * widget, int row)
+@@ -64,12 +64,14 @@ bool BoolParameter::addTo(QWidget * widget, int row)
    _checkBox = new QCheckBox(widget);
    _checkBox->setChecked(_value);
    _label = new QLabel(_name, widget);
@@ -58,10 +58,10 @@ index 41a5f04..619a480 100644
    _grid->addWidget(_checkBox, row, 1, 1, 2);
    connectCheckBox();
 diff --git a/src/FilterParameters/FloatParameter.cpp b/src/FilterParameters/FloatParameter.cpp
-index 01a01c6..4171638 100644
+index fb271f0..4d9a022 100644
 --- a/src/FilterParameters/FloatParameter.cpp
 +++ b/src/FilterParameters/FloatParameter.cpp
-@@ -72,12 +72,14 @@ bool FloatParameter::addTo(QWidget * widget, int row)
+@@ -73,12 +73,14 @@ bool FloatParameter::addTo(QWidget * widget, int row)
    _slider->setMinimumWidth(SLIDER_MIN_WIDTH);
    _slider->setRange(0, SLIDER_MAX_RANGE);
    _slider->setValue(static_cast<int>(SLIDER_MAX_RANGE * (_value - _min) / (_max - _min)));
@@ -77,10 +77,10 @@ index 01a01c6..4171638 100644
    _spinBox = new CustomDoubleSpinBox(widget, _min, _max);
    _spinBox->setSingleStep(double(_max - _min) / 100.0);
 diff --git a/src/FilterParameters/IntParameter.cpp b/src/FilterParameters/IntParameter.cpp
-index 0bdcba7..2a657c0 100644
+index 2af87cb..bc0f77c 100644
 --- a/src/FilterParameters/IntParameter.cpp
 +++ b/src/FilterParameters/IntParameter.cpp
-@@ -80,12 +80,14 @@ bool IntParameter::addTo(QWidget * widget, int row)
+@@ -81,12 +81,14 @@ bool IntParameter::addTo(QWidget * widget, int row)
  
    _spinBox = new CustomSpinBox(widget, _min, _max);
    _spinBox->setValue(_value);
@@ -131,7 +131,7 @@ index fad7b0a..7f6d317 100644
    return true;
  }
 diff --git a/src/MainWindow.cpp b/src/MainWindow.cpp
-index 7cbe3bd..1f5e8f6 100644
+index d48e095..23073c8 100644
 --- a/src/MainWindow.cpp
 +++ b/src/MainWindow.cpp
 @@ -275,6 +275,7 @@ void MainWindow::setIcons()
@@ -150,7 +150,7 @@ index 7cbe3bd..1f5e8f6 100644
  
  void MainWindow::setPluginParameters(const RunParameters & parameters)
  {
-@@ -1079,9 +1081,11 @@ void MainWindow::loadSettings()
+@@ -1076,9 +1078,11 @@ void MainWindow::loadSettings()
    if (settings.value("Config/PreviewPosition", "Left").toString() == "Left") {
      setPreviewPosition(PreviewPosition::Left);
    }
@@ -162,7 +162,7 @@ index 7cbe3bd..1f5e8f6 100644
    if (!Settings::visibleLogos()) {
      ui->logosLabel->hide();
    }
-@@ -1316,12 +1320,14 @@ bool MainWindow::askUserForGTKFavesImport()
+@@ -1315,12 +1319,14 @@ bool MainWindow::askUserForGTKFavesImport()
                           QMessageBox::Yes | QMessageBox::No, this);
    messageBox.setDefaultButton(QMessageBox::Yes);
    QCheckBox * cb = new QCheckBox(tr("Don't ask again"));
@@ -178,10 +178,10 @@ index 7cbe3bd..1f5e8f6 100644
    int choice = messageBox.exec();
    if (choice != QMessageBox::Yes) {
 diff --git a/src/MainWindow.h b/src/MainWindow.h
-index dcc76e6..545bac0 100644
+index e7ed69d..ea16e23 100644
 --- a/src/MainWindow.h
 +++ b/src/MainWindow.h
-@@ -71,7 +71,9 @@ public:
+@@ -70,7 +70,9 @@ public:
    explicit MainWindow(QWidget * parent = nullptr);
    ~MainWindow() override;
    void updateFiltersFromSources(int ageLimit, bool useNetwork);
@@ -192,10 +192,10 @@ index dcc76e6..545bac0 100644
  
  public slots:
 diff --git a/src/Settings.cpp b/src/Settings.cpp
-index 00ec64b..5e9e78e 100644
+index 4764218..0640f04 100644
 --- a/src/Settings.cpp
 +++ b/src/Settings.cpp
-@@ -129,7 +129,11 @@ void Settings::setVisibleLogos(bool on)
+@@ -131,7 +131,11 @@ void Settings::setVisibleLogos(bool on)
  
  bool Settings::darkThemeEnabled()
  {
@@ -208,7 +208,7 @@ index 00ec64b..5e9e78e 100644
  
  void Settings::setDarkThemeEnabled(bool on)
 diff --git a/src/Widgets/InOutPanel.cpp b/src/Widgets/InOutPanel.cpp
-index 6d77179..4fc20cd 100644
+index 2a30f99..535ba84 100644
 --- a/src/Widgets/InOutPanel.cpp
 +++ b/src/Widgets/InOutPanel.cpp
 @@ -157,10 +157,12 @@ void InOutPanel::onResetButtonClicked()
@@ -218,7 +218,7 @@ index 6d77179..4fc20cd 100644
 +#ifndef _GMIC_QT_DISABLE_THEMING_
  void InOutPanel::setDarkTheme()
  {
-   ui->tbReset->setIcon(LOAD_ICON("view-refresh"));
+   ui->tbReset->setIcon(IconLoader::load("view-refresh"));
  }
 +#endif
  

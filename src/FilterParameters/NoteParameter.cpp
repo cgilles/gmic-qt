@@ -88,12 +88,14 @@ bool NoteParameter::initFromText(const QString & /* filterName */, const char * 
   _text.remove(QRegularExpression("^\"")).remove(QRegularExpression("\"$")).replace(QString("\\\""), "\"");
   _text.replace(QString("\\n"), "<br/>");
 
+#ifndef _GMIC_QT_DISABLE_THEMING_
   if (Settings::darkThemeEnabled()) {
     _text.replace(QRegularExpression("color\\s*=\\s*\"purple\""), QString("color=\"#ff00ff\""));
     _text.replace(QRegularExpression("foreground\\s*=\\s*\"purple\""), QString("foreground=\"#ff00ff\""));
     _text.replace(QRegularExpression("color\\s*=\\s*\"blue\""), QString("color=\"#9b9bff\""));
     _text.replace(QRegularExpression("foreground\\s*=\\s*\"blue\""), QString("foreground=\"#9b9bff\""));
   }
+#endif
 
   _text.replace(QRegularExpression("color\\s*=\\s*\""), QString("style=\"color:"));
   _text.replace(QRegularExpression("foreground\\s*=\\s*\""), QString("style=\"color:"));
