@@ -83,7 +83,10 @@ int _CRT_glob = 0; // Disable globbing for msys
 int main(int argc, char **argv) {
 
   // Set default output messages stream.
-  const bool is_debug = cimg_option("-debug",false,0) || cimg_option("debug",false,0);
+  const bool
+    is_debug = cimg_option("-debug",false,0) || cimg_option("debug",false,0),
+    is_help = (argc==2 || argc==3) && (!std::strcmp(argv[1],"help") || !std::strcmp(argv[1],"-help") ||
+                                       !std::strcmp(argv[1],"h") || !std::strcmp(argv[1],"-h"));
   cimg::output(is_debug?stdout:stderr);
 
   // Set fallback for segfault signals.
@@ -112,15 +115,14 @@ int main(int argc, char **argv) {
   // Declare main G'MIC instance.
   static bool is_abort;
   gmic gmic_instance((char*)0,(char*)0,true,(float*)0,&is_abort,(gmic_pixel_type)0);
+  gmic_instance.is_debug = is_debug;
   gmic_instance.set_variable("_host",0,"cli");
-  gmic_instance.add_commands("cli_start : ");
-
-  // Load startup command files.
-  CImg<char> commands_user, commands_update, filename_update;
-  bool is_invalid_userfile = false, is_invalid_updatefile = false;
-  char sep = 0;
+  gmic_instance.add_commands("cli_start:");
 
   // Import update file (from resources directory).
+  CImg<char> filename_update, commands_update;
+  bool is_invalid_updatefile = false;
+  char sep = 0;
   filename_update.assign(1024);
   cimg_snprintf(filename_update,filename_update.width(),"%supdate%u.gmic",
                 gmic::path_rc(),gmic_version);
@@ -138,6 +140,8 @@ int main(int argc, char **argv) {
   commands_update.assign();
 
   // Import user file (in parent of resources directory).
+  CImg<char> commands_user;
+  bool is_invalid_userfile = false;
   const char *const filename_user = gmic::path_user();
   try { commands_user.load_raw(filename_user); }
   catch (...) {}
@@ -150,7 +154,7 @@ int main(int argc, char **argv) {
   // Convert 'argv' into G'MIC command line.
   CImgList<char> items;
   if (argc==1) // When no args have been specified
-    CImg<char>::string("l[] cli_noarg onfail done").move_to(items);
+    CImg<char>::string("l[] { cli_noarg onfail }").move_to(items);
   else {
     for (int l = 1; l<argc; ++l) { // Split argv as items
       if (std::strchr(argv[l],' ')) {
@@ -176,17 +180,17 @@ int main(int argc, char **argv) {
             }
           }
           if (is_command_file) {
-            bool allow_entrypoint = false;
+            bool allow_main_ = false;
             gmic gi(0,0,false,0,0,(gmic_pixel_type)0);
-            gi.add_commands(gmic_file,argv[1],is_debug,0,0,&allow_entrypoint);
-            if (allow_entrypoint && argc==3) { // Check if command '_main_' has arguments
+            gi.add_commands(gmic_file,argv[1],is_debug,0,0,&allow_main_);
+            if (allow_main_ && argc==3) { // Check if command '_main_' has arguments
               const unsigned int hash = (int)gmic::hashcode("_main_",false);
               unsigned int ind = 0;
               if (gmic::search_sorted("_main_",gi.commands_names[hash],
                                       gi.commands_names[hash].size(),ind)) // Command found
-                allow_entrypoint = (bool)gi.commands_has_arguments[hash](ind,0);
+                allow_main_ = (bool)gi.commands_has_arguments[hash](ind,0);
             }
-            gmic_instance.allow_entrypoint = allow_entrypoint;
+            gmic_instance.allow_main_ = allow_main_;
           }
           std::fclose(gmic_file);
         }
@@ -196,9 +200,7 @@ int main(int argc, char **argv) {
     // Determine initial verbosity.
     const char *const s_verbosity = std::getenv("GMIC_VERBOSITY");
     if (!s_verbosity || std::sscanf(s_verbosity,"%d%c",&gmic_instance.verbosity,&sep)!=1)
-      gmic_instance.verbosity = gmic_instance.allow_entrypoint?0:
-        (argc==2 || argc==3) && (!std::strcmp(argv[1],"help") || !std::strcmp(argv[1],"-help") ||
-                                 !std::strcmp(argv[1],"h") || !std::strcmp(argv[1],"-h"))?0:
+      gmic_instance.verbosity = gmic_instance.allow_main_?0:is_help?0:
         argc==2 && (!std::strcmp(argv[1],"version") || !std::strcmp(argv[1],"-version"))?0:1;
   }
 
@@ -229,6 +231,9 @@ int main(int argc, char **argv) {
   try {
     CImgList<gmic_pixel_type> images;
     CImgList<char> images_names;
+    if (is_help && !cimg::is_file(filename_update.data())) {
+      images.insert(gmic::stdlib); CImg<char>::string("stdlib").move_to(images_names);
+    }
     gmic_instance.run(commands_line.data(),images,images_names);
   } catch (gmic_exception &e) {
     int error_code = 0;
@@ -256,11 +261,13 @@ int main(int argc, char **argv) {
         CImgList<gmic_pixel_type> images;
         CImgList<char> images_names;
         images.insert(gmic::stdlib);
+        CImg<char>::string("stdlib").move_to(images_names);
         CImg<char> tmp_line(1024);
         cimg_snprintf(tmp_line,tmp_line.width(),
-                      "l[] i raw:\"%s\",uint8 m \"%s\" onfail rm done "
-                      "l[] i raw:\"%s\",uint8 m \"%s\" onfail rm done "
-                      "rv help \"%s\",0",
+                      "cli_start , "
+                      "l[] { i raw:\"%s\",uint8 m \"%s\" onfail rm } "
+                      "l[] { i raw:\"%s\",uint8 m \"%s\" onfail rm } "
+                      "rv help \"%s\"",
                       filename_update.data(),filename_update.data(),
                       filename_user,filename_user,
                       e.command());

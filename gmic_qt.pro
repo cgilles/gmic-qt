@@ -55,7 +55,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 TEMPLATE = app
 QT += widgets network
-CONFIG	+= qt c++17
+CONFIG	+= qt c++17 strict_c++
 CONFIG	+= warn_on
 QT_CONFIG -= no-pkg-config
 CONFIG += link_pkgconfig
@@ -168,21 +168,32 @@ equals( COMPILER, "clang" ) {
   DEFINES += gmic_prerelease="\\\"$$PRERELEASE\\\""
 }
 
-!win32 {
- LIBS += -lfftw3_threads
- DEFINES += cimg_display=1
-}
+LIBS += -lfftw3_threads
 
 win32 {
- DEFINES += _IS_WINDOWS_
- LIBS += -mwindows -lpthread -DPSAPI_VERSION=1 -lpsapi -lgdi32
- DEFINES += cimg_display=2
+  DEFINES += _IS_WINDOWS_
+  DEFINES += cimg_display=2
+  LIBS += -mwindows -lpthread -DPSAPI_VERSION=1 -lpsapi -lgdi32
+  message( Windows/GDI32 platform )
 }
 
-linux {
-  DEFINES += _IS_LINUX_
+unix:!macx {
+  DEFINES += _IS_UNIX_
+  DEFINES += cimg_display=1
   PKGCONFIG += x11
-  message( Linux platform )
+  message( Unix/X11 platform )
+}
+
+macx {
+  DEFINES += _IS_MACOS_
+  DEFINES += cimg_display=0
+  ICON = icons/application/gmic_qt.icns
+  message( macOS platform )
+}
+
+!win32:!unix:!macx {
+  DEFINES += cimg_display=0
+  message( Unknown platform )
 }
 
 equals( HOST, "gimp")|equals( HOST, "gimp3") {
@@ -308,6 +319,7 @@ HEADERS +=  \
   src/FilterSelector/FilterTagMap.h \
   src/CroppedImageListProxy.h \
   src/CroppedActiveLayerProxy.h \
+  src/FilterGuiDynamismCache.h \
   src/FilterSyncRunner.h \
   src/FilterThread.h \
   src/FilterTextTranslator.h \
@@ -388,6 +400,7 @@ SOURCES += \
   src/FilterSelector/FilterTagMap.cpp \
   src/CroppedImageListProxy.cpp \
   src/CroppedActiveLayerProxy.cpp \
+  src/FilterGuiDynamismCache.cpp \
   src/FilterSyncRunner.cpp \
   src/FilterThread.cpp \
   src/FilterTextTranslator.cpp \
@@ -479,7 +492,7 @@ RESOURCES += wip_translations.qrc
 # Prevent overwriting of these files by lupdate
 # TRANSLATIONS += translations/filters/fr.ts
 
-QMAKE_CXXFLAGS_RELEASE += -Ofast # -O3 -s
+QMAKE_CXXFLAGS_RELEASE += -O3
 QMAKE_LFLAGS_RELEASE += -s
 QMAKE_CXXFLAGS_DEBUG += -Dcimg_verbosity=3
 
@@ -506,6 +519,3 @@ UI_DIR = .ui
 MOC_DIR = .moc
 RCC_DIR = .qrc
 OBJECTS_DIR = .obj
-
-unix:!macx { DEFINES += _IS_UNIX_ }
-macx {  DEFINES += _IS_MACOS_ }

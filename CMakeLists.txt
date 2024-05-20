@@ -13,13 +13,9 @@ add_definitions(-Dcimg_use_cpp11=1)
 option(BUILD_WITH_QT6 "Build with Qt6, else Qt5" OFF)
 
 if(BUILD_WITH_QT6)
-
     set(MIN_QT_VERSION 6.5.0)
-
 else()
-
     set(MIN_QT_VERSION 5.2.0)
-
 endif()
 
 set(CMAKE_AUTOMOC ON)
@@ -49,8 +45,8 @@ else()
   option(ENABLE_DYNAMIC_LINKING "Dynamically link the binaries to the GMIC shared library" OFF)
 
   set (GMIC_LIB_PATH "${GMIC_PATH}" CACHE STRING "Define the path to the GMIC shared library")
-  if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/gmic/src/gmic.cpp")
-  set (GMIC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/gmic/src" CACHE STRING "Define the path to the gmic headers")
+  if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../src/gmic.cpp")
+  set (GMIC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../src" CACHE STRING "Define the path to the gmic headers")
   else()
   set (GMIC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../gmic/src" CACHE STRING "Define the path to the gmic headers")
   endif()
@@ -79,7 +75,6 @@ endif()
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(ENABLE_LTO OFF FORCE)
 endif()
-
 
 if (NOT ENABLE_SYSTEM_GMIC)
   #
@@ -337,14 +332,12 @@ add_definitions(-Dcimg_use_abort)
 add_definitions(-Dcimg_appname=\"gmic\")
 
 if (UNIX)
+    add_definitions(-D_IS_UNIX_)
     if(ANDROID)
         add_definitions(-Dcimg_display=0)
-        add_definitions(-D_IS_UNIX_)
     elseif(NOT APPLE)
         add_definitions(-Dcimg_display=1)
-        add_definitions(-D_IS_LINUX_)
         add_definitions(-Dcimg_use_vt100)
-        add_definitions(-D_IS_UNIX_)
         find_package(X11)
         set(gmic_qt_LIBRARIES
             ${gmic_qt_LIBRARIES}
@@ -358,13 +351,7 @@ if (APPLE)
     add_definitions(-D_IS_MACOS_)
     set(CMAKE_MACOSX_RPATH 1)
     set(BUILD_WITH_INSTALL_RPATH 1)
-    add_definitions(-Wno-macro-redefined -Wno-deprecated-register)
-
-    if(BUILD_WITH_QT6)
-        add_definitions(-mmacosx-version-min=11.3)
-    else()
-        add_definitions(-mmacosx-version-min=10.9)
-    endif()
+    add_definitions(-mmacosx-version-min=10.9 -Wno-macro-redefined -Wno-deprecated-register)
 endif()
 
 if (WIN32)
@@ -397,7 +384,7 @@ elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
     else()
       string(REPLACE "-O2" "" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
       string(REPLACE "-O3" "" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
-      set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast")
+      set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
     endif()
     if (NOT MSVC)
       set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s")
@@ -414,7 +401,7 @@ elseif (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
       string(REPLACE "-O2" "" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
       string(REPLACE "-O3" "" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
       if (NOT ENABLE_SYSTEM_GMIC)
-          set_source_files_properties(${GMIC_PATH}/gmic.cpp PROPERTIES COMPILE_FLAGS "-Ofast")
+          set_source_files_properties(${GMIC_PATH}/gmic.cpp PROPERTIES COMPILE_FLAGS "-O3")
       endif (NOT ENABLE_SYSTEM_GMIC)
       set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -O2")
     endif()
@@ -468,6 +455,7 @@ set (gmic_qt_SRCS
   src/FilterSelector/FiltersView/TreeView.h
   src/FilterSelector/FiltersVisibilityMap.h
   src/FilterSelector/FilterTagMap.h
+  src/FilterGuiDynamismCache.h
   src/FilterSyncRunner.h
   src/FilterTextTranslator.h
   src/FilterThread.h
@@ -558,6 +546,7 @@ set(gmic_qt_SRCS
   src/FilterSelector/FiltersView/TreeView.cpp
   src/FilterSelector/FiltersVisibilityMap.cpp
   src/FilterSelector/FilterTagMap.cpp
+  src/FilterGuiDynamismCache.cpp
   src/FilterSyncRunner.cpp
   src/FilterTextTranslator.cpp
   src/FilterThread.cpp
@@ -792,13 +781,10 @@ elseif (${GMIC_QT_HOST} STREQUAL "8bf")
 	${LCMS2_LIBRARIES}
     )
 
-elseif (${GMIC_QT_HOST} STREQUAL "digikam")
-
-    include("src/Host/digiKam/MacroUtils.cmake")
-    include("src/Host/digiKam/RulesDigikamHost.cmake")
-
 else()
-    message(FATAL_ERROR "GMIC_QT_HOST is not defined as gimp, gimp3, none, paintdotnet or 8bf")
+
+  message(FATAL_ERROR "GMIC_QT_HOST is not defined as gimp, gimp3, none, paintdotnet or 8bf")
+
 endif()
 
 feature_summary(WHAT ALL FATAL_ON_MISSING_REQUIRED_PACKAGES)

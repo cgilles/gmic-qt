@@ -52,7 +52,7 @@
 */
 
 #ifndef gmic_version
-#define gmic_version 322
+#define gmic_version 337
 
 #ifndef gmic_pixel_type
 #define gmic_pixel_type float
@@ -246,9 +246,9 @@ inline double gmic_mp_name(const unsigned int ind, double *const out_str, const 
   return ::gmic_mp_name(ind,out_str,siz,&mp.imglist)
 
 template<typename T>
-inline double gmic_mp_run(char *const str, void *const p_list, const T& pixel_type);
-#define cimg_mp_func_run(str) \
-  return ::gmic_mp_run(str,&mp.imglist,(T)0)
+inline double gmic_mp_run(char *const str, const bool is_parallel_run, void *const p_list, const T& pixel_type);
+#define cimg_mp_func_run(str,is_parallel_run) \
+  return ::gmic_mp_run(str,is_parallel_run,&mp.imglist,(T)0)
 
 template<typename T>
 inline double gmic_mp_store(const double *const ptrs, const unsigned int siz,
@@ -267,7 +267,9 @@ inline double gmic_mp_store(const double *const ptrs, const unsigned int siz,
 #elif cimg_OS==1
 #include <cerrno>
 #include <sys/resource.h>
+#if !defined(__NetBSD__) && !defined(cimg_use_pthread) && cimg_display!=1
 #include <sys/syscall.h>
+#endif
 #include <signal.h>
 
 #endif // #if cimg_OS==2
@@ -293,22 +295,22 @@ struct gmic {
 
   // Constructors.
   gmic();
+  gmic& assign();
+
+  gmic(const gmic& gmic_instance);
+  gmic& assign(const gmic& gmic_instance);
 
   template<typename T>
   gmic(const char *const commands_line, const char *const custom_commands=0, const bool include_stdlib=true,
        float *const p_progress=0, bool *const p_is_abort=0, const T& pixel_type=(T)0);
+  template<typename T>
+  gmic& assign(const char *const commands_line, const char *const custom_commands=0, const bool include_stdlib=true,
+               float *const p_progress=0, bool *const p_is_abort=0, const T& pixel_type=(T)0);
 
   template<typename T>
   gmic(const char *const commands_line,
        gmic_list<T>& images, gmic_list<char>& images_names, const char *const custom_commands=0,
        const bool include_stdlib=true, float *const p_progress=0, bool *const p_is_abort=0);
-
-  gmic& assign();
-
-  template<typename T>
-  gmic& assign(const char *const commands_line, const char *const custom_commands=0, const bool include_stdlib=true,
-               float *const p_progress=0, bool *const p_is_abort=0, const T& pixel_type=(T)0);
-
   template<typename T>
   gmic& assign(const char *const commands_line,
                gmic_list<T>& images, gmic_list<char>& images_names, const char *const custom_commands=0,
@@ -366,7 +368,7 @@ struct gmic {
   static double mp_set(const double *const ptrs, const unsigned int siz, const char *const str, void *const p_list);
   static double mp_name(const unsigned int ind, double *const out_str, const unsigned int siz, void *const p_list);
   template<typename T>
-  static double mp_run(char *const str, void *const p_list, const T& pixel_type);
+  static double mp_run(char *const str, const bool is_parallel_run, void *const p_list, const T& pixel_type);
   template<typename T>
   static double mp_store(const double *const ptrs, const unsigned int siz,
                          const unsigned int w, const unsigned int h, const unsigned int d, const unsigned int s,
@@ -396,10 +398,10 @@ struct gmic {
                            const unsigned int *const variables_sizes=0);
 
   gmic& add_commands(const char *const data_commands, const char *const commands_file=0,
-                     const bool add_debug_info=false, unsigned int *count_new=0,
-                     unsigned int *count_replaced=0, bool *const is_entrypoint=0);
+                     const bool add_debug_info=false,
+                     unsigned int *count_new=0, unsigned int *count_replaced=0, bool *const is_main_=0);
   gmic& add_commands(std::FILE *const file, const char *const filename=0, const bool add_debug_info=false,
-                     unsigned int *count_new=0, unsigned int *count_replaced=0, bool *const is_entrypoint=0);
+                     unsigned int *count_new=0, unsigned int *count_replaced=0, bool *const is_main_=0);
 
   gmic_image<char> callstack2string(const bool _is_debug=false) const;
   gmic_image<char> callstack2string(const gmic_image<unsigned int>& callstack_selection,
@@ -417,13 +419,17 @@ struct gmic {
 
   gmic_list<char> commands_line_to_CImgList(const char *const commands_line);
 
-  template<typename T>
   void _gmic_substitute_args(const char *const argument, const char *const argument0, const char *const command,
-                             const char *const item, const gmic_list<T>& images);
+                             const char *const item);
 
-  gmic& print(const char *format, ...);
-  gmic& error(const bool output_header, const char *format, ...);
+  gmic& print(const gmic_image<unsigned int> *const callstack_selection,
+              const char *format, ...);
+  gmic& warn(const gmic_image<unsigned int> *const callstack_selection,
+             const char *format, ...);
   gmic& debug(const char *format, ...);
+  gmic& error(const bool output_header, const char *format, ...);
+  gmic& error(const bool output_header, const gmic_image<unsigned int> *const callstack_selection,
+              const char *const command, const char *format, ...);
 
   template<typename T>
   gmic_image<char> substitute_item(const char *const source, gmic_list<T>& images, gmic_list<char>& images_names,
@@ -435,33 +441,11 @@ struct gmic {
   void wait_threads(void *const p_gmic_threads, const bool try_abort, const T& pixel_type);
 
   template<typename T>
-  gmic& print(const gmic_list<T>& list, const gmic_image<unsigned int> *const callstack_selection,
-              const char *format, ...);
-
-  template<typename T>
-  gmic& warn(const gmic_list<T>& list, const gmic_image<unsigned int> *const callstack_selection,
-             const bool force_visible, const char *format, ...);
-
-  template<typename T>
-  gmic& error(const bool output_header, const gmic_list<T>& list,
-              const gmic_image<unsigned int> *const callstack_selection,
-              const char *const command, const char *format, ...);
-
-  template<typename T>
   bool check_cond(const char *const expr, gmic_list<T>& images, const char *const command);
 
   template<typename T>
-  gmic& debug(const gmic_list<T>& list, const char *format, ...);
-
-  template<typename T>
-  gmic& print_images(const gmic_list<T>& images, const gmic_list<char>& images_names,
-                     const gmic_image<unsigned int>& selection, const bool is_header=true);
-  template<typename T>
-  gmic& display_images(const gmic_list<T>& images, const gmic_list<char>& images_names,
-                       const gmic_image<unsigned int>& selection, unsigned int *const XYZ,
-                       const bool exit_on_anykey);
-  template<typename T>
-  gmic& display_plots(const gmic_list<T>& images, const gmic_list<char>& images_names,
+  gmic& display_plots(gmic_list<T>& images, gmic_list<char>& images_names,
+                      const unsigned int *const variables_sizes,
                       const gmic_image<unsigned int>& selection, const unsigned int plot_type,
                       const unsigned int vertex_type, const double xmin, const double xmax,
                       const double ymin, const double ymax, const bool exit_on_anykey);
@@ -503,10 +487,10 @@ struct gmic {
 
   float light3d_x, light3d_y, light3d_z, _progress, *progress;
   gmic_uint64 reference_time;
-  unsigned int nb_dowhiles, nb_fordones, nb_foreachdones, nb_repeatdones, nb_carriages_default, nb_carriages_stdout,
-    debug_filename, debug_line, cimg_exception_mode;
+  unsigned int nb_dowhiles, nb_fordones, nb_foreachdones, nb_repeatdones, nb_remaining_fr,
+    nb_carriages_default, nb_carriages_stdout, debug_filename, debug_line, cimg_exception_mode;
   int verbosity, network_timeout;
-  bool allow_entrypoint, is_change, is_debug, is_running, is_start, is_return, is_quit, is_debug_info,
+  bool allow_main_, is_change, is_debug, is_running, is_start, is_return, is_quit, is_debug_info,
     _is_abort, *is_abort, is_abort_thread, is_lbrace_command;
   const char *starting_commands_line;
 };
@@ -571,9 +555,9 @@ inline double gmic_mp_name(const unsigned int ind, double *const out_str, const 
 }
 
 template<typename T>
-inline double gmic_mp_run(char *const str,
+inline double gmic_mp_run(char *const str, const bool is_parallel_run,
                           void *const p_list, const T& pixel_type) {
-  return gmic::mp_run(str,p_list,pixel_type);
+  return gmic::mp_run(str,is_parallel_run,p_list,pixel_type);
 }
 
 template<typename T>

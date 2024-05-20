@@ -250,6 +250,13 @@
                </widget>
               </item>
               <item>
+               <widget class="QToolButton" name="tbRandomizeParameters">
+                <property name="text">
+                 <string>...</string>
+                </property>
+               </widget>
+              </item>
+              <item>
                <widget class="QToolButton" name="tbResetParameters">
                 <property name="text">
                  <string>...</string>
@@ -283,8 +290,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>194</width>
-                 <height>395</height>
+                 <width>271</width>
+                 <height>397</height>
                 </rect>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -482,7 +489,7 @@
      </widget>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1,0,0,0,0,0,0">
+     <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1,0,0,0,0,0,0,0">
       <item>
        <widget class="QPushButton" name="pbSettings">
         <property name="sizePolicy">
@@ -492,7 +499,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Settings...</string>
+         <string>&amp;Settings...</string>
         </property>
        </widget>
       </item>
@@ -520,19 +527,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pbCancel">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>&amp;Cancel</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QPushButton" name="pbFullscreen">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -542,6 +536,32 @@
         </property>
         <property name="text">
          <string>&amp;Fullscreen</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pbClose">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>&amp;Close</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pbCancel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>&amp;Cancel</string>
         </property>
        </widget>
       </item>
@@ -624,7 +644,6 @@
   <tabstop>previewWidget</tabstop>
   <tabstop>cbPreview</tabstop>
   <tabstop>pbCancel</tabstop>
-  <tabstop>pbFullscreen</tabstop>
   <tabstop>pbApply</tabstop>
   <tabstop>pbOk</tabstop>
  </tabstops>
