@@ -29,17 +29,29 @@ string(REPLACE " -fno-exceptions "    " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 string(STRIP "${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS)
 
 if (MSVC)
+
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -EHsc")
+
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+
     if (WIN32)
+
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -EHsc")
+
     else()
+
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions")
+
     endif()
+
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions")
+
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions")
+
 endif()
 
 string(STRIP "${CMAKE_CXX_FLAGS}" ${CMAKE_CXX_FLAGS})
@@ -83,25 +95,33 @@ else()
 endif()
 
 if(NOT QT_QMAKE_EXECUTABLE)
+
     message(FATAL_ERROR "qmake is not found.")
+
 endif()
 
 # execute the command "qmake -query QT_INSTALL_PLUGINS" to get the path of plugins dir.
+
 execute_process(COMMAND ${QT_QMAKE_EXECUTABLE} -query QT_INSTALL_PLUGINS
                 OUTPUT_VARIABLE QT_PLUGINS_DIR
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 if(NOT QT_PLUGINS_DIR)
+
     message(FATAL_ERROR "Qt plugin directory cannot be detected.")
+
 endif()
 
 if(MSVC)
 
-    file(COPY ${CMAKE_SOURCE_DIR}/src/Host/digiKam/translations/ DESTINATION ${CMAKE_SOURCE_DIR}/translations/)
+    file(COPY        ${CMAKE_SOURCE_DIR}/src/Host/digiKam/translations/
+         DESTINATION ${CMAKE_SOURCE_DIR}/translations/)
 
 endif()
 
 # --- Plugins Compilation Rules -----------------------------------------
 
 include(${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/EditorPluginRules.cmake)
+
+# Not yet finalized
 #include(${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/BqmPluginRules.cmake)

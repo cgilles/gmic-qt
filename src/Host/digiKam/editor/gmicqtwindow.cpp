@@ -64,8 +64,10 @@ GMicQtWindow::GMicQtWindow(DPlugin*const tool, QWidget* const parent)
         help->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
         QMenu* const menu          = new QMenu(help);
-        QAction* const webAction   = menu->addAction(QIcon::fromTheme(QLatin1String("globe")), tr("Online Handbook..."));
-        QAction* const aboutAction = menu->addAction(QIcon::fromTheme(QLatin1String("help-about")), tr("About..."));
+        QAction* const webAction   = menu->addAction(QIcon::fromTheme(QLatin1String("globe")),
+                                                     tr("Online Handbook..."));
+        QAction* const aboutAction = menu->addAction(QIcon::fromTheme(QLatin1String("help-about")),
+                                                     tr("About..."));
         help->setMenu(menu);
 
         connect(webAction, SIGNAL(triggered()),
@@ -135,6 +137,7 @@ void GMicQtWindow::closeEvent(QCloseEvent* event)
     QCoreApplication::setOrganizationName(m_hostOrg);
     QCoreApplication::setOrganizationDomain(m_hostDom);
     QCoreApplication::setApplicationName(m_hostName);
+
     QWidget::closeEvent(event);
 }
 

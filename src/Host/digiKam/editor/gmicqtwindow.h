@@ -49,7 +49,7 @@ class GMicQtWindow : public GmicQt::MainWindow
 public:
 
     explicit GMicQtWindow(DPlugin* const tool, QWidget* const parent);
-    ~GMicQtWindow() = default;
+    ~GMicQtWindow()                     override = default;
 
     void saveParameters();
 
