@@ -45,8 +45,8 @@ else()
   option(ENABLE_DYNAMIC_LINKING "Dynamically link the binaries to the GMIC shared library" OFF)
 
   set (GMIC_LIB_PATH "${GMIC_PATH}" CACHE STRING "Define the path to the GMIC shared library")
-  if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../src/gmic.cpp")
-  set (GMIC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../src" CACHE STRING "Define the path to the gmic headers")
+  if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/gmic/src/gmic.cpp")
+  set (GMIC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/gmic/src" CACHE STRING "Define the path to the gmic headers")
   else()
   set (GMIC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../gmic/src" CACHE STRING "Define the path to the gmic headers")
   endif()
@@ -780,6 +780,11 @@ elseif (${GMIC_QT_HOST} STREQUAL "8bf")
     ${gmic_qt_LIBRARIES}
 	${LCMS2_LIBRARIES}
     )
+
+ elseif (${GMIC_QT_HOST} STREQUAL "digikam")
+
+    include("src/Host/digiKam/MacroUtils.cmake")
+    include("src/Host/digiKam/RulesDigikamHost.cmake")
 
 else()
 
