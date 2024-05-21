@@ -27,17 +27,17 @@
 #include <QDataStream>
 #include <QTextStream>
 
-// Local includes
-
-#include "gmicqtwindow.h"
-#include "Common.h"
-#include "Host/GmicQtHost.h"
-#include "gmicqtimageconverter.h"
-
 // digiKam includes
 
 #include "imageiface.h"
 #include "digikam_debug.h"
+
+// Local includes
+
+#include "Common.h"
+#include "Host/GmicQtHost.h"
+#include "gmicqtwindow.h"
+#include "gmicqtimageconverter.h"
 
 namespace DigikamEditorGmicQtPlugin
 {
@@ -48,7 +48,10 @@ extern GMicQtWindow* s_mainWindow;
 
 using namespace DigikamEditorGmicQtPlugin;
 
-// --- GMic-Qt plugin functions ----------------------
+/**
+ * GMic-Qt plugin functions
+ * See documentation from GmicQtHost.h for details.
+ */
 
 namespace GmicQtHost
 {
@@ -73,7 +76,8 @@ void getLayersExtent(int* width,
                      int* height,
                      GmicQt::InputMode mode)
 {
-    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Calling GmicQt getLayersExtent() : InputMode=" << (int)mode;
+    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Calling GmicQt getLayersExtent(): InputMode="
+                                        << (int)mode;
 
     getImageSize(width, height);
 
@@ -101,7 +105,12 @@ void getCroppedImages(cimg_library::CImgList<gmic_pixel_type>& images,
 
     ImageIface iface;
     DImg* const input_image = iface.original();
-    const bool entireImage  = ((x < 0.0) && (y < 0.0) && (width < 0.0) && (height < 0.0));
+    const bool entireImage  = (
+                               (x      < 0.0) &&
+                               (y      < 0.0) &&
+                               (width  < 0.0) &&
+                               (height < 0.0))
+                              ;
 
     if (entireImage)
     {
@@ -118,10 +127,23 @@ void getCroppedImages(cimg_library::CImgList<gmic_pixel_type>& images,
     QByteArray ba = name.toUtf8();
     gmic_image<char>::string(ba.constData()).move_to(imageNames[0]);
 
-    const int ix = static_cast<int>(entireImage ? 0                     : std::floor(x * input_image->width()));
-    const int iy = static_cast<int>(entireImage ? 0                     : std::floor(y * input_image->height()));
-    const int iw = entireImage                  ? input_image->width()  : std::min(static_cast<int>(input_image->width()  - ix), static_cast<int>(1 + std::ceil(width  * input_image->width())));
-    const int ih = entireImage                  ? input_image->height() : std::min(static_cast<int>(input_image->height() - iy), static_cast<int>(1 + std::ceil(height * input_image->height())));
+    const int ix = static_cast<int>(entireImage ? 0
+                                                : std::floor(x * input_image->width()));
+
+    const int iy = static_cast<int>(entireImage ? 0
+                                                : std::floor(y * input_image->height()));
+
+    const int iw = entireImage ? input_image->width()
+                               : std::min(
+                                          static_cast<int>(input_image->width()  - ix),
+                                          static_cast<int>(1 + std::ceil(width  * input_image->width()))
+                                         );
+
+    const int ih = entireImage ? input_image->height()
+                               : std::min(
+                                          static_cast<int>(input_image->height() - iy),
+                                          static_cast<int>(1 + std::ceil(height * input_image->height()))
+                                         );
 
     GMicQtImageConverter::convertDImgtoCImg(input_image->copy(ix, iy, iw, ih), images[0]);
 }
@@ -151,7 +173,7 @@ void outputImages(cimg_library::CImgList<gmic_pixel_type>& images,
         DImg dest;
         GMicQtImageConverter::convertCImgtoDImg(images[0], dest, iface.originalSixteenBit());
 
-        // See bug #462137 : force to save current filter applied
+        // See bug #462137: force to save current filter applied
         // to the image to store settings in history.
 
         if (DigikamEditorGmicQtPlugin::s_mainWindow)
