@@ -53,13 +53,13 @@ Bqm_Processor::Bqm_Processor(QObject* const parent)
       _filterThread(nullptr),
       _gmicImages  (new gmic_library::gmic_list<gmic_pixel_type>)
 {
-  _processingCompletedProperly = false;
-  GmicStdLib::Array            = Updater::getInstance()->buildFullStdlib();
+    _processingCompletedProperly = false;
+    GmicStdLib::Array            = Updater::getInstance()->buildFullStdlib();
 }
 
 Bqm_Processor::~Bqm_Processor()
 {
-  delete _gmicImages;
+    delete _gmicImages;
 }
 
 bool Bqm_Processor::setPluginParameters(const QString& command, const DImg& inImage)
@@ -68,7 +68,7 @@ bool Bqm_Processor::setPluginParameters(const QString& command, const DImg& inIm
 
     if (command.isEmpty())
     {
-        _errorMessage = tr("At least a filter command must be provided.");
+        qCWarning(DIGIKAM_DPLUGIN_EDITOR_LOG) << "The Gmic command is empty.";
         return false;
     }
     else
@@ -81,126 +81,113 @@ bool Bqm_Processor::setPluginParameters(const QString& command, const DImg& inIm
     return true;
 }
 
-const QString& Bqm_Processor::error() const
-{
-  return _errorMessage;
-}
-
 void Bqm_Processor::startProcessing()
 {
-  if (!_errorMessage.isEmpty())
-  {
-    endApplication(_errorMessage);
-  }
+    gmic_list<char> imageNames;
 
-  _singleShotTimer.setInterval(750);
-  _singleShotTimer.setSingleShot(true);
+    _gmicImages->assign(1);
+    imageNames.assign(1);
 
-  connect(&_singleShotTimer, &QTimer::timeout,
-          this, &Bqm_Processor::progressWindowShouldShow);
+    QString name  = QString("pos(0,0),name(%1)").arg("Batch Queue Manager");
+    QByteArray ba = name.toUtf8();
+    gmic_image<char>::string(ba.constData()).move_to(imageNames[0]);
 
-  _singleShotTimer.start();
+    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Processing image size"
+                                        << _inImage.size();
 
-  gmic_list<char> imageNames;
-
-  _gmicImages->assign(1);
-  imageNames.assign(1);
-
-  QString name  = QString("pos(0,0),name(%1)").arg("Batch Queue Manager");
-  QByteArray ba = name.toUtf8();
-  gmic_image<char>::string(ba.constData()).move_to(imageNames[0]);
-
-  DigikamEditorGmicQtPlugin::GMicQtImageConverter::convertDImgtoCImg(_inImage.copy(0, 0,
+    DigikamEditorGmicQtPlugin::GMicQtImageConverter::convertDImgtoCImg(_inImage.copy(0, 0,
                                                                                    _inImage.width(),
                                                                                    _inImage.height()),
-                                                                     *_gmicImages[0]);
+                                                                       *_gmicImages[0]);
 
-  qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << QString::fromUtf8("G'MIC: %1 %2")
-                                         .arg(_command)
-                                         .arg(_arguments);
+    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << QString::fromUtf8("G'MIC: %1 %2")
+                                           .arg(_command)
+                                           .arg(_arguments);
 
-  QString env = QString::fromLatin1("_input_layers=%1").arg((int)DefaultInputMode);
-  env        += QString::fromLatin1(" _output_mode=%1").arg((int)DefaultInputMode);
-  env        += QString::fromLatin1(" _output_messages=%1").arg((int)OutputMessageMode::VerboseConsole);
+    QString env = QString::fromLatin1("_input_layers=%1").arg((int)DefaultInputMode);
+    env        += QString::fromLatin1(" _output_mode=%1").arg((int)DefaultInputMode);
+    env        += QString::fromLatin1(" _output_messages=%1").arg((int)OutputMessageMode::VerboseConsole);
 
-  _filterThread = new FilterThread(this, _command, _arguments, env);
-  _filterThread->swapImages(*_gmicImages);
-  _filterThread->setImageNames(imageNames);
+    _filterThread = new FilterThread(this, _command, _arguments, env);
+    _filterThread->swapImages(*_gmicImages);
+    _filterThread->setImageNames(imageNames);
 
-  _processingCompletedProperly = false;
+    _processingCompletedProperly = false;
 
-  connect(_filterThread, &FilterThread::finished,
-          this, &Bqm_Processor::onProcessingFinished);
+    connect(_filterThread, &FilterThread::finished,
+            this, &Bqm_Processor::onProcessingFinished);
 
-  _timer.setInterval(250);
+    _timer.setInterval(250);
 
-  connect(&_timer, &QTimer::timeout,
-          this, &Bqm_Processor::sendProgressInformation);
+    connect(&_timer, &QTimer::timeout,
+            this, &Bqm_Processor::sendProgressInformation);
 
-  _timer.start();
-  _filterThread->start();
+    _timer.start();
+    _filterThread->start();
 }
 
 QString Bqm_Processor::command() const
 {
-  return _command;
+    return _command;
 }
 
 QString Bqm_Processor::filterName() const
 {
-  return _filterName;
+    return _filterName;
 }
 
-bool Bqm_Processor::processingCompletedProperly()
+bool Bqm_Processor::processingComplete() const
 {
-  return _processingCompletedProperly;
+    return _processingCompletedProperly;
 }
 
 void Bqm_Processor::sendProgressInformation()
 {
-  if (!_filterThread)
-  {
-    return;
-  }
+    if (!_filterThread)
+    {
+        return;
+    }
 
-  float progress = _filterThread->progress();
+    float progress = _filterThread->progress();
 
-  Q_EMIT progression(progress);
+    Q_EMIT progression(progress);
 }
 
 void Bqm_Processor::onProcessingFinished()
 {
-  _timer.stop();
-  QString errorMessage;
-  QStringList status = _filterThread->gmicStatus();
+    _timer.stop();
+    QString errorMessage;
+    QStringList status = _filterThread->gmicStatus();
 
-  if (_filterThread->failed())
-  {
-    errorMessage = _filterThread->errorMessage();
-
-    if (errorMessage.isEmpty())
+    if (_filterThread->failed())
     {
-      errorMessage = tr("Filter execution failed, but with no error message.");
-    }
-  }
-  else
-  {
-    gmic_list<gmic_pixel_type> images = _filterThread->images();
+        errorMessage = _filterThread->errorMessage();
 
-    if (!_filterThread->aborted())
+        if (errorMessage.isEmpty())
+        {
+            errorMessage = QLatin1String("Gmic Filter execution failed without error message.");
+        }
+
+        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << errorMessage;
+    }
+    else
     {
-      DigikamEditorGmicQtPlugin::GMicQtImageConverter::convertCImgtoDImg(images[0],
-                                                                         _outImage,
-                                                                         _inImage.sixteenBit());
+        gmic_list<gmic_pixel_type> images = _filterThread->images();
 
-      _processingCompletedProperly = true;
+        if (!_filterThread->aborted())
+        {
+            DigikamEditorGmicQtPlugin::GMicQtImageConverter::convertCImgtoDImg(images[0],
+                                                                               _outImage,
+                                                                               _inImage.sixteenBit());
+
+            _processingCompletedProperly = true;
+        }
     }
-  }
 
-  _filterThread->deleteLater();
-  _filterThread = nullptr;
+    _filterThread->deleteLater();
+    _filterThread = nullptr;
 
-  endApplication(errorMessage);
+    Q_EMIT done(errorMessage);
 }
 
 DImg Bqm_Processor::outputImage() const
@@ -210,22 +197,10 @@ DImg Bqm_Processor::outputImage() const
 
 void Bqm_Processor::cancel()
 {
-  if (_filterThread)
-  {
-    _filterThread->abortGmic();
-  }
-}
-
-void Bqm_Processor::endApplication(const QString& errorMessage)
-{
-  _singleShotTimer.stop();
-
-  Q_EMIT done(errorMessage);
-
-  if (!errorMessage.isEmpty())
-  {
-    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << errorMessage;
-  }
+    if (_filterThread)
+    {
+        _filterThread->abortGmic();
+    }
 }
 
 } // namespace DigikamBqmGmicQtPlugin

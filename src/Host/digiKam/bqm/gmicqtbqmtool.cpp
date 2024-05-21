@@ -93,6 +93,8 @@ bool GmicQtBqmTool::toolOperations()
 {
     if (!loadToDImg())
     {
+        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GmicQtBqmTool: cannot load image!";
+
         return false;
     }
 
@@ -101,10 +103,11 @@ bool GmicQtBqmTool::toolOperations()
     QString command = QLatin1String("fx_watermark_visible \"digiKam\",0.664,27,60,1,25,0,0.5");
     m_gmicProcessor = new Bqm_Processor(this);
 
-    if (m_gmicProcessor->setPluginParameters(command, image()))
+    if (!m_gmicProcessor->setPluginParameters(command, image()))
     {
         delete m_gmicProcessor;
         m_gmicProcessor = nullptr;
+        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GmicQtBqmTool: cannot setup Gmic command!";
 
         return false;
     }
@@ -116,16 +119,19 @@ bool GmicQtBqmTool::toolOperations()
     connect(m_gmicProcessor, SIGNAL(done(QString)),
             &loop, SLOT(quit()));
 
+    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GmicQtBqmTool: started Gmic command...";
+
     loop.exec();
 
-    QString error = m_gmicProcessor->error();
-
+    bool b  = m_gmicProcessor->processingComplete();
     image() = m_gmicProcessor->outputImage();
 
     delete m_gmicProcessor;
     m_gmicProcessor = nullptr;
 
-    if (!error.isEmpty())
+    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GmicQtBqmTool: Gmic command completed:" << b;
+
+    if (!b)
     {
         return false;
     }

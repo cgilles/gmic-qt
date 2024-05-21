@@ -61,9 +61,8 @@ public:
 
     QString command() const;
     QString filterName() const;
-    bool processingCompletedProperly();
+    bool processingComplete() const;
     bool setPluginParameters(const QString& command, const DImg& inImage);
-    const QString& error() const;
     DImg outputImage() const;
 
 public Q_SLOTS:
@@ -75,13 +74,8 @@ public Q_SLOTS:
 
 Q_SIGNALS:
 
-    void progressWindowShouldShow();
     void done(QString errorMessage);
     void progression(float progress);
-
-private:
-
-    void endApplication(const QString& errorMessage);
 
 private:
 
@@ -91,10 +85,7 @@ private:
     QString                         _filterName;
     QString                         _command;
     QString                         _arguments;
-    QTimer                          _singleShotTimer;
     bool                            _processingCompletedProperly;
-    QString                         _errorMessage;
-    QString                         _hash;
     QVector<bool>                   _gmicStatusQuotedParameters;
 
     DImg                            _inImage;
