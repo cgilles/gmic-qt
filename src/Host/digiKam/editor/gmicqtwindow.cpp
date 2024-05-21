@@ -50,7 +50,7 @@ class Q_DECL_HIDDEN GMicQtWindow::Private
 {
 public:
 
-    explicit Private(DPlugin*const tool)
+    explicit Private(DPlugin* const tool)
         : plugTool(tool)
     {
     }
@@ -66,7 +66,7 @@ public:
     DPlugin* plugTool = nullptr;
 };
 
-GMicQtWindow::GMicQtWindow(DPlugin*const tool, QWidget* const parent)
+GMicQtWindow::GMicQtWindow(DPlugin* const tool, QWidget* const parent)
     : GmicQt::MainWindow(parent),
       d                 (new Private(tool))
 {
@@ -74,6 +74,19 @@ GMicQtWindow::GMicQtWindow(DPlugin*const tool, QWidget* const parent)
 
     if (hlay)
     {
+/*
+        QPushButton* const layers  = new QPushButton(this);
+        layers->setText(tr("Layers..."));
+        layers->setIcon(QIcon::fromTheme(QLatin1String("dialog-layers")));
+        layers->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+
+        connect(layers, SIGNAL(released()),
+                this, SLOT(slotLayersDialog()));
+
+        hlay->insertWidget(0, layers);
+*/
+        // ---
+
         QPushButton* const help    = new QPushButton(this);
         help->setText(tr("Help"));
         help->setIcon(QIcon::fromTheme(QLatin1String("help-browser")));
@@ -100,6 +113,16 @@ GMicQtWindow::GMicQtWindow(DPlugin*const tool, QWidget* const parent)
         {
             hlay->setStretchFactor(lbl, 10);
         }
+        else
+        {
+            qCWarning(DIGIKAM_DPLUGIN_EDITOR_LOG) << "G'MIC-Qt: Cannot found \"messageLabel\" "
+                                                     "label from plugin dialog!";
+        }
+    }
+    else
+    {
+        qCWarning(DIGIKAM_DPLUGIN_EDITOR_LOG) << "G'MIC-Qt: Cannot found \"horizontalLayout\" "
+                                                 "layout from plugin dialog!";
     }
 }
 
@@ -122,6 +145,10 @@ void GMicQtWindow::slotOpenWebSite()
                             d->plugTool->handbookChapter(),
                             d->plugTool->handbookReference()
                            );
+}
+
+void GMicQtWindow::slotLayersDialog()
+{
 }
 
 void GMicQtWindow::saveParameters()

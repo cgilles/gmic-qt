@@ -22,54 +22,46 @@
 *
 */
 
-#ifndef DIGIKAM_GMICQT_WINDOW_H
-#define DIGIKAM_GMICQT_WINDOW_H
+#ifndef DIGIKAM_GMICQT_IMAGE_CONVERTER_H
+#define DIGIKAM_GMICQT_IMAGE_CONVERTER_H
 
-// Qt includes
+// digiKam includes
 
-#include <QString>
-#include <QCloseEvent>
-#include <QShowEvent>
-#include <QWidget>
+#include "dimg.h"
 
 // Local includes
 
-#include "MainWindow.h"
-#include "gmicqttoolplugin.h"
+#include "gmic.h"
 
 using namespace Digikam;
 
 namespace DigikamEditorGmicQtPlugin
 {
 
-class GMicQtWindow : public GmicQt::MainWindow
+/**
+ * Helper methods for Digikam::DImg to CImg image data container conversions and vis-versa.
+ */
+class GMicQtImageConverter
 {
-    Q_OBJECT
 
 public:
 
-    explicit GMicQtWindow(DPlugin* const tool, QWidget* const parent);
-    ~GMicQtWindow()                     override;
+    static void convertCImgtoDImg(const cimg_library::CImg<float>& in,
+                                  DImg& out, bool sixteenBit);
 
-    void saveParameters();
-
-protected:
-
-    void showEvent(QShowEvent* event)   override;
-    void closeEvent(QCloseEvent* event) override;
-
-private Q_SLOTS:
-
-    void slotAboutPlugin();
-    void slotOpenWebSite();
-    void slotLayersDialog();
+    static void convertDImgtoCImg(const DImg& in,
+                                  cimg_library::CImg<float>& out);
 
 private:
 
-    class Private;
-    Private* const d = nullptr;
+    static unsigned char  float2ucharBounded(const float& in);
+    static unsigned short float2ushortBounded(const float& in);
+
+    // Disable
+    GMicQtImageConverter()  = delete;
+    ~GMicQtImageConverter() = delete;
 };
 
 } // namespace DigikamEditorGmicQtPlugin
 
-#endif // DIGIKAM_GMICQT_WINDOW_H
+#endif // DIGIKAM_GMICQT_IMAGE_CONVERTER_H

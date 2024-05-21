@@ -31,6 +31,7 @@ set(gmic_qt_editor_SRCS ${gmic_qt_SRCS}
                         ${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/host_digikam.cpp
                         ${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/gmicqttoolplugin.cpp
                         ${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/gmicqtwindow.cpp
+                        ${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/gmicqtimageconverter.cpp
 )
 
 if(BUILD_WITH_QT6)
@@ -47,6 +48,7 @@ add_definitions(-DGMIC_HOST=digikam)
 add_definitions(-D_GMIC_QT_DISABLE_THEMING_)
 add_definitions(-D_GMIC_QT_DISABLE_HDPI_)
 add_definitions(-D_GMIC_QT_DISABLE_LOGO_)
+
 add_library(Editor_GmicQt_Plugin
             MODULE ${gmic_qt_editor_SRCS} ${gmic_qt_QRC} ${gmic_qt_QM})
 

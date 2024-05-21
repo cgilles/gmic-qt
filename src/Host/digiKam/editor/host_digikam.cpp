@@ -25,7 +25,6 @@
 // Qt includes
 
 #include <QDataStream>
-#include <QString>
 #include <QTextStream>
 
 // Local includes
@@ -33,7 +32,7 @@
 #include "gmicqtwindow.h"
 #include "Common.h"
 #include "Host/GmicQtHost.h"
-#include "gmic.h"
+#include "gmicqtimageconverter.h"
 
 // digiKam includes
 
@@ -47,291 +46,16 @@ extern GMicQtWindow* s_mainWindow;
 
 } // namespace DigikamEditorGmicQtPlugin
 
-using namespace Digikam;
-
-namespace GmicQtHost
-{
-    const QString ApplicationName          = QString("digiKam");
-    const char* const ApplicationShortname = GMIC_QT_XSTRINGIFY(GMIC_HOST);
-    const bool DarkThemeIsDefault          = false;
-
-} // namespace GmicQtHost
-
-// Helper methods for DImg to CImg container conversions
-
-namespace
-{
-
-inline unsigned char float2uchar_bounded(const float& in)
-{
-    return (
-            (in < 0.0f) ? 0
-                        : (in > 255.0f) ? 255
-                                        : static_cast<unsigned char>(in)
-           );
-}
-
-inline unsigned short float2ushort_bounded(const float& in)
-{
-    return (
-            (in < 0.0f) ? 0
-                        : (in > 65535.0f) ? 65535
-                                          : static_cast<unsigned short>(in)
-           );
-}
-
-void convertCImgtoDImg(const cimg_library::CImg<float>& in, DImg& out, bool sixteenBit)
-{
-    Q_ASSERT_X(
-               (in.spectrum() <= 4),
-               "ImageConverter::convert()",
-               QString("bad input spectrum (%1)").arg(in.spectrum()).toLatin1()
-              );
-
-    bool alpha = ((in.spectrum() == 4) || (in.spectrum() == 2));
-    out        = DImg(in.width(), in.height(), sixteenBit, alpha);
-
-    if      (in.spectrum() == 4) // RGB + Alpha
-    {
-        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert CImg to DImg: RGB+Alpha image"
-                                            << "(" << (sixteenBit+1) * 8 << "bits)";
-
-        const float* srcR = in.data(0, 0, 0, 0);
-        const float* srcG = in.data(0, 0, 0, 1);
-        const float* srcB = in.data(0, 0, 0, 2);
-        const float* srcA = in.data(0, 0, 0, 3);
-        int height        = out.height();
-
-        for (int y = 0 ; y < height ; ++y)
-        {
-            int n = in.width();
-
-            if (sixteenBit)
-            {
-                unsigned short* dst = (unsigned short*)out.scanLine(y);
-
-                while (n--)
-                {
-                    dst[2] = float2ushort_bounded(*srcR++) * 256;
-                    dst[1] = float2ushort_bounded(*srcG++) * 256;
-                    dst[0] = float2ushort_bounded(*srcB++) * 256;
-                    dst[3] = float2ushort_bounded(*srcA++) * 256;
-                    dst   += 4;
-                }
-            }
-            else
-            {
-                unsigned char* dst = out.scanLine(y);
-
-                while (n--)
-                {
-                    dst[2] = float2uchar_bounded(*srcR++);
-                    dst[1] = float2uchar_bounded(*srcG++);
-                    dst[0] = float2uchar_bounded(*srcB++);
-                    dst[3] = float2uchar_bounded(*srcA++);
-                    dst   += 4;
-                }
-            }
-        }
-    }
-    else if (in.spectrum() == 3) // RGB
-    {
-        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert CImg to DImg: RGB image"
-                                            << "(" << (sixteenBit+1) * 8 << "bits)";
-
-        const float* srcR = in.data(0, 0, 0, 0);
-        const float* srcG = in.data(0, 0, 0, 1);
-        const float* srcB = in.data(0, 0, 0, 2);
-        int height        = out.height();
-
-        for (int y = 0 ; y < height ; ++y)
-        {
-            int n = in.width();
-
-            if (sixteenBit)
-            {
-                unsigned short* dst = (unsigned short*)out.scanLine(y);
-
-                while (n--)
-                {
-                    dst[2] = float2ushort_bounded(*srcR++) * 256;
-                    dst[1] = float2ushort_bounded(*srcG++) * 256;
-                    dst[0] = float2ushort_bounded(*srcB++) * 256;
-                    dst[3] = 0xFFFF;
-                    dst   += 4;
-                }
-            }
-            else
-            {
-                unsigned char* dst = out.scanLine(y);
-
-                while (n--)
-                {
-                    dst[2] = float2uchar_bounded(*srcR++);
-                    dst[1] = float2uchar_bounded(*srcG++);
-                    dst[0] = float2uchar_bounded(*srcB++);
-                    dst[3] = 0xFF;
-                    dst   += 4;
-                }
-            }
-        }
-    }
-    else if (in.spectrum() == 2) // Gray levels + Alpha
-    {
-        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert CImg to DImg: Gray+Alpha image"
-                                            << "(" << (sixteenBit+1) * 8 << "bits)";
-
-        const float* src  = in.data(0, 0, 0, 0);
-        const float* srcA = in.data(0, 0, 0, 1);
-        int height        = out.height();
-
-        for (int y = 0 ; y < height ; ++y)
-        {
-            int n = in.width();
-
-            if (sixteenBit)
-            {
-                unsigned short* dst = (unsigned short*)out.scanLine(y);
-
-                while (n--)
-                {
-                    dst[2] = float2ushort_bounded(*src) * 256;
-                    dst[1] = float2ushort_bounded(*src) * 256;
-                    dst[0] = float2ushort_bounded(*src) * 256;
-                    dst[3] = float2ushort_bounded(*srcA++) * 256;
-                    src++;
-                    dst   += 4;
-                }
-            }
-            else
-            {
-                unsigned char* dst = out.scanLine(y);
-
-                while (n--)
-                {
-                    dst[2] = float2uchar_bounded(*src);
-                    dst[1] = float2uchar_bounded(*src);
-                    dst[0] = float2uchar_bounded(*src);
-                    dst[3] = float2uchar_bounded(*srcA++);
-                    src++;
-                    dst   += 4;
-                }
-            }
-        }
-    }
-    else // Gray levels
-    {
-        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert CImg to DImg: Gray image"
-                                            << "(" << (sixteenBit+1) * 8 << "bits)";
-
-        const float* src  = in.data(0, 0, 0, 0);
-        int height        = out.height();
-
-        for (int y = 0 ; y < height ; ++y)
-        {
-            int n = in.width();
-
-            if (sixteenBit)
-            {
-                unsigned short* dst = (unsigned short*)out.scanLine(y);
-
-                while (n--)
-                {
-                    dst[2] = float2ushort_bounded(*src) * 256;
-                    dst[1] = float2ushort_bounded(*src) * 256;
-                    dst[0] = float2ushort_bounded(*src) * 256;
-                    dst[3] = 0xFFFF;
-                    src++;
-                    dst   += 4;
-                }
-            }
-            else
-            {
-                unsigned char* dst = out.scanLine(y);
-
-                while (n--)
-                {
-                    dst[2] = float2uchar_bounded(*src);
-                    dst[1] = float2uchar_bounded(*src);
-                    dst[0] = float2uchar_bounded(*src);
-                    dst[3] = 0xFF;
-                    src++;
-                    dst   += 4;
-                }
-            }
-        }
-    }
-}
-
-void convertDImgtoCImg(const DImg& in, cimg_library::CImg<float>& out)
-{
-    const int w = in.width();
-    const int h = in.height();
-    out.assign(w, h, 1, in.hasAlpha() ? 4 : 3);
-
-    float* dstR = out.data(0, 0, 0, 0);
-    float* dstG = out.data(0, 0, 0, 1);
-    float* dstB = out.data(0, 0, 0, 2);
-    float* dstA = nullptr;
-
-    if (in.hasAlpha())
-    {
-        dstA = out.data(0, 0, 0, 3);
-    }
-
-    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert DImg to CImg:"
-                                        << (in.sixteenBit() + 1) * 8 << "bits image"
-                                        << "with alpha channel:" << in.hasAlpha();
-
-    for (int y = 0 ; y < h ; ++y)
-    {
-        if (in.sixteenBit())
-        {
-            const unsigned short* src = (unsigned short*)in.scanLine(y);
-            int n                     = in.width();
-
-            while (n--)
-            {
-                *dstB++ = static_cast<float>(src[0] / 255.0);
-                *dstG++ = static_cast<float>(src[1] / 255.0);
-                *dstR++ = static_cast<float>(src[2] / 255.0);
-
-                if (in.hasAlpha())
-                {
-                    *dstA++ = static_cast<float>(src[3] / 255.0);
-                }
-
-                src    += 4;
-            }
-        }
-        else
-        {
-            const unsigned char* src = in.scanLine(y);
-            int n                    = in.width();
-
-            while (n--)
-            {
-                *dstB++ = static_cast<float>(src[0]);
-                *dstG++ = static_cast<float>(src[1]);
-                *dstR++ = static_cast<float>(src[2]);
-
-                if (in.hasAlpha())
-                {
-                    *dstA++ = static_cast<float>(src[3]);
-                }
-
-                src    += 4;
-            }
-        }
-    }
-}
-
-} // namespace
+using namespace DigikamEditorGmicQtPlugin;
 
 // --- GMic-Qt plugin functions ----------------------
 
 namespace GmicQtHost
 {
+
+const QString ApplicationName          = QString("digiKam");
+const char* const ApplicationShortname = GMIC_QT_XSTRINGIFY(GMIC_HOST);
+const bool DarkThemeIsDefault          = false;
 
 void getImageSize(int* width,
                   int* height)
@@ -399,7 +123,7 @@ void getCroppedImages(cimg_library::CImgList<gmic_pixel_type>& images,
     const int iw = entireImage                  ? input_image->width()  : std::min(static_cast<int>(input_image->width()  - ix), static_cast<int>(1 + std::ceil(width  * input_image->width())));
     const int ih = entireImage                  ? input_image->height() : std::min(static_cast<int>(input_image->height() - iy), static_cast<int>(1 + std::ceil(height * input_image->height())));
 
-    convertDImgtoCImg(input_image->copy(ix, iy, iw, ih), images[0]);
+    GMicQtImageConverter::convertDImgtoCImg(input_image->copy(ix, iy, iw, ih), images[0]);
 }
 
 void applyColorProfile(cimg_library::CImg<gmic_pixel_type>& images)
@@ -425,7 +149,7 @@ void outputImages(cimg_library::CImgList<gmic_pixel_type>& images,
     {
         ImageIface iface;
         DImg dest;
-        convertCImgtoDImg(images[0], dest, iface.originalSixteenBit());
+        GMicQtImageConverter::convertCImgtoDImg(images[0], dest, iface.originalSixteenBit());
 
         // See bug #462137 : force to save current filter applied
         // to the image to store settings in history.
