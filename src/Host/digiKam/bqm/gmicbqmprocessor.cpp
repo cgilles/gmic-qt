@@ -47,6 +47,8 @@ const bool DarkThemeIsDefault          = false;
 
 } // namespace GmicQtHost
 
+using namespace DigikamEditorGmicQtPlugin;
+
 namespace DigikamBqmGmicQtPlugin
 {
 
@@ -63,7 +65,6 @@ public:
     QString                         filterName;
 
     QString                         command;
-    QString                         arguments;
     bool                            completed    = false;
 
     DImg                            inImage;
@@ -93,13 +94,13 @@ bool GmicBqmProcessor::setProcessingCommand(const QString& command)
     if (command.isEmpty())
     {
         qCWarning(DIGIKAM_DPLUGIN_EDITOR_LOG) << "The Gmic command is empty.";
+
         return false;
     }
     else
     {
-        d->filterName = QString::fromLatin1("Custom command (%1)").arg(elided(command, 35));
-        d->command    = "skip 0";
-        d->arguments  = command;
+        d->command    = command;
+        d->filterName = QString::fromLatin1("Custom command (%1)").arg(elided(d->command, 35));
     }
 
     return true;
@@ -119,20 +120,27 @@ void GmicBqmProcessor::startProcessing()
     qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Processing image size"
                                         << d->inImage.size();
 
-    DigikamEditorGmicQtPlugin::GMicQtImageConverter::convertDImgtoCImg(d->inImage.copy(0, 0,
-                                                                                   d->inImage.width(),
-                                                                                   d->inImage.height()),
-                                                                       *d->gmicImages[0]);
+    GMicQtImageConverter::convertDImgtoCImg(
+                                            d->inImage.copy(
+                                                            0, 0,
+                                                            d->inImage.width(),
+                                                            d->inImage.height()
+                                                           ),
+                                            *d->gmicImages[0]
+                                           );
 
-    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << QString::fromUtf8("G'MIC: %1 %2")
-                                           .arg(d->command)
-                                           .arg(d->arguments);
+    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << QString::fromUtf8("G'MIC: %1")
+                                           .arg(d->command);
 
     QString env = QString::fromLatin1("_input_layers=%1").arg((int)DefaultInputMode);
     env        += QString::fromLatin1(" _output_mode=%1").arg((int)DefaultInputMode);
     env        += QString::fromLatin1(" _output_messages=%1").arg((int)OutputMessageMode::VerboseConsole);
 
-    d->filterThread = new FilterThread(this, d->command, d->arguments, env);
+    d->filterThread = new FilterThread(this,
+                                       QLatin1String("skip 0"),
+                                       d->command,
+                                       env);
+
     d->filterThread->swapImages(*d->gmicImages);
     d->filterThread->setImageNames(imageNames);
 
@@ -150,20 +158,6 @@ void GmicBqmProcessor::startProcessing()
     d->filterThread->start();
 }
 
-QString GmicBqmProcessor::processingCommand() const
-{
-    return d->command;
-}
-
-QString GmicBqmProcessor::filterName() const
-{
-    return d->filterName;
-}
-
-bool GmicBqmProcessor::processingComplete() const
-{
-    return d->completed;
-}
 
 void GmicBqmProcessor::slotSendProgressInformation()
 {
@@ -189,6 +183,7 @@ void GmicBqmProcessor::slotProcessingFinished()
         }
 
         qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << errorMessage;
+        d->completed = false;
     }
     else
     {
@@ -196,9 +191,11 @@ void GmicBqmProcessor::slotProcessingFinished()
 
         if (!d->filterThread->aborted())
         {
-            DigikamEditorGmicQtPlugin::GMicQtImageConverter::convertCImgtoDImg(images[0],
-                                                                               d->outImage,
-                                                                               d->inImage.sixteenBit());
+            GMicQtImageConverter::convertCImgtoDImg(
+                                                    images[0],
+                                                    d->outImage,
+                                                    d->inImage.sixteenBit()
+                                                   );
 
             d->completed = true;
         }
@@ -210,17 +207,32 @@ void GmicBqmProcessor::slotProcessingFinished()
     Q_EMIT signalDone(errorMessage);
 }
 
-DImg GmicBqmProcessor::outputImage() const
-{
-    return d->outImage;
-}
-
 void GmicBqmProcessor::cancel()
 {
     if (d->filterThread)
     {
         d->filterThread->abortGmic();
     }
+}
+
+DImg GmicBqmProcessor::outputImage() const
+{
+    return d->outImage;
+}
+
+QString GmicBqmProcessor::processingCommand() const
+{
+    return d->command;
+}
+
+QString GmicBqmProcessor::filterName() const
+{
+    return d->filterName;
+}
+
+bool GmicBqmProcessor::processingComplete() const
+{
+    return d->completed;
 }
 
 } // namespace DigikamBqmGmicQtPlugin

@@ -32,10 +32,10 @@
 
 #include "digikam_debug.h"
 #include "dimg.h"
-#include "bqm_widget.h"
 
 // Local includes
 
+#include "gmicbqmwidget.h"
 #include "gmicbqmprocessor.h"
 
 namespace DigikamBqmGmicQtPlugin
