@@ -1,29 +1,31 @@
-/** -*- mode: c++ ; c-basic-offset: 2 -*-
- *
- *  @file Bqm_Processor.h
- *
- *  Copyright 2017 Sebastien Fourey
- *
+/*
  *  This file is part of G'MIC-Qt, a generic plug-in for raster graphics
  *  editors, offering hundreds of filters thanks to the underlying G'MIC
  *  image processing framework.
  *
- *  gmic_qt is free software: you can redistribute it and/or modify
+ *  Copyright (C) 2019-2024 Gilles Caulier <caulier dot gilles at gmail dot com>
+ *
+ *  Description: digiKam Batch Queue Manager plugin for GmicQt.
+ *
+ *  G'MIC-Qt is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  gmic_qt is distributed in the hope that it will be useful,
+ *  G'MIC-Qt is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with gmic_qt.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef GMIC_QT_BQM_PROCESSOR_H
-#define GMIC_QT_BQM_PROCESSOR_H
+
+#ifndef DIGIKAM_GMIC_BQM_PROCESSOR_H
+#define DIGIKAM_GMIC_BQM_PROCESSOR_H
+
+// Qt includes
 
 #include <QObject>
 #include <QString>
@@ -31,17 +33,19 @@
 #include <QVector>
 #include <QStringList>
 
+// digiKam includes
+
 #include "dimg.h"
 
 namespace gmic_library
 {
-template <typename T> struct gmic_list;
+    template <typename T> struct gmic_list;
 }
 
 namespace GmicQt
 {
-class FilterThread;
-struct RunParameters;
+    class FilterThread;
+    struct RunParameters;
 }
 
 using namespace GmicQt;
@@ -50,21 +54,22 @@ using namespace Digikam;
 namespace DigikamBqmGmicQtPlugin
 {
 
-class Bqm_Processor : public QObject
+class GmicBqmProcessor : public QObject
 {
     Q_OBJECT
 
 public:
 
-    explicit Bqm_Processor(QObject* const parent);
-    ~Bqm_Processor()                      override;
+    explicit GmicBqmProcessor(QObject* const parent);
+    ~GmicBqmProcessor()                      override;
 
-    QString command()               const;
+    QString processingCommand()     const;
     QString filterName()            const;
     bool processingComplete()       const;
     DImg outputImage()              const;
 
-    bool setProcessingSettings(const QString& command, const DImg& inImage);
+    void setInputImage(const DImg& inImage);
+    bool setProcessingCommand(const QString& command);
     void startProcessing();
     void cancel();
 
@@ -80,19 +85,10 @@ private Q_SLOTS:
 
 private:
 
-    FilterThread*                   _filterThread;
-    gmic_library::gmic_list<float>* _gmicImages;
-    QTimer                          _timer;
-    QString                         _filterName;
-    QString                         _command;
-    QString                         _arguments;
-    bool                            _processingCompletedProperly;
-    QVector<bool>                   _gmicStatusQuotedParameters;
-
-    DImg                            _inImage;
-    DImg                            _outImage;
+    class Private;
+    Private* const d = nullptr;
 };
 
 } // namespace DigikamBqmGmicQtPlugin
 
-#endif // GMIC_QT_BQM_PROCESSOR_H
+#endif // DIGIKAM_GMIC_BQM_PROCESSOR_H
