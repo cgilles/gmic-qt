@@ -62,7 +62,7 @@ Bqm_Processor::~Bqm_Processor()
     delete _gmicImages;
 }
 
-bool Bqm_Processor::setPluginParameters(const QString& command, const DImg& inImage)
+bool Bqm_Processor::setProcessingSettings(const QString& command, const DImg& inImage)
 {
     _inImage = inImage;
 
@@ -115,12 +115,12 @@ void Bqm_Processor::startProcessing()
     _processingCompletedProperly = false;
 
     connect(_filterThread, &FilterThread::finished,
-            this, &Bqm_Processor::onProcessingFinished);
+            this, &Bqm_Processor::slotProcessingFinished);
 
     _timer.setInterval(250);
 
     connect(&_timer, &QTimer::timeout,
-            this, &Bqm_Processor::sendProgressInformation);
+            this, &Bqm_Processor::slotSendProgressInformation);
 
     _timer.start();
     _filterThread->start();
@@ -141,19 +141,15 @@ bool Bqm_Processor::processingComplete() const
     return _processingCompletedProperly;
 }
 
-void Bqm_Processor::sendProgressInformation()
+void Bqm_Processor::slotSendProgressInformation()
 {
     if (!_filterThread)
     {
-        return;
+        Q_EMIT signalProgress(_filterThread->progress());
     }
-
-    float progress = _filterThread->progress();
-
-    Q_EMIT progression(progress);
 }
 
-void Bqm_Processor::onProcessingFinished()
+void Bqm_Processor::slotProcessingFinished()
 {
     _timer.stop();
     QString errorMessage;
@@ -187,7 +183,7 @@ void Bqm_Processor::onProcessingFinished()
     _filterThread->deleteLater();
     _filterThread = nullptr;
 
-    Q_EMIT done(errorMessage);
+    Q_EMIT signalDone(errorMessage);
 }
 
 DImg Bqm_Processor::outputImage() const

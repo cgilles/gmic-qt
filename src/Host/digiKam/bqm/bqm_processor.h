@@ -57,25 +57,26 @@ class Bqm_Processor : public QObject
 public:
 
     explicit Bqm_Processor(QObject* const parent);
-    ~Bqm_Processor() override;
+    ~Bqm_Processor()                      override;
 
-    QString command() const;
-    QString filterName() const;
-    bool processingComplete() const;
-    bool setPluginParameters(const QString& command, const DImg& inImage);
-    DImg outputImage() const;
+    QString command()               const;
+    QString filterName()            const;
+    bool processingComplete()       const;
+    DImg outputImage()              const;
 
-public Q_SLOTS:
-
+    bool setProcessingSettings(const QString& command, const DImg& inImage);
     void startProcessing();
-    void sendProgressInformation();
-    void onProcessingFinished();
     void cancel();
 
 Q_SIGNALS:
 
-    void done(QString errorMessage);
-    void progression(float progress);
+    void signalDone(const QString& errorMessage);
+    void signalProgress(float progress);
+
+private Q_SLOTS:
+
+    void slotSendProgressInformation();
+    void slotProcessingFinished();
 
 private:
 

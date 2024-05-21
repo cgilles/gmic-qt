@@ -103,7 +103,7 @@ bool GmicQtBqmTool::toolOperations()
     QString command = QLatin1String("fx_watermark_visible \"digiKam\",0.664,27,60,1,25,0,0.5");
     m_gmicProcessor = new Bqm_Processor(this);
 
-    if (!m_gmicProcessor->setPluginParameters(command, image()))
+    if (!m_gmicProcessor->setProcessingSettings(command, image()))
     {
         delete m_gmicProcessor;
         m_gmicProcessor = nullptr;
@@ -116,7 +116,7 @@ bool GmicQtBqmTool::toolOperations()
 
     QEventLoop loop;
 
-    connect(m_gmicProcessor, SIGNAL(done(QString)),
+    connect(m_gmicProcessor, SIGNAL(signalDone(QString)),
             &loop, SLOT(quit()));
 
     qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GmicQtBqmTool: started Gmic command...";
