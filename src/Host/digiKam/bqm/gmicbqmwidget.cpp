@@ -1,29 +1,28 @@
-/** -*- mode: c++ ; c-basic-offset: 2 -*-
- *
- *  @file Bqm_Widget.cpp
- *
- *  Copyright 2017 Sebastien Fourey
- *
+/*
  *  This file is part of G'MIC-Qt, a generic plug-in for raster graphics
  *  editors, offering hundreds of filters thanks to the underlying G'MIC
  *  image processing framework.
  *
- *  gmic_qt is free software: you can redistribute it and/or modify
+ *  Copyright (C) 2019-2023 Gilles Caulier <caulier dot gilles at gmail dot com>
+ *
+ *  Description: digiKam image editor plugin for GmicQt.
+ *
+ *  G'MIC-Qt is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  gmic_qt is distributed in the hope that it will be useful,
+ *  G'MIC-Qt is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with gmic_qt.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
-#include "bqm_widget.h"
+#include "gmicbqmwidget.h"
 
 #include <cassert>
 #include <iostream>
@@ -85,13 +84,13 @@ QString appendShortcutText(const QString & text, const QKeySequence & key)
 namespace DigikamBqmGmicQtPlugin
 {
 
-bool Bqm_Widget::_isAccepted = false;
+bool GmicBqmWidget::_isAccepted = false;
 
 //
 // TODO : Handle window maximization properly (Windows as well as some Linux desktops)
 //
 
-Bqm_Widget::Bqm_Widget(QWidget * parent) : QWidget(parent), ui(new Ui::Bqm_Widget)
+GmicBqmWidget::GmicBqmWidget(QWidget * parent) : QWidget(parent), ui(new Ui::GmicBqmWidget)
 {
   TIMING;
   ui->setupUi(this);
@@ -125,7 +124,7 @@ Bqm_Widget::Bqm_Widget(QWidget * parent) : QWidget(parent), ui(new Ui::Bqm_Widge
 
   QShortcut * closeShortcut = new QShortcut(QKeySequence::Close, this);
   closeShortcut->setContext(Qt::ApplicationShortcut);
-  connect(closeShortcut, &QShortcut::activated, this, &Bqm_Widget::close);
+  connect(closeShortcut, &QShortcut::activated, this, &GmicBqmWidget::close);
 
   ui->tbRenameFave->setToolTip(tr("Rename fave"));
   ui->tbRenameFave->setEnabled(false);
@@ -201,7 +200,7 @@ Bqm_Widget::Bqm_Widget(QWidget * parent) : QWidget(parent), ui(new Ui::Bqm_Widge
   QAction * escAction = new QAction(this);
   escAction->setShortcut(QKeySequence(Qt::Key_Escape));
   escAction->setShortcutContext(Qt::ApplicationShortcut);
-  connect(escAction, &QAction::triggered, this, &Bqm_Widget::onEscapeKeyPressed);
+  connect(escAction, &QAction::triggered, this, &GmicBqmWidget::onEscapeKeyPressed);
   addAction(escAction);
 
   CroppedImageListProxy::clear();
@@ -222,7 +221,7 @@ Bqm_Widget::Bqm_Widget(QWidget * parent) : QWidget(parent), ui(new Ui::Bqm_Widge
   TIMING;
 }
 
-Bqm_Widget::~Bqm_Widget()
+GmicBqmWidget::~GmicBqmWidget()
 {
   //  QSet<QString> hashes;
   //  FiltersTreeAbstractItem::buildHashesList(_filtersTreeModel.invisibleRootItem(),hashes);
@@ -235,7 +234,7 @@ Bqm_Widget::~Bqm_Widget()
   delete ui;
 }
 
-void Bqm_Widget::setIcons()
+void GmicBqmWidget::setIcons()
 {
   ui->tbTags->setIcon(LOAD_ICON("color-wheel"));
   ui->tbRenameFave->setIcon(LOAD_ICON("rename"));
@@ -251,23 +250,23 @@ void Bqm_Widget::setIcons()
   ui->tbExpandCollapse->setIcon(_expandIcon);
 }
 
-void Bqm_Widget::setPluginParameters(const RunParameters & parameters)
+void GmicBqmWidget::setPluginParameters(const RunParameters & parameters)
 {
   _pluginParameters = parameters;
 }
 
-RunParameters Bqm_Widget::pluginParameters() const
+RunParameters GmicBqmWidget::pluginParameters() const
 {
   return _pluginParameters;
 }
 
-void Bqm_Widget::updateFiltersFromSources(int ageLimit, bool useNetwork)
+void GmicBqmWidget::updateFiltersFromSources(int ageLimit, bool useNetwork)
 {
-  connect(Updater::getInstance(), &Updater::updateIsDone, this, &Bqm_Widget::onUpdateDownloadsFinished, Qt::UniqueConnection);
+  connect(Updater::getInstance(), &Updater::updateIsDone, this, &GmicBqmWidget::onUpdateDownloadsFinished, Qt::UniqueConnection);
   Updater::getInstance()->startUpdate(ageLimit, 60, useNetwork);
 }
 
-void Bqm_Widget::onUpdateDownloadsFinished(int status)
+void GmicBqmWidget::onUpdateDownloadsFinished(int status)
 {
   if (status == (int)Updater::UpdateStatus::SomeFailed) {
   } else if (status == (int)Updater::UpdateStatus::Successful) {
@@ -284,7 +283,7 @@ void Bqm_Widget::onUpdateDownloadsFinished(int status)
   ui->tbUpdateFilters->setEnabled(true);
 }
 
-void Bqm_Widget::buildFiltersTree()
+void GmicBqmWidget::buildFiltersTree()
 {
   saveCurrentParameters();
   GmicStdLib::Array = Updater::getInstance()->buildFullStdlib();
@@ -310,7 +309,7 @@ void Bqm_Widget::buildFiltersTree()
   }
 }
 
-void Bqm_Widget::retrieveFilterAndParametersFromPluginParameters(QString & hash, QList<QString> & parameters)
+void GmicBqmWidget::retrieveFilterAndParametersFromPluginParameters(QString & hash, QList<QString> & parameters)
 {
   if (_pluginParameters.command.empty() && _pluginParameters.filterPath.empty()) {
     return;
@@ -379,7 +378,7 @@ void Bqm_Widget::retrieveFilterAndParametersFromPluginParameters(QString & hash,
   }
 }
 
-QString Bqm_Widget::screenGeometries()
+QString GmicBqmWidget::screenGeometries()
 {
   QList<QScreen *> screens = QGuiApplication::screens();
   QStringList geometries;
@@ -390,16 +389,16 @@ QString Bqm_Widget::screenGeometries()
   return geometries.join(QString());
 }
 
-void Bqm_Widget::updateFilters(bool internet)
+void GmicBqmWidget::updateFilters(bool internet)
 {
   ui->tbUpdateFilters->setEnabled(false);
   updateFiltersFromSources(0, internet);
 }
 
-void Bqm_Widget::onStartupFiltersUpdateFinished(int status)
+void GmicBqmWidget::onStartupFiltersUpdateFinished(int status)
 {
-  bool ok = QObject::disconnect(Updater::getInstance(), &Updater::updateIsDone, this, &Bqm_Widget::onStartupFiltersUpdateFinished);
-  Q_ASSERT_X(ok, __PRETTY_FUNCTION__, "Cannot disconnect Updater::updateIsDone from Bqm_Widget::onStartupFiltersUpdateFinished");
+  bool ok = QObject::disconnect(Updater::getInstance(), &Updater::updateIsDone, this, &GmicBqmWidget::onStartupFiltersUpdateFinished);
+  Q_ASSERT_X(ok, __PRETTY_FUNCTION__, "Cannot disconnect Updater::updateIsDone from GmicBqmWidget::onStartupFiltersUpdateFinished");
 
   ui->progressInfoWidget->stopAnimationAndHide();
   if (status == (int)Updater::UpdateStatus::SomeFailed) {
@@ -444,36 +443,36 @@ void Bqm_Widget::onStartupFiltersUpdateFinished(int status)
   // after the very first resize event).
 }
 
-void Bqm_Widget::showZoomWarningIfNeeded()
+void GmicBqmWidget::showZoomWarningIfNeeded()
 {
   // TODO : Remove
 }
 
-void Bqm_Widget::updateZoomLabel(double zoom)
+void GmicBqmWidget::updateZoomLabel(double zoom)
 {
   // TODO : Remove
 }
 
-void Bqm_Widget::onFiltersSelectionModeToggled(bool on)
+void GmicBqmWidget::onFiltersSelectionModeToggled(bool on)
 {
   _filtersPresenter->toggleSelectionMode(on);
 }
 
-void Bqm_Widget::onPreviewCheckBoxToggled(bool on)
+void GmicBqmWidget::onPreviewCheckBoxToggled(bool on)
 {
   if (!on) {
     _processor.cancel();
   }
 }
 
-void Bqm_Widget::onFilterSelectionChanged()
+void GmicBqmWidget::onFilterSelectionChanged()
 {
   activateFilter(false);
 
   Q_EMIT signalSettingsChanged();
 }
 
-void Bqm_Widget::onEscapeKeyPressed()
+void GmicBqmWidget::onEscapeKeyPressed()
 {
   ui->searchField->clear();
   if (_processor.isProcessing()) {
@@ -486,7 +485,7 @@ void Bqm_Widget::onEscapeKeyPressed()
   }
 }
 
-void Bqm_Widget::clearMessage()
+void GmicBqmWidget::clearMessage()
 {
   ui->messageLabel->setText(QString());
   if (!_messageTimerID) {
@@ -496,19 +495,19 @@ void Bqm_Widget::clearMessage()
   _messageTimerID = 0;
 }
 
-void Bqm_Widget::clearRightMessage()
+void GmicBqmWidget::clearRightMessage()
 {
   ui->rightMessageLabel->hide();
   ui->rightMessageLabel->clear();
 }
 
-void Bqm_Widget::showRightMessage(const QString & text)
+void GmicBqmWidget::showRightMessage(const QString & text)
 {
   ui->rightMessageLabel->setText(text);
   ui->rightMessageLabel->show();
 }
 
-void Bqm_Widget::timerEvent(QTimerEvent * e)
+void GmicBqmWidget::timerEvent(QTimerEvent * e)
 {
   if (e->timerId() == _messageTimerID) {
     clearMessage();
@@ -517,7 +516,7 @@ void Bqm_Widget::timerEvent(QTimerEvent * e)
   e->ignore();
 }
 
-void Bqm_Widget::showMessage(const QString & text, int ms)
+void GmicBqmWidget::showMessage(const QString & text, int ms)
 {
   clearMessage();
   if (!text.isEmpty()) {
@@ -528,7 +527,7 @@ void Bqm_Widget::showMessage(const QString & text, int ms)
   }
 }
 
-void Bqm_Widget::showUpdateErrors()
+void GmicBqmWidget::showUpdateErrors()
 {
   QString message(tr("The update could not be achieved<br>"
                      "because of the following errors:<br>"));
@@ -539,39 +538,39 @@ void Bqm_Widget::showUpdateErrors()
   QMessageBox::information(this, tr("Update error"), message);
 }
 
-void Bqm_Widget::makeConnections()
+void GmicBqmWidget::makeConnections()
 {
-  connect(_filtersPresenter, &FiltersPresenter::filterSelectionChanged, this, &Bqm_Widget::onFilterSelectionChanged);
-  connect(ui->tbResetParameters, &QToolButton::clicked, this, &Bqm_Widget::onReset);
-  connect(ui->tbCopyCommand, &QToolButton::clicked, this, &Bqm_Widget::onCopyGMICCommand);
-  connect(ui->tbUpdateFilters, &QToolButton::clicked, this, &Bqm_Widget::onUpdateFiltersClicked);
-  connect(ui->pbSettings, &QPushButton::clicked, this, &Bqm_Widget::onSettingsClicked);
-  connect(ui->filterParams, &FilterParametersWidget::valueChanged, this, &Bqm_Widget::onParametersChanged);
-  connect(ui->tbAddFave, &QToolButton::clicked, this, &Bqm_Widget::onAddFave);
-  connect(_filtersPresenter, &FiltersPresenter::faveAdditionRequested, this, &Bqm_Widget::onAddFave);
-  connect(ui->tbRemoveFave, &QToolButton::clicked, this, &Bqm_Widget::onRemoveFave);
-  connect(ui->tbRenameFave, &QToolButton::clicked, this, &Bqm_Widget::onRenameFave);
-  connect(ui->inOutSelector, &InOutPanel::inputModeChanged, this, &Bqm_Widget::onInputModeChanged);
-  connect(ui->searchField, &SearchFieldWidget::textChanged, this, &Bqm_Widget::search);
-  connect(ui->tbExpandCollapse, &QToolButton::clicked, this, &Bqm_Widget::expandOrCollapseFolders);
-  connect(ui->progressInfoWidget, &ProgressInfoWidget::cancel, this, &Bqm_Widget::onProgressionWidgetCancelClicked);
-  connect(ui->tbSelectionMode, &QToolButton::toggled, this, &Bqm_Widget::onFiltersSelectionModeToggled);
-  connect(&_processor, &GmicProcessor::previewImageAvailable, this, &Bqm_Widget::onPreviewImageAvailable);
-  connect(&_processor, &GmicProcessor::previewCommandFailed, this, &Bqm_Widget::onPreviewError);
-  connect(&_processor, &GmicProcessor::fullImageProcessingFailed, this, &Bqm_Widget::onFullImageProcessingError);
-  connect(&_processor, &GmicProcessor::fullImageProcessingDone, this, &Bqm_Widget::onFullImageProcessingDone);
+  connect(_filtersPresenter, &FiltersPresenter::filterSelectionChanged, this, &GmicBqmWidget::onFilterSelectionChanged);
+  connect(ui->tbResetParameters, &QToolButton::clicked, this, &GmicBqmWidget::onReset);
+  connect(ui->tbCopyCommand, &QToolButton::clicked, this, &GmicBqmWidget::onCopyGMICCommand);
+  connect(ui->tbUpdateFilters, &QToolButton::clicked, this, &GmicBqmWidget::onUpdateFiltersClicked);
+  connect(ui->pbSettings, &QPushButton::clicked, this, &GmicBqmWidget::onSettingsClicked);
+  connect(ui->filterParams, &FilterParametersWidget::valueChanged, this, &GmicBqmWidget::onParametersChanged);
+  connect(ui->tbAddFave, &QToolButton::clicked, this, &GmicBqmWidget::onAddFave);
+  connect(_filtersPresenter, &FiltersPresenter::faveAdditionRequested, this, &GmicBqmWidget::onAddFave);
+  connect(ui->tbRemoveFave, &QToolButton::clicked, this, &GmicBqmWidget::onRemoveFave);
+  connect(ui->tbRenameFave, &QToolButton::clicked, this, &GmicBqmWidget::onRenameFave);
+  connect(ui->inOutSelector, &InOutPanel::inputModeChanged, this, &GmicBqmWidget::onInputModeChanged);
+  connect(ui->searchField, &SearchFieldWidget::textChanged, this, &GmicBqmWidget::search);
+  connect(ui->tbExpandCollapse, &QToolButton::clicked, this, &GmicBqmWidget::expandOrCollapseFolders);
+  connect(ui->progressInfoWidget, &ProgressInfoWidget::cancel, this, &GmicBqmWidget::onProgressionWidgetCancelClicked);
+  connect(ui->tbSelectionMode, &QToolButton::toggled, this, &GmicBqmWidget::onFiltersSelectionModeToggled);
+  connect(&_processor, &GmicProcessor::previewImageAvailable, this, &GmicBqmWidget::onPreviewImageAvailable);
+  connect(&_processor, &GmicProcessor::previewCommandFailed, this, &GmicBqmWidget::onPreviewError);
+  connect(&_processor, &GmicProcessor::fullImageProcessingFailed, this, &GmicBqmWidget::onFullImageProcessingError);
+  connect(&_processor, &GmicProcessor::fullImageProcessingDone, this, &GmicBqmWidget::onFullImageProcessingDone);
   connect(&_processor, &GmicProcessor::aboutToSendImagesToHost, ui->progressInfoWidget, &ProgressInfoWidget::stopAnimationAndHide);
-  connect(_filtersPresenter, &FiltersPresenter::faveNameChanged, this, &Bqm_Widget::setFilterName);
+  connect(_filtersPresenter, &FiltersPresenter::faveNameChanged, this, &GmicBqmWidget::setFilterName);
 }
 
-void Bqm_Widget::onPreviewUpdateRequested()
+void GmicBqmWidget::onPreviewUpdateRequested()
 {
   clearMessage();
   clearRightMessage();
   onPreviewUpdateRequested(false);
 }
 
-void Bqm_Widget::onPreviewUpdateRequested(bool synchronous)
+void GmicBqmWidget::onPreviewUpdateRequested(bool synchronous)
 {
   _processor.init();
   if (_filtersPresenter->currentFilter().isNoPreviewFilter()) {
@@ -598,7 +597,7 @@ void Bqm_Widget::onPreviewUpdateRequested(bool synchronous)
   _okButtonShouldApply = true;
 }
 
-void Bqm_Widget::onPreviewKeypointsEvent(unsigned int flags, unsigned long time)
+void GmicBqmWidget::onPreviewKeypointsEvent(unsigned int flags, unsigned long time)
 {
 /*
   if (flags & PreviewWidget::KeypointMouseReleaseEvent) {
@@ -629,7 +628,7 @@ void Bqm_Widget::onPreviewKeypointsEvent(unsigned int flags, unsigned long time)
 */
 }
 
-void Bqm_Widget::onPreviewImageAvailable()
+void GmicBqmWidget::onPreviewImageAvailable()
 {
 /*
   ui->filterParams->setValues(_processor.gmicStatus(), false);
@@ -648,7 +647,7 @@ void Bqm_Widget::onPreviewImageAvailable()
   // TODO: REMOVE
 }
 
-void Bqm_Widget::onPreviewError(const QString & message)
+void GmicBqmWidget::onPreviewError(const QString & message)
 {
 /*
   ui->previewWidget->setPreviewErrorMessage(message);
@@ -661,22 +660,22 @@ void Bqm_Widget::onPreviewError(const QString & message)
   // TODO: REMOVE
 }
 
-void Bqm_Widget::onParametersChanged()
+void GmicBqmWidget::onParametersChanged()
 {
     Q_EMIT signalSettingsChanged();
 }
 
-bool Bqm_Widget::isAccepted()
+bool GmicBqmWidget::isAccepted()
 {
   return _isAccepted;
 }
 
-void Bqm_Widget::setFilterName(const QString & text)
+void GmicBqmWidget::setFilterName(const QString & text)
 {
   ui->filterName->setText(QString("<b>%1</b>").arg(text));
 }
 
-void Bqm_Widget::processImage()
+void GmicBqmWidget::processImage()
 {
   // Abort any already running thread
   _processor.init();
@@ -706,7 +705,7 @@ void Bqm_Widget::processImage()
   _processor.execute();
 }
 
-void Bqm_Widget::onFullImageProcessingError(const QString & message)
+void GmicBqmWidget::onFullImageProcessingError(const QString & message)
 {
   ui->progressInfoWidget->stopAnimationAndHide();
   QMessageBox::warning(this, tr("Error"), message, QMessageBox::Close);
@@ -716,18 +715,18 @@ void Bqm_Widget::onFullImageProcessingError(const QString & message)
   }
 }
 
-void Bqm_Widget::onInputModeChanged(InputMode mode)
+void GmicBqmWidget::onInputModeChanged(InputMode mode)
 {
   PersistentMemory::clear();
 }
 
-void Bqm_Widget::onVeryFirstShowEvent()
+void GmicBqmWidget::onVeryFirstShowEvent()
 {
   adjustVerticalSplitter();
   if (_newSession) {
     Logger::clear();
   }
-  QObject::connect(Updater::getInstance(), &Updater::updateIsDone, this, &Bqm_Widget::onStartupFiltersUpdateFinished);
+  QObject::connect(Updater::getInstance(), &Updater::updateIsDone, this, &GmicBqmWidget::onStartupFiltersUpdateFinished);
   Logger::setMode(Settings::outputMessageMode());
   Updater::setOutputMessageMode(Settings::outputMessageMode());
   int ageLimit;
@@ -740,7 +739,7 @@ void Bqm_Widget::onVeryFirstShowEvent()
   Updater::getInstance()->startUpdate(ageLimit, 4, useNetwork);
 }
 
-void Bqm_Widget::setZoomConstraint()
+void GmicBqmWidget::setZoomConstraint()
 {
 /*
   const FiltersPresenter::Filter & currentFilter = _filtersPresenter->currentFilter();
@@ -759,7 +758,7 @@ void Bqm_Widget::setZoomConstraint()
   // TODO: REMOVE
 }
 
-void Bqm_Widget::onFullImageProcessingDone()
+void GmicBqmWidget::onFullImageProcessingDone()
 {
 /*
   ui->progressInfoWidget->stopAnimationAndHide();
@@ -784,7 +783,7 @@ void Bqm_Widget::onFullImageProcessingDone()
   // TODO: REMOVE
 }
 
-void Bqm_Widget::expandOrCollapseFolders()
+void GmicBqmWidget::expandOrCollapseFolders()
 {
   if (_expandCollapseIcon == &_expandIcon) {
     _filtersPresenter->expandAll();
@@ -797,12 +796,12 @@ void Bqm_Widget::expandOrCollapseFolders()
   }
 }
 
-void Bqm_Widget::search(const QString & text)
+void GmicBqmWidget::search(const QString & text)
 {
   _filtersPresenter->applySearchCriterion(text);
 }
 
-void Bqm_Widget::onApplyClicked()
+void GmicBqmWidget::onApplyClicked()
 {
   clearMessage();
   clearRightMessage();
@@ -810,7 +809,7 @@ void Bqm_Widget::onApplyClicked()
   processImage();
 }
 
-void Bqm_Widget::onOkClicked()
+void GmicBqmWidget::onOkClicked()
 {
   if (_filtersPresenter->currentFilter().isNoApplyFilter()) {
     _isAccepted = _processor.completedFullImageProcessingCount();
@@ -828,13 +827,13 @@ void Bqm_Widget::onOkClicked()
   }
 }
 
-void Bqm_Widget::onCancelClicked()
+void GmicBqmWidget::onCancelClicked()
 {
 /*
   if (_processor.isProcessing() && confirmAbortProcessingOnCloseRequest()) {
     if (_processor.isProcessing()) {
       _pendingActionAfterCurrentProcessing = ProcessingAction::Close;
-      connect(&_processor, &GmicProcessor::noMoreUnfinishedJobs, this, &Bqm_Widget::close);
+      connect(&_processor, &GmicProcessor::noMoreUnfinishedJobs, this, &GmicBqmWidget::close);
       ui->progressInfoWidget->showBusyIndicator();
       ui->previewWidget->setOverlayMessage(tr("Waiting for cancelled jobs..."));
       _processor.cancel();
@@ -848,7 +847,7 @@ void Bqm_Widget::onCancelClicked()
   // TODO: REMOVE
 }
 
-void Bqm_Widget::onProgressionWidgetCancelClicked()
+void GmicBqmWidget::onProgressionWidgetCancelClicked()
 {
   if (ui->progressInfoWidget->mode() == ProgressInfoWidget::Mode::GmicProcessing) {
     if (_processor.isProcessing()) {
@@ -863,7 +862,7 @@ void Bqm_Widget::onProgressionWidgetCancelClicked()
   }
 }
 
-void Bqm_Widget::onReset()
+void GmicBqmWidget::onReset()
 {
   if (!_filtersPresenter->currentFilter().hash.isEmpty() && _filtersPresenter->currentFilter().isAFave) {
     PersistentMemory::clear();
@@ -877,7 +876,7 @@ void Bqm_Widget::onReset()
   }
 }
 
-void Bqm_Widget::onCopyGMICCommand()
+void GmicBqmWidget::onCopyGMICCommand()
 {
   QClipboard * clipboard = QGuiApplication::clipboard();
   QString fullCommand = _filtersPresenter->currentFilter().command;
@@ -886,7 +885,7 @@ void Bqm_Widget::onCopyGMICCommand()
   clipboard->setText(fullCommand, QClipboard::Clipboard);
 }
 
-void Bqm_Widget::onPreviewZoomReset()
+void GmicBqmWidget::onPreviewZoomReset()
 {
 /*
   if (!_filtersPresenter->currentFilter().hash.isEmpty()) {
@@ -898,12 +897,12 @@ void Bqm_Widget::onPreviewZoomReset()
   // TODO: REMOVE
 }
 
-void Bqm_Widget::onUpdateFiltersClicked()
+void GmicBqmWidget::onUpdateFiltersClicked()
 {
   updateFilters(ui->cbInternetUpdate->isChecked());
 }
 
-void Bqm_Widget::saveCurrentParameters()
+void GmicBqmWidget::saveCurrentParameters()
 {
   QString hash = ui->filterParams->filterHash();
   if (!hash.isEmpty()) {
@@ -913,7 +912,7 @@ void Bqm_Widget::saveCurrentParameters()
   }
 }
 
-void Bqm_Widget::saveSettings()
+void GmicBqmWidget::saveSettings()
 {
   QSettings settings;
 
@@ -936,9 +935,9 @@ void Bqm_Widget::saveSettings()
   settings.setValue("LastExecution/gmic_version", gmic_version);
   _processor.saveSettings(settings);
   settings.setValue("SelectedFilter", _filtersPresenter->currentFilter().hash);
-  settings.setValue("Config/Bqm_WidgetPosition", frameGeometry().topLeft());
-  settings.setValue("Config/Bqm_WidgetRect", rect());
-  settings.setValue("Config/Bqm_WidgetMaximized", isMaximized());
+  settings.setValue("Config/GmicBqmWidgetPosition", frameGeometry().topLeft());
+  settings.setValue("Config/GmicBqmWidgetRect", rect());
+  settings.setValue("Config/GmicBqmWidgetMaximized", isMaximized());
   settings.setValue("Config/ScreenGeometries", screenGeometries());
   settings.setValue("LastExecution/ExitedNormally", true);
   settings.setValue("LastExecution/HostApplicationID", host_app_pid());
@@ -954,7 +953,7 @@ void Bqm_Widget::saveSettings()
   settings.setValue(REFRESH_USING_INTERNET_KEY, ui->cbInternetUpdate->isChecked());
 }
 
-void Bqm_Widget::loadSettings()
+void GmicBqmWidget::loadSettings()
 {
   QSettings settings;
   _filtersPresenter->loadSettings(settings);
@@ -970,10 +969,10 @@ void Bqm_Widget::loadSettings()
 #endif
 
   // Mainwindow geometry
-  QPoint position = settings.value("Config/Bqm_WidgetPosition", QPoint(20, 20)).toPoint();
-  QRect r = settings.value("Config/Bqm_WidgetRect", QRect()).toRect();
+  QPoint position = settings.value("Config/GmicBqmWidgetPosition", QPoint(20, 20)).toPoint();
+  QRect r = settings.value("Config/GmicBqmWidgetRect", QRect()).toRect();
   const bool sameScreenGeometries = (settings.value("Config/ScreenGeometries", QString()).toString() == screenGeometries());
-  if (settings.value("Config/Bqm_WidgetMaximized", false).toBool()) {
+  if (settings.value("Config/GmicBqmWidgetMaximized", false).toBool()) {
 //    ui->pbFullscreen->setChecked(true);
   } else {
     if (r.isValid() && sameScreenGeometries) {
@@ -1011,7 +1010,7 @@ void Bqm_Widget::loadSettings()
   ui->cbInternetUpdate->setChecked(settings.value("Config/RefreshInternetUpdate", true).toBool());
 }
 
-void Bqm_Widget::adjustVerticalSplitter()
+void GmicBqmWidget::adjustVerticalSplitter()
 {
   QList<int> sizes;
   QSettings settings;
@@ -1031,12 +1030,12 @@ void Bqm_Widget::adjustVerticalSplitter()
   }
 }
 
-bool Bqm_Widget::filtersSelectionMode()
+bool GmicBqmWidget::filtersSelectionMode()
 {
   return ui->tbSelectionMode->isChecked();
 }
 
-void Bqm_Widget::activateFilter(bool resetZoom, const QList<QString> & values)
+void GmicBqmWidget::activateFilter(bool resetZoom, const QList<QString> & values)
 {
   saveCurrentParameters();
   const FiltersPresenter::Filter & filter = _filtersPresenter->currentFilter();
@@ -1098,7 +1097,7 @@ void Bqm_Widget::activateFilter(bool resetZoom, const QList<QString> & values)
   }
 }
 
-void Bqm_Widget::setNoFilter()
+void GmicBqmWidget::setNoFilter()
 {
   PersistentMemory::clear();
   ui->filterParams->setNoFilter(_filtersPresenter->errorMessage());
@@ -1113,7 +1112,7 @@ void Bqm_Widget::setNoFilter()
   ui->tbRenameFave->setEnabled(false);
 }
 
-void Bqm_Widget::showEvent(QShowEvent * event)
+void GmicBqmWidget::showEvent(QShowEvent * event)
 {
   TIMING;
   event->accept();
@@ -1123,7 +1122,7 @@ void Bqm_Widget::showEvent(QShowEvent * event)
   }
 }
 
-void Bqm_Widget::resizeEvent(QResizeEvent * e)
+void GmicBqmWidget::resizeEvent(QResizeEvent * e)
 {
 /*
   // Check if size is reducing
@@ -1134,7 +1133,7 @@ void Bqm_Widget::resizeEvent(QResizeEvent * e)
 // TODO: REMOVE
 }
 
-bool Bqm_Widget::askUserForGTKFavesImport()
+bool GmicBqmWidget::askUserForGTKFavesImport()
 {
   QMessageBox messageBox(QMessageBox::Question, tr("Import faves"), QString(tr("Do you want to import faves from file below?<br/>%1")).arg(FavesModelReader::gmicGTKFavesFilename()),
                          QMessageBox::Yes | QMessageBox::No, this);
@@ -1159,7 +1158,7 @@ bool Bqm_Widget::askUserForGTKFavesImport()
   return true;
 }
 
-void Bqm_Widget::onAddFave()
+void GmicBqmWidget::onAddFave()
 {
   if (_filtersPresenter->currentFilter().hash.isEmpty()) {
     return;
@@ -1167,17 +1166,17 @@ void Bqm_Widget::onAddFave()
   saveCurrentParameters();
   _filtersPresenter->addSelectedFilterAsNewFave(ui->filterParams->valueStringList(), ui->filterParams->visibilityStates(), ui->inOutSelector->state());
 }
-void Bqm_Widget::onRemoveFave()
+void GmicBqmWidget::onRemoveFave()
 {
   _filtersPresenter->removeSelectedFave();
 }
 
-void Bqm_Widget::onRenameFave()
+void GmicBqmWidget::onRenameFave()
 {
   _filtersPresenter->editSelectedFaveName();
 }
 
-void Bqm_Widget::onToggleFullScreen(bool on)
+void GmicBqmWidget::onToggleFullScreen(bool on)
 {
   if (on && !(windowState() & Qt::WindowMaximized)) {
     showMaximized();
@@ -1187,7 +1186,7 @@ void Bqm_Widget::onToggleFullScreen(bool on)
   }
 }
 
-void Bqm_Widget::onSettingsClicked()
+void GmicBqmWidget::onSettingsClicked()
 {
   QList<int> splitterSizes = ui->splitter->sizes();
 
@@ -1204,13 +1203,13 @@ void Bqm_Widget::onSettingsClicked()
   }
 }
 
-bool Bqm_Widget::confirmAbortProcessingOnCloseRequest()
+bool GmicBqmWidget::confirmAbortProcessingOnCloseRequest()
 {
   int button = QMessageBox::question(this, tr("Confirmation"), tr("A gmic command is running.<br>Do you really want to close the plugin?"), QMessageBox::Yes, QMessageBox::No);
   return (button == QMessageBox::Yes);
 }
 
-void Bqm_Widget::enableWidgetList(bool on)
+void GmicBqmWidget::enableWidgetList(bool on)
 {
   for (QWidget * w : _filterUpdateWidgets) {
     w->setEnabled(on);
@@ -1218,7 +1217,7 @@ void Bqm_Widget::enableWidgetList(bool on)
   ui->inOutSelector->setEnabled(on);
 }
 
-void Bqm_Widget::closeEvent(QCloseEvent * e)
+void GmicBqmWidget::closeEvent(QCloseEvent * e)
 {
   if (_processor.isProcessing() && _pendingActionAfterCurrentProcessing != ProcessingAction::Close) {
     if (confirmAbortProcessingOnCloseRequest()) {
