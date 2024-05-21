@@ -3,7 +3,7 @@
 *  editors, offering hundreds of filters thanks to the underlying G'MIC
 *  image processing framework.
 *
-*  Copyright (C) 2019-2023 Gilles Caulier <caulier dot gilles at gmail dot com>
+*  Copyright (C) 2019-2024 Gilles Caulier <caulier dot gilles at gmail dot com>
 *
 *  Description: digiKam Batch Queue Manager plugin for GmicQt.
 *
@@ -60,10 +60,6 @@ GmicQtPlugin::GmicQtPlugin(QObject* const parent)
 {
 }
 
-GmicQtPlugin::~GmicQtPlugin()
-{
-}
-
 QString GmicQtPlugin::name() const
 {
     return QString::fromUtf8("GmicQt");
@@ -109,30 +105,40 @@ QString GmicQtPlugin::details() const
                 "<a href='https://www.unicaen.fr'>Normandy University</a><br/>"
                 "<a href='https://www.ensicaen.fr'>Ensicaen</a><br/>"
               "<p><b>Configuration:</b></p>"
-                "Libgmic version: %2<br/>"
+                "Libcimg version: %2<br/>"
+                "Libgmic version: %3<br/>"
              ).arg(logo)
+              .arg(cimg_version)
               .arg(gmic_version)
 
-#ifdef cimg_use_fftw3
-             + QString::fromUtf8("Libfftw3 version: %1<br/>").arg(fftw_version)
-#endif
-
 #ifdef cimg_use_fftw3_singlethread
+
              + QString::fromUtf8("Use FFTW3 single thread: yes<br/>")
+
 #else
+
              + QString::fromUtf8("Use FFTW3 single thread: no<br/>")
+
 #endif
 
 #ifdef cimg_use_curl
+
              + QString::fromUtf8("Use Curl: yes<br/>")
+
 #else
+
              + QString::fromUtf8("Use Curl: no<br/>")
+
 #endif
 
 #ifdef cimg_use_openmp
+
              + QString::fromUtf8("Use OpenMP: yes<br/>")
+
 #else
+
              + QString::fromUtf8("Use OpenMP: no<br/>")
+
 #endif
 
     ;
@@ -158,14 +164,14 @@ QList<DPluginAuthor> GmicQtPlugin::authors() const
     return QList<DPluginAuthor>()
             << DPluginAuthor(QString::fromUtf8("Gilles Caulier"),
                              QString::fromUtf8("caulier dot gilles at gmail dot com"),
-                             QString::fromUtf8("(C) 2019-2023"))
+                             QString::fromUtf8("(C) 2019-2024"))
             << DPluginAuthor(QString::fromUtf8("Sébastien Fourey"),
                              QString::fromUtf8("Sebastien dot Fourey at ensicaen dot fr"),
-                             QString::fromUtf8("(C) 2017-2023"),
+                             QString::fromUtf8("(C) 2017-2024"),
                              QString::fromUtf8("G'MIC plugin"))
             << DPluginAuthor(QString::fromUtf8("David Tschumperlé"),
                              QString::fromUtf8("David dot Tschumperle at ensicaen dot fr"),
-                             QString::fromUtf8("(C) 2008-2023"),
+                             QString::fromUtf8("(C) 2008-2024"),
                              QString::fromUtf8("G'MIC core"))
             ;
 }

@@ -25,44 +25,36 @@
 
 #include "bqm_processor.h"
 
-#include <QDebug>
-#include <QMessageBox>
-#include <QSettings>
-#include <QStringList>
+#include "digikam_debug.h"
+
 #include "Common.h"
-#include "FilterParameters/FilterParametersWidget.h"
-#include "FilterSelector/FiltersPresenter.h"
-#include "FilterTextTranslator.h"
 #include "FilterThread.h"
 #include "GmicStdlib.h"
-#include "HtmlTranslator.h"
-#include "Logger.h"
 #include "Misc.h"
-#include "ParametersCache.h"
-#include "Settings.h"
 #include "Updater.h"
-#include "Widgets/ProgressInfoWindow.h"
-#include "gmic.h"
+#include "GmicQt.h"
 
-#ifdef _IS_WINDOWS_
-#include <windows.h>
-#include <process.h>
-#include <psapi.h>
-#endif
+#include "gmicqtimageconverter.h"
+
+namespace GmicQtHost
+{
+
+const QString ApplicationName          = QString("digiKam");
+const char* const ApplicationShortname = GMIC_QT_XSTRINGIFY(GMIC_HOST);
+const bool DarkThemeIsDefault          = false;
+
+} // namespace GmicQtHost
 
 namespace DigikamBqmGmicQtPlugin
 {
 
-/**
- * @brief Bqm_Processor::Bqm_Processor using "last parameters" from config file
- * @param parent
- */
-Bqm_Processor::Bqm_Processor(QObject * parent) //
-    : QObject(parent), _filterThread(nullptr), _gmicImages(new gmic_library::gmic_list<gmic_pixel_type>)
+Bqm_Processor::Bqm_Processor(QObject* const parent)
+    : QObject      (parent),
+      _filterThread(nullptr),
+      _gmicImages  (new gmic_library::gmic_list<gmic_pixel_type>)
 {
-  _progressWindow = nullptr;
   _processingCompletedProperly = false;
-  GmicStdLib::Array = Updater::getInstance()->buildFullStdlib();
+  GmicStdLib::Array            = Updater::getInstance()->buildFullStdlib();
 }
 
 Bqm_Processor::~Bqm_Processor()
@@ -70,103 +62,81 @@ Bqm_Processor::~Bqm_Processor()
   delete _gmicImages;
 }
 
-bool Bqm_Processor::setPluginParameters(const RunParameters & parameters)
+bool Bqm_Processor::setPluginParameters(const QString& command, const DImg& inImage)
 {
-  _path = QString::fromStdString(parameters.filterPath);
-  _inputMode = (parameters.inputMode == InputMode::Unspecified) ? DefaultInputMode : parameters.inputMode;
-  _outputMode = (parameters.outputMode == OutputMode::Unspecified) ? DefaultOutputMode : parameters.outputMode;
+    _inImage = inImage;
 
-  if (_path.isEmpty()) { // A pure command
-    if (parameters.command.empty()) {
-      _errorMessage = tr("At least a filter path or a filter command must be provided.");
-    } else {
-      _filterName = tr("Custom command (%1)").arg(elided(QString::fromStdString(parameters.command), 35));
-      _command = "skip 0";
-      _arguments = QString::fromStdString(parameters.command);
+    if (command.isEmpty())
+    {
+        _errorMessage = tr("At least a filter command must be provided.");
+        return false;
     }
-  } else { // A path is given
-    QString plainPath = HtmlTranslator::html2txt(_path, false);
-    FiltersPresenter::Filter filter = FiltersPresenter::findFilterFromAbsolutePathOrNameInStdlib(plainPath);
-    if (filter.isInvalid()) {
-      _errorMessage = tr("Cannot find filter matching path %1").arg(_path);
-    } else {
-      QString error;
-      QVector<bool> quoted;
-      QVector<int> sizes;
-      QStringList defaultParameters = FilterParametersWidget::defaultParameterList(filter.parameters, &error, &quoted, &sizes);
-      if (!error.isEmpty()) {
-        _errorMessage = tr("Error parsing filter parameters definition for filter:\n\n%1\n\nCannot retrieve default parameters.\n\n%2").arg(_path).arg(error);
-      } else {
-        if (filter.isAFave) {
-          // sizes have been computed, but we replace 'defaults' with Fave's ones.
-          defaultParameters = filter.defaultParameterValues;
-        }
-        if (parameters.command.empty()) {
-          _filterName = FilterTextTranslator::translate(filter.plainTextName);
-          _hash = filter.hash;
-          _command = filter.command;
-          _arguments = flattenGmicParameterList(defaultParameters, quoted);
-          _gmicStatusQuotedParameters = quoted;
-        } else {
-          QString command;
-          QString arguments;
-          QStringList providedParameters;
-          if (!parseGmicUniqueFilterCommand(parameters.command.c_str(), command, arguments) || //
-              !parseGmicFilterParameters(arguments, providedParameters)) {
-            _errorMessage = tr("Error parsing supplied command: %1").arg(QString::fromStdString(parameters.command));
-          } else {
-            if (command != filter.command) {
-              _errorMessage = tr("Supplied command (%1) does not match path (%2), (should be %3).").arg(command).arg(plainPath).arg(filter.command);
-            } else {
-              _filterName = FilterTextTranslator::translate(filter.plainTextName);
-              _hash = filter.hash;
-              _command = command;
-              auto expandedDefaults = expandParameterList(defaultParameters, sizes);
-              auto completed = completePrefixFromFullList(providedParameters, expandedDefaults);
-              _arguments = flattenGmicParameterList(mergeSubsequences(completed, sizes), quoted);
-              _gmicStatusQuotedParameters = quoted;
-            }
-          }
-        }
-      }
+    else
+    {
+        _filterName = tr("Custom command (%1)").arg(elided(command, 35));
+        _command    = "skip 0";
+        _arguments  = command;
     }
-  }
-  return _errorMessage.isEmpty();
+
+    return true;
 }
 
-const QString & Bqm_Processor::error() const
+const QString& Bqm_Processor::error() const
 {
   return _errorMessage;
 }
 
 void Bqm_Processor::startProcessing()
 {
-  if (!_errorMessage.isEmpty()) {
+  if (!_errorMessage.isEmpty())
+  {
     endApplication(_errorMessage);
   }
 
   _singleShotTimer.setInterval(750);
   _singleShotTimer.setSingleShot(true);
-  connect(&_singleShotTimer, &QTimer::timeout, this, &Bqm_Processor::progressWindowShouldShow);
-  ParametersCache::load(true);
+
+  connect(&_singleShotTimer, &QTimer::timeout,
+          this, &Bqm_Processor::progressWindowShouldShow);
 
   _singleShotTimer.start();
-  _gmicImages->assign();
+
   gmic_list<char> imageNames;
-  GmicQtHost::getCroppedImages(*_gmicImages, imageNames, -1, -1, -1, -1, _inputMode);
-  if (!_progressWindow) {
-    GmicQtHost::showMessage(QString("G'MIC: %1 %2").arg(_command).arg(_arguments).toUtf8().constData());
-  }
-  QString env = QString("_input_layers=%1").arg((int)_inputMode);
-  env += QString(" _output_mode=%1").arg((int)_outputMode);
-  env += QString(" _output_messages=%1").arg((int)Settings::outputMessageMode());
+
+  _gmicImages->assign(1);
+  imageNames.assign(1);
+
+  QString name  = QString("pos(0,0),name(%1)").arg("Batch Queue Manager");
+  QByteArray ba = name.toUtf8();
+  gmic_image<char>::string(ba.constData()).move_to(imageNames[0]);
+
+  DigikamEditorGmicQtPlugin::GMicQtImageConverter::convertDImgtoCImg(_inImage.copy(0, 0,
+                                                                                   _inImage.width(),
+                                                                                   _inImage.height()),
+                                                                     *_gmicImages[0]);
+
+  qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << QString::fromUtf8("G'MIC: %1 %2")
+                                         .arg(_command)
+                                         .arg(_arguments);
+
+  QString env = QString::fromLatin1("_input_layers=%1").arg((int)DefaultInputMode);
+  env        += QString::fromLatin1(" _output_mode=%1").arg((int)DefaultInputMode);
+  env        += QString::fromLatin1(" _output_messages=%1").arg((int)OutputMessageMode::VerboseConsole);
+
   _filterThread = new FilterThread(this, _command, _arguments, env);
   _filterThread->swapImages(*_gmicImages);
   _filterThread->setImageNames(imageNames);
+
   _processingCompletedProperly = false;
-  connect(_filterThread, &FilterThread::finished, this, &Bqm_Processor::onProcessingFinished);
+
+  connect(_filterThread, &FilterThread::finished,
+          this, &Bqm_Processor::onProcessingFinished);
+
   _timer.setInterval(250);
-  connect(&_timer, &QTimer::timeout, this, &Bqm_Processor::sendProgressInformation);
+
+  connect(&_timer, &QTimer::timeout,
+          this, &Bqm_Processor::sendProgressInformation);
+
   _timer.start();
   _filterThread->start();
 }
@@ -181,11 +151,6 @@ QString Bqm_Processor::filterName() const
   return _filterName;
 }
 
-void Bqm_Processor::setProgressWindow(ProgressInfoWindow * progressInfoWindow)
-{
-  _progressWindow = progressInfoWindow;
-}
-
 bool Bqm_Processor::processingCompletedProperly()
 {
   return _processingCompletedProperly;
@@ -193,31 +158,14 @@ bool Bqm_Processor::processingCompletedProperly()
 
 void Bqm_Processor::sendProgressInformation()
 {
-  if (!_filterThread) {
+  if (!_filterThread)
+  {
     return;
   }
+
   float progress = _filterThread->progress();
-  int ms = _filterThread->duration();
-  unsigned long memory = 0;
-#if defined(_IS_LINUX_)
-  QFile status("/proc/self/status");
-  if (status.open(QFile::ReadOnly)) {
-    QByteArray text = status.readAll();
-    const char * str = strstr(text.constData(), "VmRSS:");
-    unsigned int kiB = 0;
-    if (str && sscanf(str + 7, "%u", &kiB)) {
-      memory = 1024 * (unsigned long)kiB;
-    }
-  }
-#elif defined(_IS_WINDOWS_)
-  PROCESS_MEMORY_COUNTERS counters;
-  if (GetProcessMemoryInfo(GetCurrentProcess(), &counters, sizeof(counters))) {
-    memory = static_cast<unsigned long>(counters.WorkingSetSize);
-  }
-#else
-// TODO: MACOS
-#endif
-  emit progression(progress, ms, memory);
+
+  Q_EMIT progression(progress);
 }
 
 void Bqm_Processor::onProcessingFinished()
@@ -225,49 +173,58 @@ void Bqm_Processor::onProcessingFinished()
   _timer.stop();
   QString errorMessage;
   QStringList status = _filterThread->gmicStatus();
-  if (_filterThread->failed()) {
+
+  if (_filterThread->failed())
+  {
     errorMessage = _filterThread->errorMessage();
-    if (errorMessage.isEmpty()) {
+
+    if (errorMessage.isEmpty())
+    {
       errorMessage = tr("Filter execution failed, but with no error message.");
     }
-  } else {
+  }
+  else
+  {
     gmic_list<gmic_pixel_type> images = _filterThread->images();
-    if (!_filterThread->aborted()) {
-      GmicQtHost::outputImages(images, _filterThread->imageNames(), _outputMode);
+
+    if (!_filterThread->aborted())
+    {
+      DigikamEditorGmicQtPlugin::GMicQtImageConverter::convertCImgtoDImg(images[0],
+                                                                         _outImage,
+                                                                         _inImage.sixteenBit());
+
       _processingCompletedProperly = true;
     }
-    QSettings settings;
-    if (!status.isEmpty() && !_hash.isEmpty()) {
-      ParametersCache::setValues(_hash, status);
-      ParametersCache::save();
-      QString statusString = flattenGmicParameterList(status, _gmicStatusQuotedParameters);
-      settings.setValue(QString("LastExecution/host_%1/GmicStatusString").arg(GmicQtHost::ApplicationShortname), statusString);
-    }
-    settings.setValue(QString("LastExecution/host_%1/FilterPath").arg(GmicQtHost::ApplicationShortname), _path);
-    settings.setValue(QString("LastExecution/host_%1/FilterHash").arg(GmicQtHost::ApplicationShortname), _hash);
-    settings.setValue(QString("LastExecution/host_%1/Command").arg(GmicQtHost::ApplicationShortname), _command);
-    settings.setValue(QString("LastExecution/host_%1/Arguments").arg(GmicQtHost::ApplicationShortname), _arguments);
-    settings.setValue(QString("LastExecution/host_%1/InputMode").arg(GmicQtHost::ApplicationShortname), (int)_inputMode);
-    settings.setValue(QString("LastExecution/host_%1/OutputMode").arg(GmicQtHost::ApplicationShortname), (int)_outputMode);
   }
+
   _filterThread->deleteLater();
   _filterThread = nullptr;
+
   endApplication(errorMessage);
+}
+
+DImg Bqm_Processor::outputImage() const
+{
+    return _outImage;
 }
 
 void Bqm_Processor::cancel()
 {
-  if (_filterThread) {
+  if (_filterThread)
+  {
     _filterThread->abortGmic();
   }
 }
 
-void Bqm_Processor::endApplication(const QString & errorMessage)
+void Bqm_Processor::endApplication(const QString& errorMessage)
 {
   _singleShotTimer.stop();
-  emit done(errorMessage);
-  if (!errorMessage.isEmpty()) {
-    Logger::error(errorMessage);
+
+  Q_EMIT done(errorMessage);
+
+  if (!errorMessage.isEmpty())
+  {
+    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << errorMessage;
   }
 }
 

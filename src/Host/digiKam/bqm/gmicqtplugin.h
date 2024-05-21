@@ -3,7 +3,7 @@
 *  editors, offering hundreds of filters thanks to the underlying G'MIC
 *  image processing framework.
 *
-*  Copyright (C) 2019-2023 Gilles Caulier <caulier dot gilles at gmail dot com>
+*  Copyright (C) 2019-2024 Gilles Caulier <caulier dot gilles at gmail dot com>
 *
 *  Description: digiKam Batch Queue Manager plugin for GmicQt.
 *
@@ -45,7 +45,7 @@ class GmicQtPlugin : public DPluginBqm
 public:
 
     explicit GmicQtPlugin(QObject* const parent = nullptr);
-    ~GmicQtPlugin()                      override;
+    ~GmicQtPlugin()                      override = default;
 
     QString name()                 const override;
     QString iid()                  const override;

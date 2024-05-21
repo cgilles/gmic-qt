@@ -29,7 +29,9 @@
 #include <QString>
 #include <QTimer>
 #include <QVector>
-#include "GmicQt.h"
+#include <QStringList>
+
+#include "dimg.h"
 
 namespace gmic_library
 {
@@ -39,10 +41,11 @@ template <typename T> struct gmic_list;
 namespace GmicQt
 {
 class FilterThread;
-class ProgressInfoWindow;
+struct RunParameters;
 }
 
 using namespace GmicQt;
+using namespace Digikam;
 
 namespace DigikamBqmGmicQtPlugin
 {
@@ -53,15 +56,15 @@ class Bqm_Processor : public QObject
 
 public:
 
-    explicit Bqm_Processor(QObject * parent);
+    explicit Bqm_Processor(QObject* const parent);
     ~Bqm_Processor() override;
 
     QString command() const;
     QString filterName() const;
-    void setProgressWindow(ProgressInfoWindow *);
     bool processingCompletedProperly();
-    bool setPluginParameters(const RunParameters & parameters);
-    const QString & error() const;
+    bool setPluginParameters(const QString& command, const DImg& inImage);
+    const QString& error() const;
+    DImg outputImage() const;
 
 public Q_SLOTS:
 
@@ -74,7 +77,7 @@ Q_SIGNALS:
 
     void progressWindowShouldShow();
     void done(QString errorMessage);
-    void progression(float progress, int duration, unsigned long memory);
+    void progression(float progress);
 
 private:
 
@@ -82,21 +85,20 @@ private:
 
 private:
 
-    FilterThread *                  _filterThread;
+    FilterThread*                   _filterThread;
     gmic_library::gmic_list<float>* _gmicImages;
-    ProgressInfoWindow *            _progressWindow;
     QTimer                          _timer;
     QString                         _filterName;
-    QString                         _path;
     QString                         _command;
     QString                         _arguments;
-    OutputMode                      _outputMode;
-    InputMode                       _inputMode;
     QTimer                          _singleShotTimer;
     bool                            _processingCompletedProperly;
     QString                         _errorMessage;
     QString                         _hash;
     QVector<bool>                   _gmicStatusQuotedParameters;
+
+    DImg                            _inImage;
+    DImg                            _outImage;
 };
 
 } // namespace DigikamBqmGmicQtPlugin

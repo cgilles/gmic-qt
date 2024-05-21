@@ -1,6 +1,6 @@
 # Some useful cmake macros for general purposes
 #
-# Copyright (c) 2010-2023 by Gilles Caulier, <caulier dot gilles at gmail dot com>
+# Copyright (c) 2010-2024 by Gilles Caulier, <caulier dot gilles at gmail dot com>
 #
 # G'MIC-Qt is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,7 +25,9 @@ set_package_properties(DigikamCore PROPERTIES
                        DESCRIPTION "digiKam core library"
 )
 
-include_directories($<TARGET_PROPERTY:Digikam::digikamcore,INTERFACE_INCLUDE_DIRECTORIES>)
+include_directories(${CMAKE_SOURCE_DIR}/src/Host/digiKam/common/
+                    $<TARGET_PROPERTY:Digikam::digikamcore,INTERFACE_INCLUDE_DIRECTORIES>
+)
 
 find_package(DigikamGui CONFIG REQUIRED)
 
@@ -47,22 +49,13 @@ include_directories($<TARGET_PROPERTY:Digikam::digikamdatabase,INTERFACE_INCLUDE
 
 set(gmic_qt_bqm_SRCS
     ${gmic_qt_SRCS}
-    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/host_digikam.cpp
-    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/bqm_widget.cpp
+#    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/bqm_widget.cpp
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/bqm_processor.cpp
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicqtbqmtool.cpp
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicqtplugin.cpp
+
+    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/common/gmicqtimageconverter.cpp
 )
-
-if(BUILD_WITH_QT6)
-
-    qt6_wrap_ui(gmic_qt_bqm_SRCS ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/bqm_widget.ui)
-
-else()
-
-    qt5_wrap_ui(gmic_qt_bqm_SRCS ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/bqm_widget.ui)
-
-endif()
 
 add_definitions(-DGMIC_HOST=digikam)
 add_definitions(-D_GMIC_QT_DISABLE_THEMING_)

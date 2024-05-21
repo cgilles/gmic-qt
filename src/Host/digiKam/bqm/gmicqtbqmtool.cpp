@@ -3,7 +3,7 @@
 *  editors, offering hundreds of filters thanks to the underlying G'MIC
 *  image processing framework.
 *
-*  Copyright (C) 2019-2023 Gilles Caulier <caulier dot gilles at gmail dot com>
+*  Copyright (C) 2019-2024 Gilles Caulier <caulier dot gilles at gmail dot com>
 *
 *  Description: digiKam Batch Queue Manager plugin for GmicQt.
 *
@@ -36,7 +36,6 @@
 
 // Local includes
 
-#include "GmicQt.h"
 #include "bqm_processor.h"
 
 namespace DigikamBqmGmicQtPlugin
@@ -47,10 +46,6 @@ GmicQtBqmTool::GmicQtBqmTool(QObject* const parent)
 {
 }
 
-GmicQtBqmTool::~GmicQtBqmTool()
-{
-}
-
 BatchTool* GmicQtBqmTool::clone(QObject* const parent) const
 {
     return new GmicQtBqmTool(parent);
@@ -58,7 +53,7 @@ BatchTool* GmicQtBqmTool::clone(QObject* const parent) const
 
 void GmicQtBqmTool::registerSettingsWidget()
 {
-    m_gmicWidget     = new Bqm_Widget();
+    m_gmicWidget     = new QWidget();
     m_settingsWidget = m_gmicWidget;
 
     connect(m_gmicWidget, SIGNAL(signalSettingsChanged()),
@@ -71,38 +66,25 @@ BatchToolSettings GmicQtBqmTool::defaultSettings()
 {
     BatchToolSettings settings;
 
-    settings.insert(QLatin1String("GmicQtBqmToolCommand"),    QString());
-    settings.insert(QLatin1String("GmicQtBqmToolFilterPath"), QString());
-    settings.insert(QLatin1String("GmicQtBqmToolInputMode"),  (int)InputMode::Unspecified);
-    settings.insert(QLatin1String("GmicQtBqmToolOutputMode"), (int)OutputMode::Unspecified);
+    settings.insert(QLatin1String("GmicQtBqmToolCommand"), QString());
 
     return settings;
 }
 
 void GmicQtBqmTool::slotAssignSettings2Widget()
 {
-    RunParameters parameters;
+    QString command = settings()[QLatin1String("GmicQtBqmToolCommand")].toString();
 
-    parameters.command    = settings()[QLatin1String("GmicQtBqmToolCommand")].toString().toStdString();
-    parameters.filterPath = settings()[QLatin1String("GmicQtBqmToolFilterPath")].toString().toStdString();
-    parameters.inputMode  = (InputMode)settings()[QLatin1String("GmicQtBqmToolInputMode")].toInt();
-    parameters.outputMode = (OutputMode)settings()[QLatin1String("GmicQtBqmToolOutputMode")].toInt();
-
-    m_gmicWidget->setPluginParameters(parameters);
+//    m_gmicWidget->setPluginParameters(parameters);
 }
 
 void GmicQtBqmTool::slotSettingsChanged()
 {
-    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Receive settings changed signal from G'MIC-Qt";
-
-    RunParameters parameters = m_gmicWidget->pluginParameters();
+    QString command = QLatin1String("fx_watermark_visible \"digiKam\",0.664,27,60,1,25,0,0.5");
 
     BatchToolSettings settings;
 
-    settings.insert(QLatin1String("GmicQtBqmToolCommand"),    QString::fromStdString(parameters.command));
-    settings.insert(QLatin1String("GmicQtBqmToolFilterPath"), QString::fromStdString(parameters.filterPath));
-    settings.insert(QLatin1String("GmicQtBqmToolInputMode"),  (int)parameters.inputMode);
-    settings.insert(QLatin1String("GmicQtBqmToolOutputMode"), (int)parameters.outputMode);
+    settings.insert(QLatin1String("GmicQtBqmToolCommand"), command);
 
     BatchTool::slotSettingsChanged(settings);
 }
@@ -114,15 +96,12 @@ bool GmicQtBqmTool::toolOperations()
         return false;
     }
 
-    RunParameters parameters;
+//    QString command = settings()[QLatin1String("GmicQtBqmToolCommand")].toString();
 
-    parameters.command    = settings()[QLatin1String("GmicQtBqmToolCommand")].toString().toStdString();
-    parameters.filterPath = settings()[QLatin1String("GmicQtBqmToolFilterPath")].toString().toStdString();
-    parameters.inputMode  = (InputMode)settings()[QLatin1String("GmicQtBqmToolInputMode")].toInt();
-    parameters.outputMode = (OutputMode)settings()[QLatin1String("GmicQtBqmToolOutputMode")].toInt();
-    m_gmicProcessor       = new Bqm_Processor(this);
+    QString command = QLatin1String("fx_watermark_visible \"digiKam\",0.664,27,60,1,25,0,0.5");
+    m_gmicProcessor = new Bqm_Processor(this);
 
-    if (m_gmicProcessor->setPluginParameters(parameters))
+    if (m_gmicProcessor->setPluginParameters(command, image()))
     {
         delete m_gmicProcessor;
         m_gmicProcessor = nullptr;
@@ -140,6 +119,8 @@ bool GmicQtBqmTool::toolOperations()
     loop.exec();
 
     QString error = m_gmicProcessor->error();
+
+    image() = m_gmicProcessor->outputImage();
 
     delete m_gmicProcessor;
     m_gmicProcessor = nullptr;
