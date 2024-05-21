@@ -6,7 +6,7 @@ index 3d2991c..1a0c2a4 100644
    _filtersView->clear();
    _filtersView->disableModel();
    for (const FiltersModel::Filter & filter : _filtersModel) {
-+    if (filter.absolutePathNoTags().contains("About") && filter.absolutePathNoTags().contains("Support Us")) continue;
++    if (filter.absolutePathNoTags().contains("About")) continue;
      if (filter.matchKeywords(keywords)) {
        _filtersView->addFilter(filter.name(), filter.hash(), filter.path(), filter.isWarning());
      }
