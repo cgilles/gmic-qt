@@ -107,8 +107,10 @@ QString GmicQtToolPlugin::details() const
                 "<a href='https://www.unicaen.fr'>Normandy University</a><br/>"
                 "<a href='https://www.ensicaen.fr'>Ensicaen</a><br/>"
               "<p><b>Configuration:</b></p>"
-                "Libgmic version: %2<br/>"
+                "Libcimg version: %2<br/>"
+                "Libgmic version: %3<br/>"
              ).arg(logo)
+              .arg(cimg_version)
               .arg(gmic_version)
 
 #ifdef cimg_use_fftw3_singlethread
