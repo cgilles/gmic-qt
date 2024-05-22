@@ -41,9 +41,26 @@
 namespace DigikamBqmGmicQtPlugin
 {
 
-GmicQtBqmTool::GmicQtBqmTool(QObject* const parent)
-    : BatchTool(QLatin1String("GmicQtBqmTool"), EnhanceTool, parent)
+class Q_DECL_HIDDEN GmicQtBqmTool::Private
 {
+public:
+
+    Private() = default;
+
+//    GmicBqmWidget*    gmicWidget    = nullptr;
+    QWidget*          gmicWidget    = nullptr;
+    GmicBqmProcessor* gmicProcessor = nullptr;
+};
+
+GmicQtBqmTool::GmicQtBqmTool(QObject* const parent)
+    : BatchTool(QLatin1String("GmicQtBqmTool"), EnhanceTool, parent),
+      d        (new Private)
+{
+}
+
+GmicQtBqmTool::~GmicQtBqmTool()
+{
+    delete d;
 }
 
 BatchTool* GmicQtBqmTool::clone(QObject* const parent) const
@@ -53,10 +70,10 @@ BatchTool* GmicQtBqmTool::clone(QObject* const parent) const
 
 void GmicQtBqmTool::registerSettingsWidget()
 {
-    m_gmicWidget     = new QWidget();
-    m_settingsWidget = m_gmicWidget;
+    d->gmicWidget    = new QWidget();
+    m_settingsWidget = d->gmicWidget;
 
-    connect(m_gmicWidget, SIGNAL(signalSettingsChanged()),
+    connect(d->gmicWidget, SIGNAL(signalSettingsChanged()),
             this, SLOT(slotSettingsChanged()));
 
     BatchTool::registerSettingsWidget();
@@ -75,7 +92,7 @@ void GmicQtBqmTool::slotAssignSettings2Widget()
 {
     QString command = settings()[QLatin1String("GmicQtBqmToolCommand")].toString();
 
-//    m_gmicWidget->setPluginParameters(parameters);
+//    d->gmicWidget->setPluginParameters(parameters);
 }
 
 void GmicQtBqmTool::slotSettingsChanged()
@@ -100,35 +117,35 @@ bool GmicQtBqmTool::toolOperations()
 
 //    QString command = settings()[QLatin1String("GmicQtBqmToolCommand")].toString();
 
-    QString command = QLatin1String("fx_watermark_visible \"digiKam\",0.664,27,60,1,25,0,0.5");
-    m_gmicProcessor = new GmicBqmProcessor(this);
-    m_gmicProcessor->setInputImage(image());
+    QString command  = QLatin1String("fx_watermark_visible \"digiKam\",0.664,27,60,1,25,0,0.5");
+    d->gmicProcessor = new GmicBqmProcessor(this);
+    d->gmicProcessor->setInputImage(image());
 
-    if (!m_gmicProcessor->setProcessingCommand(command))
+    if (!d->gmicProcessor->setProcessingCommand(command))
     {
-        delete m_gmicProcessor;
-        m_gmicProcessor = nullptr;
+        delete d->gmicProcessor;
+        d->gmicProcessor = nullptr;
         qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GmicQtBqmTool: cannot setup Gmic command!";
 
         return false;
     }
 
-    m_gmicProcessor->startProcessing();
+    d->gmicProcessor->startProcessing();
 
     QEventLoop loop;
 
-    connect(m_gmicProcessor, SIGNAL(signalDone(QString)),
+    connect(d->gmicProcessor, SIGNAL(signalDone(QString)),
             &loop, SLOT(quit()));
 
     qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GmicQtBqmTool: started Gmic command...";
 
     loop.exec();
 
-    bool b  = m_gmicProcessor->processingComplete();
-    image() = m_gmicProcessor->outputImage();
+    bool b  = d->gmicProcessor->processingComplete();
+    image() = d->gmicProcessor->outputImage();
 
-    delete m_gmicProcessor;
-    m_gmicProcessor = nullptr;
+    delete d->gmicProcessor;
+    d->gmicProcessor = nullptr;
 
     qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GmicQtBqmTool: Gmic command completed:" << b;
 
@@ -142,9 +159,9 @@ bool GmicQtBqmTool::toolOperations()
 
 void GmicQtBqmTool::cancel()
 {
-    if (m_gmicProcessor)
+    if (d->gmicProcessor)
     {
-        m_gmicProcessor->cancel();
+        d->gmicProcessor->cancel();
     }
 
     BatchTool::cancel();

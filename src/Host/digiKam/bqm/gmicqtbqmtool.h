@@ -34,9 +34,6 @@ using namespace Digikam;
 namespace DigikamBqmGmicQtPlugin
 {
 
-class GmicBqmWidget;
-class GmicBqmProcessor;
-
 class GmicQtBqmTool : public BatchTool
 {
     Q_OBJECT
@@ -44,7 +41,7 @@ class GmicQtBqmTool : public BatchTool
 public:
 
     explicit GmicQtBqmTool(QObject* const parent = nullptr);
-    ~GmicQtBqmTool()                                        override = default;
+    ~GmicQtBqmTool()                                        override;
 
     BatchToolSettings defaultSettings()                     override;
 
@@ -65,8 +62,8 @@ private Q_SLOTS:
 
 private:
 
-    QWidget* /*GmicBqmWidget* */    m_gmicWidget    = nullptr;
-    GmicBqmProcessor* m_gmicProcessor = nullptr;
+    class Private;
+    Private* const d = nullptr;
 };
 
 } // namespace DigikamBqmGmicQtPlugin
