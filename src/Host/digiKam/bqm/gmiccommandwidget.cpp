@@ -29,6 +29,7 @@
 #include <QMenu>
 #include <QFile>
 #include <QIcon>
+#include <QStandardPaths>
 #include <QHeaderView>
 #include <QMessageBox>
 #include <QToolButton>
@@ -196,18 +197,21 @@ public:
     QTreeView*             tree             = nullptr;
 };
 
-GmicCommandWidget::GmicCommandWidget(QWidget* const parent, GmicCommandManager* const mngr)
+GmicCommandWidget::GmicCommandWidget(QWidget* const parent)
     : QWidget(parent),
       d      (new Private)
 {
     setObjectName(QLatin1String("GeolocationBookmarksEditDialog"));
 
-    d->manager = mngr;
+    const QString db = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
+                                                        QLatin1String("/gmiccommands.xml");
+    d->manager       = new GmicCommandManager(db, this);
+    d->manager->load();
 
-    d->search  = new SearchTextBar(this, QLatin1String("DigikamGmicCommandSearchBar"));
+    d->search        = new SearchTextBar(this, QLatin1String("DigikamGmicCommandSearchBar"));
     d->search->setObjectName(QLatin1String("search"));
 
-    d->tree    = new QTreeView(this);
+    d->tree          = new QTreeView(this);
     d->tree->setUniformRowHeights(true);
     d->tree->setSelectionBehavior(QAbstractItemView::SelectRows);
     d->tree->setSelectionMode(QAbstractItemView::ContiguousSelection);
@@ -216,22 +220,23 @@ GmicCommandWidget::GmicCommandWidget(QWidget* const parent, GmicCommandManager* 
     d->tree->setAlternatingRowColors(true);
     d->tree->setContextMenuPolicy(Qt::CustomContextMenu);
 
+    QPushButton* const addButton       = new QPushButton(this);
+    addButton->setText(QObject::tr("&Add..."));
+
     QPushButton* const removeButton    = new QPushButton(this);
     removeButton->setText(QObject::tr("&Remove"));
 
     QPushButton* const addFolderButton = new QPushButton(this);
     addFolderButton->setText(QObject::tr("Add Folder"));
 
-    QSpacerItem* const spacerItem1     = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-
-    QDialogButtonBox* const buttonBox  = new QDialogButtonBox(this);
-    buttonBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
+    QSpacerItem* const spacerItem1     = new QSpacerItem(40, 20, QSizePolicy::Expanding,
+                                                                 QSizePolicy::Minimum);
 
     QHBoxLayout* const hbox = new QHBoxLayout();
+    hbox->addWidget(addButton);
     hbox->addWidget(removeButton);
     hbox->addWidget(addFolderButton);
     hbox->addItem(spacerItem1);
-    hbox->addWidget(buttonBox);
 
     QGridLayout* const grid = new QGridLayout(this);
     grid->addWidget(d->search,  0, 0, 1, 2);
@@ -246,12 +251,6 @@ GmicCommandWidget::GmicCommandWidget(QWidget* const parent, GmicCommandManager* 
     d->tree->setExpanded(d->proxyModel->index(0, 0), true);
     d->tree->header()->setSectionResizeMode(QHeaderView::Stretch);
 
-    connect(buttonBox, SIGNAL(accepted()),
-            this, SLOT(accept()));
-
-    connect(buttonBox, SIGNAL(rejected()),
-            this, SLOT(reject()));
-
     connect(d->search, SIGNAL(textChanged(QString)),
             d->proxyModel, SLOT(setFilterFixedString(QString)));
 
@@ -261,8 +260,8 @@ GmicCommandWidget::GmicCommandWidget(QWidget* const parent, GmicCommandManager* 
     connect(removeButton, SIGNAL(clicked()),
             this, SLOT(slotRemoveOne()));
 
-    connect(d->tree, SIGNAL(clicked(QModelIndex)),
-            this, SLOT(slotOpenInMap(QModelIndex)));
+    connect(addButton, SIGNAL(clicked()),
+            this, SLOT(slotAddOne()));
 
     connect(d->tree, SIGNAL(customContextMenuRequested(QPoint)),
             this, SLOT(slotCustomContextMenuRequested(QPoint)));
@@ -370,7 +369,7 @@ void GmicCommandWidget::slotRemoveOne()
 
     if (index.isValid())
     {
-        index                    = d->proxyModel->mapToSource(index);
+        index                       = d->proxyModel->mapToSource(index);
         GmicCommandNode* const node = d->manager->commandsModel()->node(index);
 
         if (node->type() == GmicCommandNode::RootFolder)
@@ -378,8 +377,8 @@ void GmicCommandWidget::slotRemoveOne()
             return;
         }
 
-        if (QMessageBox::question(this, QObject::tr("@title:window", "Gmic Commands Management"),
-                                  QObject::tr("@info", "Do you want to remove \"%1\" "
+        if (QMessageBox::question(this, QObject::tr("Gmic Commands Management"),
+                                  QObject::tr("Do you want to remove \"%1\" "
                                         "from your Gmic Commands collection?")
                                   .arg(node->title),
                                   QMessageBox::Yes | QMessageBox::No
@@ -390,6 +389,17 @@ void GmicCommandWidget::slotRemoveOne()
 
         d->manager->removeCommand(node);
     }
+}
+
+void GmicCommandWidget::slotAddOne()
+{
+    AddGmicCommandDialog* const dlg = new AddGmicCommandDialog(
+                                                               QString(),  // TODO: use clipboard
+                                                               tr("New Gmic Command"),
+                                                               this,
+                                                               d->manager
+                                                              );
+    dlg->exec();
 }
 
 void GmicCommandWidget::readSettings()

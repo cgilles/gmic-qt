@@ -70,8 +70,7 @@ class GmicCommandWidget : public QWidget
 
 public:
 
-    explicit GmicCommandWidget(QWidget* const parent = nullptr,
-                               GmicCommandManager* const mngr = nullptr);
+    explicit GmicCommandWidget(QWidget* const parent = nullptr);
     ~GmicCommandWidget()            override;
 
 private Q_SLOTS:
@@ -79,6 +78,7 @@ private Q_SLOTS:
     void slotCustomContextMenuRequested(const QPoint&);
     void slotNewFolder();
     void slotRemoveOne();
+    void slotAddOne();
 
 private:
 

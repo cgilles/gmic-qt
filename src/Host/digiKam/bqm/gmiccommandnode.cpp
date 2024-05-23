@@ -158,7 +158,7 @@ GmicCommandNode* XbelReader::read(const QString& fileName)
     {
         GmicCommandNode* const root   = new GmicCommandNode(GmicCommandNode::Root);
         GmicCommandNode* const folder = new GmicCommandNode(GmicCommandNode::RootFolder, root);
-        folder->title                 = QObject::tr("Command folder");
+        folder->title                 = QObject::tr("My Gmic Filters");
 
         return root;
     }
@@ -183,7 +183,7 @@ GmicCommandNode* XbelReader::read(QIODevice* const device, bool addRootFolder)
             if (addRootFolder)
             {
                 GmicCommandNode* const folder = new GmicCommandNode(GmicCommandNode::RootFolder, root);
-                folder->title                 = QObject::tr("Command folder");
+                folder->title                 = QObject::tr("My Gmic Filters");
                 readXBEL(folder);
             }
             else
