@@ -68,7 +68,7 @@ public:
 
     Private() = default;
 
-    bool                      edit            = false;
+    GmicCommandNode*          currentItem     = nullptr;
     GmicCommandManager*       manager         = nullptr;
     AddGmicCommandProxyModel* proxyModel      = nullptr;
     QComboBox*                collectionPlace = nullptr;
@@ -77,14 +77,14 @@ public:
     QTextEdit*                command         = nullptr;
 };
 
-GmicCommandDialog::GmicCommandDialog(bool edit,
+GmicCommandDialog::GmicCommandDialog(GmicCommandNode* const citem,
                                      QWidget* const parent,
                                      GmicCommandManager* const mngr)
     : QDialog(parent),
       d      (new Private)
 {
-    d->edit    = edit;
-    d->manager = mngr;
+    d->manager     = mngr;
+    d->currentItem = citem;
 
     setObjectName(QLatin1String("GmicCommandDialog"));
     setModal(true);
@@ -94,9 +94,10 @@ GmicCommandDialog::GmicCommandDialog(bool edit,
                    Qt::WindowMinMaxButtonsHint);
 
     QLabel* const frontLbl = new QLabel(this);
-    frontLbl->setText(QObject::tr("Enter the G'MIC Command string corresponding to this new filter. "
+    frontLbl->setText(QObject::tr("This dialog allow to customize the G'MIC Command string corresponding "
+                                  "to this new filter. "
                                   "Don't forget to assign at least a name and optionally a comment "
-                                  "to describe the filter. Finaly choose where to keep it in your "
+                                  "to describe the filter. Finaly you can choose where to keep it in your "
                                   "filters collection."));
     frontLbl->setTextFormat(Qt::PlainText);
     frontLbl->setWordWrap(true);
@@ -154,19 +155,20 @@ GmicCommandDialog::GmicCommandDialog(bool edit,
     d->collectionPlace->setModel(d->proxyModel);
     d->collectionPlace->setView(view);
 
-    if (d->edit)
+    if (d->currentItem)
     {
-        GmicCommandNode* const node = d->manager->commandsModel()->node(idx);
-        d->command->setText(node->command);
-        d->title->setText(node->title);
-        d->desc->setText(node->desc);
+        d->command->setText(d->currentItem->command);
+        d->title->setText(d->currentItem->title);
+        d->desc->setText(d->currentItem->desc);
         setWindowTitle(QObject::tr("Edit G'MIC Filter"));
+        view->setCurrentIndex(model->index(d->currentItem->parent()));
     }
     else
     {
         d->command->setText(QString());     // TODO use Clipboard
         d->title->setText(QObject::tr("My new G'MIC filter title"));
         setWindowTitle(QObject::tr("Add G'MIC Filter"));
+        view->setCurrentIndex(idx);
     }
 
     connect(buttonBox, SIGNAL(accepted()),
@@ -490,7 +492,7 @@ void GmicCommandWidget::slotRemoveOne()
 void GmicCommandWidget::slotAddOne()
 {
     GmicCommandDialog* const dlg = new GmicCommandDialog(
-                                                         false,
+                                                         nullptr,
                                                          this,
                                                          d->manager
                                                         );
@@ -500,13 +502,20 @@ void GmicCommandWidget::slotAddOne()
 
 void GmicCommandWidget::slotEditOne()
 {
-    GmicCommandDialog* const dlg = new GmicCommandDialog(
-                                                         true,
-                                                         this,
-                                                         d->manager
-                                                        );
-    dlg->exec();
-    delete dlg;
+    QModelIndex index = d->tree->currentIndex();
+
+    if (index.isValid())
+    {
+        index                       = d->proxyModel->mapToSource(index);
+        GmicCommandNode* const node = d->manager->commandsModel()->node(index);
+
+        GmicCommandDialog* const dlg = new GmicCommandDialog(node,
+                                                             this,
+                                                             d->manager
+                                                            );
+        dlg->exec();
+        delete dlg;
+    }
 }
 
 
