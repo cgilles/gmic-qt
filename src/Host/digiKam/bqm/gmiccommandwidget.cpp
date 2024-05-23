@@ -169,8 +169,6 @@ GmicCommandDialog::GmicCommandDialog(bool edit,
         setWindowTitle(QObject::tr("Add G'MIC Filter"));
     }
 
-
-
     connect(buttonBox, SIGNAL(accepted()),
             this, SLOT(accept()));
 
@@ -267,6 +265,7 @@ GmicCommandWidget::GmicCommandWidget(QWidget* const parent)
     QHBoxLayout* const hbox = new QHBoxLayout();
     hbox->addWidget(d->addButton);
     hbox->addWidget(d->remButton);
+    hbox->addWidget(d->edtButton);
     hbox->addWidget(d->addFolderButton);
     hbox->addItem(spacerItem1);
 
