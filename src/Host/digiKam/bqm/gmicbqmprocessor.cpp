@@ -93,7 +93,7 @@ bool GmicBqmProcessor::setProcessingCommand(const QString& command)
 {
     if (command.isEmpty())
     {
-        qCWarning(DIGIKAM_DPLUGIN_EDITOR_LOG) << "The Gmic command is empty.";
+        qCWarning(DIGIKAM_DPLUGIN_BQM_LOG) << "The Gmic command is empty.";
 
         return false;
     }
@@ -117,8 +117,8 @@ void GmicBqmProcessor::startProcessing()
     QByteArray ba = name.toUtf8();
     gmic_image<char>::string(ba.constData()).move_to(imageNames[0]);
 
-    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Processing image size"
-                                        << d->inImage.size();
+    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Processing image size"
+                                     << d->inImage.size();
 
     GMicQtImageConverter::convertDImgtoCImg(
                                             d->inImage.copy(
@@ -129,7 +129,7 @@ void GmicBqmProcessor::startProcessing()
                                             *d->gmicImages[0]
                                            );
 
-    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << QString::fromUtf8("G'MIC: %1")
+    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << QString::fromUtf8("G'MIC: %1")
                                            .arg(d->command);
 
     QString env = QString::fromLatin1("_input_layers=%1").arg((int)DefaultInputMode);
@@ -182,7 +182,7 @@ void GmicBqmProcessor::slotProcessingFinished()
             errorMessage = QLatin1String("Gmic Filter execution failed without error message.");
         }
 
-        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << errorMessage;
+        qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << errorMessage;
         d->completed = false;
     }
     else

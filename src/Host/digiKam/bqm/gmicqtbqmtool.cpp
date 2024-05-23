@@ -27,6 +27,7 @@
 // Qt includes
 
 #include <QWidget>
+#include <QEventLoop>
 
 // digikam includes
 
@@ -35,7 +36,7 @@
 
 // Local includes
 
-#include "gmicbqmwidget.h"
+//#include "gmicbqmwidget.h"
 #include "gmicbqmprocessor.h"
 
 namespace DigikamBqmGmicQtPlugin
@@ -110,7 +111,7 @@ bool GmicQtBqmTool::toolOperations()
 {
     if (!loadToDImg())
     {
-        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GmicQtBqmTool: cannot load image!";
+        qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "GmicQtBqmTool: cannot load image!";
 
         return false;
     }
@@ -125,7 +126,7 @@ bool GmicQtBqmTool::toolOperations()
     {
         delete d->gmicProcessor;
         d->gmicProcessor = nullptr;
-        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GmicQtBqmTool: cannot setup Gmic command!";
+        qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "GmicQtBqmTool: cannot setup Gmic command!";
 
         return false;
     }
@@ -137,7 +138,7 @@ bool GmicQtBqmTool::toolOperations()
     connect(d->gmicProcessor, SIGNAL(signalDone(QString)),
             &loop, SLOT(quit()));
 
-    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GmicQtBqmTool: started Gmic command...";
+    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "GmicQtBqmTool: started Gmic command...";
 
     loop.exec();
 
@@ -147,7 +148,7 @@ bool GmicQtBqmTool::toolOperations()
     delete d->gmicProcessor;
     d->gmicProcessor = nullptr;
 
-    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GmicQtBqmTool: Gmic command completed:" << b;
+    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "GmicQtBqmTool: Gmic command completed:" << b;
 
     if (!b)
     {
