@@ -36,7 +36,7 @@
 
 // Local includes
 
-//#include "gmicbqmwidget.h"
+#include "gmiccommandwidget.h"
 #include "gmicbqmprocessor.h"
 
 namespace DigikamBqmGmicQtPlugin
@@ -48,8 +48,7 @@ public:
 
     Private() = default;
 
-//    GmicBqmWidget*    gmicWidget    = nullptr;
-    QWidget*          gmicWidget    = nullptr;
+    GmicCommandWidget* gmicWidget   = nullptr;
     GmicBqmProcessor* gmicProcessor = nullptr;
 };
 
@@ -71,7 +70,7 @@ BatchTool* GmicQtBqmTool::clone(QObject* const parent) const
 
 void GmicQtBqmTool::registerSettingsWidget()
 {
-    d->gmicWidget    = new QWidget();
+    d->gmicWidget    = new GmicCommandWidget();
     m_settingsWidget = d->gmicWidget;
 
     connect(d->gmicWidget, SIGNAL(signalSettingsChanged()),

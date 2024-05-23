@@ -28,6 +28,7 @@
 // Qt includes
 
 #include <QWidget>
+#include <QDialog>
 #include <QTreeView>
 #include <QComboBox>
 #include <QAbstractItemModel>
@@ -39,17 +40,17 @@
 namespace DigikamBqmGmicQtPlugin
 {
 
-class AddBookmarkDialog : public QDialog
+class AddGmicCommandDialog : public QDialog
 {
     Q_OBJECT
 
 public:
 
-    explicit AddBookmarkDialog(const QString& command,
-                               const QString& title,
-                               QWidget* const parent = nullptr,
-                               BookmarksManager* const mngr = nullptr);
-    ~AddBookmarkDialog() override;
+    explicit AddGmicCommandDialog(const QString& command,
+                                  const QString& title,
+                                  QWidget* const parent = nullptr,
+                                  GmicCommandManager* const mngr = nullptr);
+    ~AddGmicCommandDialog() override;
 
 private Q_SLOTS:
 
@@ -63,30 +64,25 @@ private:
 
 // --------------------------------------------------------------------
 
-class BookmarksDialog : public QDialog
+class GmicCommandWidget : public QWidget
 {
     Q_OBJECT
 
 public:
 
-    explicit BookmarksDialog(QWidget* const parent = nullptr,
-                             BookmarksManager* const mngr = nullptr);
-    ~BookmarksDialog()              override;
+    explicit GmicCommandWidget(QWidget* const parent = nullptr,
+                               GmicCommandManager* const mngr = nullptr);
+    ~GmicCommandWidget()            override;
 
 private Q_SLOTS:
 
     void slotCustomContextMenuRequested(const QPoint&);
-    void accept()                   override;
     void slotNewFolder();
     void slotRemoveOne();
 
-protected:
-
-    void closeEvent(QCloseEvent*)   override;
-
 private:
 
-    void expandNodes(BookmarkNode* const node);
+    void expandNodes(GmicCommandNode* const node);
     bool saveExpandedNodes(const QModelIndex& parent);
     void readSettings();
     void saveSettings();

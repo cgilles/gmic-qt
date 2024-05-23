@@ -45,11 +45,18 @@
 #include <QPushButton>
 #include <QSpacerItem>
 #include <QLabel>
-#include <QtextEdit.h>
+#include <QTextEdit>
+
+// digiKam includes
+
+#include "searchtextbar.h"
+#include "dtextedit.h"
 
 // Local includes
 
-#include "bookmarknode.h"
+#include "gmiccommandnode.h"
+
+using namespace Digikam;
 
 namespace DigikamBqmGmicQtPlugin
 {
@@ -60,12 +67,12 @@ public:
 
     Private() = default;
 
-    QString                command;
-    GmicCommandManager*    manager      = nullptr;
-    AddBookmarkProxyModel* proxyModel   = nullptr;
-    QComboBox*             location     = nullptr;
-    QTextEdit*             title        = nullptr;
-    QTextEdit*             desc         = nullptr;
+    QString                   command;
+    GmicCommandManager*       manager      = nullptr;
+    AddGmicCommandProxyModel* proxyModel   = nullptr;
+    QComboBox*                location     = nullptr;
+    DTextEdit*                title        = nullptr;
+    DTextEdit*                desc         = nullptr;
 };
 
 AddGmicCommandDialog::AddGmicCommandDialog(const QString& command,
@@ -122,8 +129,8 @@ AddGmicCommandDialog::AddGmicCommandDialog(const QString& command,
     vbox->addWidget(buttonBox);
 
     QTreeView* const view       = new QTreeView(this);
-    d->proxyModel               = new AddBookmarkProxyModel(this);
-    GmicCommandModel* const model = d->manager->bookmarksModel();
+    d->proxyModel               = new AddGmicCommandProxyModel(this);
+    GmicCommandModel* const model = d->manager->commandsModel();
     d->proxyModel->setSourceModel(model);
     view->setModel(d->proxyModel);
     view->expandAll();
@@ -134,8 +141,8 @@ AddGmicCommandDialog::AddGmicCommandDialog(const QString& command,
     view->setIndentation(10);
     view->show();
 
-    GmicCommandNode* const menu = d->manager->bookmarks();
-    QModelIndex idx          = d->proxyModel->mapFromSource(model->index(menu));
+    GmicCommandNode* const menu = d->manager->commands();
+    QModelIndex idx             = d->proxyModel->mapFromSource(model->index(menu));
     view->setCurrentIndex(idx);
 
     d->location->setModel(d->proxyModel);
@@ -160,23 +167,23 @@ void AddGmicCommandDialog::accept()
 
     if (!index.isValid())
     {
-        index = d->manager->bookmarksModel()->index(0, 0);
+        index = d->manager->commandsModel()->index(0, 0);
     }
 
-    GmicCommandNode* const parent = d->manager->bookmarksModel()->node(index);
-    GmicCommandNode* const node   = new GmicCommandNode(GmicCommandNode::Command);
-    node->command              = d->command;
-    node->title                = d->title->text();
-    node->desc                 = d->desc->text();
-    node->dateAdded            = QDateTime::currentDateTime();
-    d->manager->addBookmark(parent, node);
+    GmicCommandNode* const parent = d->manager->commandsModel()->node(index);
+    GmicCommandNode* const node   = new GmicCommandNode(GmicCommandNode::Item);
+    node->command                 = d->command;
+    node->title                   = d->title->text();
+    node->desc                    = d->desc->text();
+    node->dateAdded               = QDateTime::currentDateTime();
+    d->manager->addCommand(parent, node);
     d->manager->save();
     QDialog::accept();
 }
 
 // ----------------------------------------------------------------
 
-class Q_DECL_HIDDEN BookmarksDialog::Private
+class Q_DECL_HIDDEN GmicCommandWidget::Private
 {
 public:
 
@@ -189,23 +196,15 @@ public:
     QTreeView*             tree             = nullptr;
 };
 
-BookmarksDialog::BookmarksDialog(QWidget* const parent, GmicCommandManager* const mngr)
-    : QDialog(parent),
+GmicCommandWidget::GmicCommandWidget(QWidget* const parent, GmicCommandManager* const mngr)
+    : QWidget(parent),
       d      (new Private)
 {
-    setWindowFlags((windowFlags() & ~Qt::Dialog) |
-                   Qt::Window                    |
-                   Qt::WindowCloseButtonHint     |
-                   Qt::WindowMinMaxButtonsHint);
-
-    setWindowTitle(QObject::tr("Edit Geolocation Bookmarks"));
     setObjectName(QLatin1String("GeolocationBookmarksEditDialog"));
-    setAttribute(Qt::WA_DeleteOnClose);
-    resize(750, 450);
 
     d->manager = mngr;
 
-    d->search  = new SearchTextBar(this, QLatin1String("DigikamBookmarksGeolocationSearchBar"));
+    d->search  = new SearchTextBar(this, QLatin1String("DigikamGmicCommandSearchBar"));
     d->search->setObjectName(QLatin1String("search"));
 
     d->tree    = new QTreeView(this);
@@ -240,9 +239,9 @@ BookmarksDialog::BookmarksDialog(QWidget* const parent, GmicCommandManager* cons
     grid->addLayout(hbox,       2, 0, 1, 3);
     grid->setColumnStretch(1, 10);
 
-    d->commandsModel        = d->manager->bookmarksModel();
+    d->commandsModel        = d->manager->commandsModel();
     d->proxyModel           = new TreeProxyModel(this);
-    d->proxyModel->setSourceModel(d->bookmarksModel);
+    d->proxyModel->setSourceModel(d->commandsModel);
     d->tree->setModel(d->proxyModel);
     d->tree->setExpanded(d->proxyModel->index(0, 0), true);
     d->tree->header()->setSectionResizeMode(QHeaderView::Stretch);
@@ -274,38 +273,23 @@ BookmarksDialog::BookmarksDialog(QWidget* const parent, GmicCommandManager* cons
     readSettings();
 }
 
-BookmarksDialog::~BookmarksDialog()
+GmicCommandWidget::~GmicCommandWidget()
 {
+    saveSettings();
+    d->manager->save();
     delete d;
 }
 
-void BookmarksDialog::accept()
-{
-    d->manager->save();
-    QDialog::accept();
-}
-
-void BookmarksDialog::closeEvent(QCloseEvent* e)
-{
-    if (!e)
-    {
-        return;
-    }
-
-    saveSettings();
-    e->accept();
-}
-
-bool BookmarksDialog::saveExpandedNodes(const QModelIndex& parent)
+bool GmicCommandWidget::saveExpandedNodes(const QModelIndex& parent)
 {
     bool changed = false;
 
     for (int i = 0 ; i < d->proxyModel->rowCount(parent) ; ++i)
     {
-        QModelIndex child             = d->proxyModel->index(i, 0, parent);
-        QModelIndex sourceIndex       = d->proxyModel->mapToSource(child);
-        GmicCommandNode* const childNode = d->bookmarksModel->node(sourceIndex);
-        bool wasExpanded              = childNode->expanded;
+        QModelIndex child                = d->proxyModel->index(i, 0, parent);
+        QModelIndex sourceIndex          = d->proxyModel->mapToSource(child);
+        GmicCommandNode* const childNode = d->commandsModel->node(sourceIndex);
+        bool wasExpanded                 = childNode->expanded;
 
         if (d->tree->isExpanded(child))
         {
@@ -323,7 +307,7 @@ bool BookmarksDialog::saveExpandedNodes(const QModelIndex& parent)
     return changed;
 }
 
-void BookmarksDialog::expandNodes(GmicCommandNode* const node)
+void GmicCommandWidget::expandNodes(GmicCommandNode* const node)
 {
     for (int i = 0 ; i < node->children().count() ; ++i)
     {
@@ -339,7 +323,7 @@ void BookmarksDialog::expandNodes(GmicCommandNode* const node)
     }
 }
 
-void BookmarksDialog::slotCustomContextMenuRequested(const QPoint& pos)
+void GmicCommandWidget::slotCustomContextMenuRequested(const QPoint& pos)
 {
     QModelIndex index = d->tree->indexAt(pos);
     index             = index.sibling(index.row(), 0);
@@ -358,7 +342,7 @@ void BookmarksDialog::slotCustomContextMenuRequested(const QPoint& pos)
     }
 }
 
-void BookmarksDialog::slotNewFolder()
+void GmicCommandWidget::slotNewFolder()
 {
     QModelIndex currentIndex = d->tree->currentIndex();
     QModelIndex idx          = currentIndex;
@@ -373,70 +357,52 @@ void BookmarksDialog::slotNewFolder()
         idx = d->tree->rootIndex();
     }
 
-    idx                        = d->proxyModel->mapToSource(idx);
-    GmicCommandNode* const parent = d->manager->bookmarksModel()->node(idx);
+    idx                           = d->proxyModel->mapToSource(idx);
+    GmicCommandNode* const parent = d->manager->commandsModel()->node(idx);
     GmicCommandNode* const node   = new GmicCommandNode(GmicCommandNode::Folder);
-    node->title                = QObject::tr("New Folder");
-    d->manager->addBookmark(parent, node, currentIndex.row() + 1);
+    node->title                   = QObject::tr("New Folder");
+    d->manager->addCommand(parent, node, currentIndex.row() + 1);
 }
 
-void BookmarksDialog::slotRemoveOne()
+void GmicCommandWidget::slotRemoveOne()
 {
     QModelIndex index = d->tree->currentIndex();
 
     if (index.isValid())
     {
         index                    = d->proxyModel->mapToSource(index);
-        GmicCommandNode* const node = d->manager->bookmarksModel()->node(index);
+        GmicCommandNode* const node = d->manager->commandsModel()->node(index);
 
         if (node->type() == GmicCommandNode::RootFolder)
         {
             return;
         }
 
-        if (QMessageBox::question(this, QObject::tr("@title:window", "Bookmarks Management"),
+        if (QMessageBox::question(this, QObject::tr("@title:window", "Gmic Commands Management"),
                                   QObject::tr("@info", "Do you want to remove \"%1\" "
-                                        "from your Bookmarks collection?",
-                                        node->title),
+                                        "from your Gmic Commands collection?")
+                                  .arg(node->title),
                                   QMessageBox::Yes | QMessageBox::No
                                  ) == QMessageBox::No)
         {
             return;
         }
 
-        d->manager->removeBookmark(node);
+        d->manager->removeCommand(node);
     }
 }
 
-void BookmarksDialog::readSettings()
+void GmicCommandWidget::readSettings()
 {
-    expandNodes(d->manager->bookmarks());
-
-    KSharedConfig::Ptr config = KSharedConfig::openConfig();
-    KConfigGroup group        = config->group(objectName());
-    KConfigGroup groupGPSTab  = KConfigGroup(&group, QLatin1String("GPS Properties Tab"));
-    d->mapView->readSettings(groupGPSTab);
-
-    KConfigGroup groupDialog  = KConfigGroup(&group, QLatin1String("Dialog"));
-    winId();
-    DXmlGuiWindow::restoreWindowSize(windowHandle(), groupDialog);
-    resize(windowHandle()->size());
+    expandNodes(d->manager->commands());
 }
 
-void BookmarksDialog::saveSettings()
+void GmicCommandWidget::saveSettings()
 {
     if (saveExpandedNodes(d->tree->rootIndex()))
     {
         d->manager->changeExpanded();
     }
-
-    KSharedConfig::Ptr config = KSharedConfig::openConfig();
-    KConfigGroup group        = config->group(objectName());
-    KConfigGroup groupGPSTab  = KConfigGroup(&group, QLatin1String("GPS Properties Tab"));
-    d->mapView->writeSettings(groupGPSTab);
-
-    KConfigGroup groupDialog = KConfigGroup(&group, QLatin1String("Dialog"));
-    DXmlGuiWindow::saveWindowSize(windowHandle(), groupDialog);
 }
 
 } // namespace DigikamBqmGmicQtPlugin
