@@ -68,12 +68,12 @@ public:
 
     Private() = default;
 
-    QString                   command;
-    GmicCommandManager*       manager      = nullptr;
-    AddGmicCommandProxyModel* proxyModel   = nullptr;
-    QComboBox*                location     = nullptr;
-    DTextEdit*                title        = nullptr;
-    DTextEdit*                desc         = nullptr;
+    GmicCommandManager*       manager         = nullptr;
+    AddGmicCommandProxyModel* proxyModel      = nullptr;
+    QComboBox*                collectionPlace = nullptr;
+    DTextEdit*                title           = nullptr;
+    DTextEdit*                desc            = nullptr;
+    QTextEdit*                command         = nullptr;
 };
 
 AddGmicCommandDialog::AddGmicCommandDialog(const QString& command,
@@ -83,51 +83,58 @@ AddGmicCommandDialog::AddGmicCommandDialog(const QString& command,
     : QDialog(parent),
       d      (new Private)
 {
-    d->command = command;
-    d->manager = mngr;
+    d->manager     = mngr;
 
+    setWindowTitle(QObject::tr("Add G'MIC Command"));
+    setObjectName(QLatin1String("AddGmicCommandDialog"));
+    setModal(true);
     setWindowFlags((windowFlags() & ~Qt::Dialog) |
                    Qt::Window                    |
                    Qt::WindowCloseButtonHint     |
                    Qt::WindowMinMaxButtonsHint);
 
-    setModal(true);
+    QLabel* const frontLbl = new QLabel(this);
+    frontLbl->setText(QObject::tr("Enter the G'MIC Command string corresponding to this new filter. "
+                                  "Don't forget to assign at least a name and optionally a comment "
+                                  "to describe the filter. Finaly choose where to keep it in your "
+                                  "filters collection."));
+    frontLbl->setTextFormat(Qt::PlainText);
+    frontLbl->setWordWrap(true);
 
-    setWindowTitle(QObject::tr("Add Gmic Command"));
-    setObjectName(QLatin1String("AddGmicCommandDialog"));
-    resize(350, 300);
+    QLabel* const commandLbl = new QLabel(QObject::tr("Filter Command:"), this);
+    d->command               = new QTextEdit(this);
+    d->command->setText(command);
 
-    QLabel* const label = new QLabel(this);
-    label->setText(QObject::tr("Type a name and a comment for the Gmic Command, "
-                               "and choose where to keep it."));
-    label->setTextFormat(Qt::PlainText);
-    label->setWordWrap(true);
-
-    d->title            = new DTextEdit(this);
+    QLabel* const titleLbl   = new QLabel(QObject::tr("Filter Title:"), this);
+    d->title                 = new DTextEdit(this);
     d->title->setLinesVisible(1);
-    d->title->setPlaceholderText(QObject::tr("Command title"));
+    d->title->setPlaceholderText(QObject::tr("Enter here the filter title"));
     d->title->setText(title);
 
-    d->desc             = new DTextEdit(this);
-    d->desc->setLinesVisible(1);
-    d->desc->setPlaceholderText(QObject::tr("Command comment"));
-    d->location         = new QComboBox(this);
+    QLabel* const descLbl    = new QLabel(QObject::tr("Filter Description:"), this);
+    d->desc                  = new DTextEdit(this);
+    d->desc->setLinesVisible(3);
+    d->desc->setPlaceholderText(QObject::tr("Enter here the filter description"));
 
-    QSpacerItem* const verticalSpacer = new QSpacerItem(20, 2, QSizePolicy::Minimum,
-                                                        QSizePolicy::Expanding);
+    QLabel* const placeLbl   = new QLabel(QObject::tr("Place in Collection:"), this);
+    d->collectionPlace       = new QComboBox(this);
 
     QDialogButtonBox* const buttonBox = new QDialogButtonBox(this);
     buttonBox->setOrientation(Qt::Horizontal);
     buttonBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
     buttonBox->setCenterButtons(false);
 
-    QVBoxLayout* const vbox     = new QVBoxLayout(this);
-    vbox->addWidget(label);
-    vbox->addWidget(d->title);
-    vbox->addWidget(d->desc);
-    vbox->addWidget(d->location);
-    vbox->addItem(verticalSpacer);
-    vbox->addWidget(buttonBox);
+    QGridLayout* const grid     = new QGridLayout(this);
+    grid->addWidget(frontLbl,           0, 0, 1, 2);
+    grid->addWidget(commandLbl,         1, 0, 1, 2);
+    grid->addWidget(d->command,         2, 0, 1, 2);
+    grid->addWidget(titleLbl,           3, 0, 1, 1);
+    grid->addWidget(d->title,           3, 1, 1, 1);
+    grid->addWidget(descLbl,            4, 0, 1, 2);
+    grid->addWidget(d->desc,            5, 0, 1, 2);
+    grid->addWidget(placeLbl,           6, 0, 1, 1);
+    grid->addWidget(d->collectionPlace, 6, 1, 1, 1);
+    grid->addWidget(buttonBox);
 
     QTreeView* const view       = new QTreeView(this);
     d->proxyModel               = new AddGmicCommandProxyModel(this);
@@ -146,14 +153,16 @@ AddGmicCommandDialog::AddGmicCommandDialog(const QString& command,
     QModelIndex idx             = d->proxyModel->mapFromSource(model->index(menu));
     view->setCurrentIndex(idx);
 
-    d->location->setModel(d->proxyModel);
-    d->location->setView(view);
+    d->collectionPlace->setModel(d->proxyModel);
+    d->collectionPlace->setView(view);
 
     connect(buttonBox, SIGNAL(accepted()),
             this, SLOT(accept()));
 
     connect(buttonBox, SIGNAL(rejected()),
             this, SLOT(reject()));
+
+    adjustSize();
 }
 
 AddGmicCommandDialog::~AddGmicCommandDialog()
@@ -163,7 +172,7 @@ AddGmicCommandDialog::~AddGmicCommandDialog()
 
 void AddGmicCommandDialog::accept()
 {
-    QModelIndex index = d->location->view()->currentIndex();
+    QModelIndex index = d->collectionPlace->view()->currentIndex();
     index             = d->proxyModel->mapToSource(index);
 
     if (!index.isValid())
@@ -173,12 +182,13 @@ void AddGmicCommandDialog::accept()
 
     GmicCommandNode* const parent = d->manager->commandsModel()->node(index);
     GmicCommandNode* const node   = new GmicCommandNode(GmicCommandNode::Item);
-    node->command                 = d->command;
+    node->command                 = d->command->toPlainText();
     node->title                   = d->title->text();
     node->desc                    = d->desc->text();
     node->dateAdded               = QDateTime::currentDateTime();
     d->manager->addCommand(parent, node);
     d->manager->save();
+
     QDialog::accept();
 }
 
@@ -201,7 +211,7 @@ GmicCommandWidget::GmicCommandWidget(QWidget* const parent)
     : QWidget(parent),
       d      (new Private)
 {
-    setObjectName(QLatin1String("GeolocationBookmarksEditDialog"));
+    setObjectName(QLatin1String("GmicCommandEditDialog"));
 
     const QString db = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
                                                         QLatin1String("/gmiccommands.xml");
@@ -377,9 +387,9 @@ void GmicCommandWidget::slotRemoveOne()
             return;
         }
 
-        if (QMessageBox::question(this, QObject::tr("Gmic Commands Management"),
+        if (QMessageBox::question(this, QObject::tr("G'MIC Commands Management"),
                                   QObject::tr("Do you want to remove \"%1\" "
-                                        "from your Gmic Commands collection?")
+                                        "from your G'MIC filters collection?")
                                   .arg(node->title),
                                   QMessageBox::Yes | QMessageBox::No
                                  ) == QMessageBox::No)
@@ -395,7 +405,7 @@ void GmicCommandWidget::slotAddOne()
 {
     AddGmicCommandDialog* const dlg = new AddGmicCommandDialog(
                                                                QString(),  // TODO: use clipboard
-                                                               tr("New Gmic Command"),
+                                                               QString(),
                                                                this,
                                                                d->manager
                                                               );

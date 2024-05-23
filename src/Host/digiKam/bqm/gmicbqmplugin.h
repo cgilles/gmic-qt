@@ -22,21 +22,21 @@
 *
 */
 
-#ifndef DIGIKAM_BQM_GMICQT_PLUGIN_H
-#define DIGIKAM_BQM_GMICQT_PLUGIN_H
+#ifndef DIGIKAM_BQM_GMIC_PLUGIN_H
+#define DIGIKAM_BQM_GMIC_PLUGIN_H
 
 // Local includes
 
 #include "dpluginbqm.h"
 
-#define DPLUGIN_IID "org.kde.digikam.plugin.bqm.GmicQt"
+#define DPLUGIN_IID "org.kde.digikam.plugin.bqm.Gmic"
 
 using namespace Digikam;
 
 namespace DigikamBqmGmicQtPlugin
 {
 
-class GmicQtPlugin : public DPluginBqm
+class GmicBqmPlugin : public DPluginBqm
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID DPLUGIN_IID)
@@ -44,8 +44,8 @@ class GmicQtPlugin : public DPluginBqm
 
 public:
 
-    explicit GmicQtPlugin(QObject* const parent = nullptr);
-    ~GmicQtPlugin()                      override = default;
+    explicit GmicBqmPlugin(QObject* const parent = nullptr);
+    ~GmicBqmPlugin()                      override = default;
 
     QString name()                 const override;
     QString iid()                  const override;
@@ -62,4 +62,4 @@ public:
 
 } // namespace DigikamBqmGmicQtPlugin
 
-#endif // DIGIKAM_BQM_GMICQT_PLUGIN_H
+#endif // DIGIKAM_BQM_GMIC_PLUGIN_H

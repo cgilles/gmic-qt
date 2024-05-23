@@ -93,7 +93,7 @@ bool GmicBqmProcessor::setProcessingCommand(const QString& command)
 {
     if (command.isEmpty())
     {
-        qCWarning(DIGIKAM_DPLUGIN_BQM_LOG) << "The Gmic command is empty.";
+        qCWarning(DIGIKAM_DPLUGIN_BQM_LOG) << "The G'MIC command is empty.";
 
         return false;
     }
@@ -179,7 +179,7 @@ void GmicBqmProcessor::slotProcessingFinished()
 
         if (errorMessage.isEmpty())
         {
-            errorMessage = QLatin1String("Gmic Filter execution failed without error message.");
+            errorMessage = QLatin1String("G'MIC Filter execution failed without error message.");
         }
 
         qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << errorMessage;

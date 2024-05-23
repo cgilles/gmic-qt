@@ -22,7 +22,7 @@
 *
 */
 
-#include "gmicqtplugin.h"
+#include "gmicbqmplugin.h"
 
 // Qt includes
 
@@ -48,39 +48,39 @@
 #include "Widgets/InOutPanel.h"
 #include "Settings.h"
 #include "gmic.h"
-#include "gmicqtbqmtool.h"
+#include "gmicbqmtool.h"
 
 using namespace GmicQt;
 
 namespace DigikamBqmGmicQtPlugin
 {
 
-GmicQtPlugin::GmicQtPlugin(QObject* const parent)
+GmicBqmPlugin::GmicBqmPlugin(QObject* const parent)
     : DPluginBqm(parent)
 {
 }
 
-QString GmicQtPlugin::name() const
+QString GmicBqmPlugin::name() const
 {
-    return QString::fromUtf8("GmicQt");
+    return QString::fromUtf8("G'MIC");
 }
 
-QString GmicQtPlugin::iid() const
+QString GmicBqmPlugin::iid() const
 {
     return QLatin1String(DPLUGIN_IID);
 }
 
-QIcon GmicQtPlugin::icon() const
+QIcon GmicBqmPlugin::icon() const
 {
     return QIcon(":resources/gmic_hat.png");
 }
 
-QString GmicQtPlugin::description() const
+QString GmicBqmPlugin::description() const
 {
-    return tr("A tool for G'MIC-Qt");
+    return tr("A tool for the G'MIC processor");
 }
 
-QString GmicQtPlugin::details() const
+QString GmicBqmPlugin::details() const
 {
     QImage img(":resources/logos.png");
     QByteArray byteArray;
@@ -90,9 +90,8 @@ QString GmicQtPlugin::details() const
     QString logo = QString::fromLatin1("<p><img src=\"data:image/png;base64,%1\"></p>")
                    .arg(QString::fromLatin1(byteArray.toBase64().data()));
 
-    return tr("<p><b>An Image Editor tool for G'MIC-Qt.</b></p>"
+    return tr("<p><b>An Batch Queue Manager tool for G'MIC processor.</b></p>"
               "<p><b>Overview:</b></p>"
-                "<p>G'MIC-Qt is a versatile front-end to the image processing framework G'MIC</p>"
                 "<p>G'MIC is a full-featured open-source framework for image processing. "
                 "It provides several user interfaces to convert / manipulate / filter / "
                 "visualize generic image datasets, ranging from 1D scalar signals to 3D+t sequences "
@@ -144,22 +143,22 @@ QString GmicQtPlugin::details() const
     ;
 }
 
-QString GmicQtPlugin::handbookSection() const
+QString GmicBqmPlugin::handbookSection() const
 {
     return QLatin1String("batch_queue");
 }
 
-QString GmicQtPlugin::handbookChapter() const
+QString GmicBqmPlugin::handbookChapter() const
 {
     return QLatin1String("base_tools");
 }
 
-QString GmicQtPlugin::handbookReference() const
+QString GmicBqmPlugin::handbookReference() const
 {
     return QLatin1String("bqm-enhancetools");
 }
 
-QList<DPluginAuthor> GmicQtPlugin::authors() const
+QList<DPluginAuthor> GmicBqmPlugin::authors() const
 {
     return QList<DPluginAuthor>()
             << DPluginAuthor(QString::fromUtf8("Gilles Caulier"),
@@ -176,7 +175,7 @@ QList<DPluginAuthor> GmicQtPlugin::authors() const
             ;
 }
 
-void GmicQtPlugin::setup(QObject* const parent)
+void GmicBqmPlugin::setup(QObject* const parent)
 {
     // Code inspired from GmicQt.cpp::run() and host_none.cpp::main()
 
@@ -210,7 +209,7 @@ void GmicQtPlugin::setup(QObject* const parent)
         GmicQt::InOutPanel::disableOutputMode(mode);
     }
 
-    GmicQtBqmTool* const tool = new GmicQtBqmTool(parent);
+    GmicBqmTool* const tool = new GmicBqmTool(parent);
     tool->setPlugin(this);
 
     addTool(tool);

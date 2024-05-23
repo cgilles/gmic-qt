@@ -47,14 +47,14 @@ set_package_properties(DigikamDatabase PROPERTIES
 
 include_directories($<TARGET_PROPERTY:Digikam::digikamdatabase,INTERFACE_INCLUDE_DIRECTORIES>)
 
-set(gmic_qt_bqm_SRCS
+set(gmic_bqm_SRCS
     ${gmic_qt_SRCS}
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmiccommandwidget.cpp
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmiccommandnode.cpp
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmiccommandmngr.cpp
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicbqmprocessor.cpp
-    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicqtbqmtool.cpp
-    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicqtplugin.cpp
+    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicbqmtool.cpp
+    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicbqmplugin.cpp
 
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/common/gmicqtimageconverter.cpp
 )
@@ -63,32 +63,32 @@ add_definitions(-DGMIC_HOST=digikam)
 add_definitions(-D_GMIC_QT_DISABLE_THEMING_)
 add_definitions(-D_GMIC_QT_DISABLE_HDPI_)
 add_definitions(-D_GMIC_QT_DISABLE_LOGO_)
-add_library(Bqm_GmicQt_Plugin
-            MODULE ${gmic_qt_bqm_SRCS} ${gmic_qt_QRC} ${gmic_qt_QM})
+add_library(Bqm_Gmic_Plugin
+            MODULE ${gmic_bqm_SRCS} ${gmic_qt_QRC} ${gmic_qt_QM})
 
-set_target_properties(Bqm_GmicQt_Plugin PROPERTIES PREFIX "")
+set_target_properties(Bqm_Gmic_Plugin PROPERTIES PREFIX "")
 
-target_link_libraries(Bqm_GmicQt_Plugin
+target_link_libraries(Bqm_Gmic_Plugin
                       PRIVATE
                       ${gmic_qt_LIBRARIES}
                       Digikam::digikamcore
                       Digikam::digikamgui
                       Digikam::digikamdatabase)
 
-install(TARGETS Bqm_GmicQt_Plugin
+install(TARGETS Bqm_Gmic_Plugin
         DESTINATION ${QT_PLUGINS_DIR}/digikam/bqm)
 
 # Install debug symbols
 
 if(MSVC)
-    install(FILES "$<TARGET_PDB_FILE:Bqm_GmicQt_Plugin>"
+    install(FILES "$<TARGET_PDB_FILE:Bqm_Gmic_Plugin>"
             DESTINATION ${QT_PLUGINS_DIR}/digikam/bqm
             CONFIGURATIONS Debug RelWithDebInfo
     )
 endif()
 
 if(APPLE)
-    install(FILES "$<TARGET_FILE:Bqm_GmicQt_Plugin>.dSYM"
+    install(FILES "$<TARGET_FILE:Bqm_Gmic_Plugin>.dSYM"
             DESTINATION ${QT_PLUGINS_DIR}/digikam/bqm
             CONFIGURATIONS Debug RelWithDebInfo
     )

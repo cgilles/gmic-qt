@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef DIGIKAM_BQM_GMICQT_TOOL_H
-#define DIGIKAM_BQM_GMICQT_TOOL_H
+#ifndef DIGIKAM_GMIC_BQM_TOOL_H
+#define DIGIKAM_GMIC_BQM_TOOL_H
 
 // Local includes
 
@@ -34,14 +34,14 @@ using namespace Digikam;
 namespace DigikamBqmGmicQtPlugin
 {
 
-class GmicQtBqmTool : public BatchTool
+class GmicBqmTool : public BatchTool
 {
     Q_OBJECT
 
 public:
 
-    explicit GmicQtBqmTool(QObject* const parent = nullptr);
-    ~GmicQtBqmTool()                                        override;
+    explicit GmicBqmTool(QObject* const parent = nullptr);
+    ~GmicBqmTool()                                          override;
 
     BatchToolSettings defaultSettings()                     override;
 
@@ -68,4 +68,4 @@ private:
 
 } // namespace DigikamBqmGmicQtPlugin
 
-#endif // DIGIKAM_BQM_GMICQT_TOOL_H
+#endif // DIGIKAM_GMIC_BQM_TOOL_H

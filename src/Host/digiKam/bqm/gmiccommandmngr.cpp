@@ -52,7 +52,7 @@ namespace DigikamBqmGmicQtPlugin
 RemoveGmicCommand::RemoveGmicCommand(GmicCommandManager* const mngr,
                                      GmicCommandNode* const parent,
                                      int row)
-    : QUndoCommand(QObject::tr("Remove Command")),
+    : QUndoCommand(QObject::tr("Remove Filter")),
       m_row            (row),
       m_bookmarkManager(mngr),
       m_node           (parent->children().value(row)),
@@ -94,7 +94,7 @@ InsertGmicCommand::InsertGmicCommand(GmicCommandManager* const mngr,
                                      int row)
     : RemoveGmicCommand(mngr, parent, row)
 {
-    setText(QObject::tr("Insert Command"));
+    setText(QObject::tr("Insert Filter"));
     m_node = node;
 }
 
@@ -154,7 +154,7 @@ ChangeGmicCommand::ChangeGmicCommand(GmicCommandManager* const mngr,
         default:    // Gmic Command
         {
             d->oldValue = d->node->command;
-            setText(QObject::tr("Gmic Command Change"));
+            setText(QObject::tr("G'MIC Command Change"));
             break;
         }
     }
@@ -600,7 +600,7 @@ bool GmicCommandModel::dropMimeData(const QMimeData* data,
     }
 
     QUndoStack* const undoStack = d->manager->undoRedoStack();
-    undoStack->beginMacro(QLatin1String("Move Commands"));
+    undoStack->beginMacro(QLatin1String("Move Filters"));
 
     while (!stream.atEnd())
     {
@@ -799,7 +799,7 @@ void GmicCommandManager::load()
         return;
     }
 
-    qCDebug(DIGIKAM_GEOIFACE_LOG) << "Loading Gmic Command from" << d->commandsFile;
+    qCDebug(DIGIKAM_GEOIFACE_LOG) << "Loading G'MIC filter from" << d->commandsFile;
     d->loaded = true;
 
     XbelReader reader;
@@ -808,7 +808,7 @@ void GmicCommandManager::load()
     if (reader.error() != QXmlStreamReader::NoError)
     {
         QMessageBox::warning(nullptr, QObject::tr("Loading Commands"),
-                             QObject::tr("Error when loading Gmic commands on line %1, column %2:\n%3")
+                             QObject::tr("Error when loading G'MIC filters on line %1, column %2:\n%3")
                                   .arg(reader.lineNumber())
                                   .arg(reader.columnNumber())
                                   .arg(reader.errorString()));
@@ -943,8 +943,8 @@ void GmicCommandManager::importCommands()
 
     if (reader.error() != QXmlStreamReader::NoError)
     {
-        QMessageBox::warning(nullptr, QObject::tr("Loading Commands"),
-                             QObject::tr("Error when loading Gmic Commands on line %1, column %2:\n%3")
+        QMessageBox::warning(nullptr, QObject::tr("Loading Filters"),
+                             QObject::tr("Error when loading G'MIC filters on line %1, column %2:\n%3")
                                   .arg(reader.lineNumber())
                                   .arg(reader.columnNumber())
                                   .arg(reader.errorString()));
@@ -970,8 +970,8 @@ void GmicCommandManager::exportCommands()
 
     if (!writer.write(fileName, d->commandRootNode))
     {
-        QMessageBox::critical(nullptr, QObject::tr("Export Commands"),
-                                       QObject::tr("Error saving Gmic Commands"));
+        QMessageBox::critical(nullptr, QObject::tr("Export filters"),
+                                       QObject::tr("Error saving G'MIC filters"));
     }
 }
 
