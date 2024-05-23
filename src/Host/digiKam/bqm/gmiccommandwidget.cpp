@@ -62,12 +62,13 @@ using namespace Digikam;
 namespace DigikamBqmGmicQtPlugin
 {
 
-class Q_DECL_HIDDEN AddGmicCommandDialog::Private
+class Q_DECL_HIDDEN GmicCommandDialog::Private
 {
 public:
 
     Private() = default;
 
+    bool                      edit            = false;
     GmicCommandManager*       manager         = nullptr;
     AddGmicCommandProxyModel* proxyModel      = nullptr;
     QComboBox*                collectionPlace = nullptr;
@@ -76,17 +77,16 @@ public:
     QTextEdit*                command         = nullptr;
 };
 
-AddGmicCommandDialog::AddGmicCommandDialog(const QString& command,
-                                           const QString& title,
-                                           QWidget* const parent,
-                                           GmicCommandManager* const mngr)
+GmicCommandDialog::GmicCommandDialog(bool edit,
+                                     QWidget* const parent,
+                                     GmicCommandManager* const mngr)
     : QDialog(parent),
       d      (new Private)
 {
-    d->manager     = mngr;
+    d->edit    = edit;
+    d->manager = mngr;
 
-    setWindowTitle(QObject::tr("Add G'MIC Command"));
-    setObjectName(QLatin1String("AddGmicCommandDialog"));
+    setObjectName(QLatin1String("GmicCommandDialog"));
     setModal(true);
     setWindowFlags((windowFlags() & ~Qt::Dialog) |
                    Qt::Window                    |
@@ -103,13 +103,11 @@ AddGmicCommandDialog::AddGmicCommandDialog(const QString& command,
 
     QLabel* const commandLbl = new QLabel(QObject::tr("Filter Command:"), this);
     d->command               = new QTextEdit(this);
-    d->command->setText(command);
 
     QLabel* const titleLbl   = new QLabel(QObject::tr("Filter Title:"), this);
     d->title                 = new DTextEdit(this);
     d->title->setLinesVisible(1);
     d->title->setPlaceholderText(QObject::tr("Enter here the filter title"));
-    d->title->setText(title);
 
     QLabel* const descLbl    = new QLabel(QObject::tr("Filter Description:"), this);
     d->desc                  = new DTextEdit(this);
@@ -156,6 +154,23 @@ AddGmicCommandDialog::AddGmicCommandDialog(const QString& command,
     d->collectionPlace->setModel(d->proxyModel);
     d->collectionPlace->setView(view);
 
+    if (d->edit)
+    {
+        GmicCommandNode* const node = d->manager->commandsModel()->node(idx);
+        d->command->setText(node->command);
+        d->title->setText(node->title);
+        d->desc->setText(node->desc);
+        setWindowTitle(QObject::tr("Edit G'MIC Filter"));
+    }
+    else
+    {
+        d->command->setText(QString());     // TODO use Clipboard
+        d->title->setText(QObject::tr("My new G'MIC filter title"));
+        setWindowTitle(QObject::tr("Add G'MIC Filter"));
+    }
+
+
+
     connect(buttonBox, SIGNAL(accepted()),
             this, SLOT(accept()));
 
@@ -165,12 +180,12 @@ AddGmicCommandDialog::AddGmicCommandDialog(const QString& command,
     adjustSize();
 }
 
-AddGmicCommandDialog::~AddGmicCommandDialog()
+GmicCommandDialog::~GmicCommandDialog()
 {
     delete d;
 }
 
-void AddGmicCommandDialog::accept()
+void GmicCommandDialog::accept()
 {
     QModelIndex index = d->collectionPlace->view()->currentIndex();
     index             = d->proxyModel->mapToSource(index);
@@ -205,6 +220,10 @@ public:
     TreeProxyModel*        proxyModel       = nullptr;
     SearchTextBar*         search           = nullptr;
     QTreeView*             tree             = nullptr;
+    QPushButton*           addButton        = nullptr;
+    QPushButton*           remButton        = nullptr;
+    QPushButton*           edtButton        = nullptr;
+    QPushButton*           addFolderButton  = nullptr;
 };
 
 GmicCommandWidget::GmicCommandWidget(QWidget* const parent)
@@ -230,22 +249,25 @@ GmicCommandWidget::GmicCommandWidget(QWidget* const parent)
     d->tree->setAlternatingRowColors(true);
     d->tree->setContextMenuPolicy(Qt::CustomContextMenu);
 
-    QPushButton* const addButton       = new QPushButton(this);
-    addButton->setText(QObject::tr("&Add..."));
+    d->addButton       = new QPushButton(this);
+    d->addButton->setText(QObject::tr("&Add..."));
 
-    QPushButton* const removeButton    = new QPushButton(this);
-    removeButton->setText(QObject::tr("&Remove"));
+    d->remButton       = new QPushButton(this);
+    d->remButton->setText(QObject::tr("&Remove..."));
 
-    QPushButton* const addFolderButton = new QPushButton(this);
-    addFolderButton->setText(QObject::tr("Add Folder"));
+    d->edtButton       = new QPushButton(this);
+    d->edtButton->setText(QObject::tr("&Edit..."));
+
+    d->addFolderButton = new QPushButton(this);
+    d->addFolderButton->setText(QObject::tr("Add Folder..."));
 
     QSpacerItem* const spacerItem1     = new QSpacerItem(40, 20, QSizePolicy::Expanding,
                                                                  QSizePolicy::Minimum);
 
     QHBoxLayout* const hbox = new QHBoxLayout();
-    hbox->addWidget(addButton);
-    hbox->addWidget(removeButton);
-    hbox->addWidget(addFolderButton);
+    hbox->addWidget(d->addButton);
+    hbox->addWidget(d->remButton);
+    hbox->addWidget(d->addFolderButton);
     hbox->addItem(spacerItem1);
 
     QGridLayout* const grid = new QGridLayout(this);
@@ -267,17 +289,23 @@ GmicCommandWidget::GmicCommandWidget(QWidget* const parent)
     connect(d->proxyModel, SIGNAL(signalFilterAccepts(bool)),
             d->search, SLOT(slotSearchResult(bool)));
 
-    connect(removeButton, SIGNAL(clicked()),
+    connect(d->remButton, SIGNAL(clicked()),
             this, SLOT(slotRemoveOne()));
 
-    connect(addButton, SIGNAL(clicked()),
+    connect(d->edtButton, SIGNAL(clicked()),
+            this, SLOT(slotEditOne()));
+
+    connect(d->addButton, SIGNAL(clicked()),
             this, SLOT(slotAddOne()));
+
+    connect(d->addFolderButton, SIGNAL(clicked()),
+            this, SLOT(slotNewFolder()));
+
+    connect(d->tree, SIGNAL(activated(QModelIndex)),
+            this, SLOT(slotTreeViewItemActivated(QModelIndex)));
 
     connect(d->tree, SIGNAL(customContextMenuRequested(QPoint)),
             this, SLOT(slotCustomContextMenuRequested(QPoint)));
-
-    connect(addFolderButton, SIGNAL(clicked()),
-            this, SLOT(slotNewFolder()));
 
     readSettings();
 }
@@ -328,6 +356,63 @@ void GmicCommandWidget::expandNodes(GmicCommandNode* const node)
             idx             = d->proxyModel->mapFromSource(idx);
             d->tree->setExpanded(idx, true);
             expandNodes(childNode);
+        }
+    }
+}
+
+void GmicCommandWidget::slotTreeViewItemActivated(const QModelIndex& index)
+{
+    if (index.isValid())
+    {
+        QModelIndex idx             = d->proxyModel->mapToSource(index);
+        GmicCommandNode* const node = d->manager->commandsModel()->node(idx);
+
+        switch (node->type())
+        {
+            case GmicCommandNode::RootFolder:
+            {
+                d->addFolderButton->setEnabled(true);
+                d->remButton->setEnabled(false);
+                d->addButton->setEnabled(true);
+                d->edtButton->setEnabled(false);
+                break;
+            }
+
+            case GmicCommandNode::Folder:
+            {
+                d->addFolderButton->setEnabled(true);
+                d->remButton->setEnabled(true);
+                d->addButton->setEnabled(true);
+                d->edtButton->setEnabled(false);
+                break;
+            }
+
+            case GmicCommandNode::Item:
+            {
+                d->addFolderButton->setEnabled(false);
+                d->remButton->setEnabled(true);
+                d->addButton->setEnabled(false);
+                d->edtButton->setEnabled(true);
+                break;
+            }
+
+            case GmicCommandNode::Separator:
+            {
+                d->addFolderButton->setEnabled(false);
+                d->remButton->setEnabled(true);
+                d->addButton->setEnabled(false);
+                d->edtButton->setEnabled(false);
+                break;
+            }
+
+            default:
+            {
+                d->addFolderButton->setEnabled(false);
+                d->remButton->setEnabled(false);
+                d->addButton->setEnabled(false);
+                d->edtButton->setEnabled(false);
+                break;
+            }
         }
     }
 }
@@ -403,14 +488,26 @@ void GmicCommandWidget::slotRemoveOne()
 
 void GmicCommandWidget::slotAddOne()
 {
-    AddGmicCommandDialog* const dlg = new AddGmicCommandDialog(
-                                                               QString(),  // TODO: use clipboard
-                                                               QString(),
-                                                               this,
-                                                               d->manager
-                                                              );
+    GmicCommandDialog* const dlg = new GmicCommandDialog(
+                                                         false,
+                                                         this,
+                                                         d->manager
+                                                        );
     dlg->exec();
+    delete dlg;
 }
+
+void GmicCommandWidget::slotEditOne()
+{
+    GmicCommandDialog* const dlg = new GmicCommandDialog(
+                                                         true,
+                                                         this,
+                                                         d->manager
+                                                        );
+    dlg->exec();
+    delete dlg;
+}
+
 
 void GmicCommandWidget::readSettings()
 {

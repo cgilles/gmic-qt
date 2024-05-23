@@ -40,17 +40,16 @@
 namespace DigikamBqmGmicQtPlugin
 {
 
-class AddGmicCommandDialog : public QDialog
+class GmicCommandDialog : public QDialog
 {
     Q_OBJECT
 
 public:
 
-    explicit AddGmicCommandDialog(const QString& command,
-                                  const QString& title,
-                                  QWidget* const parent = nullptr,
-                                  GmicCommandManager* const mngr = nullptr);
-    ~AddGmicCommandDialog() override;
+    explicit GmicCommandDialog(bool edit,
+                               QWidget* const parent = nullptr,
+                               GmicCommandManager* const mngr = nullptr);
+    ~GmicCommandDialog() override;
 
 private Q_SLOTS:
 
@@ -76,9 +75,11 @@ public:
 private Q_SLOTS:
 
     void slotCustomContextMenuRequested(const QPoint&);
+    void slotTreeViewItemActivated(const QModelIndex&);
     void slotNewFolder();
     void slotRemoveOne();
     void slotAddOne();
+    void slotEditOne();
 
 private:
 
