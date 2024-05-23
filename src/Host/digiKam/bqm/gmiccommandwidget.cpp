@@ -300,7 +300,7 @@ GmicCommandWidget::GmicCommandWidget(QWidget* const parent)
     connect(d->addFolderButton, SIGNAL(clicked()),
             this, SLOT(slotNewFolder()));
 
-    connect(d->tree, SIGNAL(activated(QModelIndex)),
+    connect(d->tree, SIGNAL(clicked(QModelIndex)),
             this, SLOT(slotTreeViewItemActivated(QModelIndex)));
 
     connect(d->tree, SIGNAL(customContextMenuRequested(QPoint)),
@@ -361,6 +361,8 @@ void GmicCommandWidget::expandNodes(GmicCommandNode* const node)
 
 void GmicCommandWidget::slotTreeViewItemActivated(const QModelIndex& index)
 {
+    qDebug() << "slotTreeViewItemActivated" << index;
+
     if (index.isValid())
     {
         QModelIndex idx             = d->proxyModel->mapToSource(index);

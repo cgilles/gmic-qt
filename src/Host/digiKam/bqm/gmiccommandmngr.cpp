@@ -416,7 +416,7 @@ QVariant GmicCommandModel::data(const QModelIndex& index, int role) const
             {
                 if (commandNode->type() == GmicCommandNode::Item)
                 {
-                    return QIcon::fromTheme(QLatin1String("run"));
+                    return QIcon::fromTheme(QLatin1String("process-working-symbolic"));
                 }
                 else
                 {
