@@ -507,27 +507,15 @@ void GmicCommandWidget::slotRemoveOne()
 
 void GmicCommandWidget::slotAddOne()
 {
-    QModelIndex index = d->tree->currentIndex();
-
-    if (index.isValid())
-    {
-        index                       = d->proxyModel->mapToSource(index);
-        GmicCommandNode* const node = d->manager->commandsModel()->node(index);
-
-        GmicCommandDialog* const dlg = new GmicCommandDialog(
-                                                             node,
-                                                             false,
-                                                             this,
-                                                             d->manager
-                                                            );
-        dlg->exec();
-        delete dlg;
-
-        Q_EMIT signalSettingsChanged();
-    }
+    openCommandDialog(false);
 }
 
 void GmicCommandWidget::slotEditOne()
+{
+    openCommandDialog(true);
+}
+
+void GmicCommandWidget::openCommandDialog(bool edit)
 {
     QModelIndex index = d->tree->currentIndex();
 
@@ -538,7 +526,7 @@ void GmicCommandWidget::slotEditOne()
 
         GmicCommandDialog* const dlg = new GmicCommandDialog(
                                                              node,
-                                                             true,
+                                                             edit,
                                                              this,
                                                              d->manager
                                                             );

@@ -97,6 +97,7 @@ private:
     bool saveExpandedNodes(const QModelIndex& parent);
     void readSettings();
     void saveSettings();
+    void openCommandDialog(bool edit);
 
 private:
 
