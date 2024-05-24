@@ -453,7 +453,11 @@ int GmicCommandModel::rowCount(const QModelIndex& parent) const
 
 QModelIndex GmicCommandModel::index(int row, int column, const QModelIndex& parent) const
 {
-    if ((row < 0) || (column < 0) || (row >= rowCount(parent)) || (column >= columnCount(parent)))
+    if (
+        (row < 0) || (column < 0) ||
+        (row >= rowCount(parent)) ||
+        (column >= columnCount(parent))
+       )
     {
         return QModelIndex();
     }
@@ -518,14 +522,6 @@ Qt::ItemFlags GmicCommandModel::flags(const QModelIndex& index) const
     if (commandNode->type() != GmicCommandNode::RootFolder)
     {
         flags |= Qt::ItemIsDragEnabled;
-    }
-
-    if (
-        (commandNode->type() != GmicCommandNode::Separator) &&
-        (commandNode->type() != GmicCommandNode::RootFolder)
-       )
-    {
-        flags |= Qt::ItemIsEditable;
     }
 
     if (hasChildren(index))

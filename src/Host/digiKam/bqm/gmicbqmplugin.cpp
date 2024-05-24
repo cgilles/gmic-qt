@@ -77,7 +77,7 @@ QIcon GmicBqmPlugin::icon() const
 
 QString GmicBqmPlugin::description() const
 {
-    return tr("A tool for the G'MIC processor");
+    return tr("A tool to apply the G'MIC filters over the images");
 }
 
 QString GmicBqmPlugin::details() const

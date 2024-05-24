@@ -46,7 +46,8 @@
 #include <QPushButton>
 #include <QSpacerItem>
 #include <QLabel>
-#include <QTextEdit>
+#include <QItemDelegate>
+#include <QValidator>
 
 // digiKam includes
 
@@ -69,21 +70,23 @@ public:
 
     Private() = default;
 
+    bool                      edit            = false;
     GmicCommandNode*          currentItem     = nullptr;
     GmicCommandManager*       manager         = nullptr;
     AddGmicCommandProxyModel* proxyModel      = nullptr;
-    QComboBox*                collectionPlace = nullptr;
-    DTextEdit*                title           = nullptr;
+    QLineEdit*                title           = nullptr;
     DTextEdit*                desc            = nullptr;
     QTextEdit*                command         = nullptr;
 };
 
 GmicCommandDialog::GmicCommandDialog(GmicCommandNode* const citem,
+                                     bool edit,
                                      QWidget* const parent,
                                      GmicCommandManager* const mngr)
     : QDialog(parent),
       d      (new Private)
 {
+    d->edit        = edit;
     d->manager     = mngr;
     d->currentItem = citem;
 
@@ -107,17 +110,21 @@ GmicCommandDialog::GmicCommandDialog(GmicCommandNode* const citem,
     d->command               = new QTextEdit(this);
 
     QLabel* const titleLbl   = new QLabel(QObject::tr("Filter Title:"), this);
-    d->title                 = new DTextEdit(this);
-    d->title->setLinesVisible(1);
+    d->title                 = new QLineEdit(this);
     d->title->setPlaceholderText(QObject::tr("Enter here the filter title"));
+
+    /*
+     * Accepts all UTF-8 Characters.
+     * Excludes the "/" symbol (for the absolute title path support).
+     */
+    QRegularExpression utf8Rx(QLatin1String("[^/]*"));
+    QValidator* const utf8Validator = new QRegularExpressionValidator(utf8Rx, this);
+    d->title->setValidator(utf8Validator);
 
     QLabel* const descLbl    = new QLabel(QObject::tr("Filter Description:"), this);
     d->desc                  = new DTextEdit(this);
     d->desc->setLinesVisible(3);
     d->desc->setPlaceholderText(QObject::tr("Enter here the filter description"));
-
-    QLabel* const placeLbl   = new QLabel(QObject::tr("Place in Collection:"), this);
-    d->collectionPlace       = new QComboBox(this);
 
     QDialogButtonBox* const buttonBox = new QDialogButtonBox(this);
     buttonBox->setOrientation(Qt::Horizontal);
@@ -132,8 +139,6 @@ GmicCommandDialog::GmicCommandDialog(GmicCommandNode* const citem,
     grid->addWidget(d->title,           3, 1, 1, 1);
     grid->addWidget(descLbl,            4, 0, 1, 2);
     grid->addWidget(d->desc,            5, 0, 1, 2);
-    grid->addWidget(placeLbl,           6, 0, 1, 1);
-    grid->addWidget(d->collectionPlace, 6, 1, 1, 1);
     grid->addWidget(buttonBox);
 
     QTreeView* const view       = new QTreeView(this);
@@ -153,10 +158,7 @@ GmicCommandDialog::GmicCommandDialog(GmicCommandNode* const citem,
     QModelIndex idx             = d->proxyModel->mapFromSource(model->index(menu));
     view->setCurrentIndex(idx);
 
-    d->collectionPlace->setModel(d->proxyModel);
-    d->collectionPlace->setView(view);
-
-    if (d->currentItem)
+    if (d->edit)
     {
         d->command->setText(d->currentItem->command);
         d->title->setText(d->currentItem->title);
@@ -188,7 +190,7 @@ GmicCommandDialog::~GmicCommandDialog()
 
 void GmicCommandDialog::accept()
 {
-    if (d->currentItem)
+    if (d->edit)
     {
         d->currentItem->command   = d->command->toPlainText();
         d->currentItem->title     = d->title->text();
@@ -198,21 +200,12 @@ void GmicCommandDialog::accept()
     }
     else
     {
-        QModelIndex index = d->collectionPlace->view()->currentIndex();
-        index             = d->proxyModel->mapToSource(index);
-
-        if (!index.isValid())
-        {
-            index = d->manager->commandsModel()->index(0, 0);
-        }
-
-        GmicCommandNode* const parent = d->manager->commandsModel()->node(index);
-        GmicCommandNode* const node   = new GmicCommandNode(GmicCommandNode::Item);
-        node->command                 = d->command->toPlainText();
-        node->title                   = d->title->text();
-        node->desc                    = d->desc->text();
-        node->dateAdded               = QDateTime::currentDateTime();
-        d->manager->addCommand(parent, node);
+        GmicCommandNode* const node = new GmicCommandNode(GmicCommandNode::Item);
+        node->command               = d->command->toPlainText();
+        node->title                 = d->title->text();
+        node->desc                  = d->desc->text();
+        node->dateAdded             = QDateTime::currentDateTime();
+        d->manager->addCommand(d->currentItem, node);
         d->manager->save();
     }
 
@@ -255,7 +248,7 @@ GmicCommandWidget::GmicCommandWidget(QWidget* const parent)
     d->tree          = new QTreeView(this);
     d->tree->setUniformRowHeights(true);
     d->tree->setSelectionBehavior(QAbstractItemView::SelectRows);
-    d->tree->setSelectionMode(QAbstractItemView::ContiguousSelection);
+    d->tree->setSelectionMode(QAbstractItemView::SingleSelection);
     d->tree->setTextElideMode(Qt::ElideMiddle);
     d->tree->setDragDropMode(QAbstractItemView::InternalMove);
     d->tree->setAlternatingRowColors(true);
@@ -317,6 +310,9 @@ GmicCommandWidget::GmicCommandWidget(QWidget* const parent)
     connect(d->tree, SIGNAL(clicked(QModelIndex)),
             this, SLOT(slotTreeViewItemActivated(QModelIndex)));
 
+    connect(d->tree, SIGNAL(doubleClicked(QModelIndex)),
+            this, SLOT(slotAddOne()));
+
     connect(d->tree, SIGNAL(customContextMenuRequested(QPoint)),
             this, SLOT(slotCustomContextMenuRequested(QPoint)));
 
@@ -330,6 +326,7 @@ GmicCommandWidget::~GmicCommandWidget()
 
     delete d;
 }
+
 
 bool GmicCommandWidget::saveExpandedNodes(const QModelIndex& parent)
 {
@@ -408,6 +405,9 @@ void GmicCommandWidget::slotTreeViewItemActivated(const QModelIndex& index)
                 d->remButton->setEnabled(true);
                 d->addButton->setEnabled(false);
                 d->edtButton->setEnabled(true);
+
+                Q_EMIT signalSettingsChanged();
+
                 break;
             }
 
@@ -432,8 +432,6 @@ void GmicCommandWidget::slotTreeViewItemActivated(const QModelIndex& index)
     }
 
     qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << currentPath();
-
-    Q_EMIT signalSettingsChanged();
 }
 
 void GmicCommandWidget::slotCustomContextMenuRequested(const QPoint& pos)
@@ -509,15 +507,24 @@ void GmicCommandWidget::slotRemoveOne()
 
 void GmicCommandWidget::slotAddOne()
 {
-    GmicCommandDialog* const dlg = new GmicCommandDialog(
-                                                         nullptr,
-                                                         this,
-                                                         d->manager
-                                                        );
-    dlg->exec();
-    delete dlg;
+    QModelIndex index = d->tree->currentIndex();
 
-    Q_EMIT signalSettingsChanged();
+    if (index.isValid())
+    {
+        index                       = d->proxyModel->mapToSource(index);
+        GmicCommandNode* const node = d->manager->commandsModel()->node(index);
+
+        GmicCommandDialog* const dlg = new GmicCommandDialog(
+                                                             node,
+                                                             false,
+                                                             this,
+                                                             d->manager
+                                                            );
+        dlg->exec();
+        delete dlg;
+
+        Q_EMIT signalSettingsChanged();
+    }
 }
 
 void GmicCommandWidget::slotEditOne()
@@ -531,6 +538,7 @@ void GmicCommandWidget::slotEditOne()
 
         GmicCommandDialog* const dlg = new GmicCommandDialog(
                                                              node,
+                                                             true,
                                                              this,
                                                              d->manager
                                                             );

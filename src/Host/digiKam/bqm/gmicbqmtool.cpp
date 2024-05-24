@@ -48,8 +48,10 @@ public:
 
     Private() = default;
 
-    GmicCommandWidget* gmicWidget   = nullptr;
-    GmicBqmProcessor* gmicProcessor = nullptr;
+    GmicCommandWidget* gmicWidget     = nullptr;
+    GmicBqmProcessor*  gmicProcessor  = nullptr;
+
+    bool               changeSettings = true;
 };
 
 GmicBqmTool::GmicBqmTool(QObject* const parent)
@@ -91,19 +93,26 @@ BatchToolSettings GmicBqmTool::defaultSettings()
 
 void GmicBqmTool::slotAssignSettings2Widget()
 {
+    d->changeSettings = false;
+
     QString path = settings()[QLatin1String("GmicBqmToolPath")].toString();
 
     d->gmicWidget->setCurrentPath(path);
+
+    d->changeSettings = true;
 }
 
 void GmicBqmTool::slotSettingsChanged()
 {
-    BatchToolSettings settings;
+    if (d->changeSettings)
+    {
+        BatchToolSettings settings;
 
-    settings.insert(QLatin1String("GmicBqmToolCommand"), d->gmicWidget->currentGmicCommand());
-    settings.insert(QLatin1String("GmicBqmToolPath"),    d->gmicWidget->currentPath());
+        settings.insert(QLatin1String("GmicBqmToolCommand"), d->gmicWidget->currentGmicCommand());
+        settings.insert(QLatin1String("GmicBqmToolPath"),    d->gmicWidget->currentPath());
 
-    BatchTool::slotSettingsChanged(settings);
+        BatchTool::slotSettingsChanged(settings);
+    }
 }
 
 bool GmicBqmTool::toolOperations()

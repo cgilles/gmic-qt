@@ -47,6 +47,7 @@ class GmicCommandDialog : public QDialog
 public:
 
     explicit GmicCommandDialog(GmicCommandNode* const citem,
+                               bool edit,
                                QWidget* const parent = nullptr,
                                GmicCommandManager* const mngr = nullptr);
     ~GmicCommandDialog() override;
