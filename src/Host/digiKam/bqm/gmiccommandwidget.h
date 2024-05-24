@@ -70,7 +70,12 @@ class GmicCommandWidget : public QWidget
 public:
 
     explicit GmicCommandWidget(QWidget* const parent = nullptr);
-    ~GmicCommandWidget()            override;
+    ~GmicCommandWidget()                                  override;
+
+    QString currentPath()                           const;
+    void setCurrentPath(const QString& path);
+
+    QString currentGmicCommand()                    const;
 
 Q_SIGNALS:
 

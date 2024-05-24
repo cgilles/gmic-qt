@@ -799,7 +799,7 @@ void GmicCommandManager::load()
         return;
     }
 
-    qCDebug(DIGIKAM_GEOIFACE_LOG) << "Loading G'MIC filter from" << d->commandsFile;
+    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Loading G'MIC filter from" << d->commandsFile;
     d->loaded = true;
 
     XbelReader reader;

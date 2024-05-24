@@ -75,7 +75,7 @@ public:
     QString   title;
     QString   desc;
     QDateTime dateAdded;
-    bool      expanded;
+    bool      expanded  = false;
 
 private:
 

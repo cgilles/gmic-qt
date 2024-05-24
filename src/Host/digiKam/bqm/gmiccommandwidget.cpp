@@ -50,6 +50,7 @@
 
 // digiKam includes
 
+#include "digikam_debug.h"
 #include "searchtextbar.h"
 #include "dtextedit.h"
 
@@ -430,6 +431,8 @@ void GmicCommandWidget::slotTreeViewItemActivated(const QModelIndex& index)
         }
     }
 
+    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << currentPath();
+
     Q_EMIT signalSettingsChanged();
 }
 
@@ -549,6 +552,95 @@ void GmicCommandWidget::saveSettings()
     {
         d->manager->changeExpanded();
     }
+}
+
+QString GmicCommandWidget::currentGmicCommand() const
+{
+    QModelIndex index = d->tree->currentIndex();
+
+    if (index.isValid())
+    {
+        index                 = d->proxyModel->mapToSource(index);
+        GmicCommandNode* node = d->manager->commandsModel()->node(index);
+
+        if (node && (node->type() == GmicCommandNode::Item))
+        {
+            return node->command;
+        }
+    }
+
+    return QString();
+}
+
+QString GmicCommandWidget::currentPath() const
+{
+    QStringList hierarchy;
+    QModelIndex index = d->tree->currentIndex();
+
+    if (index.isValid())
+    {
+        index                 = d->proxyModel->mapToSource(index);
+        GmicCommandNode* node = d->manager->commandsModel()->node(index);
+
+        if (node)
+        {
+            if (node->type() == GmicCommandNode::RootFolder)
+            {
+                return QString();
+            }
+
+            hierarchy.append(node->title);
+
+            while (node->parent())
+            {
+                node  = node->parent();
+
+                if (node)
+                {
+                    if (node->type() == GmicCommandNode::RootFolder)
+                    {
+                        break;
+                    }
+
+                    hierarchy.append(node->title);
+                }
+            }
+        }
+
+        std::reverse(hierarchy.begin(), hierarchy.end());
+
+        return (hierarchy.join(QLatin1Char('/')));
+    }
+
+    return QString();
+}
+
+void GmicCommandWidget::setCurrentPath(const QString& path)
+{
+    QStringList hierarchy = path.split(QLatin1Char('/'));
+    GmicCommandNode* node = d->manager->commands();
+
+    foreach (const QString& title, hierarchy)
+    {
+        QList<GmicCommandNode*> children = node->children();
+
+        foreach (GmicCommandNode* const child, children)
+        {
+            if (child->title == title)
+            {
+                node = child;
+            }
+            else
+            {
+                // Hierarchy is broken. Select root item.
+
+                d->tree->setCurrentIndex(d->commandsModel->index(d->manager->commands()));
+                return;
+            }
+        }
+    }
+
+    d->tree->setCurrentIndex(d->commandsModel->index(node));
 }
 
 } // namespace DigikamBqmGmicQtPlugin

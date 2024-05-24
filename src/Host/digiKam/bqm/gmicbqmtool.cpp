@@ -84,24 +84,24 @@ BatchToolSettings GmicBqmTool::defaultSettings()
     BatchToolSettings settings;
 
     settings.insert(QLatin1String("GmicBqmToolCommand"), QString());
+    settings.insert(QLatin1String("GmicBqmToolPath"),    QString());
 
     return settings;
 }
 
 void GmicBqmTool::slotAssignSettings2Widget()
 {
-    QString command = settings()[QLatin1String("GmicBqmToolCommand")].toString();
+    QString path = settings()[QLatin1String("GmicBqmToolPath")].toString();
 
-//    d->gmicWidget->setPluginParameters(parameters);
+    d->gmicWidget->setCurrentPath(path);
 }
 
 void GmicBqmTool::slotSettingsChanged()
 {
-    QString command = QLatin1String("fx_watermark_visible \"digiKam\",0.664,27,60,1,25,0,0.5");
-
     BatchToolSettings settings;
 
-    settings.insert(QLatin1String("GmicBqmToolCommand"), command);
+    settings.insert(QLatin1String("GmicBqmToolCommand"), d->gmicWidget->currentGmicCommand());
+    settings.insert(QLatin1String("GmicBqmToolPath"),    d->gmicWidget->currentPath());
 
     BatchTool::slotSettingsChanged(settings);
 }
@@ -115,9 +115,18 @@ bool GmicBqmTool::toolOperations()
         return false;
     }
 
-//    QString command = settings()[QLatin1String("GmicBqmToolCommand")].toString();
+    QString path     = settings()[QLatin1String("GmicBqmToolPath")].toString();
+    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "GmicBqmTool: running G'MIC filter" << path;
 
-    QString command  = QLatin1String("fx_watermark_visible \"digiKam\",0.664,27,60,1,25,0,0.5");
+    QString command  = settings()[QLatin1String("GmicBqmToolCommand")].toString();
+
+    if (command.isEmpty())
+    {
+        qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "GmicBqmTool: G'MIC filter command is null!";
+
+        return false;
+    }
+
     d->gmicProcessor = new GmicBqmProcessor(this);
     d->gmicProcessor->setInputImage(image());
 
@@ -125,7 +134,7 @@ bool GmicBqmTool::toolOperations()
     {
         delete d->gmicProcessor;
         d->gmicProcessor = nullptr;
-        qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "GmicBqmTool: cannot setup Gmic command!";
+        qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "GmicBqmTool: cannot setup G'MIC filter!";
 
         return false;
     }
@@ -137,7 +146,7 @@ bool GmicBqmTool::toolOperations()
     connect(d->gmicProcessor, SIGNAL(signalDone(QString)),
             &loop, SLOT(quit()));
 
-    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "GmicBqmTool: started Gmic command...";
+    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "GmicBqmTool: started G'MIC filter...";
 
     loop.exec();
 
@@ -147,7 +156,7 @@ bool GmicBqmTool::toolOperations()
     delete d->gmicProcessor;
     d->gmicProcessor = nullptr;
 
-    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "GmicBqmTool: Gmic command completed:" << b;
+    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "GmicBqmTool: G'MIC filter completed:" << b;
 
     if (!b)
     {
