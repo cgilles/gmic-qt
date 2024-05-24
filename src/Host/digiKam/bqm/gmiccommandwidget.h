@@ -72,6 +72,10 @@ public:
     explicit GmicCommandWidget(QWidget* const parent = nullptr);
     ~GmicCommandWidget()            override;
 
+Q_SIGNALS:
+
+    void signalSettingsChanged();
+
 private Q_SLOTS:
 
     void slotCustomContextMenuRequested(const QPoint&);

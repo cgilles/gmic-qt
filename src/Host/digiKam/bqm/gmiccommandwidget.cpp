@@ -187,22 +187,33 @@ GmicCommandDialog::~GmicCommandDialog()
 
 void GmicCommandDialog::accept()
 {
-    QModelIndex index = d->collectionPlace->view()->currentIndex();
-    index             = d->proxyModel->mapToSource(index);
-
-    if (!index.isValid())
+    if (d->currentItem)
     {
-        index = d->manager->commandsModel()->index(0, 0);
+        d->currentItem->command   = d->command->toPlainText();
+        d->currentItem->title     = d->title->text();
+        d->currentItem->desc      = d->desc->text();
+        d->currentItem->dateAdded = QDateTime::currentDateTime();
+        d->manager->save();
     }
+    else
+    {
+        QModelIndex index = d->collectionPlace->view()->currentIndex();
+        index             = d->proxyModel->mapToSource(index);
 
-    GmicCommandNode* const parent = d->manager->commandsModel()->node(index);
-    GmicCommandNode* const node   = new GmicCommandNode(GmicCommandNode::Item);
-    node->command                 = d->command->toPlainText();
-    node->title                   = d->title->text();
-    node->desc                    = d->desc->text();
-    node->dateAdded               = QDateTime::currentDateTime();
-    d->manager->addCommand(parent, node);
-    d->manager->save();
+        if (!index.isValid())
+        {
+            index = d->manager->commandsModel()->index(0, 0);
+        }
+
+        GmicCommandNode* const parent = d->manager->commandsModel()->node(index);
+        GmicCommandNode* const node   = new GmicCommandNode(GmicCommandNode::Item);
+        node->command                 = d->command->toPlainText();
+        node->title                   = d->title->text();
+        node->desc                    = d->desc->text();
+        node->dateAdded               = QDateTime::currentDateTime();
+        d->manager->addCommand(parent, node);
+        d->manager->save();
+    }
 
     QDialog::accept();
 }
@@ -315,6 +326,7 @@ GmicCommandWidget::~GmicCommandWidget()
 {
     saveSettings();
     d->manager->save();
+
     delete d;
 }
 
@@ -363,8 +375,6 @@ void GmicCommandWidget::expandNodes(GmicCommandNode* const node)
 
 void GmicCommandWidget::slotTreeViewItemActivated(const QModelIndex& index)
 {
-    qDebug() << "slotTreeViewItemActivated" << index;
-
     if (index.isValid())
     {
         QModelIndex idx             = d->proxyModel->mapToSource(index);
@@ -372,6 +382,7 @@ void GmicCommandWidget::slotTreeViewItemActivated(const QModelIndex& index)
 
         switch (node->type())
         {
+            case GmicCommandNode::Root:
             case GmicCommandNode::RootFolder:
             {
                 d->addFolderButton->setEnabled(true);
@@ -418,6 +429,8 @@ void GmicCommandWidget::slotTreeViewItemActivated(const QModelIndex& index)
             }
         }
     }
+
+    Q_EMIT signalSettingsChanged();
 }
 
 void GmicCommandWidget::slotCustomContextMenuRequested(const QPoint& pos)
@@ -430,7 +443,7 @@ void GmicCommandWidget::slotCustomContextMenuRequested(const QPoint& pos)
         index                       = d->proxyModel->mapToSource(index);
         GmicCommandNode* const node = d->manager->commandsModel()->node(index);
 
-        if (node && node->type() != GmicCommandNode::RootFolder)
+        if (node && (node->type() != GmicCommandNode::RootFolder))
         {
             QMenu menu;
             menu.addAction(QObject::tr("Remove"), this, SLOT(slotRemoveOne()));
@@ -470,7 +483,7 @@ void GmicCommandWidget::slotRemoveOne()
         index                       = d->proxyModel->mapToSource(index);
         GmicCommandNode* const node = d->manager->commandsModel()->node(index);
 
-        if (node->type() == GmicCommandNode::RootFolder)
+        if (!node || (node->type() == GmicCommandNode::RootFolder))
         {
             return;
         }
@@ -487,6 +500,8 @@ void GmicCommandWidget::slotRemoveOne()
 
         d->manager->removeCommand(node);
     }
+
+    Q_EMIT signalSettingsChanged();
 }
 
 void GmicCommandWidget::slotAddOne()
@@ -498,6 +513,8 @@ void GmicCommandWidget::slotAddOne()
                                                         );
     dlg->exec();
     delete dlg;
+
+    Q_EMIT signalSettingsChanged();
 }
 
 void GmicCommandWidget::slotEditOne()
@@ -509,15 +526,17 @@ void GmicCommandWidget::slotEditOne()
         index                       = d->proxyModel->mapToSource(index);
         GmicCommandNode* const node = d->manager->commandsModel()->node(index);
 
-        GmicCommandDialog* const dlg = new GmicCommandDialog(node,
+        GmicCommandDialog* const dlg = new GmicCommandDialog(
+                                                             node,
                                                              this,
                                                              d->manager
                                                             );
         dlg->exec();
         delete dlg;
+
+        Q_EMIT signalSettingsChanged();
     }
 }
-
 
 void GmicCommandWidget::readSettings()
 {
