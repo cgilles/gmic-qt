@@ -249,7 +249,8 @@ public:
     QPushButton*          addButton        = nullptr;
     QPushButton*          remButton        = nullptr;
     QPushButton*          edtButton        = nullptr;
-    QPushButton*          addFolderButton  = nullptr;
+    QAction*              addFilter        = nullptr;
+    QAction*              addFolder        = nullptr;
 };
 
 GmicFilterWidget::GmicFilterWidget(QWidget* const parent)
@@ -266,7 +267,7 @@ GmicFilterWidget::GmicFilterWidget(QWidget* const parent)
     d->search        = new SearchTextBar(this, QLatin1String("DigikamGmicFilterSearchBar"));
     d->search->setObjectName(QLatin1String("search"));
 
-    d->tree          = new QTreeView(this);
+    d->tree            = new QTreeView(this);
     d->tree->setUniformRowHeights(true);
     d->tree->setSelectionBehavior(QAbstractItemView::SelectRows);
     d->tree->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -276,16 +277,23 @@ GmicFilterWidget::GmicFilterWidget(QWidget* const parent)
     d->tree->setContextMenuPolicy(Qt::CustomContextMenu);
 
     d->addButton       = new QPushButton(this);
-    d->addButton->setText(QObject::tr("&Add..."));
+    d->addButton->setToolTip(QObject::tr("Add new item."));
+    d->addButton->setIcon(QIcon::fromTheme(QLatin1String("list-add")));
+    d->addButton->setAutoDefault(false);
+    QMenu* const menu  = new QMenu(d->addButton);
+    d->addFilter = menu->addAction(QIcon::fromTheme(QLatin1String("process-working-symbolic")),
+                                   QObject::tr("Add filter..."));
+    d->addFolder = menu->addAction(QIcon::fromTheme(QLatin1String("folder")),
+                                   QObject::tr("Add folder..."));
+    d->addButton->setMenu(menu);
 
     d->remButton       = new QPushButton(this);
-    d->remButton->setText(QObject::tr("&Remove..."));
+    d->remButton->setToolTip(QObject::tr("Remove current selected item."));
+    d->remButton->setIcon(QIcon::fromTheme(QLatin1String("list-remove")));
 
     d->edtButton       = new QPushButton(this);
-    d->edtButton->setText(QObject::tr("&Edit..."));
-
-    d->addFolderButton = new QPushButton(this);
-    d->addFolderButton->setText(QObject::tr("Add Folder..."));
+    d->edtButton->setToolTip(QObject::tr("Edit current selected item."));
+    d->edtButton->setIcon(QIcon::fromTheme(QLatin1String("document-edit")));
 
     QSpacerItem* const spacerItem1     = new QSpacerItem(40, 20, QSizePolicy::Expanding,
                                                                  QSizePolicy::Minimum);
@@ -294,7 +302,6 @@ GmicFilterWidget::GmicFilterWidget(QWidget* const parent)
     hbox->addWidget(d->addButton);
     hbox->addWidget(d->remButton);
     hbox->addWidget(d->edtButton);
-    hbox->addWidget(d->addFolderButton);
     hbox->addItem(spacerItem1);
 
     QGridLayout* const grid = new QGridLayout(this);
@@ -322,10 +329,10 @@ GmicFilterWidget::GmicFilterWidget(QWidget* const parent)
     connect(d->edtButton, SIGNAL(clicked()),
             this, SLOT(slotEdit()));
 
-    connect(d->addButton, SIGNAL(clicked()),
+    connect(d->addFilter, SIGNAL(triggered()),
             this, SLOT(slotAddFilter()));
 
-    connect(d->addFolderButton, SIGNAL(clicked()),
+    connect(d->addFolder, SIGNAL(triggered()),
             this, SLOT(slotAddFolder()));
 
     connect(d->tree, SIGNAL(clicked(QModelIndex)),
@@ -403,27 +410,27 @@ void GmicFilterWidget::slotTreeViewItemActivated(const QModelIndex& index)
             case GmicFilterNode::Root:
             case GmicFilterNode::RootFolder:
             {
-                d->addFolderButton->setEnabled(true);
+                d->addFolder->setEnabled(true);
                 d->remButton->setEnabled(false);
-                d->addButton->setEnabled(true);
+                d->addFilter->setEnabled(true);
                 d->edtButton->setEnabled(false);
                 break;
             }
 
             case GmicFilterNode::Folder:
             {
-                d->addFolderButton->setEnabled(true);
+                d->addFolder->setEnabled(true);
                 d->remButton->setEnabled(true);
-                d->addButton->setEnabled(true);
+                d->addFilter->setEnabled(true);
                 d->edtButton->setEnabled(true);
                 break;
             }
 
             case GmicFilterNode::Item:
             {
-                d->addFolderButton->setEnabled(false);
+                d->addFolder->setEnabled(false);
                 d->remButton->setEnabled(true);
-                d->addButton->setEnabled(false);
+                d->addFilter->setEnabled(false);
                 d->edtButton->setEnabled(true);
 
                 Q_EMIT signalSettingsChanged();
@@ -433,18 +440,18 @@ void GmicFilterWidget::slotTreeViewItemActivated(const QModelIndex& index)
 
             case GmicFilterNode::Separator:
             {
-                d->addFolderButton->setEnabled(false);
+                d->addFolder->setEnabled(false);
                 d->remButton->setEnabled(true);
-                d->addButton->setEnabled(false);
+                d->addFilter->setEnabled(false);
                 d->edtButton->setEnabled(false);
                 break;
             }
 
             default:
             {
-                d->addFolderButton->setEnabled(false);
+                d->addFolder->setEnabled(false);
                 d->remButton->setEnabled(false);
-                d->addButton->setEnabled(false);
+                d->addFilter->setEnabled(false);
                 d->edtButton->setEnabled(false);
                 break;
             }
