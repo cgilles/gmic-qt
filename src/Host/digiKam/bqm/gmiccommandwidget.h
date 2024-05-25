@@ -86,9 +86,9 @@ private Q_SLOTS:
 
     void slotCustomContextMenuRequested(const QPoint&);
     void slotTreeViewItemActivated(const QModelIndex&);
-    void slotNewFolder();
     void slotRemove();
     void slotAddFilter();
+    void slotAddFolder();
     void slotEdit();
 
 private:

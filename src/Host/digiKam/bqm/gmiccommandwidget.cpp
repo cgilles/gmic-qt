@@ -207,29 +207,28 @@ void GmicCommandDialog::accept()
         d->currentItem->title     = d->title->text();
         d->currentItem->desc      = d->desc->text();
         d->currentItem->dateAdded = QDateTime::currentDateTime();
-        d->manager->save();
     }
     else
     {
+        GmicCommandNode* node = nullptr;
+
         if (d->filter)
         {
-            GmicCommandNode* const node = new GmicCommandNode(GmicCommandNode::Item);
-            node->command               = d->command->toPlainText();
-            node->title                 = d->title->text();
-            node->desc                  = d->desc->text();
-            node->dateAdded             = QDateTime::currentDateTime();
-            d->manager->addCommand(d->currentItem, node);
-            d->manager->save();
+            node          = new GmicCommandNode(GmicCommandNode::Item);
+            node->command = d->command->toPlainText();
+            node->desc    = d->desc->text();
         }
         else
         {
-            GmicCommandNode* const node = new GmicCommandNode(GmicCommandNode::Folder);
-            node->title                 = d->title->text();
-            node->dateAdded             = QDateTime::currentDateTime();
-            d->manager->addCommand(d->currentItem, node);
-            d->manager->save();
+            node          = new GmicCommandNode(GmicCommandNode::Folder);
         }
+
+        node->title       = d->title->text();
+        node->dateAdded   = QDateTime::currentDateTime();
+        d->manager->addCommand(d->currentItem, node);
     }
+
+    d->manager->save();
 
     QDialog::accept();
 }
@@ -327,7 +326,7 @@ GmicCommandWidget::GmicCommandWidget(QWidget* const parent)
             this, SLOT(slotAddFilter()));
 
     connect(d->addFolderButton, SIGNAL(clicked()),
-            this, SLOT(slotNewFolder()));
+            this, SLOT(slotAddFolder()));
 
     connect(d->tree, SIGNAL(clicked(QModelIndex)),
             this, SLOT(slotTreeViewItemActivated(QModelIndex)));
@@ -474,28 +473,6 @@ void GmicCommandWidget::slotCustomContextMenuRequested(const QPoint& pos)
     }
 }
 
-void GmicCommandWidget::slotNewFolder()
-{
-    QModelIndex currentIndex = d->tree->currentIndex();
-    QModelIndex idx          = currentIndex;
-
-    if (idx.isValid() && !idx.model()->hasChildren(idx))
-    {
-        idx = idx.parent();
-    }
-
-    if (!idx.isValid())
-    {
-        idx = d->tree->rootIndex();
-    }
-
-    idx                           = d->proxyModel->mapToSource(idx);
-    GmicCommandNode* const parent = d->manager->commandsModel()->node(idx);
-    GmicCommandNode* const node   = new GmicCommandNode(GmicCommandNode::Folder);
-    node->title                   = QObject::tr("New Folder");
-    d->manager->addCommand(parent, node, currentIndex.row() + 1);
-}
-
 void GmicCommandWidget::slotRemove()
 {
     QModelIndex index = d->tree->currentIndex();
@@ -529,6 +506,11 @@ void GmicCommandWidget::slotRemove()
 void GmicCommandWidget::slotAddFilter()
 {
     openCommandDialog(false, true);
+}
+
+void GmicCommandWidget::slotAddFolder()
+{
+    openCommandDialog(false, false);
 }
 
 void GmicCommandWidget::slotEdit()
