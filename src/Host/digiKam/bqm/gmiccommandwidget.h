@@ -47,7 +47,7 @@ class GmicCommandDialog : public QDialog
 public:
 
     explicit GmicCommandDialog(GmicCommandNode* const citem,
-                               bool edit,
+                               bool edit, bool filter,
                                QWidget* const parent = nullptr,
                                GmicCommandManager* const mngr = nullptr);
     ~GmicCommandDialog() override;
@@ -87,9 +87,9 @@ private Q_SLOTS:
     void slotCustomContextMenuRequested(const QPoint&);
     void slotTreeViewItemActivated(const QModelIndex&);
     void slotNewFolder();
-    void slotRemoveOne();
-    void slotAddOne();
-    void slotEditOne();
+    void slotRemove();
+    void slotAddFilter();
+    void slotEdit();
 
 private:
 
@@ -97,7 +97,7 @@ private:
     bool saveExpandedNodes(const QModelIndex& parent);
     void readSettings();
     void saveSettings();
-    void openCommandDialog(bool edit);
+    void openCommandDialog(bool edit, bool filter);
 
 private:
 

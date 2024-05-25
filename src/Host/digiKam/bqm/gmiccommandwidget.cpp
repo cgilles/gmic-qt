@@ -71,6 +71,7 @@ public:
     Private() = default;
 
     bool                      edit            = false;
+    bool                      filter          = true;
     GmicCommandNode*          currentItem     = nullptr;
     GmicCommandManager*       manager         = nullptr;
     AddGmicCommandProxyModel* proxyModel      = nullptr;
@@ -80,13 +81,14 @@ public:
 };
 
 GmicCommandDialog::GmicCommandDialog(GmicCommandNode* const citem,
-                                     bool edit,
+                                     bool edit, bool filter,
                                      QWidget* const parent,
                                      GmicCommandManager* const mngr)
     : QDialog(parent),
       d      (new Private)
 {
     d->edit        = edit;
+    d->filter      = filter;
     d->manager     = mngr;
     d->currentItem = citem;
 
@@ -109,9 +111,11 @@ GmicCommandDialog::GmicCommandDialog(GmicCommandNode* const citem,
     QLabel* const commandLbl = new QLabel(QObject::tr("Filter Command:"), this);
     d->command               = new QTextEdit(this);
 
-    QLabel* const titleLbl   = new QLabel(QObject::tr("Filter Title:"), this);
+    QLabel* const titleLbl   = new QLabel(d->filter ? QObject::tr("Filter Title:")
+                                                    : QObject::tr("Folder Title:"), this);
     d->title                 = new QLineEdit(this);
-    d->title->setPlaceholderText(QObject::tr("Enter here the filter title"));
+    d->title->setPlaceholderText(d->filter ? QObject::tr("Enter here the filter title")
+                                           : QObject::tr("Enter here the folder title"));
 
     /*
      * Accepts all UTF-8 Characters.
@@ -141,37 +145,44 @@ GmicCommandDialog::GmicCommandDialog(GmicCommandNode* const citem,
     grid->addWidget(d->desc,            5, 0, 1, 2);
     grid->addWidget(buttonBox);
 
-    QTreeView* const view       = new QTreeView(this);
-    d->proxyModel               = new AddGmicCommandProxyModel(this);
-    GmicCommandModel* const model = d->manager->commandsModel();
-    d->proxyModel->setSourceModel(model);
-    view->setModel(d->proxyModel);
-    view->expandAll();
-    view->header()->setStretchLastSection(true);
-    view->header()->hide();
-    view->setItemsExpandable(false);
-    view->setRootIsDecorated(false);
-    view->setIndentation(10);
-    view->show();
-
-    GmicCommandNode* const menu = d->manager->commands();
-    QModelIndex idx             = d->proxyModel->mapFromSource(model->index(menu));
-    view->setCurrentIndex(idx);
-
     if (d->edit)
     {
-        d->command->setText(d->currentItem->command);
         d->title->setText(d->currentItem->title);
-        d->desc->setText(d->currentItem->desc);
-        setWindowTitle(QObject::tr("Edit G'MIC Filter"));
-        view->setCurrentIndex(model->index(d->currentItem->parent()));
+
+        if (d->filter)
+        {
+            d->command->setText(d->currentItem->command);
+            d->desc->setText(d->currentItem->desc);
+            setWindowTitle(QObject::tr("Edit G'MIC Filter"));
+        }
+        else
+        {
+            frontLbl->setVisible(false);
+            commandLbl->setVisible(false);
+            d->command->setVisible(false);
+            descLbl->setVisible(false);
+            d->desc->setVisible(false);
+            setWindowTitle(QObject::tr("Edit G'MIC Folder"));
+        }
     }
     else
     {
-        d->command->setText(QString());     // TODO use Clipboard
-        d->title->setText(QObject::tr("My new G'MIC filter title"));
-        setWindowTitle(QObject::tr("Add G'MIC Filter"));
-        view->setCurrentIndex(idx);
+        if (d->filter)
+        {
+            d->command->setText(QString());     // TODO use Clipboard
+            d->title->setText(QObject::tr("My new G'MIC filter"));
+            setWindowTitle(QObject::tr("Add G'MIC Filter"));
+        }
+        else
+        {
+            frontLbl->setVisible(false);
+            commandLbl->setVisible(false);
+            d->command->setVisible(false);
+            descLbl->setVisible(false);
+            d->desc->setVisible(false);
+            d->title->setText(QObject::tr("My new G'MIC folder"));
+            setWindowTitle(QObject::tr("Add G'MIC Folder"));
+        }
     }
 
     connect(buttonBox, SIGNAL(accepted()),
@@ -200,13 +211,24 @@ void GmicCommandDialog::accept()
     }
     else
     {
-        GmicCommandNode* const node = new GmicCommandNode(GmicCommandNode::Item);
-        node->command               = d->command->toPlainText();
-        node->title                 = d->title->text();
-        node->desc                  = d->desc->text();
-        node->dateAdded             = QDateTime::currentDateTime();
-        d->manager->addCommand(d->currentItem, node);
-        d->manager->save();
+        if (d->filter)
+        {
+            GmicCommandNode* const node = new GmicCommandNode(GmicCommandNode::Item);
+            node->command               = d->command->toPlainText();
+            node->title                 = d->title->text();
+            node->desc                  = d->desc->text();
+            node->dateAdded             = QDateTime::currentDateTime();
+            d->manager->addCommand(d->currentItem, node);
+            d->manager->save();
+        }
+        else
+        {
+            GmicCommandNode* const node = new GmicCommandNode(GmicCommandNode::Folder);
+            node->title                 = d->title->text();
+            node->dateAdded             = QDateTime::currentDateTime();
+            d->manager->addCommand(d->currentItem, node);
+            d->manager->save();
+        }
     }
 
     QDialog::accept();
@@ -235,10 +257,10 @@ GmicCommandWidget::GmicCommandWidget(QWidget* const parent)
     : QWidget(parent),
       d      (new Private)
 {
-    setObjectName(QLatin1String("GmicCommandEditDialog"));
+    setObjectName(QLatin1String("GmicCommandWidget"));
 
     const QString db = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
-                                                        QLatin1String("/gmiccommands.xml");
+                                                        QLatin1String("/gmicfilters.xml");
     d->manager       = new GmicCommandManager(db, this);
     d->manager->load();
 
@@ -296,13 +318,13 @@ GmicCommandWidget::GmicCommandWidget(QWidget* const parent)
             d->search, SLOT(slotSearchResult(bool)));
 
     connect(d->remButton, SIGNAL(clicked()),
-            this, SLOT(slotRemoveOne()));
+            this, SLOT(slotRemove()));
 
     connect(d->edtButton, SIGNAL(clicked()),
-            this, SLOT(slotEditOne()));
+            this, SLOT(slotEdit()));
 
     connect(d->addButton, SIGNAL(clicked()),
-            this, SLOT(slotAddOne()));
+            this, SLOT(slotAddFilter()));
 
     connect(d->addFolderButton, SIGNAL(clicked()),
             this, SLOT(slotNewFolder()));
@@ -311,7 +333,7 @@ GmicCommandWidget::GmicCommandWidget(QWidget* const parent)
             this, SLOT(slotTreeViewItemActivated(QModelIndex)));
 
     connect(d->tree, SIGNAL(doubleClicked(QModelIndex)),
-            this, SLOT(slotAddOne()));
+            this, SLOT(slotEdit()));
 
     connect(d->tree, SIGNAL(customContextMenuRequested(QPoint)),
             this, SLOT(slotCustomContextMenuRequested(QPoint)));
@@ -326,7 +348,6 @@ GmicCommandWidget::~GmicCommandWidget()
 
     delete d;
 }
-
 
 bool GmicCommandWidget::saveExpandedNodes(const QModelIndex& parent)
 {
@@ -395,7 +416,7 @@ void GmicCommandWidget::slotTreeViewItemActivated(const QModelIndex& index)
                 d->addFolderButton->setEnabled(true);
                 d->remButton->setEnabled(true);
                 d->addButton->setEnabled(true);
-                d->edtButton->setEnabled(false);
+                d->edtButton->setEnabled(true);
                 break;
             }
 
@@ -475,7 +496,7 @@ void GmicCommandWidget::slotNewFolder()
     d->manager->addCommand(parent, node, currentIndex.row() + 1);
 }
 
-void GmicCommandWidget::slotRemoveOne()
+void GmicCommandWidget::slotRemove()
 {
     QModelIndex index = d->tree->currentIndex();
 
@@ -489,7 +510,7 @@ void GmicCommandWidget::slotRemoveOne()
             return;
         }
 
-        if (QMessageBox::question(this, QObject::tr("G'MIC Commands Management"),
+        if (QMessageBox::question(this, QObject::tr("G'MIC Filters Management"),
                                   QObject::tr("Do you want to remove \"%1\" "
                                         "from your G'MIC filters collection?")
                                   .arg(node->title),
@@ -505,17 +526,30 @@ void GmicCommandWidget::slotRemoveOne()
     Q_EMIT signalSettingsChanged();
 }
 
-void GmicCommandWidget::slotAddOne()
+void GmicCommandWidget::slotAddFilter()
 {
-    openCommandDialog(false);
+    openCommandDialog(false, true);
 }
 
-void GmicCommandWidget::slotEditOne()
+void GmicCommandWidget::slotEdit()
 {
-    openCommandDialog(true);
+    QModelIndex index = d->tree->currentIndex();
+
+    if (index.isValid())
+    {
+        index                       = d->proxyModel->mapToSource(index);
+        GmicCommandNode* const node = d->manager->commandsModel()->node(index);
+
+        if (!node || (node->type() == GmicCommandNode::RootFolder))
+        {
+            return;
+        }
+
+        openCommandDialog(true, (node->type() == GmicCommandNode::Item));
+    }
 }
 
-void GmicCommandWidget::openCommandDialog(bool edit)
+void GmicCommandWidget::openCommandDialog(bool edit, bool filter)
 {
     QModelIndex index = d->tree->currentIndex();
 
@@ -527,6 +561,7 @@ void GmicCommandWidget::openCommandDialog(bool edit)
         GmicCommandDialog* const dlg = new GmicCommandDialog(
                                                              node,
                                                              edit,
+                                                             filter,
                                                              this,
                                                              d->manager
                                                             );
@@ -613,27 +648,54 @@ QString GmicCommandWidget::currentPath() const
 
 void GmicCommandWidget::setCurrentPath(const QString& path)
 {
+    if (path.isEmpty())
+    {
+        d->tree->setCurrentIndex(d->commandsModel->index(d->manager->commands()));
+        return;
+    }
+
     QStringList hierarchy = path.split(QLatin1Char('/'));
     GmicCommandNode* node = d->manager->commands();
 
+    // bypass the root folder.
+
+    QList<GmicCommandNode*> children = node->children();
+
+    if (children.isEmpty())
+    {
+        d->tree->setCurrentIndex(d->commandsModel->index(d->manager->commands()));
+        return;
+    }
+
+    node         = children[0];
+    int branches = 0;
+    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Hierarchy:" << hierarchy;
+
     foreach (const QString& title, hierarchy)
     {
-        QList<GmicCommandNode*> children = node->children();
+        children = node->children();
+        qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Title:" << title;
 
         foreach (GmicCommandNode* const child, children)
         {
+            qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Child node:" << child->title;
+
             if (child->title == title)
             {
+                qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Found node:" << title;
                 node = child;
-            }
-            else
-            {
-                // Hierarchy is broken. Select root item.
-
-                d->tree->setCurrentIndex(d->commandsModel->index(d->manager->commands()));
-                return;
+                branches++;
+                break;
             }
         }
+    }
+
+    if (branches != hierarchy.size())
+    {
+        // Hierarchy is broken. Select root item.
+
+        d->tree->setCurrentIndex(d->commandsModel->index(d->manager->commands()));
+        return;
     }
 
     d->tree->setCurrentIndex(d->commandsModel->index(node));

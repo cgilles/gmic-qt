@@ -75,7 +75,7 @@ public:
     QString   title;
     QString   desc;
     QDateTime dateAdded;
-    bool      expanded  = false;
+    bool      expanded  = true;
 
 private:
 
@@ -91,11 +91,11 @@ private:
 
 // -----------------------------------------------------------
 
-class XbelReader : public QXmlStreamReader
+class GmicXmlReader : public QXmlStreamReader
 {
 public:
 
-    XbelReader() = default;
+    GmicXmlReader() = default;
 
     GmicCommandNode* read(const QString& fileName);
     GmicCommandNode* read(QIODevice* const device, bool addRootFolder = false);
@@ -112,11 +112,11 @@ private:
 
 // -----------------------------------------------------------
 
-class XbelWriter : public QXmlStreamWriter
+class GmicXmlWriter : public QXmlStreamWriter
 {
 public:
 
-    XbelWriter();
+    GmicXmlWriter();
 
     bool write(const QString& fileName, const GmicCommandNode* const root);
     bool write(QIODevice* const device, const GmicCommandNode* const root);

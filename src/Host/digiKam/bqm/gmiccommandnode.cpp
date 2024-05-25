@@ -52,7 +52,6 @@ GmicCommandNode::GmicCommandNode(GmicCommandNode::Type type, GmicCommandNode* co
     : QObject(nullptr),
       d      (new Private)
 {
-    expanded  = false;
     d->parent = parent;
     d->type   = type;
 
@@ -150,7 +149,7 @@ void GmicCommandNode::remove(GmicCommandNode* const child)
 
 // -------------------------------------------------------
 
-GmicCommandNode* XbelReader::read(const QString& fileName)
+GmicCommandNode* GmicXmlReader::read(const QString& fileName)
 {
     QFile file(fileName);
 
@@ -166,7 +165,7 @@ GmicCommandNode* XbelReader::read(const QString& fileName)
     return read(&file, true);
 }
 
-GmicCommandNode* XbelReader::read(QIODevice* const device, bool addRootFolder)
+GmicCommandNode* GmicXmlReader::read(QIODevice* const device, bool addRootFolder)
 {
     GmicCommandNode* const root = new GmicCommandNode(GmicCommandNode::Root);
     setDevice(device);
@@ -176,7 +175,7 @@ GmicCommandNode* XbelReader::read(QIODevice* const device, bool addRootFolder)
         QString version = attributes().value(QLatin1String("version")).toString();
 
         if (
-            (name() == QLatin1String("xbel")) &&
+            (name() == QLatin1String("gmic")) &&
             (version.isEmpty() || (version == QLatin1String("1.0")))
            )
         {
@@ -193,16 +192,16 @@ GmicCommandNode* XbelReader::read(QIODevice* const device, bool addRootFolder)
         }
         else
         {
-            raiseError(QObject::tr("The file is not an XBEL version 1.0 file."));
+            raiseError(QObject::tr("The file is not an G'MIC filters database version 1.0 file."));
         }
     }
 
     return root;
 }
 
-void XbelReader::readXBEL(GmicCommandNode* const parent)
+void GmicXmlReader::readXBEL(GmicCommandNode* const parent)
 {
-    Q_ASSERT(isStartElement() && (name() == QLatin1String("xbel")));
+    Q_ASSERT(isStartElement() && (name() == QLatin1String("gmic")));
 
     while (readNextStartElement())
     {
@@ -225,7 +224,7 @@ void XbelReader::readXBEL(GmicCommandNode* const parent)
     }
 }
 
-void XbelReader::readFolder(GmicCommandNode* const parent)
+void GmicXmlReader::readFolder(GmicCommandNode* const parent)
 {
     Q_ASSERT(isStartElement() && (name() == QLatin1String("folder")));
 
@@ -237,10 +236,6 @@ void XbelReader::readFolder(GmicCommandNode* const parent)
         if      (name() == QLatin1String("title"))
         {
             readTitle(folder);
-        }
-        else if (name() == QLatin1String("desc"))
-        {
-            readDescription(folder);
         }
         else if (name() == QLatin1String("folder"))
         {
@@ -261,21 +256,14 @@ void XbelReader::readFolder(GmicCommandNode* const parent)
     }
 }
 
-void XbelReader::readTitle(GmicCommandNode* const parent)
+void GmicXmlReader::readTitle(GmicCommandNode* const parent)
 {
     Q_ASSERT(isStartElement() && (name() == QLatin1String("title")));
 
     parent->title = readElementText();
 }
 
-void XbelReader::readDescription(GmicCommandNode* const parent)
-{
-    Q_ASSERT(isStartElement() && (name() == QLatin1String("desc")));
-
-    parent->desc = readElementText();
-}
-
-void XbelReader::readSeparator(GmicCommandNode* const parent)
+void GmicXmlReader::readSeparator(GmicCommandNode* const parent)
 {
     new GmicCommandNode(GmicCommandNode::Separator, parent);
 
@@ -284,7 +272,7 @@ void XbelReader::readSeparator(GmicCommandNode* const parent)
     readNext();
 }
 
-void XbelReader::readGmicCommandNode(GmicCommandNode* const parent)
+void GmicXmlReader::readGmicCommandNode(GmicCommandNode* const parent)
 {
     Q_ASSERT(isStartElement() && (name() == QLatin1String("item")));
 
@@ -292,16 +280,13 @@ void XbelReader::readGmicCommandNode(GmicCommandNode* const parent)
     item->command               = attributes().value(QLatin1String("command")).toString();
     QString date                = attributes().value(QLatin1String("added")).toString();
     item->dateAdded             = QDateTime::fromString(date, Qt::ISODate);
+    item->desc                  = attributes().value(QLatin1String("desc")).toString();
 
     while (readNextStartElement())
     {
         if      (name() == QLatin1String("title"))
         {
             readTitle(item);
-        }
-        else if (name() == QLatin1String("desc"))
-        {
-            readDescription(item);
         }
         else
         {
@@ -311,18 +296,18 @@ void XbelReader::readGmicCommandNode(GmicCommandNode* const parent)
 
     if (item->title.isEmpty())
     {
-        item->title = QObject::tr("Unknown title");
+        item->title = QObject::tr("Unknown item");
     }
 }
 
 // -------------------------------------------------------
 
-XbelWriter::XbelWriter()
+GmicXmlWriter::GmicXmlWriter()
 {
     setAutoFormatting(true);
 }
 
-bool XbelWriter::write(const QString& fileName, const GmicCommandNode* const root)
+bool GmicXmlWriter::write(const QString& fileName, const GmicCommandNode* const root)
 {
     QFile file(fileName);
 
@@ -334,20 +319,20 @@ bool XbelWriter::write(const QString& fileName, const GmicCommandNode* const roo
     return write(&file, root);
 }
 
-bool XbelWriter::write(QIODevice* const device, const GmicCommandNode* const root)
+bool GmicXmlWriter::write(QIODevice* const device, const GmicCommandNode* const root)
 {
     setDevice(device);
 
     writeStartDocument();
-    writeDTD(QLatin1String("<!DOCTYPE xbel>"));
-    writeStartElement(QLatin1String("xbel"));
+    writeDTD(QLatin1String("<!DOCTYPE gmic>"));
+    writeStartElement(QLatin1String("gmic"));
     writeAttribute(QLatin1String("version"), QLatin1String("1.0"));
 
     if (root->type() == GmicCommandNode::Root)
     {
         GmicCommandNode* const rootFolder = root->children().constFirst();
 
-        for (int i = 0  ; i < rootFolder->children().count() ; ++i)
+        for (int i = 0 ; i < rootFolder->children().count() ; ++i)
         {
             writeItem(rootFolder->children().at(i));
         }
@@ -362,7 +347,7 @@ bool XbelWriter::write(QIODevice* const device, const GmicCommandNode* const roo
     return true;
 }
 
-void XbelWriter::writeItem(const GmicCommandNode* const parent)
+void GmicXmlWriter::writeItem(const GmicCommandNode* const parent)
 {
     switch (parent->type())
     {

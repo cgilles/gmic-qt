@@ -171,13 +171,13 @@ void ChangeGmicCommand::undo()
     {
         case Title:
         {
-            d->node->title = d->oldValue;
+            d->node->title   = d->oldValue;
             break;
         }
 
         case Desc:
         {
-            d->node->desc  = d->oldValue;
+            d->node->desc    = d->oldValue;
             break;
         }
 
@@ -197,19 +197,19 @@ void ChangeGmicCommand::redo()
     {
         case Title:
         {
-            d->node->title = d->newValue;
+            d->node->title   = d->newValue;
             break;
         }
 
         case Desc:
         {
-            d->node->desc  = d->newValue;
+            d->node->desc    = d->newValue;
             break;
         }
 
         default:    // Gmic Command
         {
-            d->node->command   = d->newValue;
+            d->node->command = d->newValue;
             break;
         }
     }
@@ -355,7 +355,6 @@ QVariant GmicCommandModel::data(const QModelIndex& index, int role) const
 
     switch (role)
     {
-        case Qt::EditRole:
         case Qt::DisplayRole:
         {
             if (commandNode->type() == GmicCommandNode::Separator)
@@ -414,9 +413,13 @@ QVariant GmicCommandModel::data(const QModelIndex& index, int role) const
         {
             if (index.column() == 0)
             {
-                if (commandNode->type() == GmicCommandNode::Item)
+                if      (commandNode->type() == GmicCommandNode::Item)
                 {
                     return QIcon::fromTheme(QLatin1String("process-working-symbolic"));
+                }
+                else if (commandNode->type() == GmicCommandNode::RootFolder)
+                {
+                    return QIcon(":resources/gmic_hat.png");
                 }
                 else
                 {
@@ -540,7 +543,7 @@ Qt::DropActions GmicCommandModel::supportedDropActions() const
 QStringList GmicCommandModel::mimeTypes() const
 {
     QStringList types;
-    types << QLatin1String("application/gmiccommands.xbel");
+    types << QLatin1String("application/gmicfilters.xml");
 
     return types;
 }
@@ -561,13 +564,13 @@ QMimeData* GmicCommandModel::mimeData(const QModelIndexList& indexes) const
         QByteArray encodedData;
         QBuffer buffer(&encodedData);
         buffer.open(QBuffer::ReadWrite);
-        XbelWriter writer;
+        GmicXmlWriter writer;
         const GmicCommandNode* const parentNode = node(index);
         writer.write(&buffer, parentNode);
         stream << encodedData;
     }
 
-    mimeData->setData(QLatin1String("application/gmiccommands.xbel"), data);
+    mimeData->setData(QLatin1String("application/gmicfilters.xml"), data);
 
     return mimeData;
 }
@@ -582,12 +585,12 @@ bool GmicCommandModel::dropMimeData(const QMimeData* data,
         return true;
     }
 
-    if (!data->hasFormat(QLatin1String("application/gmiccommands.xbel")) || column > 0)
+    if (!data->hasFormat(QLatin1String("application/gmicfilters.xml")) || column > 0)
     {
         return false;
     }
 
-    QByteArray ba = data->data(QLatin1String("application/gmiccommands.xbel"));
+    QByteArray ba = data->data(QLatin1String("application/gmicfilters.xml"));
     QDataStream stream(&ba, QIODevice::ReadOnly);
 
     if (stream.atEnd())
@@ -605,7 +608,7 @@ bool GmicCommandModel::dropMimeData(const QMimeData* data,
         QBuffer buffer(&encodedData);
         buffer.open(QBuffer::ReadOnly);
 
-        XbelReader reader;
+        GmicXmlReader reader;
         GmicCommandNode* const rootNode  = reader.read(&buffer);
         QList<GmicCommandNode*> children = rootNode->children();
 
@@ -627,7 +630,7 @@ bool GmicCommandModel::dropMimeData(const QMimeData* data,
 
 bool GmicCommandModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    if (!index.isValid() || (flags(index) & Qt::ItemIsEditable) == 0)
+    if (!index.isValid())
     {
         return false;
     }
@@ -636,7 +639,6 @@ bool GmicCommandModel::setData(const QModelIndex& index, const QVariant& value, 
 
     switch (role)
     {
-        case Qt::EditRole:
         case Qt::DisplayRole:
         {
             if (index.column() == 0)
@@ -795,15 +797,15 @@ void GmicCommandManager::load()
         return;
     }
 
-    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Loading G'MIC filter from" << d->commandsFile;
+    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Loading G'MIC filters from" << d->commandsFile;
     d->loaded = true;
 
-    XbelReader reader;
+    GmicXmlReader reader;
     d->commandRootNode = reader.read(d->commandsFile);
 
     if (reader.error() != QXmlStreamReader::NoError)
     {
-        QMessageBox::warning(nullptr, QObject::tr("Loading Commands"),
+        QMessageBox::warning(nullptr, QObject::tr("Loading Filters"),
                              QObject::tr("Error when loading G'MIC filters on line %1, column %2:\n%3")
                                   .arg(reader.lineNumber())
                                   .arg(reader.columnNumber())
@@ -818,13 +820,13 @@ void GmicCommandManager::save()
         return;
     }
 
-    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Saving Gmic Commands to" << d->commandsFile;
+    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Saving G'MIC Filters to" << d->commandsFile;
 
-    XbelWriter writer;
+    GmicXmlWriter writer;
 
     if (!writer.write(d->commandsFile, d->commandRootNode))
     {
-        qCWarning(DIGIKAM_DPLUGIN_BQM_LOG) << "GmicCommandManager: error saving to" << d->commandsFile;
+        qCWarning(DIGIKAM_DPLUGIN_BQM_LOG) << "Error saving G'MIC filters to" << d->commandsFile;
     }
 }
 
@@ -928,13 +930,13 @@ void GmicCommandManager::importCommands()
 {
     QString fileName = QFileDialog::getOpenFileName(nullptr, QObject::tr("Open File"),
                                                     QString(),
-                                                    QObject::tr("XBEL (*.xbel *.xml)"));
+                                                    QObject::tr("XML (*.xml)"));
     if (fileName.isEmpty())
     {
         return;
     }
 
-    XbelReader reader;
+    GmicXmlReader reader;
     GmicCommandNode* const importRootNode = reader.read(fileName);
 
     if (reader.error() != QXmlStreamReader::NoError)
@@ -954,15 +956,15 @@ void GmicCommandManager::importCommands()
 void GmicCommandManager::exportCommands()
 {
     QString fileName = QFileDialog::getSaveFileName(nullptr, QObject::tr("Save File"),
-                                                    QObject::tr("%1 Gmic Commands.xbel")
+                                                    QObject::tr("%1 Gmic Filters.xml")
                                                     .arg(QCoreApplication::applicationName()),
-                                                    QObject::tr("XBEL (*.xbel *.xml)"));
+                                                    QObject::tr("XML ( *.xml)"));
     if (fileName.isEmpty())
     {
         return;
     }
 
-    XbelWriter writer;
+    GmicXmlWriter writer;
 
     if (!writer.write(fileName, d->commandRootNode))
     {
