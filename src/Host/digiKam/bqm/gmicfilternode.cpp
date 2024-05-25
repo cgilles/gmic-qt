@@ -22,7 +22,7 @@
  *
  */
 
-#include "gmiccommandnode.h"
+#include "gmicfilternode.h"
 
 // Qt includes
 
@@ -37,18 +37,18 @@
 namespace DigikamBqmGmicQtPlugin
 {
 
-class Q_DECL_HIDDEN GmicCommandNode::Private
+class Q_DECL_HIDDEN GmicFilterNode::Private
 {
 public:
 
     Private() = default;
 
-    GmicCommandNode*        parent     = nullptr;
-    Type                    type       = GmicCommandNode::Root;
-    QList<GmicCommandNode*> children;
+    GmicFilterNode*        parent    = nullptr;
+    Type                   type      = GmicFilterNode::Root;
+    QList<GmicFilterNode*> children;
 };
 
-GmicCommandNode::GmicCommandNode(GmicCommandNode::Type type, GmicCommandNode* const parent)
+GmicFilterNode::GmicFilterNode(GmicFilterNode::Type type, GmicFilterNode* const parent)
     : QObject(nullptr),
       d      (new Private)
 {
@@ -61,7 +61,7 @@ GmicCommandNode::GmicCommandNode(GmicCommandNode::Type type, GmicCommandNode* co
     }
 }
 
-GmicCommandNode::~GmicCommandNode()
+GmicFilterNode::~GmicFilterNode()
 {
     if (d->parent)
     {
@@ -76,7 +76,7 @@ GmicCommandNode::~GmicCommandNode()
     delete d;
 }
 
-bool GmicCommandNode::operator==(const GmicCommandNode& other) const
+bool GmicFilterNode::operator==(const GmicFilterNode& other) const
 {
     if (
         (command             != other.command)       ||
@@ -102,27 +102,27 @@ bool GmicCommandNode::operator==(const GmicCommandNode& other) const
     return true;
 }
 
-GmicCommandNode::Type GmicCommandNode::type() const
+GmicFilterNode::Type GmicFilterNode::type() const
 {
     return d->type;
 }
 
-void GmicCommandNode::setType(Type type)
+void GmicFilterNode::setType(Type type)
 {
     d->type = type;
 }
 
-QList<GmicCommandNode*> GmicCommandNode::children() const
+QList<GmicFilterNode*> GmicFilterNode::children() const
 {
     return d->children;
 }
 
-GmicCommandNode* GmicCommandNode::parent() const
+GmicFilterNode* GmicFilterNode::parent() const
 {
     return d->parent;
 }
 
-void GmicCommandNode::add(GmicCommandNode* const child, int offset)
+void GmicFilterNode::add(GmicFilterNode* const child, int offset)
 {
     Q_ASSERT(child->d->type != Root);
 
@@ -141,7 +141,7 @@ void GmicCommandNode::add(GmicCommandNode* const child, int offset)
     d->children.insert(offset, child);
 }
 
-void GmicCommandNode::remove(GmicCommandNode* const child)
+void GmicFilterNode::remove(GmicFilterNode* const child)
 {
     child->d->parent = nullptr;
     d->children.removeAll(child);
@@ -149,15 +149,15 @@ void GmicCommandNode::remove(GmicCommandNode* const child)
 
 // -------------------------------------------------------
 
-GmicCommandNode* GmicXmlReader::read(const QString& fileName)
+GmicFilterNode* GmicXmlReader::read(const QString& fileName)
 {
     QFile file(fileName);
 
     if (!file.exists() || !file.open(QFile::ReadOnly))
     {
-        GmicCommandNode* const root   = new GmicCommandNode(GmicCommandNode::Root);
-        GmicCommandNode* const folder = new GmicCommandNode(GmicCommandNode::RootFolder, root);
-        folder->title                 = QObject::tr("My G'MIC Filters");
+        GmicFilterNode* const root   = new GmicFilterNode(GmicFilterNode::Root);
+        GmicFilterNode* const folder = new GmicFilterNode(GmicFilterNode::RootFolder, root);
+        folder->title                = QObject::tr("My G'MIC Filters");
 
         return root;
     }
@@ -165,9 +165,9 @@ GmicCommandNode* GmicXmlReader::read(const QString& fileName)
     return read(&file, true);
 }
 
-GmicCommandNode* GmicXmlReader::read(QIODevice* const device, bool addRootFolder)
+GmicFilterNode* GmicXmlReader::read(QIODevice* const device, bool addRootFolder)
 {
-    GmicCommandNode* const root = new GmicCommandNode(GmicCommandNode::Root);
+    GmicFilterNode* const root = new GmicFilterNode(GmicFilterNode::Root);
     setDevice(device);
 
     if (readNextStartElement())
@@ -181,8 +181,8 @@ GmicCommandNode* GmicXmlReader::read(QIODevice* const device, bool addRootFolder
         {
             if (addRootFolder)
             {
-                GmicCommandNode* const folder = new GmicCommandNode(GmicCommandNode::RootFolder, root);
-                folder->title                 = QObject::tr("My G'MIC Filters");
+                GmicFilterNode* const folder = new GmicFilterNode(GmicFilterNode::RootFolder, root);
+                folder->title                = QObject::tr("My G'MIC Filters");
                 readXBEL(folder);
             }
             else
@@ -199,7 +199,7 @@ GmicCommandNode* GmicXmlReader::read(QIODevice* const device, bool addRootFolder
     return root;
 }
 
-void GmicXmlReader::readXBEL(GmicCommandNode* const parent)
+void GmicXmlReader::readXBEL(GmicFilterNode* const parent)
 {
     Q_ASSERT(isStartElement() && (name() == QLatin1String("gmic")));
 
@@ -211,7 +211,7 @@ void GmicXmlReader::readXBEL(GmicCommandNode* const parent)
         }
         else if (name() == QLatin1String("item"))
         {
-            readGmicCommandNode(parent);
+            readGmicFilterNode(parent);
         }
         else if (name() == QLatin1String("separator"))
         {
@@ -224,11 +224,11 @@ void GmicXmlReader::readXBEL(GmicCommandNode* const parent)
     }
 }
 
-void GmicXmlReader::readFolder(GmicCommandNode* const parent)
+void GmicXmlReader::readFolder(GmicFilterNode* const parent)
 {
     Q_ASSERT(isStartElement() && (name() == QLatin1String("folder")));
 
-    QPointer<GmicCommandNode> folder = new GmicCommandNode(GmicCommandNode::Folder, parent);
+    QPointer<GmicFilterNode> folder = new GmicFilterNode(GmicFilterNode::Folder, parent);
     folder->expanded                 = (attributes().value(QLatin1String("folded")) == QLatin1String("no"));
 
     while (readNextStartElement())
@@ -243,7 +243,7 @@ void GmicXmlReader::readFolder(GmicCommandNode* const parent)
         }
         else if (name() == QLatin1String("item"))
         {
-            readGmicCommandNode(folder);
+            readGmicFilterNode(folder);
         }
         else if (name() == QLatin1String("separator"))
         {
@@ -256,27 +256,27 @@ void GmicXmlReader::readFolder(GmicCommandNode* const parent)
     }
 }
 
-void GmicXmlReader::readTitle(GmicCommandNode* const parent)
+void GmicXmlReader::readTitle(GmicFilterNode* const parent)
 {
     Q_ASSERT(isStartElement() && (name() == QLatin1String("title")));
 
     parent->title = readElementText();
 }
 
-void GmicXmlReader::readSeparator(GmicCommandNode* const parent)
+void GmicXmlReader::readSeparator(GmicFilterNode* const parent)
 {
-    new GmicCommandNode(GmicCommandNode::Separator, parent);
+    new GmicFilterNode(GmicFilterNode::Separator, parent);
 
     // empty elements have a start and end element
 
     readNext();
 }
 
-void GmicXmlReader::readGmicCommandNode(GmicCommandNode* const parent)
+void GmicXmlReader::readGmicFilterNode(GmicFilterNode* const parent)
 {
     Q_ASSERT(isStartElement() && (name() == QLatin1String("item")));
 
-    GmicCommandNode* const item = new GmicCommandNode(GmicCommandNode::Item, parent);
+    GmicFilterNode* const item = new GmicFilterNode(GmicFilterNode::Item, parent);
     item->command               = attributes().value(QLatin1String("command")).toString();
     QString date                = attributes().value(QLatin1String("added")).toString();
     item->dateAdded             = QDateTime::fromString(date, Qt::ISODate);
@@ -307,7 +307,7 @@ GmicXmlWriter::GmicXmlWriter()
     setAutoFormatting(true);
 }
 
-bool GmicXmlWriter::write(const QString& fileName, const GmicCommandNode* const root)
+bool GmicXmlWriter::write(const QString& fileName, const GmicFilterNode* const root)
 {
     QFile file(fileName);
 
@@ -319,7 +319,7 @@ bool GmicXmlWriter::write(const QString& fileName, const GmicCommandNode* const 
     return write(&file, root);
 }
 
-bool GmicXmlWriter::write(QIODevice* const device, const GmicCommandNode* const root)
+bool GmicXmlWriter::write(QIODevice* const device, const GmicFilterNode* const root)
 {
     setDevice(device);
 
@@ -328,9 +328,9 @@ bool GmicXmlWriter::write(QIODevice* const device, const GmicCommandNode* const 
     writeStartElement(QLatin1String("gmic"));
     writeAttribute(QLatin1String("version"), QLatin1String("1.0"));
 
-    if (root->type() == GmicCommandNode::Root)
+    if (root->type() == GmicFilterNode::Root)
     {
-        GmicCommandNode* const rootFolder = root->children().constFirst();
+        GmicFilterNode* const rootFolder = root->children().constFirst();
 
         for (int i = 0 ; i < rootFolder->children().count() ; ++i)
         {
@@ -347,11 +347,11 @@ bool GmicXmlWriter::write(QIODevice* const device, const GmicCommandNode* const 
     return true;
 }
 
-void GmicXmlWriter::writeItem(const GmicCommandNode* const parent)
+void GmicXmlWriter::writeItem(const GmicFilterNode* const parent)
 {
     switch (parent->type())
     {
-        case GmicCommandNode::Folder:
+        case GmicFilterNode::Folder:
         {
             writeStartElement(QLatin1String("folder"));
             writeAttribute(QLatin1String("folded"), parent->expanded ? QLatin1String("no") : QLatin1String("yes"));
@@ -366,7 +366,7 @@ void GmicXmlWriter::writeItem(const GmicCommandNode* const parent)
             break;
         }
 
-        case GmicCommandNode::Item:
+        case GmicFilterNode::Item:
         {
             writeStartElement(QLatin1String("item"));
 
@@ -391,7 +391,7 @@ void GmicXmlWriter::writeItem(const GmicCommandNode* const parent)
             break;
         }
 
-        case GmicCommandNode::Separator:
+        case GmicFilterNode::Separator:
         {
             writeEmptyElement(QLatin1String("separator"));
             break;
@@ -406,4 +406,4 @@ void GmicXmlWriter::writeItem(const GmicCommandNode* const parent)
 
 } // namespace DigikamBqmGmicQtPlugin
 
-#include "moc_gmiccommandnode.cpp"
+#include "moc_gmicfilternode.cpp"

@@ -35,22 +35,22 @@
 
 // Local includes
 
-#include "gmiccommandmngr.h"
+#include "gmicfiltermngr.h"
 
 namespace DigikamBqmGmicQtPlugin
 {
 
-class GmicCommandDialog : public QDialog
+class GmicFilterDialog : public QDialog
 {
     Q_OBJECT
 
 public:
 
-    explicit GmicCommandDialog(GmicCommandNode* const citem,
+    explicit GmicFilterDialog(GmicFilterNode* const citem,
                                bool edit, bool filter,
                                QWidget* const parent = nullptr,
-                               GmicCommandManager* const mngr = nullptr);
-    ~GmicCommandDialog() override;
+                               GmicFilterManager* const mngr = nullptr);
+    ~GmicFilterDialog() override;
 
 private Q_SLOTS:
 
@@ -64,19 +64,19 @@ private:
 
 // --------------------------------------------------------------------
 
-class GmicCommandWidget : public QWidget
+class GmicFilterWidget : public QWidget
 {
     Q_OBJECT
 
 public:
 
-    explicit GmicCommandWidget(QWidget* const parent = nullptr);
-    ~GmicCommandWidget()                                  override;
+    explicit GmicFilterWidget(QWidget* const parent = nullptr);
+    ~GmicFilterWidget()                                  override;
 
     QString currentPath()                           const;
     void setCurrentPath(const QString& path);
 
-    QString currentGmicCommand()                    const;
+    QString currentGmicFilter()                    const;
 
 Q_SIGNALS:
 
@@ -93,7 +93,7 @@ private Q_SLOTS:
 
 private:
 
-    void expandNodes(GmicCommandNode* const node);
+    void expandNodes(GmicFilterNode* const node);
     bool saveExpandedNodes(const QModelIndex& parent);
     void readSettings();
     void saveSettings();

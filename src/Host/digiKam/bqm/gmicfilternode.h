@@ -38,7 +38,7 @@
 namespace DigikamBqmGmicQtPlugin
 {
 
-class GmicCommandNode : public QObject
+class GmicFilterNode : public QObject
 {
     Q_OBJECT
 
@@ -55,19 +55,19 @@ public:
 
 public:
 
-    explicit GmicCommandNode(Type type = Root, GmicCommandNode* const parent = nullptr);
-    ~GmicCommandNode() override;
+    explicit GmicFilterNode(Type type = Root, GmicFilterNode* const parent = nullptr);
+    ~GmicFilterNode() override;
 
-    bool operator==(const GmicCommandNode& other) const;
+    bool operator==(const GmicFilterNode& other) const;
 
     Type type()                                   const;
     void setType(Type type);
 
-    QList<GmicCommandNode*> children()            const;
-    GmicCommandNode*        parent()              const;
+    QList<GmicFilterNode*> children()            const;
+    GmicFilterNode*        parent()              const;
 
-    void add(GmicCommandNode* const child, int offset = -1);
-    void remove(GmicCommandNode* const child);
+    void add(GmicFilterNode* const child, int offset = -1);
+    void remove(GmicFilterNode* const child);
 
 public:
 
@@ -80,8 +80,8 @@ public:
 private:
 
     // Disable
-    GmicCommandNode(const GmicCommandNode&)            = delete;
-    GmicCommandNode& operator=(const GmicCommandNode&) = delete;
+    GmicFilterNode(const GmicFilterNode&)            = delete;
+    GmicFilterNode& operator=(const GmicFilterNode&) = delete;
 
 private:
 
@@ -97,17 +97,17 @@ public:
 
     GmicXmlReader() = default;
 
-    GmicCommandNode* read(const QString& fileName);
-    GmicCommandNode* read(QIODevice* const device, bool addRootFolder = false);
+    GmicFilterNode* read(const QString& fileName);
+    GmicFilterNode* read(QIODevice* const device, bool addRootFolder = false);
 
 private:
 
-    void readXBEL(GmicCommandNode* const parent);
-    void readTitle(GmicCommandNode* const parent);
-    void readDescription(GmicCommandNode* const parent);
-    void readSeparator(GmicCommandNode* const parent);
-    void readFolder(GmicCommandNode* const parent);
-    void readGmicCommandNode(GmicCommandNode* const parent);
+    void readXBEL(GmicFilterNode* const parent);
+    void readTitle(GmicFilterNode* const parent);
+    void readDescription(GmicFilterNode* const parent);
+    void readSeparator(GmicFilterNode* const parent);
+    void readFolder(GmicFilterNode* const parent);
+    void readGmicFilterNode(GmicFilterNode* const parent);
 };
 
 // -----------------------------------------------------------
@@ -118,12 +118,12 @@ public:
 
     GmicXmlWriter();
 
-    bool write(const QString& fileName, const GmicCommandNode* const root);
-    bool write(QIODevice* const device, const GmicCommandNode* const root);
+    bool write(const QString& fileName, const GmicFilterNode* const root);
+    bool write(QIODevice* const device, const GmicFilterNode* const root);
 
 private:
 
-    void writeItem(const GmicCommandNode* const parent);
+    void writeItem(const GmicFilterNode* const parent);
 };
 
 } // namespace DigikamBqmGmicQtPlugin

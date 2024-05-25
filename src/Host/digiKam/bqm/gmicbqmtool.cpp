@@ -36,7 +36,7 @@
 
 // Local includes
 
-#include "gmiccommandwidget.h"
+#include "gmicfilterwidget.h"
 #include "gmicbqmprocessor.h"
 
 namespace DigikamBqmGmicQtPlugin
@@ -48,10 +48,10 @@ public:
 
     Private() = default;
 
-    GmicCommandWidget* gmicWidget     = nullptr;
-    GmicBqmProcessor*  gmicProcessor  = nullptr;
+    GmicFilterWidget* gmicWidget     = nullptr;
+    GmicBqmProcessor* gmicProcessor  = nullptr;
 
-    bool               changeSettings = true;
+    bool              changeSettings = true;
 };
 
 GmicBqmTool::GmicBqmTool(QObject* const parent)
@@ -72,7 +72,7 @@ BatchTool* GmicBqmTool::clone(QObject* const parent) const
 
 void GmicBqmTool::registerSettingsWidget()
 {
-    d->gmicWidget    = new GmicCommandWidget();
+    d->gmicWidget    = new GmicFilterWidget();
     m_settingsWidget = d->gmicWidget;
 
     connect(d->gmicWidget, SIGNAL(signalSettingsChanged()),
@@ -108,7 +108,7 @@ void GmicBqmTool::slotSettingsChanged()
     {
         BatchToolSettings settings;
 
-        settings.insert(QLatin1String("GmicBqmToolCommand"), d->gmicWidget->currentGmicCommand());
+        settings.insert(QLatin1String("GmicBqmToolCommand"), d->gmicWidget->currentGmicFilter());
         settings.insert(QLatin1String("GmicBqmToolPath"),    d->gmicWidget->currentPath());
 
         BatchTool::slotSettingsChanged(settings);

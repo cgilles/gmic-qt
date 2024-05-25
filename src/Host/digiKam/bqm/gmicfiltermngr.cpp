@@ -22,7 +22,7 @@
  *
  */
 
-#include "gmiccommandmngr.h"
+#include "gmicfiltermngr.h"
 
 // Qt includes
 
@@ -44,13 +44,13 @@
 
 // Local includes
 
-#include "gmiccommandnode.h"
+#include "gmicfilternode.h"
 
 namespace DigikamBqmGmicQtPlugin
 {
 
-RemoveGmicCommand::RemoveGmicCommand(GmicCommandManager* const mngr,
-                                     GmicCommandNode* const parent,
+RemoveGmicFilter::RemoveGmicFilter(GmicFilterManager* const mngr,
+                                   GmicFilterNode* const parent,
                                      int row)
     : QUndoCommand(QObject::tr("Remove Filter")),
       m_row            (row),
@@ -60,7 +60,7 @@ RemoveGmicCommand::RemoveGmicCommand(GmicCommandManager* const mngr,
 {
 }
 
-RemoveGmicCommand::~RemoveGmicCommand()
+RemoveGmicFilter::~RemoveGmicFilter()
 {
     if (m_done && !m_node->parent())
     {
@@ -68,7 +68,7 @@ RemoveGmicCommand::~RemoveGmicCommand()
     }
 }
 
-void RemoveGmicCommand::undo()
+void RemoveGmicFilter::undo()
 {
     m_parent->add(m_node, m_row);
 
@@ -77,7 +77,7 @@ void RemoveGmicCommand::undo()
     m_done = false;
 }
 
-void RemoveGmicCommand::redo()
+void RemoveGmicFilter::redo()
 {
     m_parent->remove(m_node);
 
@@ -88,45 +88,45 @@ void RemoveGmicCommand::redo()
 
 // --------------------------------------------------------------
 
-InsertGmicCommand::InsertGmicCommand(GmicCommandManager* const mngr,
-                                     GmicCommandNode* const parent,
-                                     GmicCommandNode* const node,
+InsertGmicFilter::InsertGmicFilter(GmicFilterManager* const mngr,
+                                   GmicFilterNode* const parent,
+                                   GmicFilterNode* const node,
                                      int row)
-    : RemoveGmicCommand(mngr, parent, row)
+    : RemoveGmicFilter(mngr, parent, row)
 {
     setText(QObject::tr("Insert Filter"));
     m_node = node;
 }
 
-void InsertGmicCommand::undo()
+void InsertGmicFilter::undo()
 {
-    RemoveGmicCommand::redo();
+    RemoveGmicFilter::redo();
 }
 
-void InsertGmicCommand::redo()
+void InsertGmicFilter::redo()
 {
-    RemoveGmicCommand::undo();
+    RemoveGmicFilter::undo();
 }
 
 // --------------------------------------------------------------
 
-class Q_DECL_HIDDEN ChangeGmicCommand::Private
+class Q_DECL_HIDDEN ChangeGmicFilter::Private
 {
 public:
 
     Private() = default;
 
-    GmicCommandManager* manager   = nullptr;
-    GmicCommandData     type      = Command;
+    GmicFilterManager* manager   = nullptr;
+    GmicFilterData     type      = Command;
     QString             oldValue;
     QString             newValue;
-    GmicCommandNode*    node      = nullptr;
+    GmicFilterNode*    node      = nullptr;
 };
 
-ChangeGmicCommand::ChangeGmicCommand(GmicCommandManager* const mngr,
-                                     GmicCommandNode* const node,
-                                     const QString& newValue,
-                                     GmicCommandData type)
+ChangeGmicFilter::ChangeGmicFilter(GmicFilterManager* const mngr,
+                                   GmicFilterNode* const node,
+                                   const QString& newValue,
+                                   GmicFilterData type)
     : QUndoCommand(),
       d           (new Private)
 {
@@ -154,18 +154,18 @@ ChangeGmicCommand::ChangeGmicCommand(GmicCommandManager* const mngr,
         default:    // Gmic Command
         {
             d->oldValue = d->node->command;
-            setText(QObject::tr("G'MIC Command Change"));
+            setText(QObject::tr("Command Change"));
             break;
         }
     }
 }
 
-ChangeGmicCommand::~ChangeGmicCommand()
+ChangeGmicFilter::~ChangeGmicFilter()
 {
     delete d;
 }
 
-void ChangeGmicCommand::undo()
+void ChangeGmicFilter::undo()
 {
     switch (d->type)
     {
@@ -191,7 +191,7 @@ void ChangeGmicCommand::undo()
     Q_EMIT d->manager->entryChanged(d->node);
 }
 
-void ChangeGmicCommand::redo()
+void ChangeGmicFilter::redo()
 {
     switch (d->type)
     {
@@ -219,45 +219,45 @@ void ChangeGmicCommand::redo()
 
 // --------------------------------------------------------------
 
-class Q_DECL_HIDDEN GmicCommandModel::Private
+class Q_DECL_HIDDEN GmicFilterModel::Private
 {
 public:
 
     Private() = default;
 
-    GmicCommandManager* manager   = nullptr;
-    bool                endMacro  = false;
+    GmicFilterManager* manager   = nullptr;
+    bool               endMacro  = false;
 };
 
-GmicCommandModel::GmicCommandModel(GmicCommandManager* const mngr, QObject* const parent)
+GmicFilterModel::GmicFilterModel(GmicFilterManager* const mngr, QObject* const parent)
     : QAbstractItemModel(parent),
       d                 (new Private)
 {
     d->manager = mngr;
 
-    connect(d->manager, SIGNAL(entryAdded(GmicCommandNode*)),
-            this, SLOT(entryAdded(GmicCommandNode*)));
+    connect(d->manager, SIGNAL(entryAdded(GmicFilterNode*)),
+            this, SLOT(entryAdded(GmicFilterNode*)));
 
-    connect(d->manager, SIGNAL(entryRemoved(GmicCommandNode*,int,GmicCommandNode*)),
-            this, SLOT(entryRemoved(GmicCommandNode*,int,GmicCommandNode*)));
+    connect(d->manager, SIGNAL(entryRemoved(GmicFilterNode*,int,GmicFilterNode*)),
+            this, SLOT(entryRemoved(GmicFilterNode*,int,GmicFilterNode*)));
 
-    connect(d->manager, SIGNAL(entryChanged(GmicCommandNode*)),
-            this, SLOT(entryChanged(GmicCommandNode*)));
+    connect(d->manager, SIGNAL(entryChanged(GmicFilterNode*)),
+            this, SLOT(entryChanged(GmicFilterNode*)));
 }
 
-GmicCommandModel::~GmicCommandModel()
+GmicFilterModel::~GmicFilterModel()
 {
     delete d;
 }
 
-GmicCommandManager* GmicCommandModel::bookmarksManager() const
+GmicFilterManager* GmicFilterModel::bookmarksManager() const
 {
     return d->manager;
 }
 
-QModelIndex GmicCommandModel::index(GmicCommandNode* node) const
+QModelIndex GmicFilterModel::index(GmicFilterNode* node) const
 {
-    GmicCommandNode* const parent = node->parent();
+    GmicFilterNode* const parent = node->parent();
 
     if (!parent)
     {
@@ -267,12 +267,12 @@ QModelIndex GmicCommandModel::index(GmicCommandNode* node) const
     return createIndex(parent->children().indexOf(node), 0, node);
 }
 
-void GmicCommandModel::entryAdded(GmicCommandNode* item)
+void GmicFilterModel::entryAdded(GmicFilterNode* item)
 {
     Q_ASSERT(item && item->parent());
 
     int row                       = item->parent()->children().indexOf(item);
-    GmicCommandNode* const parent = item->parent();
+    GmicFilterNode* const parent = item->parent();
 
     // item was already added so remove before beginInsertRows is called
 
@@ -282,7 +282,7 @@ void GmicCommandModel::entryAdded(GmicCommandNode* item)
     endInsertRows();
 }
 
-void GmicCommandModel::entryRemoved(GmicCommandNode* parent, int row, GmicCommandNode* item)
+void GmicFilterModel::entryRemoved(GmicFilterNode* parent, int row, GmicFilterNode* item)
 {
     // item was already removed, re-add so beginRemoveRows works
 
@@ -292,25 +292,25 @@ void GmicCommandModel::entryRemoved(GmicCommandNode* parent, int row, GmicComman
     endRemoveRows();
 }
 
-void GmicCommandModel::entryChanged(GmicCommandNode* item)
+void GmicFilterModel::entryChanged(GmicFilterNode* item)
 {
     QModelIndex idx = index(item);
 
     Q_EMIT dataChanged(idx, idx);
 }
 
-bool GmicCommandModel::removeRows(int row, int count, const QModelIndex& parent)
+bool GmicFilterModel::removeRows(int row, int count, const QModelIndex& parent)
 {
     if ((row < 0) || (count <= 0) || ((row + count) > rowCount(parent)))
     {
         return false;
     }
 
-    GmicCommandNode* const bookmarkNode = node(parent);
+    GmicFilterNode* const bookmarkNode = node(parent);
 
     for (int i = (row + count - 1) ; i >= row ; --i)
     {
-        GmicCommandNode* const node = bookmarkNode->children().at(i);
+        GmicFilterNode* const node = bookmarkNode->children().at(i);
         d->manager->removeCommand(node);
     }
 
@@ -323,7 +323,7 @@ bool GmicCommandModel::removeRows(int row, int count, const QModelIndex& parent)
     return true;
 }
 
-QVariant GmicCommandModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant GmicFilterModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if ((orientation == Qt::Horizontal) && (role == Qt::DisplayRole))
     {
@@ -344,20 +344,20 @@ QVariant GmicCommandModel::headerData(int section, Qt::Orientation orientation, 
     return QAbstractItemModel::headerData(section, orientation, role);
 }
 
-QVariant GmicCommandModel::data(const QModelIndex& index, int role) const
+QVariant GmicFilterModel::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid() || (index.model() != this))
     {
         return QVariant();
     }
 
-    const GmicCommandNode* const commandNode = node(index);
+    const GmicFilterNode* const commandNode = node(index);
 
     switch (role)
     {
         case Qt::DisplayRole:
         {
-            if (commandNode->type() == GmicCommandNode::Separator)
+            if (commandNode->type() == GmicFilterNode::Separator)
             {
                 switch (index.column())
                 {
@@ -389,35 +389,35 @@ QVariant GmicCommandModel::data(const QModelIndex& index, int role) const
             break;
         }
 
-        case GmicCommandModel::CommandRole:
+        case GmicFilterModel::CommandRole:
         {
             return commandNode->command;
         }
 
-        case GmicCommandModel::DateAddedRole:
+        case GmicFilterModel::DateAddedRole:
         {
             return commandNode->dateAdded;
         }
 
-        case GmicCommandModel::TypeRole:
+        case GmicFilterModel::TypeRole:
         {
             return commandNode->type();
         }
 
-        case GmicCommandModel::SeparatorRole:
+        case GmicFilterModel::SeparatorRole:
         {
-            return (commandNode->type() == GmicCommandNode::Separator);
+            return (commandNode->type() == GmicFilterNode::Separator);
         }
 
         case Qt::DecorationRole:
         {
             if (index.column() == 0)
             {
-                if      (commandNode->type() == GmicCommandNode::Item)
+                if      (commandNode->type() == GmicFilterNode::Item)
                 {
                     return QIcon::fromTheme(QLatin1String("process-working-symbolic"));
                 }
-                else if (commandNode->type() == GmicCommandNode::RootFolder)
+                else if (commandNode->type() == GmicFilterNode::RootFolder)
                 {
                     return QIcon(":resources/gmic_hat.png");
                 }
@@ -432,12 +432,12 @@ QVariant GmicCommandModel::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-int GmicCommandModel::columnCount(const QModelIndex& parent) const
+int GmicFilterModel::columnCount(const QModelIndex& parent) const
 {
     return ((parent.column() > 0) ? 0 : 2);
 }
 
-int GmicCommandModel::rowCount(const QModelIndex& parent) const
+int GmicFilterModel::rowCount(const QModelIndex& parent) const
 {
     if (parent.column() > 0)
     {
@@ -449,12 +449,12 @@ int GmicCommandModel::rowCount(const QModelIndex& parent) const
         return d->manager->commands()->children().count();
     }
 
-    const GmicCommandNode* const item = static_cast<GmicCommandNode*>(parent.internalPointer());
+    const GmicFilterNode* const item = static_cast<GmicFilterNode*>(parent.internalPointer());
 
     return item->children().count();
 }
 
-QModelIndex GmicCommandModel::index(int row, int column, const QModelIndex& parent) const
+QModelIndex GmicFilterModel::index(int row, int column, const QModelIndex& parent) const
 {
     if (
         (row < 0) || (column < 0) ||
@@ -467,20 +467,20 @@ QModelIndex GmicCommandModel::index(int row, int column, const QModelIndex& pare
 
     // get the parent node
 
-    GmicCommandNode* const parentNode = node(parent);
+    GmicFilterNode* const parentNode = node(parent);
 
     return createIndex(row, column, parentNode->children().at(row));
 }
 
-QModelIndex GmicCommandModel::parent(const QModelIndex& index) const
+QModelIndex GmicFilterModel::parent(const QModelIndex& index) const
 {
     if (!index.isValid())
     {
         return QModelIndex();
     }
 
-    GmicCommandNode* const itemNode   = node(index);
-    GmicCommandNode* const parentNode = (itemNode ? itemNode->parent() : nullptr);
+    GmicFilterNode* const itemNode   = node(index);
+    GmicFilterNode* const parentNode = (itemNode ? itemNode->parent() : nullptr);
 
     if (!parentNode || (parentNode == d->manager->commands()))
     {
@@ -489,7 +489,7 @@ QModelIndex GmicCommandModel::parent(const QModelIndex& index) const
 
     // get the parent's row
 
-    GmicCommandNode* const grandParentNode = parentNode->parent();
+    GmicFilterNode* const grandParentNode = parentNode->parent();
     int parentRow                          = grandParentNode->children().indexOf(parentNode);
 
     Q_ASSERT(parentRow >= 0);
@@ -497,32 +497,32 @@ QModelIndex GmicCommandModel::parent(const QModelIndex& index) const
     return createIndex(parentRow, 0, parentNode);
 }
 
-bool GmicCommandModel::hasChildren(const QModelIndex& parent) const
+bool GmicFilterModel::hasChildren(const QModelIndex& parent) const
 {
     if (!parent.isValid())
     {
         return true;
     }
 
-    const GmicCommandNode* const parentNode = node(parent);
+    const GmicFilterNode* const parentNode = node(parent);
 
     return (
-            (parentNode->type() == GmicCommandNode::Folder) ||
-            (parentNode->type() == GmicCommandNode::RootFolder)
+            (parentNode->type() == GmicFilterNode::Folder) ||
+            (parentNode->type() == GmicFilterNode::RootFolder)
            );
 }
 
-Qt::ItemFlags GmicCommandModel::flags(const QModelIndex& index) const
+Qt::ItemFlags GmicFilterModel::flags(const QModelIndex& index) const
 {
     if (!index.isValid())
     {
         return Qt::NoItemFlags;
     }
 
-    Qt::ItemFlags flags                = Qt::ItemIsSelectable | Qt::ItemIsEnabled;
-    GmicCommandNode* const commandNode = node(index);
+    Qt::ItemFlags flags               = Qt::ItemIsSelectable | Qt::ItemIsEnabled;
+    GmicFilterNode* const commandNode = node(index);
 
-    if (commandNode->type() != GmicCommandNode::RootFolder)
+    if (commandNode->type() != GmicFilterNode::RootFolder)
     {
         flags |= Qt::ItemIsDragEnabled;
     }
@@ -535,12 +535,12 @@ Qt::ItemFlags GmicCommandModel::flags(const QModelIndex& index) const
     return flags;
 }
 
-Qt::DropActions GmicCommandModel::supportedDropActions() const
+Qt::DropActions GmicFilterModel::supportedDropActions() const
 {
     return (Qt::CopyAction | Qt::MoveAction);
 }
 
-QStringList GmicCommandModel::mimeTypes() const
+QStringList GmicFilterModel::mimeTypes() const
 {
     QStringList types;
     types << QLatin1String("application/gmicfilters.xml");
@@ -548,7 +548,7 @@ QStringList GmicCommandModel::mimeTypes() const
     return types;
 }
 
-QMimeData* GmicCommandModel::mimeData(const QModelIndexList& indexes) const
+QMimeData* GmicFilterModel::mimeData(const QModelIndexList& indexes) const
 {
     QMimeData* const mimeData = new QMimeData();
     QByteArray data;
@@ -565,7 +565,7 @@ QMimeData* GmicCommandModel::mimeData(const QModelIndexList& indexes) const
         QBuffer buffer(&encodedData);
         buffer.open(QBuffer::ReadWrite);
         GmicXmlWriter writer;
-        const GmicCommandNode* const parentNode = node(index);
+        const GmicFilterNode* const parentNode = node(index);
         writer.write(&buffer, parentNode);
         stream << encodedData;
     }
@@ -575,10 +575,10 @@ QMimeData* GmicCommandModel::mimeData(const QModelIndexList& indexes) const
     return mimeData;
 }
 
-bool GmicCommandModel::dropMimeData(const QMimeData* data,
-                                    Qt::DropAction action,
-                                    int row, int column,
-                                    const QModelIndex& parent)
+bool GmicFilterModel::dropMimeData(const QMimeData* data,
+                                   Qt::DropAction action,
+                                   int row, int column,
+                                   const QModelIndex& parent)
 {
     if (action == Qt::IgnoreAction)
     {
@@ -609,15 +609,15 @@ bool GmicCommandModel::dropMimeData(const QMimeData* data,
         buffer.open(QBuffer::ReadOnly);
 
         GmicXmlReader reader;
-        GmicCommandNode* const rootNode  = reader.read(&buffer);
-        QList<GmicCommandNode*> children = rootNode->children();
+        GmicFilterNode* const rootNode  = reader.read(&buffer);
+        QList<GmicFilterNode*> children = rootNode->children();
 
         for (int i = 0 ; i < children.count() ; ++i)
         {
-            GmicCommandNode* const commandNode = children.at(i);
+            GmicFilterNode* const commandNode = children.at(i);
             rootNode->remove(commandNode);
             row                               = qMax(0, row);
-            GmicCommandNode* const parentNode = node(parent);
+            GmicFilterNode* const parentNode  = node(parent);
             d->manager->addCommand(parentNode, commandNode, row);
             d->endMacro                       = true;
         }
@@ -628,14 +628,14 @@ bool GmicCommandModel::dropMimeData(const QMimeData* data,
     return true;
 }
 
-bool GmicCommandModel::setData(const QModelIndex& index, const QVariant& value, int role)
+bool GmicFilterModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
     if (!index.isValid())
     {
         return false;
     }
 
-    GmicCommandNode* const item = node(index);
+    GmicFilterNode* const item = node(index);
 
     switch (role)
     {
@@ -656,7 +656,7 @@ bool GmicCommandModel::setData(const QModelIndex& index, const QVariant& value, 
             return false;
         }
 
-        case GmicCommandModel::CommandRole:
+        case GmicFilterModel::CommandRole:
         {
             d->manager->setCommand(item, value.toString());
             break;
@@ -671,9 +671,9 @@ bool GmicCommandModel::setData(const QModelIndex& index, const QVariant& value, 
     return true;
 }
 
-GmicCommandNode* GmicCommandModel::node(const QModelIndex& index) const
+GmicFilterNode* GmicFilterModel::node(const QModelIndex& index) const
 {
-    GmicCommandNode* const itemNode = static_cast<GmicCommandNode*>(index.internalPointer());
+    GmicFilterNode* const itemNode = static_cast<GmicFilterNode*>(index.internalPointer());
 
     if (!itemNode)
     {
@@ -685,17 +685,17 @@ GmicCommandNode* GmicCommandModel::node(const QModelIndex& index) const
 
 // --------------------------------------------------------------
 
-AddGmicCommandProxyModel::AddGmicCommandProxyModel(QObject* const parent)
+AddGmicFilterProxyModel::AddGmicFilterProxyModel(QObject* const parent)
     : QSortFilterProxyModel(parent)
 {
 }
 
-int AddGmicCommandProxyModel::columnCount(const QModelIndex& parent) const
+int AddGmicFilterProxyModel::columnCount(const QModelIndex& parent) const
 {
     return qMin(1, QSortFilterProxyModel::columnCount(parent));
 }
 
-bool AddGmicCommandProxyModel::filterAcceptsRow(int srow, const QModelIndex& sparent) const
+bool AddGmicFilterProxyModel::filterAcceptsRow(int srow, const QModelIndex& sparent) const
 {
     QModelIndex idx = sourceModel()->index(srow, 0, sparent);
 
@@ -759,20 +759,20 @@ void TreeProxyModel::emitResult(bool v)
 
 // --------------------------------------------------------------
 
-class Q_DECL_HIDDEN GmicCommandManager::Private
+class Q_DECL_HIDDEN GmicFilterManager::Private
 {
 public:
 
     Private() = default;
 
-    bool              loaded             = false;
-    GmicCommandNode*  commandRootNode    = nullptr;
-    GmicCommandModel* commandModel       = nullptr;
-    QUndoStack        commands;
-    QString           commandsFile;
+    bool             loaded             = false;
+    GmicFilterNode*  commandRootNode    = nullptr;
+    GmicFilterModel* commandModel       = nullptr;
+    QUndoStack       commands;
+    QString          commandsFile;
 };
 
-GmicCommandManager::GmicCommandManager(const QString& commandsFile, QObject* const parent)
+GmicFilterManager::GmicFilterManager(const QString& commandsFile, QObject* const parent)
     : QObject(parent),
       d      (new Private)
 {
@@ -780,17 +780,17 @@ GmicCommandManager::GmicCommandManager(const QString& commandsFile, QObject* con
     load();
 }
 
-GmicCommandManager::~GmicCommandManager()
+GmicFilterManager::~GmicFilterManager()
 {
     delete d->commandRootNode;
     delete d;
 }
 
-void GmicCommandManager::changeExpanded()
+void GmicFilterManager::changeExpanded()
 {
 }
 
-void GmicCommandManager::load()
+void GmicFilterManager::load()
 {
     if (d->loaded)
     {
@@ -813,7 +813,7 @@ void GmicCommandManager::load()
     }
 }
 
-void GmicCommandManager::save()
+void GmicFilterManager::save()
 {
     if (!d->loaded)
     {
@@ -830,8 +830,8 @@ void GmicCommandManager::save()
     }
 }
 
-void GmicCommandManager::addCommand(GmicCommandNode* const parent,
-                                    GmicCommandNode* const node, int row)
+void GmicFilterManager::addCommand(GmicFilterNode* const parent,
+                                   GmicFilterNode* const node, int row)
 {
     if (!d->loaded)
     {
@@ -840,11 +840,11 @@ void GmicCommandManager::addCommand(GmicCommandNode* const parent,
 
     Q_ASSERT(parent);
 
-    InsertGmicCommand* const command = new InsertGmicCommand(this, parent, node, row);
+    InsertGmicFilter* const command = new InsertGmicFilter(this, parent, node, row);
     d->commands.push(command);
 }
 
-void GmicCommandManager::removeCommand(GmicCommandNode* const node)
+void GmicFilterManager::removeCommand(GmicFilterNode* const node)
 {
     if (!d->loaded)
     {
@@ -853,13 +853,13 @@ void GmicCommandManager::removeCommand(GmicCommandNode* const node)
 
     Q_ASSERT(node);
 
-    GmicCommandNode* const parent    = node->parent();
-    int row                          = parent->children().indexOf(node);
-    RemoveGmicCommand* const command = new RemoveGmicCommand(this, parent, row);
+    GmicFilterNode* const parent    = node->parent();
+    int row                         = parent->children().indexOf(node);
+    RemoveGmicFilter* const command = new RemoveGmicFilter(this, parent, row);
     d->commands.push(command);
 }
 
-void GmicCommandManager::setTitle(GmicCommandNode* const node, const QString& newTitle)
+void GmicFilterManager::setTitle(GmicFilterNode* const node, const QString& newTitle)
 {
     if (!d->loaded)
     {
@@ -868,12 +868,12 @@ void GmicCommandManager::setTitle(GmicCommandNode* const node, const QString& ne
 
     Q_ASSERT(node);
 
-    ChangeGmicCommand* const command = new ChangeGmicCommand(this, node, newTitle,
-                                                             ChangeGmicCommand::Title);
+    ChangeGmicFilter* const command = new ChangeGmicFilter(this, node, newTitle,
+                                                           ChangeGmicFilter::Title);
     d->commands.push(command);
 }
 
-void GmicCommandManager::setCommand(GmicCommandNode* const node, const QString& newCommand)
+void GmicFilterManager::setCommand(GmicFilterNode* const node, const QString& newCommand)
 {
     if (!d->loaded)
     {
@@ -882,12 +882,12 @@ void GmicCommandManager::setCommand(GmicCommandNode* const node, const QString& 
 
     Q_ASSERT(node);
 
-    ChangeGmicCommand* const command = new ChangeGmicCommand(this, node, newCommand,
-                                                             ChangeGmicCommand::Command);
+    ChangeGmicFilter* const command = new ChangeGmicFilter(this, node, newCommand,
+                                                           ChangeGmicFilter::Command);
     d->commands.push(command);
 }
 
-void GmicCommandManager::setComment(GmicCommandNode* const node, const QString& newDesc)
+void GmicFilterManager::setComment(GmicFilterNode* const node, const QString& newDesc)
 {
     if (!d->loaded)
     {
@@ -896,12 +896,12 @@ void GmicCommandManager::setComment(GmicCommandNode* const node, const QString& 
 
     Q_ASSERT(node);
 
-    ChangeGmicCommand* const command = new ChangeGmicCommand(this, node, newDesc,
-                                                             ChangeGmicCommand::Desc);
+    ChangeGmicFilter* const command = new ChangeGmicFilter(this, node, newDesc,
+                                                           ChangeGmicFilter::Desc);
     d->commands.push(command);
 }
 
-GmicCommandNode* GmicCommandManager::commands()
+GmicFilterNode* GmicFilterManager::commands()
 {
     if (!d->loaded)
     {
@@ -911,22 +911,22 @@ GmicCommandNode* GmicCommandManager::commands()
     return d->commandRootNode;
 }
 
-GmicCommandModel* GmicCommandManager::commandsModel()
+GmicFilterModel* GmicFilterManager::commandsModel()
 {
     if (!d->commandModel)
     {
-        d->commandModel = new GmicCommandModel(this, this);
+        d->commandModel = new GmicFilterModel(this, this);
     }
 
     return d->commandModel;
 }
 
-QUndoStack* GmicCommandManager::undoRedoStack() const
+QUndoStack* GmicFilterManager::undoRedoStack() const
 {
     return &d->commands;
 }
 
-void GmicCommandManager::importCommands()
+void GmicFilterManager::importCommands()
 {
     QString fileName = QFileDialog::getOpenFileName(nullptr, QObject::tr("Open File"),
                                                     QString(),
@@ -937,7 +937,7 @@ void GmicCommandManager::importCommands()
     }
 
     GmicXmlReader reader;
-    GmicCommandNode* const importRootNode = reader.read(fileName);
+    GmicFilterNode* const importRootNode = reader.read(fileName);
 
     if (reader.error() != QXmlStreamReader::NoError)
     {
@@ -948,12 +948,12 @@ void GmicCommandManager::importCommands()
                                   .arg(reader.errorString()));
     }
 
-    importRootNode->setType(GmicCommandNode::Folder);
+    importRootNode->setType(GmicFilterNode::Folder);
     importRootNode->title = QObject::tr("Imported %1").arg(QLocale().toString(QDate::currentDate(), QLocale::ShortFormat));
     addCommand(commands(), importRootNode);
 }
 
-void GmicCommandManager::exportCommands()
+void GmicFilterManager::exportCommands()
 {
     QString fileName = QFileDialog::getSaveFileName(nullptr, QObject::tr("Save File"),
                                                     QObject::tr("%1 Gmic Filters.xml")
@@ -975,4 +975,4 @@ void GmicCommandManager::exportCommands()
 
 } // namespace DigikamBqmGmicQtPlugin
 
-#include "moc_gmiccommandmngr.cpp"
+#include "moc_gmicfiltermngr.cpp"

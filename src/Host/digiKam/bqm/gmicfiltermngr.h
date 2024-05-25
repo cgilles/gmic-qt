@@ -35,17 +35,17 @@
 namespace DigikamBqmGmicQtPlugin
 {
 
-class GmicCommandManager;
-class GmicCommandNode;
+class GmicFilterManager;
+class GmicFilterNode;
 
-class RemoveGmicCommand : public QUndoCommand
+class RemoveGmicFilter : public QUndoCommand
 {
 public:
 
-    explicit RemoveGmicCommand(GmicCommandManager* const mngr,
-                               GmicCommandNode* const parent,
+    explicit RemoveGmicFilter(GmicFilterManager* const mngr,
+                               GmicFilterNode* const parent,
                                int row);
-    ~RemoveGmicCommand() override;
+    ~RemoveGmicFilter() override;
 
     void undo()          override;
     void redo()          override;
@@ -53,21 +53,21 @@ public:
 protected:
 
     int                 m_row             = 0;
-    GmicCommandManager* m_bookmarkManager = nullptr;
-    GmicCommandNode*    m_node            = nullptr;
-    GmicCommandNode*    m_parent          = nullptr;
+    GmicFilterManager* m_bookmarkManager = nullptr;
+    GmicFilterNode*    m_node            = nullptr;
+    GmicFilterNode*    m_parent          = nullptr;
     bool                m_done            = false;
 };
 
 //---------------------------------------------------------------------------------
 
-class InsertGmicCommand : public RemoveGmicCommand
+class InsertGmicFilter : public RemoveGmicFilter
 {
 public:
 
-    explicit InsertGmicCommand(GmicCommandManager* const mngr,
-                               GmicCommandNode* const parent,
-                               GmicCommandNode* const node,
+    explicit InsertGmicFilter(GmicFilterManager* const mngr,
+                               GmicFilterNode* const parent,
+                               GmicFilterNode* const node,
                                int row);
 
     void undo() override;
@@ -76,11 +76,11 @@ public:
 
 //---------------------------------------------------------------------------------
 
-class ChangeGmicCommand : public QUndoCommand
+class ChangeGmicFilter : public QUndoCommand
 {
 public:
 
-    enum GmicCommandData
+    enum GmicFilterData
     {
         Command = 0,
         Title,
@@ -89,11 +89,11 @@ public:
 
 public:
 
-    explicit ChangeGmicCommand(GmicCommandManager* const mngr,
-                               GmicCommandNode* const node,
+    explicit ChangeGmicFilter(GmicFilterManager* const mngr,
+                               GmicFilterNode* const node,
                                const QString& newValue,
-                               GmicCommandData type);
-    ~ChangeGmicCommand()  override;
+                               GmicFilterData type);
+    ~ChangeGmicFilter()  override;
 
     void undo()           override;
     void redo()           override;
@@ -105,9 +105,9 @@ private:
 };
 
 /**
- * GmicCommandModel is a QAbstractItemModel wrapper around the BookmarkManager
+ * GmicFilterModel is a QAbstractItemModel wrapper around the BookmarkManager
  */
-class GmicCommandModel : public QAbstractItemModel
+class GmicFilterModel : public QAbstractItemModel
 {
     Q_OBJECT
 
@@ -123,11 +123,11 @@ public:
 
 public:
 
-    explicit GmicCommandModel(GmicCommandManager* const mngr,
+    explicit GmicFilterModel(GmicFilterManager* const mngr,
                               QObject* const parent = nullptr);
-    ~GmicCommandModel()                                                                               override;
+    ~GmicFilterModel()                                                                               override;
 
-    GmicCommandManager* bookmarksManager()                                                    const;
+    GmicFilterManager* bookmarksManager()                                                    const;
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole)                       const override;
     int columnCount(const QModelIndex& parent = QModelIndex())                                const override;
@@ -139,8 +139,8 @@ public:
     QMimeData* mimeData(const QModelIndexList& indexes)                                       const override;
     QStringList mimeTypes()                                                                   const override;
     bool hasChildren(const QModelIndex& parent = QModelIndex())                               const override;
-    GmicCommandNode* node(const QModelIndex& index)                                           const;
-    QModelIndex index(GmicCommandNode* node)                                                  const;
+    GmicFilterNode* node(const QModelIndex& index)                                           const;
+    QModelIndex index(GmicFilterNode* node)                                                  const;
 
     bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row,
                       int column, const QModelIndex& parent)                                         override;
@@ -150,9 +150,9 @@ public:
 
 public Q_SLOTS:
 
-    void entryAdded(GmicCommandNode* item);
-    void entryRemoved(GmicCommandNode* parent, int row, GmicCommandNode* item);
-    void entryChanged(GmicCommandNode* item);
+    void entryAdded(GmicFilterNode* item);
+    void entryRemoved(GmicFilterNode* parent, int row, GmicFilterNode* item);
+    void entryChanged(GmicFilterNode* item);
 
 private:
 
@@ -164,13 +164,13 @@ private:
  *  Proxy model that filters out the Gmic Commands so only the folders
  *  are left behind.  Used in the add command dialog combobox.
  */
-class AddGmicCommandProxyModel : public QSortFilterProxyModel
+class AddGmicFilterProxyModel : public QSortFilterProxyModel
 {
     Q_OBJECT
 
 public:
 
-    explicit AddGmicCommandProxyModel(QObject* const parent = nullptr);
+    explicit AddGmicFilterProxyModel(QObject* const parent = nullptr);
 
     int columnCount(const QModelIndex& parent = QModelIndex())  const override;
 
@@ -207,24 +207,24 @@ private:
 /**
  *  Gmic Command manager, owner of the commands, loads, saves and basic tasks
  */
-class GmicCommandManager : public QObject
+class GmicFilterManager : public QObject
 {
     Q_OBJECT
 
 public:
 
-    explicit GmicCommandManager(const QString& bookmarksFile, QObject* const parent = nullptr);
-    ~GmicCommandManager() override;
+    explicit GmicFilterManager(const QString& bookmarksFile, QObject* const parent = nullptr);
+    ~GmicFilterManager() override;
 
-    void addCommand(GmicCommandNode* const parent, GmicCommandNode* const node, int row = -1);
-    void removeCommand(GmicCommandNode* const node);
-    void setTitle(GmicCommandNode* const node, const QString& newTitle);
-    void setCommand(GmicCommandNode* const node, const QString& newcommand);
-    void setComment(GmicCommandNode* const node, const QString& newDesc);
+    void addCommand(GmicFilterNode* const parent, GmicFilterNode* const node, int row = -1);
+    void removeCommand(GmicFilterNode* const node);
+    void setTitle(GmicFilterNode* const node, const QString& newTitle);
+    void setCommand(GmicFilterNode* const node, const QString& newcommand);
+    void setComment(GmicFilterNode* const node, const QString& newDesc);
     void changeExpanded();
 
-    GmicCommandNode*  commands();
-    GmicCommandModel* commandsModel();
+    GmicFilterNode*  commands();
+    GmicFilterModel* commandsModel();
     QUndoStack*       undoRedoStack() const;
 
     void save();
@@ -232,9 +232,9 @@ public:
 
 Q_SIGNALS:
 
-    void entryAdded(GmicCommandNode* item);
-    void entryRemoved(GmicCommandNode* parent, int row, GmicCommandNode* item);
-    void entryChanged(GmicCommandNode* item);
+    void entryAdded(GmicFilterNode* item);
+    void entryRemoved(GmicFilterNode* parent, int row, GmicFilterNode* item);
+    void entryChanged(GmicFilterNode* item);
 
 public Q_SLOTS:
 
@@ -246,8 +246,8 @@ private:
     class Private;
     Private* const d = nullptr;
 
-    friend class RemoveGmicCommand;
-    friend class ChangeGmicCommand;
+    friend class RemoveGmicFilter;
+    friend class ChangeGmicFilter;
 };
 
 } // namespace DigikamBqmGmicQtPlugin

@@ -22,7 +22,7 @@
  *
  */
 
-#include "gmiccommandwidget.h"
+#include "gmicfilterwidget.h"
 
 // Qt includes
 
@@ -57,33 +57,33 @@
 
 // Local includes
 
-#include "gmiccommandnode.h"
+#include "gmicfilternode.h"
 
 using namespace Digikam;
 
 namespace DigikamBqmGmicQtPlugin
 {
 
-class Q_DECL_HIDDEN GmicCommandDialog::Private
+class Q_DECL_HIDDEN GmicFilterDialog::Private
 {
 public:
 
     Private() = default;
 
-    bool                      edit            = false;
-    bool                      filter          = true;
-    GmicCommandNode*          currentItem     = nullptr;
-    GmicCommandManager*       manager         = nullptr;
-    AddGmicCommandProxyModel* proxyModel      = nullptr;
-    QLineEdit*                title           = nullptr;
-    DTextEdit*                desc            = nullptr;
-    QTextEdit*                command         = nullptr;
+    bool                     edit            = false;
+    bool                     filter          = true;
+    GmicFilterNode*          currentItem     = nullptr;
+    GmicFilterManager*       manager         = nullptr;
+    AddGmicFilterProxyModel* proxyModel      = nullptr;
+    QLineEdit*               title           = nullptr;
+    DTextEdit*               desc            = nullptr;
+    QTextEdit*               command         = nullptr;
 };
 
-GmicCommandDialog::GmicCommandDialog(GmicCommandNode* const citem,
-                                     bool edit, bool filter,
-                                     QWidget* const parent,
-                                     GmicCommandManager* const mngr)
+GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
+                                   bool edit, bool filter,
+                                   QWidget* const parent,
+                                   GmicFilterManager* const mngr)
     : QDialog(parent),
       d      (new Private)
 {
@@ -92,7 +92,7 @@ GmicCommandDialog::GmicCommandDialog(GmicCommandNode* const citem,
     d->manager     = mngr;
     d->currentItem = citem;
 
-    setObjectName(QLatin1String("GmicCommandDialog"));
+    setObjectName(QLatin1String("GmicFilterDialog"));
     setModal(true);
     setWindowFlags((windowFlags() & ~Qt::Dialog) |
                    Qt::Window                    |
@@ -194,12 +194,12 @@ GmicCommandDialog::GmicCommandDialog(GmicCommandNode* const citem,
     adjustSize();
 }
 
-GmicCommandDialog::~GmicCommandDialog()
+GmicFilterDialog::~GmicFilterDialog()
 {
     delete d;
 }
 
-void GmicCommandDialog::accept()
+void GmicFilterDialog::accept()
 {
     if (d->edit)
     {
@@ -210,17 +210,17 @@ void GmicCommandDialog::accept()
     }
     else
     {
-        GmicCommandNode* node = nullptr;
+        GmicFilterNode* node = nullptr;
 
         if (d->filter)
         {
-            node          = new GmicCommandNode(GmicCommandNode::Item);
+            node          = new GmicFilterNode(GmicFilterNode::Item);
             node->command = d->command->toPlainText();
             node->desc    = d->desc->text();
         }
         else
         {
-            node          = new GmicCommandNode(GmicCommandNode::Folder);
+            node          = new GmicFilterNode(GmicFilterNode::Folder);
         }
 
         node->title       = d->title->text();
@@ -235,35 +235,35 @@ void GmicCommandDialog::accept()
 
 // ----------------------------------------------------------------
 
-class Q_DECL_HIDDEN GmicCommandWidget::Private
+class Q_DECL_HIDDEN GmicFilterWidget::Private
 {
 public:
 
     Private() = default;
 
-    GmicCommandManager*    manager          = nullptr;
-    GmicCommandModel*      commandsModel    = nullptr;
-    TreeProxyModel*        proxyModel       = nullptr;
-    SearchTextBar*         search           = nullptr;
-    QTreeView*             tree             = nullptr;
-    QPushButton*           addButton        = nullptr;
-    QPushButton*           remButton        = nullptr;
-    QPushButton*           edtButton        = nullptr;
-    QPushButton*           addFolderButton  = nullptr;
+    GmicFilterManager*    manager          = nullptr;
+    GmicFilterModel*      commandsModel    = nullptr;
+    TreeProxyModel*       proxyModel       = nullptr;
+    SearchTextBar*        search           = nullptr;
+    QTreeView*            tree             = nullptr;
+    QPushButton*          addButton        = nullptr;
+    QPushButton*          remButton        = nullptr;
+    QPushButton*          edtButton        = nullptr;
+    QPushButton*          addFolderButton  = nullptr;
 };
 
-GmicCommandWidget::GmicCommandWidget(QWidget* const parent)
+GmicFilterWidget::GmicFilterWidget(QWidget* const parent)
     : QWidget(parent),
       d      (new Private)
 {
-    setObjectName(QLatin1String("GmicCommandWidget"));
+    setObjectName(QLatin1String("GmicFilterWidget"));
 
     const QString db = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
                                                         QLatin1String("/gmicfilters.xml");
-    d->manager       = new GmicCommandManager(db, this);
+    d->manager       = new GmicFilterManager(db, this);
     d->manager->load();
 
-    d->search        = new SearchTextBar(this, QLatin1String("DigikamGmicCommandSearchBar"));
+    d->search        = new SearchTextBar(this, QLatin1String("DigikamGmicFilterSearchBar"));
     d->search->setObjectName(QLatin1String("search"));
 
     d->tree          = new QTreeView(this);
@@ -340,7 +340,7 @@ GmicCommandWidget::GmicCommandWidget(QWidget* const parent)
     readSettings();
 }
 
-GmicCommandWidget::~GmicCommandWidget()
+GmicFilterWidget::~GmicFilterWidget()
 {
     saveSettings();
     d->manager->save();
@@ -348,16 +348,16 @@ GmicCommandWidget::~GmicCommandWidget()
     delete d;
 }
 
-bool GmicCommandWidget::saveExpandedNodes(const QModelIndex& parent)
+bool GmicFilterWidget::saveExpandedNodes(const QModelIndex& parent)
 {
     bool changed = false;
 
     for (int i = 0 ; i < d->proxyModel->rowCount(parent) ; ++i)
     {
-        QModelIndex child                = d->proxyModel->index(i, 0, parent);
-        QModelIndex sourceIndex          = d->proxyModel->mapToSource(child);
-        GmicCommandNode* const childNode = d->commandsModel->node(sourceIndex);
-        bool wasExpanded                 = childNode->expanded;
+        QModelIndex child               = d->proxyModel->index(i, 0, parent);
+        QModelIndex sourceIndex         = d->proxyModel->mapToSource(child);
+        GmicFilterNode* const childNode = d->commandsModel->node(sourceIndex);
+        bool wasExpanded                = childNode->expanded;
 
         if (d->tree->isExpanded(child))
         {
@@ -375,11 +375,11 @@ bool GmicCommandWidget::saveExpandedNodes(const QModelIndex& parent)
     return changed;
 }
 
-void GmicCommandWidget::expandNodes(GmicCommandNode* const node)
+void GmicFilterWidget::expandNodes(GmicFilterNode* const node)
 {
     for (int i = 0 ; i < node->children().count() ; ++i)
     {
-        GmicCommandNode* const childNode = node->children().value(i);
+        GmicFilterNode* const childNode = node->children().value(i);
 
         if (childNode->expanded)
         {
@@ -391,17 +391,17 @@ void GmicCommandWidget::expandNodes(GmicCommandNode* const node)
     }
 }
 
-void GmicCommandWidget::slotTreeViewItemActivated(const QModelIndex& index)
+void GmicFilterWidget::slotTreeViewItemActivated(const QModelIndex& index)
 {
     if (index.isValid())
     {
-        QModelIndex idx             = d->proxyModel->mapToSource(index);
-        GmicCommandNode* const node = d->manager->commandsModel()->node(idx);
+        QModelIndex idx            = d->proxyModel->mapToSource(index);
+        GmicFilterNode* const node = d->manager->commandsModel()->node(idx);
 
         switch (node->type())
         {
-            case GmicCommandNode::Root:
-            case GmicCommandNode::RootFolder:
+            case GmicFilterNode::Root:
+            case GmicFilterNode::RootFolder:
             {
                 d->addFolderButton->setEnabled(true);
                 d->remButton->setEnabled(false);
@@ -410,7 +410,7 @@ void GmicCommandWidget::slotTreeViewItemActivated(const QModelIndex& index)
                 break;
             }
 
-            case GmicCommandNode::Folder:
+            case GmicFilterNode::Folder:
             {
                 d->addFolderButton->setEnabled(true);
                 d->remButton->setEnabled(true);
@@ -419,7 +419,7 @@ void GmicCommandWidget::slotTreeViewItemActivated(const QModelIndex& index)
                 break;
             }
 
-            case GmicCommandNode::Item:
+            case GmicFilterNode::Item:
             {
                 d->addFolderButton->setEnabled(false);
                 d->remButton->setEnabled(true);
@@ -431,7 +431,7 @@ void GmicCommandWidget::slotTreeViewItemActivated(const QModelIndex& index)
                 break;
             }
 
-            case GmicCommandNode::Separator:
+            case GmicFilterNode::Separator:
             {
                 d->addFolderButton->setEnabled(false);
                 d->remButton->setEnabled(true);
@@ -454,17 +454,17 @@ void GmicCommandWidget::slotTreeViewItemActivated(const QModelIndex& index)
     qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << currentPath();
 }
 
-void GmicCommandWidget::slotCustomContextMenuRequested(const QPoint& pos)
+void GmicFilterWidget::slotCustomContextMenuRequested(const QPoint& pos)
 {
     QModelIndex index = d->tree->indexAt(pos);
     index             = index.sibling(index.row(), 0);
 
     if (index.isValid())
     {
-        index                       = d->proxyModel->mapToSource(index);
-        GmicCommandNode* const node = d->manager->commandsModel()->node(index);
+        index                      = d->proxyModel->mapToSource(index);
+        GmicFilterNode* const node = d->manager->commandsModel()->node(index);
 
-        if (node && (node->type() != GmicCommandNode::RootFolder))
+        if (node && (node->type() != GmicFilterNode::RootFolder))
         {
             QMenu menu;
             menu.addAction(QObject::tr("Remove"), this, SLOT(slotRemoveOne()));
@@ -473,16 +473,16 @@ void GmicCommandWidget::slotCustomContextMenuRequested(const QPoint& pos)
     }
 }
 
-void GmicCommandWidget::slotRemove()
+void GmicFilterWidget::slotRemove()
 {
     QModelIndex index = d->tree->currentIndex();
 
     if (index.isValid())
     {
-        index                       = d->proxyModel->mapToSource(index);
-        GmicCommandNode* const node = d->manager->commandsModel()->node(index);
+        index                      = d->proxyModel->mapToSource(index);
+        GmicFilterNode* const node = d->manager->commandsModel()->node(index);
 
-        if (!node || (node->type() == GmicCommandNode::RootFolder))
+        if (!node || (node->type() == GmicFilterNode::RootFolder))
         {
             return;
         }
@@ -503,50 +503,50 @@ void GmicCommandWidget::slotRemove()
     Q_EMIT signalSettingsChanged();
 }
 
-void GmicCommandWidget::slotAddFilter()
+void GmicFilterWidget::slotAddFilter()
 {
     openCommandDialog(false, true);
 }
 
-void GmicCommandWidget::slotAddFolder()
+void GmicFilterWidget::slotAddFolder()
 {
     openCommandDialog(false, false);
 }
 
-void GmicCommandWidget::slotEdit()
+void GmicFilterWidget::slotEdit()
 {
     QModelIndex index = d->tree->currentIndex();
 
     if (index.isValid())
     {
-        index                       = d->proxyModel->mapToSource(index);
-        GmicCommandNode* const node = d->manager->commandsModel()->node(index);
+        index                      = d->proxyModel->mapToSource(index);
+        GmicFilterNode* const node = d->manager->commandsModel()->node(index);
 
-        if (!node || (node->type() == GmicCommandNode::RootFolder))
+        if (!node || (node->type() == GmicFilterNode::RootFolder))
         {
             return;
         }
 
-        openCommandDialog(true, (node->type() == GmicCommandNode::Item));
+        openCommandDialog(true, (node->type() == GmicFilterNode::Item));
     }
 }
 
-void GmicCommandWidget::openCommandDialog(bool edit, bool filter)
+void GmicFilterWidget::openCommandDialog(bool edit, bool filter)
 {
     QModelIndex index = d->tree->currentIndex();
 
     if (index.isValid())
     {
         index                       = d->proxyModel->mapToSource(index);
-        GmicCommandNode* const node = d->manager->commandsModel()->node(index);
+        GmicFilterNode* const node  = d->manager->commandsModel()->node(index);
 
-        GmicCommandDialog* const dlg = new GmicCommandDialog(
-                                                             node,
-                                                             edit,
-                                                             filter,
-                                                             this,
-                                                             d->manager
-                                                            );
+        GmicFilterDialog* const dlg = new GmicFilterDialog(
+                                                           node,
+                                                           edit,
+                                                           filter,
+                                                           this,
+                                                           d->manager
+                                                          );
         dlg->exec();
         delete dlg;
 
@@ -554,12 +554,12 @@ void GmicCommandWidget::openCommandDialog(bool edit, bool filter)
     }
 }
 
-void GmicCommandWidget::readSettings()
+void GmicFilterWidget::readSettings()
 {
     expandNodes(d->manager->commands());
 }
 
-void GmicCommandWidget::saveSettings()
+void GmicFilterWidget::saveSettings()
 {
     if (saveExpandedNodes(d->tree->rootIndex()))
     {
@@ -567,16 +567,16 @@ void GmicCommandWidget::saveSettings()
     }
 }
 
-QString GmicCommandWidget::currentGmicCommand() const
+QString GmicFilterWidget::currentGmicFilter() const
 {
     QModelIndex index = d->tree->currentIndex();
 
     if (index.isValid())
     {
         index                 = d->proxyModel->mapToSource(index);
-        GmicCommandNode* node = d->manager->commandsModel()->node(index);
+        GmicFilterNode* node = d->manager->commandsModel()->node(index);
 
-        if (node && (node->type() == GmicCommandNode::Item))
+        if (node && (node->type() == GmicFilterNode::Item))
         {
             return node->command;
         }
@@ -585,19 +585,19 @@ QString GmicCommandWidget::currentGmicCommand() const
     return QString();
 }
 
-QString GmicCommandWidget::currentPath() const
+QString GmicFilterWidget::currentPath() const
 {
     QStringList hierarchy;
     QModelIndex index = d->tree->currentIndex();
 
     if (index.isValid())
     {
-        index                 = d->proxyModel->mapToSource(index);
-        GmicCommandNode* node = d->manager->commandsModel()->node(index);
+        index                = d->proxyModel->mapToSource(index);
+        GmicFilterNode* node = d->manager->commandsModel()->node(index);
 
         if (node)
         {
-            if (node->type() == GmicCommandNode::RootFolder)
+            if (node->type() == GmicFilterNode::RootFolder)
             {
                 return QString();
             }
@@ -610,7 +610,7 @@ QString GmicCommandWidget::currentPath() const
 
                 if (node)
                 {
-                    if (node->type() == GmicCommandNode::RootFolder)
+                    if (node->type() == GmicFilterNode::RootFolder)
                     {
                         break;
                     }
@@ -628,7 +628,7 @@ QString GmicCommandWidget::currentPath() const
     return QString();
 }
 
-void GmicCommandWidget::setCurrentPath(const QString& path)
+void GmicFilterWidget::setCurrentPath(const QString& path)
 {
     if (path.isEmpty())
     {
@@ -637,11 +637,11 @@ void GmicCommandWidget::setCurrentPath(const QString& path)
     }
 
     QStringList hierarchy = path.split(QLatin1Char('/'));
-    GmicCommandNode* node = d->manager->commands();
+    GmicFilterNode* node  = d->manager->commands();
 
     // bypass the root folder.
 
-    QList<GmicCommandNode*> children = node->children();
+    QList<GmicFilterNode*> children = node->children();
 
     if (children.isEmpty())
     {
@@ -658,7 +658,7 @@ void GmicCommandWidget::setCurrentPath(const QString& path)
         children = node->children();
         qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Title:" << title;
 
-        foreach (GmicCommandNode* const child, children)
+        foreach (GmicFilterNode* const child, children)
         {
             qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Child node:" << child->title;
 
@@ -685,4 +685,4 @@ void GmicCommandWidget::setCurrentPath(const QString& path)
 
 } // namespace DigikamBqmGmicQtPlugin
 
-#include "moc_gmiccommandwidget.cpp"
+#include "moc_gmicfilterwidget.cpp"
