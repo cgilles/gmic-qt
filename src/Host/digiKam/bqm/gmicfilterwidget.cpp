@@ -251,6 +251,7 @@ public:
     QPushButton*          edtButton        = nullptr;
     QAction*              addFilter        = nullptr;
     QAction*              addFolder        = nullptr;
+    QAction*              addSeparator     = nullptr;
 };
 
 GmicFilterWidget::GmicFilterWidget(QWidget* const parent)
@@ -281,10 +282,12 @@ GmicFilterWidget::GmicFilterWidget(QWidget* const parent)
     d->addButton->setIcon(QIcon::fromTheme(QLatin1String("list-add")));
     d->addButton->setAutoDefault(false);
     QMenu* const menu  = new QMenu(d->addButton);
-    d->addFilter = menu->addAction(QIcon::fromTheme(QLatin1String("process-working-symbolic")),
-                                   QObject::tr("Add filter..."));
-    d->addFolder = menu->addAction(QIcon::fromTheme(QLatin1String("folder")),
-                                   QObject::tr("Add folder..."));
+    d->addFilter       = menu->addAction(QIcon::fromTheme(QLatin1String("process-working-symbolic")),
+                                         QObject::tr("Add filter..."));
+    d->addFolder       = menu->addAction(QIcon::fromTheme(QLatin1String("folder")),
+                                         QObject::tr("Add folder..."));
+    d->addSeparator    = menu->addAction(QIcon::fromTheme(QLatin1String("view-more-horizontal-symbolic")),
+                                         QObject::tr("Add Separator..."));
     d->addButton->setMenu(menu);
 
     d->remButton       = new QPushButton(this);
@@ -334,6 +337,9 @@ GmicFilterWidget::GmicFilterWidget(QWidget* const parent)
 
     connect(d->addFolder, SIGNAL(triggered()),
             this, SLOT(slotAddFolder()));
+
+    connect(d->addSeparator, SIGNAL(triggered()),
+            this, SLOT(slotAddSeparator()));
 
     connect(d->tree, SIGNAL(clicked(QModelIndex)),
             this, SLOT(slotTreeViewItemActivated(QModelIndex)));
@@ -410,6 +416,7 @@ void GmicFilterWidget::slotTreeViewItemActivated(const QModelIndex& index)
             case GmicFilterNode::Root:
             case GmicFilterNode::RootFolder:
             {
+                d->addSeparator->setEnabled(true);
                 d->addFolder->setEnabled(true);
                 d->remButton->setEnabled(false);
                 d->addFilter->setEnabled(true);
@@ -419,6 +426,7 @@ void GmicFilterWidget::slotTreeViewItemActivated(const QModelIndex& index)
 
             case GmicFilterNode::Folder:
             {
+                d->addSeparator->setEnabled(true);
                 d->addFolder->setEnabled(true);
                 d->remButton->setEnabled(true);
                 d->addFilter->setEnabled(true);
@@ -428,6 +436,7 @@ void GmicFilterWidget::slotTreeViewItemActivated(const QModelIndex& index)
 
             case GmicFilterNode::Item:
             {
+                d->addSeparator->setEnabled(false);
                 d->addFolder->setEnabled(false);
                 d->remButton->setEnabled(true);
                 d->addFilter->setEnabled(false);
@@ -440,6 +449,7 @@ void GmicFilterWidget::slotTreeViewItemActivated(const QModelIndex& index)
 
             case GmicFilterNode::Separator:
             {
+                d->addSeparator->setEnabled(false);
                 d->addFolder->setEnabled(false);
                 d->remButton->setEnabled(true);
                 d->addFilter->setEnabled(false);
@@ -450,6 +460,7 @@ void GmicFilterWidget::slotTreeViewItemActivated(const QModelIndex& index)
             default:
             {
                 d->addFolder->setEnabled(false);
+                d->addSeparator->setEnabled(false);
                 d->remButton->setEnabled(false);
                 d->addFilter->setEnabled(false);
                 d->edtButton->setEnabled(false);
@@ -518,6 +529,21 @@ void GmicFilterWidget::slotAddFilter()
 void GmicFilterWidget::slotAddFolder()
 {
     openCommandDialog(false, false);
+}
+
+void GmicFilterWidget::slotAddSeparator()
+{
+    QModelIndex index = d->tree->currentIndex();
+
+    if (index.isValid())
+    {
+        index                        = d->proxyModel->mapToSource(index);
+        GmicFilterNode* const parent = d->manager->commandsModel()->node(index);
+        GmicFilterNode* const node   = new GmicFilterNode(GmicFilterNode::Separator);
+
+        d->manager->addCommand(parent, node);
+        d->manager->save();
+    }
 }
 
 void GmicFilterWidget::slotEdit()

@@ -91,7 +91,7 @@ void RemoveGmicFilter::redo()
 InsertGmicFilter::InsertGmicFilter(GmicFilterManager* const mngr,
                                    GmicFilterNode* const parent,
                                    GmicFilterNode* const node,
-                                     int row)
+                                   int row)
     : RemoveGmicFilter(mngr, parent, row)
 {
     setText(QObject::tr("Insert Filter"));
@@ -420,6 +420,10 @@ QVariant GmicFilterModel::data(const QModelIndex& index, int role) const
                 else if (commandNode->type() == GmicFilterNode::RootFolder)
                 {
                     return QIcon(":resources/gmic_hat.png");
+                }
+                else if (commandNode->type() == GmicFilterNode::Separator)
+                {
+                    return QIcon();
                 }
                 else
                 {

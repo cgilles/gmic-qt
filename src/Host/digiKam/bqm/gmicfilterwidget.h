@@ -89,6 +89,7 @@ private Q_SLOTS:
     void slotRemove();
     void slotAddFilter();
     void slotAddFolder();
+    void slotAddSeparator();
     void slotEdit();
 
 private:
