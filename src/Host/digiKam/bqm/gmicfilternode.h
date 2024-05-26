@@ -56,11 +56,11 @@ public:
 public:
 
     explicit GmicFilterNode(Type type = Root, GmicFilterNode* const parent = nullptr);
-    ~GmicFilterNode() override;
+    ~GmicFilterNode()                                  override;
 
     bool operator==(const GmicFilterNode& other) const;
 
-    Type type()                                   const;
+    Type type()                                  const;
     void setType(Type type);
 
     QList<GmicFilterNode*> children()            const;
@@ -102,7 +102,7 @@ public:
 
 private:
 
-    void readXBEL(GmicFilterNode* const parent);
+    void readXml(GmicFilterNode* const parent);
     void readTitle(GmicFilterNode* const parent);
     void readDescription(GmicFilterNode* const parent);
     void readSeparator(GmicFilterNode* const parent);

@@ -183,11 +183,11 @@ GmicFilterNode* GmicXmlReader::read(QIODevice* const device, bool addRootFolder)
             {
                 GmicFilterNode* const folder = new GmicFilterNode(GmicFilterNode::RootFolder, root);
                 folder->title                = QObject::tr("My G'MIC Filters");
-                readXBEL(folder);
+                readXml(folder);
             }
             else
             {
-                readXBEL(root);
+                readXml(root);
             }
         }
         else
@@ -199,7 +199,7 @@ GmicFilterNode* GmicXmlReader::read(QIODevice* const device, bool addRootFolder)
     return root;
 }
 
-void GmicXmlReader::readXBEL(GmicFilterNode* const parent)
+void GmicXmlReader::readXml(GmicFilterNode* const parent)
 {
     Q_ASSERT(isStartElement() && (name() == QLatin1String("gmic")));
 
@@ -229,7 +229,7 @@ void GmicXmlReader::readFolder(GmicFilterNode* const parent)
     Q_ASSERT(isStartElement() && (name() == QLatin1String("folder")));
 
     QPointer<GmicFilterNode> folder = new GmicFilterNode(GmicFilterNode::Folder, parent);
-    folder->expanded                 = (attributes().value(QLatin1String("folded")) == QLatin1String("no"));
+    folder->expanded                = (attributes().value(QLatin1String("folded")) == QLatin1String("no"));
 
     while (readNextStartElement())
     {
@@ -277,10 +277,10 @@ void GmicXmlReader::readGmicFilterNode(GmicFilterNode* const parent)
     Q_ASSERT(isStartElement() && (name() == QLatin1String("item")));
 
     GmicFilterNode* const item = new GmicFilterNode(GmicFilterNode::Item, parent);
-    item->command               = attributes().value(QLatin1String("command")).toString();
-    QString date                = attributes().value(QLatin1String("added")).toString();
-    item->dateAdded             = QDateTime::fromString(date, Qt::ISODate);
-    item->desc                  = attributes().value(QLatin1String("desc")).toString();
+    item->command              = attributes().value(QLatin1String("command")).toString();
+    QString date               = attributes().value(QLatin1String("added")).toString();
+    item->dateAdded            = QDateTime::fromString(date, Qt::ISODate);
+    item->desc                 = attributes().value(QLatin1String("desc")).toString();
 
     while (readNextStartElement())
     {

@@ -125,28 +125,33 @@ public:
 
     explicit GmicFilterModel(GmicFilterManager* const mngr,
                              QObject* const parent = nullptr);
-    ~GmicFilterModel()                                                                               override;
+    ~GmicFilterModel()                                                        override;
 
-    GmicFilterManager* bookmarksManager()                                                     const;
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole)                       const override;
-    int columnCount(const QModelIndex& parent = QModelIndex())                                const override;
-    int rowCount(const QModelIndex& parent = QModelIndex())                                   const override;
-    QModelIndex index(int, int, const QModelIndex& = QModelIndex())                           const override;
-    QModelIndex parent(const QModelIndex& index= QModelIndex())                               const override;
-    Qt::ItemFlags flags(const QModelIndex& index)                                             const override;
-    Qt::DropActions supportedDropActions ()                                                   const override;
-    QMimeData* mimeData(const QModelIndexList& indexes)                                       const override;
-    QStringList mimeTypes()                                                                   const override;
-    bool hasChildren(const QModelIndex& parent = QModelIndex())                               const override;
-    GmicFilterNode* node(const QModelIndex& index)                                            const;
-    QModelIndex index(GmicFilterNode* node)                                                   const;
+    GmicFilterManager* bookmarksManager()                               const;
+    QVariant headerData(int section,
+                        Qt::Orientation orientation,
+                        int role = Qt::DisplayRole)                     const override;
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+    int columnCount(const QModelIndex& parent = QModelIndex())          const override;
+    int rowCount(const QModelIndex& parent = QModelIndex())             const override;
+    QModelIndex index(int, int, const QModelIndex& = QModelIndex())     const override;
+    QModelIndex parent(const QModelIndex& index= QModelIndex())         const override;
+    Qt::ItemFlags flags(const QModelIndex& index)                       const override;
+    Qt::DropActions supportedDropActions ()                             const override;
+    QMimeData* mimeData(const QModelIndexList& indexes)                 const override;
+    QStringList mimeTypes()                                             const override;
+    bool hasChildren(const QModelIndex& parent = QModelIndex())         const override;
+    GmicFilterNode* node(const QModelIndex& index)                      const;
+    QModelIndex index(GmicFilterNode* node)                             const;
 
-    bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row,
-                      int column, const QModelIndex& parent)                                         override;
+    bool dropMimeData(const QMimeData* data, Qt::DropAction action,
+                      int row, int column, const QModelIndex& parent)         override;
 
-    bool removeRows(int row, int count, const QModelIndex& parent = QModelIndex())                   override;
-    bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole)           override;
+    bool removeRows(int row, int count,
+                    const QModelIndex& parent = QModelIndex())                override;
+
+    bool setData(const QModelIndex& index, const QVariant& value,
+                 int role = Qt::EditRole)                                     override;
 
 public Q_SLOTS:
 

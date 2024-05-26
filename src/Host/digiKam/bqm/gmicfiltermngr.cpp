@@ -51,8 +51,8 @@ namespace DigikamBqmGmicQtPlugin
 
 RemoveGmicFilter::RemoveGmicFilter(GmicFilterManager* const mngr,
                                    GmicFilterNode* const parent,
-                                     int row)
-    : QUndoCommand(QObject::tr("Remove Filter")),
+                                   int row)
+    : QUndoCommand     (QObject::tr("Remove Filter")),
       m_row            (row),
       m_bookmarkManager(mngr),
       m_node           (parent->children().value(row)),
@@ -118,8 +118,8 @@ public:
 
     GmicFilterManager* manager   = nullptr;
     GmicFilterData     type      = Command;
-    QString             oldValue;
-    QString             newValue;
+    QString            oldValue;
+    QString            newValue;
     GmicFilterNode*    node      = nullptr;
 };
 
@@ -461,8 +461,9 @@ int GmicFilterModel::rowCount(const QModelIndex& parent) const
 QModelIndex GmicFilterModel::index(int row, int column, const QModelIndex& parent) const
 {
     if (
-        (row < 0) || (column < 0) ||
-        (row >= rowCount(parent)) ||
+        (row    <  0)                ||
+        (column <  0)                ||
+        (row    >= rowCount(parent)) ||
         (column >= columnCount(parent))
        )
     {
@@ -494,7 +495,7 @@ QModelIndex GmicFilterModel::parent(const QModelIndex& index) const
     // get the parent's row
 
     GmicFilterNode* const grandParentNode = parentNode->parent();
-    int parentRow                          = grandParentNode->children().indexOf(parentNode);
+    int parentRow                         = grandParentNode->children().indexOf(parentNode);
 
     Q_ASSERT(parentRow >= 0);
 
@@ -589,7 +590,7 @@ bool GmicFilterModel::dropMimeData(const QMimeData* data,
         return true;
     }
 
-    if (!data->hasFormat(QLatin1String("application/gmicfilters.xml")) || column > 0)
+    if (!data->hasFormat(QLatin1String("application/gmicfilters.xml")) || (column > 0))
     {
         return false;
     }
@@ -953,7 +954,10 @@ void GmicFilterManager::slotImportFilters()
     }
 
     importRootNode->setType(GmicFilterNode::Folder);
-    importRootNode->title = QObject::tr("Imported %1").arg(QLocale().toString(QDate::currentDate(), QLocale::ShortFormat));
+    importRootNode->title = QObject::tr("Imported %1")
+                                .arg(QLocale().toString(QDate::currentDate(),
+                                     QLocale::ShortFormat));
+
     addCommand(commands(), importRootNode);
 }
 

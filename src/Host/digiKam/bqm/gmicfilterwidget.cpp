@@ -121,11 +121,11 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
      * Excludes the "/" symbol (for the absolute filter title path support).
      */
     QRegularExpression utf8Rx(QLatin1String("[^/]*"));
-    QValidator* const utf8Validator = new QRegularExpressionValidator(utf8Rx, this);
+    QValidator* const utf8Validator   = new QRegularExpressionValidator(utf8Rx, this);
     d->title->setValidator(utf8Validator);
 
-    QLabel* const descLbl    = new QLabel(QObject::tr("Filter Description:"), this);
-    d->desc                  = new DTextEdit(this);
+    QLabel* const descLbl             = new QLabel(QObject::tr("Filter Description:"), this);
+    d->desc                           = new DTextEdit(this);
     d->desc->setLinesVisible(3);
     d->desc->setPlaceholderText(QObject::tr("Enter here the filter description"));
 
@@ -134,7 +134,7 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
     buttonBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
     buttonBox->setCenterButtons(false);
 
-    QGridLayout* const grid  = new QGridLayout(this);
+    QGridLayout* const grid           = new QGridLayout(this);
     grid->addWidget(frontLbl,   0, 0, 1, 2);
     grid->addWidget(commandLbl, 1, 0, 1, 2);
     grid->addWidget(d->command, 2, 0, 1, 2);
@@ -263,12 +263,12 @@ GmicFilterWidget::GmicFilterWidget(QWidget* const parent)
 {
     setObjectName(QLatin1String("GmicFilterWidget"));
 
-    const QString db = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
+    const QString db   = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
                                                         QLatin1String("/gmicfilters.xml");
-    d->manager       = new GmicFilterManager(db, this);
+    d->manager         = new GmicFilterManager(db, this);
     d->manager->load();
 
-    d->search        = new SearchTextBar(this, QLatin1String("DigikamGmicFilterSearchBar"));
+    d->search          = new SearchTextBar(this, QLatin1String("DigikamGmicFilterSearchBar"));
     d->search->setObjectName(QLatin1String("search"));
 
     d->tree            = new QTreeView(this);
@@ -534,8 +534,8 @@ void GmicFilterWidget::slotRemove()
 
             if (QMessageBox::question(this, QObject::tr("G'MIC Filters Management"),
                                       QObject::tr("Do you want to remove \"%1\" "
-                                            "from your G'MIC filters collection?")
-                                      .arg(title),
+                                                  "from your G'MIC filters collection?")
+                                                  .arg(title),
                                       QMessageBox::Yes | QMessageBox::No
                                      ) == QMessageBox::No)
             {
@@ -634,7 +634,7 @@ QString GmicFilterWidget::currentGmicFilter() const
 
     if (index.isValid())
     {
-        index                 = d->proxyModel->mapToSource(index);
+        index                = d->proxyModel->mapToSource(index);
         GmicFilterNode* node = d->manager->commandsModel()->node(index);
 
         if (node && (node->type() == GmicFilterNode::Item))

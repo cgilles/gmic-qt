@@ -47,14 +47,14 @@ class GmicFilterDialog : public QDialog
 public:
 
     explicit GmicFilterDialog(GmicFilterNode* const citem,
-                               bool edit, bool filter,
-                               QWidget* const parent = nullptr,
-                               GmicFilterManager* const mngr = nullptr);
-    ~GmicFilterDialog() override;
+                              bool edit, bool filter,
+                              QWidget* const parent = nullptr,
+                              GmicFilterManager* const mngr = nullptr);
+    ~GmicFilterDialog()     override;
 
 private Q_SLOTS:
 
-    void accept()        override;
+    void accept()           override;
 
 private:
 
@@ -73,7 +73,7 @@ public:
     explicit GmicFilterWidget(QWidget* const parent = nullptr);
     ~GmicFilterWidget()                                  override;
 
-    QString currentPath()                           const;
+    QString currentPath()                          const;
     void setCurrentPath(const QString& path);
 
     QString currentGmicFilter()                    const;
