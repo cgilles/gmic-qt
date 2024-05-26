@@ -72,7 +72,7 @@ void RemoveGmicFilter::undo()
 {
     m_parent->add(m_node, m_row);
 
-    Q_EMIT m_bookmarkManager->entryAdded(m_node);
+    Q_EMIT m_bookmarkManager->signalEntryAdded(m_node);
 
     m_done = false;
 }
@@ -81,7 +81,7 @@ void RemoveGmicFilter::redo()
 {
     m_parent->remove(m_node);
 
-    Q_EMIT m_bookmarkManager->entryRemoved(m_parent, m_row, m_node);
+    Q_EMIT m_bookmarkManager->signalEntryRemoved(m_parent, m_row, m_node);
 
     m_done = true;
 }
@@ -188,7 +188,7 @@ void ChangeGmicFilter::undo()
         }
     }
 
-    Q_EMIT d->manager->entryChanged(d->node);
+    Q_EMIT d->manager->signalEntryChanged(d->node);
 }
 
 void ChangeGmicFilter::redo()
@@ -214,7 +214,7 @@ void ChangeGmicFilter::redo()
         }
     }
 
-    Q_EMIT d->manager->entryChanged(d->node);
+    Q_EMIT d->manager->signalEntryChanged(d->node);
 }
 
 // --------------------------------------------------------------
@@ -235,14 +235,14 @@ GmicFilterModel::GmicFilterModel(GmicFilterManager* const mngr, QObject* const p
 {
     d->manager = mngr;
 
-    connect(d->manager, SIGNAL(entryAdded(GmicFilterNode*)),
-            this, SLOT(entryAdded(GmicFilterNode*)));
+    connect(d->manager, SIGNAL(signalEntryAdded(GmicFilterNode*)),
+            this, SLOT(signalEntryAdded(GmicFilterNode*)));
 
-    connect(d->manager, SIGNAL(entryRemoved(GmicFilterNode*,int,GmicFilterNode*)),
-            this, SLOT(entryRemoved(GmicFilterNode*,int,GmicFilterNode*)));
+    connect(d->manager, SIGNAL(signalEntryRemoved(GmicFilterNode*,int,GmicFilterNode*)),
+            this, SLOT(signalEntryRemoved(GmicFilterNode*,int,GmicFilterNode*)));
 
-    connect(d->manager, SIGNAL(entryChanged(GmicFilterNode*)),
-            this, SLOT(entryChanged(GmicFilterNode*)));
+    connect(d->manager, SIGNAL(signalEntryChanged(GmicFilterNode*)),
+            this, SLOT(signalEntryChanged(GmicFilterNode*)));
 }
 
 GmicFilterModel::~GmicFilterModel()
@@ -267,7 +267,7 @@ QModelIndex GmicFilterModel::index(GmicFilterNode* node) const
     return createIndex(parent->children().indexOf(node), 0, node);
 }
 
-void GmicFilterModel::entryAdded(GmicFilterNode* item)
+void GmicFilterModel::signalEntryAdded(GmicFilterNode* item)
 {
     Q_ASSERT(item && item->parent());
 
@@ -282,7 +282,7 @@ void GmicFilterModel::entryAdded(GmicFilterNode* item)
     endInsertRows();
 }
 
-void GmicFilterModel::entryRemoved(GmicFilterNode* parent, int row, GmicFilterNode* item)
+void GmicFilterModel::signalEntryRemoved(GmicFilterNode* parent, int row, GmicFilterNode* item)
 {
     // item was already removed, re-add so beginRemoveRows works
 
@@ -292,7 +292,7 @@ void GmicFilterModel::entryRemoved(GmicFilterNode* parent, int row, GmicFilterNo
     endRemoveRows();
 }
 
-void GmicFilterModel::entryChanged(GmicFilterNode* item)
+void GmicFilterModel::signalEntryChanged(GmicFilterNode* item)
 {
     QModelIndex idx = index(item);
 
@@ -930,7 +930,7 @@ QUndoStack* GmicFilterManager::undoRedoStack() const
     return &d->commands;
 }
 
-void GmicFilterManager::importCommands()
+void GmicFilterManager::slotImportFilters()
 {
     QString fileName = QFileDialog::getOpenFileName(nullptr, QObject::tr("Open File"),
                                                     QString(),
@@ -957,7 +957,7 @@ void GmicFilterManager::importCommands()
     addCommand(commands(), importRootNode);
 }
 
-void GmicFilterManager::exportCommands()
+void GmicFilterManager::slotExportFilters()
 {
     QString fileName = QFileDialog::getSaveFileName(nullptr, QObject::tr("Save File"),
                                                     QObject::tr("%1 Gmic Filters.xml")

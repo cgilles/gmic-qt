@@ -48,6 +48,7 @@ const bool DarkThemeIsDefault          = false;
 } // namespace GmicQtHost
 
 using namespace DigikamEditorGmicQtPlugin;
+using namespace GmicQt;
 
 namespace DigikamBqmGmicQtPlugin
 {

@@ -37,18 +37,6 @@
 
 #include "dimg.h"
 
-namespace gmic_library
-{
-    template <typename T> struct gmic_list;
-}
-
-namespace GmicQt
-{
-    class FilterThread;
-    struct RunParameters;
-}
-
-using namespace GmicQt;
 using namespace Digikam;
 
 namespace DigikamBqmGmicQtPlugin

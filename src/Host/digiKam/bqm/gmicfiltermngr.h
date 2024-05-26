@@ -43,20 +43,20 @@ class RemoveGmicFilter : public QUndoCommand
 public:
 
     explicit RemoveGmicFilter(GmicFilterManager* const mngr,
-                               GmicFilterNode* const parent,
-                               int row);
+                              GmicFilterNode* const parent,
+                              int row);
     ~RemoveGmicFilter() override;
 
-    void undo()          override;
-    void redo()          override;
+    void undo()         override;
+    void redo()         override;
 
 protected:
 
-    int                 m_row             = 0;
+    int                m_row             = 0;
     GmicFilterManager* m_bookmarkManager = nullptr;
     GmicFilterNode*    m_node            = nullptr;
     GmicFilterNode*    m_parent          = nullptr;
-    bool                m_done            = false;
+    bool               m_done            = false;
 };
 
 //---------------------------------------------------------------------------------
@@ -66,9 +66,9 @@ class InsertGmicFilter : public RemoveGmicFilter
 public:
 
     explicit InsertGmicFilter(GmicFilterManager* const mngr,
-                               GmicFilterNode* const parent,
-                               GmicFilterNode* const node,
-                               int row);
+                              GmicFilterNode* const parent,
+                              GmicFilterNode* const node,
+                              int row);
 
     void undo() override;
     void redo() override;
@@ -90,10 +90,10 @@ public:
 public:
 
     explicit ChangeGmicFilter(GmicFilterManager* const mngr,
-                               GmicFilterNode* const node,
-                               const QString& newValue,
-                               GmicFilterData type);
-    ~ChangeGmicFilter()  override;
+                              GmicFilterNode* const node,
+                              const QString& newValue,
+                              GmicFilterData type);
+    ~ChangeGmicFilter()   override;
 
     void undo()           override;
     void redo()           override;
@@ -124,10 +124,10 @@ public:
 public:
 
     explicit GmicFilterModel(GmicFilterManager* const mngr,
-                              QObject* const parent = nullptr);
+                             QObject* const parent = nullptr);
     ~GmicFilterModel()                                                                               override;
 
-    GmicFilterManager* bookmarksManager()                                                    const;
+    GmicFilterManager* bookmarksManager()                                                     const;
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole)                       const override;
     int columnCount(const QModelIndex& parent = QModelIndex())                                const override;
@@ -139,8 +139,8 @@ public:
     QMimeData* mimeData(const QModelIndexList& indexes)                                       const override;
     QStringList mimeTypes()                                                                   const override;
     bool hasChildren(const QModelIndex& parent = QModelIndex())                               const override;
-    GmicFilterNode* node(const QModelIndex& index)                                           const;
-    QModelIndex index(GmicFilterNode* node)                                                  const;
+    GmicFilterNode* node(const QModelIndex& index)                                            const;
+    QModelIndex index(GmicFilterNode* node)                                                   const;
 
     bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row,
                       int column, const QModelIndex& parent)                                         override;
@@ -150,9 +150,9 @@ public:
 
 public Q_SLOTS:
 
-    void entryAdded(GmicFilterNode* item);
-    void entryRemoved(GmicFilterNode* parent, int row, GmicFilterNode* item);
-    void entryChanged(GmicFilterNode* item);
+    void signalEntryAdded(GmicFilterNode* item);
+    void signalEntryRemoved(GmicFilterNode* parent, int row, GmicFilterNode* item);
+    void signalEntryChanged(GmicFilterNode* item);
 
 private:
 
@@ -189,7 +189,7 @@ public:
 
     explicit TreeProxyModel(QObject* const parent = nullptr);
 
-    int columnCount(const QModelIndex&) const                        override;
+    int columnCount(const QModelIndex&)                         const override;
 
 Q_SIGNALS:
 
@@ -213,11 +213,16 @@ class GmicFilterManager : public QObject
 
 public:
 
-    explicit GmicFilterManager(const QString& bookmarksFile, QObject* const parent = nullptr);
-    ~GmicFilterManager() override;
+    explicit GmicFilterManager(const QString& bookmarksFile,
+                               QObject* const parent = nullptr);
+    ~GmicFilterManager()                                              override;
 
-    void addCommand(GmicFilterNode* const parent, GmicFilterNode* const node, int row = -1);
+    void addCommand(GmicFilterNode* const parent,
+                    GmicFilterNode* const node,
+                    int row = -1);
+
     void removeCommand(GmicFilterNode* const node);
+
     void setTitle(GmicFilterNode* const node, const QString& newTitle);
     void setCommand(GmicFilterNode* const node, const QString& newcommand);
     void setComment(GmicFilterNode* const node, const QString& newDesc);
@@ -225,21 +230,21 @@ public:
 
     GmicFilterNode*  commands();
     GmicFilterModel* commandsModel();
-    QUndoStack*       undoRedoStack() const;
+    QUndoStack*      undoRedoStack() const;
 
     void save();
     void load();
 
 Q_SIGNALS:
 
-    void entryAdded(GmicFilterNode* item);
-    void entryRemoved(GmicFilterNode* parent, int row, GmicFilterNode* item);
-    void entryChanged(GmicFilterNode* item);
+    void signalEntryAdded(GmicFilterNode* item);
+    void signalEntryRemoved(GmicFilterNode* parent, int row, GmicFilterNode* item);
+    void signalEntryChanged(GmicFilterNode* item);
 
 public Q_SLOTS:
 
-    void importCommands();
-    void exportCommands();
+    void slotImportFilters();
+    void slotExportFilters();
 
 private:
 
