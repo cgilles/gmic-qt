@@ -118,7 +118,7 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
 
     /*
      * Accepts all UTF-8 Characters.
-     * Excludes the "/" symbol (for the absolute title path support).
+     * Excludes the "/" symbol (for the absolute filter title path support).
      */
     QRegularExpression utf8Rx(QLatin1String("[^/]*"));
     QValidator* const utf8Validator = new QRegularExpressionValidator(utf8Rx, this);
@@ -134,14 +134,14 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
     buttonBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
     buttonBox->setCenterButtons(false);
 
-    QGridLayout* const grid     = new QGridLayout(this);
-    grid->addWidget(frontLbl,           0, 0, 1, 2);
-    grid->addWidget(commandLbl,         1, 0, 1, 2);
-    grid->addWidget(d->command,         2, 0, 1, 2);
-    grid->addWidget(titleLbl,           3, 0, 1, 1);
-    grid->addWidget(d->title,           3, 1, 1, 1);
-    grid->addWidget(descLbl,            4, 0, 1, 2);
-    grid->addWidget(d->desc,            5, 0, 1, 2);
+    QGridLayout* const grid  = new QGridLayout(this);
+    grid->addWidget(frontLbl,   0, 0, 1, 2);
+    grid->addWidget(commandLbl, 1, 0, 1, 2);
+    grid->addWidget(d->command, 2, 0, 1, 2);
+    grid->addWidget(titleLbl,   3, 0, 1, 1);
+    grid->addWidget(d->title,   3, 1, 1, 1);
+    grid->addWidget(descLbl,    4, 0, 1, 2);
+    grid->addWidget(d->desc,    5, 0, 1, 2);
     grid->addWidget(buttonBox);
 
     if (d->edit)
@@ -151,11 +151,13 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
         if (d->filter)
         {
             d->command->setText(d->currentItem->command);
+            d->command->setFocus(true);
             d->desc->setText(d->currentItem->desc);
             setWindowTitle(QObject::tr("Edit G'MIC Filter"));
         }
         else
         {
+            d->title->setFocus(true);
             frontLbl->setVisible(false);
             commandLbl->setVisible(false);
             d->command->setVisible(false);
@@ -169,17 +171,17 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
         if (d->filter)
         {
             d->command->setText(QString());     // TODO use Clipboard
-            d->title->setText(QObject::tr("My new G'MIC filter"));
+            d->command->setFocus(true);
             setWindowTitle(QObject::tr("Add G'MIC Filter"));
         }
         else
         {
+            d->title->setFocus(true);
             frontLbl->setVisible(false);
             commandLbl->setVisible(false);
             d->command->setVisible(false);
             descLbl->setVisible(false);
             d->desc->setVisible(false);
-            d->title->setText(QObject::tr("My new G'MIC folder"));
             setWindowTitle(QObject::tr("Add G'MIC Folder"));
         }
     }
@@ -281,6 +283,8 @@ GmicFilterWidget::GmicFilterWidget(QWidget* const parent)
     d->addButton       = new QToolButton(this);
     d->addButton->setToolTip(QObject::tr("Add new item."));
     d->addButton->setIcon(QIcon::fromTheme(QLatin1String("list-add")));
+    d->addButton->setPopupMode(QToolButton::InstantPopup);
+
     QMenu* const menu  = new QMenu(d->addButton);
     d->addFilter       = menu->addAction(QIcon::fromTheme(QLatin1String("process-working-symbolic")),
                                          QObject::tr("Add filter..."));
