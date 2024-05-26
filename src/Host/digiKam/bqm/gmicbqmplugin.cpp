@@ -90,7 +90,7 @@ QString GmicBqmPlugin::details() const
     QString logo = QString::fromLatin1("<p><img src=\"data:image/png;base64,%1\"></p>")
                    .arg(QString::fromLatin1(byteArray.toBase64().data()));
 
-    return tr("<p><b>An Batch Queue Manager tool for G'MIC processor.</b></p>"
+    return tr("<p><b>A Batch Queue Manager tool for G'MIC processor.</b></p>"
               "<p><b>Overview:</b></p>"
                 "<p>G'MIC is a full-featured open-source framework for image processing. "
                 "It provides several user interfaces to convert / manipulate / filter / "
