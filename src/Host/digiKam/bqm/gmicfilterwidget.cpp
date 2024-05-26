@@ -151,13 +151,13 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
         if (d->filter)
         {
             d->command->setText(d->currentItem->command);
-            d->command->setFocus(true);
+            d->command->setFocus();
             d->desc->setText(d->currentItem->desc);
             setWindowTitle(QObject::tr("Edit G'MIC Filter"));
         }
         else
         {
-            d->title->setFocus(true);
+            d->title->setFocus();
             frontLbl->setVisible(false);
             commandLbl->setVisible(false);
             d->command->setVisible(false);
@@ -171,12 +171,12 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
         if (d->filter)
         {
             d->command->setText(QString());     // TODO use Clipboard
-            d->command->setFocus(true);
+            d->command->setFocus();
             setWindowTitle(QObject::tr("Add G'MIC Filter"));
         }
         else
         {
-            d->title->setFocus(true);
+            d->title->setFocus();
             frontLbl->setVisible(false);
             commandLbl->setVisible(false);
             d->command->setVisible(false);
