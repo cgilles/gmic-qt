@@ -501,25 +501,48 @@ void GmicFilterWidget::slotRemove()
         index                      = d->proxyModel->mapToSource(index);
         GmicFilterNode* const node = d->manager->commandsModel()->node(index);
 
-        if (!node || (node->type() == GmicFilterNode::RootFolder))
+        if (node)
         {
-            return;
-        }
+            QString title;
 
-        if (QMessageBox::question(this, QObject::tr("G'MIC Filters Management"),
-                                  QObject::tr("Do you want to remove \"%1\" "
-                                        "from your G'MIC filters collection?")
-                                  .arg(node->title),
-                                  QMessageBox::Yes | QMessageBox::No
-                                 ) == QMessageBox::No)
-        {
-            return;
-        }
+            switch (node->type())
+            {
+                case GmicFilterNode::Item:
+                case GmicFilterNode::Folder:
+                {
+                    title = node->title;
+                    break;
+                }
 
-        d->manager->removeCommand(node);
+                case GmicFilterNode::Separator:
+                {
+                    title = QObject::tr("separator");
+                    break;
+                }
+
+                case GmicFilterNode::Root:
+                case GmicFilterNode::RootFolder:
+                default:
+                {
+                    return;
+                }
+            }
+
+            if (QMessageBox::question(this, QObject::tr("G'MIC Filters Management"),
+                                      QObject::tr("Do you want to remove \"%1\" "
+                                            "from your G'MIC filters collection?")
+                                      .arg(title),
+                                      QMessageBox::Yes | QMessageBox::No
+                                     ) == QMessageBox::No)
+            {
+                return;
+            }
+
+            d->manager->removeCommand(node);
+
+            Q_EMIT signalSettingsChanged();
+        }
     }
-
-    Q_EMIT signalSettingsChanged();
 }
 
 void GmicFilterWidget::slotAddFilter()
