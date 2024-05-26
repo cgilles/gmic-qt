@@ -85,7 +85,7 @@ Q_SIGNALS:
 private Q_SLOTS:
 
     void slotCustomContextMenuRequested(const QPoint&);
-    void slotTreeViewItemActivated(const QModelIndex&);
+    void slotTreeViewItemClicked(const QModelIndex&);
     void slotRemove();
     void slotAddFilter();
     void slotAddFolder();

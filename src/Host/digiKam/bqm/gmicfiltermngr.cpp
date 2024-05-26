@@ -363,7 +363,7 @@ QVariant GmicFilterModel::data(const QModelIndex& index, int role) const
                 {
                     case 0:
                     {
-                        return QString(50, QChar(0xB7));
+                        return QString(20, QChar(0xB7));
                     }
 
                     case 1:
