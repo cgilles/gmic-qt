@@ -159,7 +159,6 @@ void GmicBqmProcessor::startProcessing()
     d->filterThread->start();
 }
 
-
 void GmicBqmProcessor::slotSendProgressInformation()
 {
     if (!d->filterThread)

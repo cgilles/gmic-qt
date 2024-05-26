@@ -29,9 +29,6 @@
 
 #include <QObject>
 #include <QString>
-#include <QTimer>
-#include <QVector>
-#include <QStringList>
 
 // digiKam includes
 
