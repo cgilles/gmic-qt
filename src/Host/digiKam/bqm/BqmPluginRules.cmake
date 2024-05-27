@@ -18,37 +18,7 @@
 
 # --- BQM Plugin Compilation Rules -----------------------------------------
 
-find_package(DigikamCore CONFIG REQUIRED)
-
-set_package_properties(DigikamCore PROPERTIES
-                       URL "http://www.digikam.org"
-                       DESCRIPTION "digiKam core library"
-)
-
-include_directories($<TARGET_PROPERTY:Digikam::digikamcore,INTERFACE_INCLUDE_DIRECTORIES>)
-
-find_package(DigikamGui CONFIG REQUIRED)
-
-set_package_properties(DigikamGui PROPERTIES
-                       URL "http://www.digikam.org"
-                       DESCRIPTION "digiKam gui library"
-)
-
-include_directories($<TARGET_PROPERTY:Digikam::digikamgui,INTERFACE_INCLUDE_DIRECTORIES>)
-
-find_package(DigikamDatabase CONFIG REQUIRED)
-
-set_package_properties(DigikamDatabase PROPERTIES
-                       URL "http://www.digikam.org"
-                       DESCRIPTION "digiKam database library"
-)
-
-include_directories($<TARGET_PROPERTY:Digikam::digikamdatabase,INTERFACE_INCLUDE_DIRECTORIES>)
-
-include_directories(${CMAKE_SOURCE_DIR}/src/Host/digiKam/common/)
-
 set(gmic_bqm_SRCS
-    ${gmic_qt_SRCS}
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/host_digikam_bqm.cpp
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicfilterwidget.cpp
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicfilternode.cpp
@@ -56,32 +26,16 @@ set(gmic_bqm_SRCS
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicbqmprocessor.cpp
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicbqmtool.cpp
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicbqmplugin.cpp
-
-    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/common/gmicqtimageconverter.cpp
 )
 
-if(BUILD_WITH_QT6)
-
-    qt6_wrap_ui(gmic_bqm_SRCS ${gmic_qt_FORMS})
-
-else()
-
-    qt5_wrap_ui(gmic_bqm_SRCS ${gmic_qt_FORMS})
-
-endif()
-
-add_definitions(-DGMIC_HOST=digikam)
-add_definitions(-D_GMIC_QT_DISABLE_THEMING_)
-add_definitions(-D_GMIC_QT_DISABLE_HDPI_)
-add_definitions(-D_GMIC_QT_DISABLE_LOGO_)
-
-add_library(Bqm_Gmic_Plugin
-            MODULE ${gmic_bqm_SRCS} ${gmic_qt_QRC} ${gmic_qt_QM})
+add_library(Bqm_Gmic_Plugin MODULE ${gmic_bqm_SRCS})
 
 set_target_properties(Bqm_Gmic_Plugin PROPERTIES PREFIX "")
 
 target_link_libraries(Bqm_Gmic_Plugin
                       PRIVATE
+
+                      gmic_qt_common
 
                       Digikam::digikamcore
                       Digikam::digikamgui

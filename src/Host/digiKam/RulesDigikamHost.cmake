@@ -119,7 +119,69 @@ if(MSVC)
 
 endif()
 
-# --- Plugins Compilation Rules -----------------------------------------
+# --- digiKam dependencies.
+
+find_package(DigikamCore CONFIG REQUIRED)
+
+set_package_properties(DigikamCore PROPERTIES
+                       URL "http://www.digikam.org"
+                       DESCRIPTION "digiKam core library"
+)
+
+include_directories($<TARGET_PROPERTY:Digikam::digikamcore,INTERFACE_INCLUDE_DIRECTORIES>)
+
+find_package(DigikamGui CONFIG REQUIRED)
+
+set_package_properties(DigikamGui PROPERTIES
+                       URL "http://www.digikam.org"
+                       DESCRIPTION "digiKam gui library"
+)
+
+include_directories($<TARGET_PROPERTY:Digikam::digikamgui,INTERFACE_INCLUDE_DIRECTORIES>)
+
+find_package(DigikamDatabase CONFIG REQUIRED)
+
+set_package_properties(DigikamDatabase PROPERTIES
+                       URL "http://www.digikam.org"
+                       DESCRIPTION "digiKam database library"
+)
+
+include_directories($<TARGET_PROPERTY:Digikam::digikamdatabase,INTERFACE_INCLUDE_DIRECTORIES>)
+
+# --- Compile common codes.
+
+include_directories(${CMAKE_SOURCE_DIR}/src/Host/digiKam/common/)
+
+if(BUILD_WITH_QT6)
+
+    qt6_wrap_ui(gmic_qt_SRCS ${gmic_qt_FORMS})
+
+else()
+
+    qt5_wrap_ui(gmic_qt_SRCS ${gmic_qt_FORMS})
+
+endif()
+
+add_definitions(-DGMIC_HOST=digikam)
+add_definitions(-D_GMIC_QT_DISABLE_THEMING_)
+add_definitions(-D_GMIC_QT_DISABLE_HDPI_)
+add_definitions(-D_GMIC_QT_DISABLE_LOGO_)
+
+add_library(gmic_qt_common STATIC
+            ${gmic_qt_QRC}
+            ${gmic_qt_QM}
+            ${gmic_qt_SRCS}
+            ${CMAKE_SOURCE_DIR}/src/Host/digiKam/common/gmicqtimageconverter.cpp
+)
+
+target_link_libraries(gmic_qt_common
+
+                      PRIVATE
+
+                      ${gmic_qt_LIBRARIES}
+)
+
+# --- Host Plugins Compilation Rules.
 
 include(${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/EditorPluginRules.cmake)
 include(${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/BqmPluginRules.cmake)

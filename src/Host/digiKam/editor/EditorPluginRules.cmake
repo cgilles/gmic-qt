@@ -18,48 +18,20 @@
 
 # --- Editor Plugin Compilation Rules -----------------------------------------
 
-find_package(DigikamCore CONFIG REQUIRED)
-
-set_package_properties(DigikamCore PROPERTIES
-                       URL "http://www.digikam.org"
-                       DESCRIPTION "digiKam core library"
-)
-
-include_directories($<TARGET_PROPERTY:Digikam::digikamcore,INTERFACE_INCLUDE_DIRECTORIES>)
-
-include_directories(${CMAKE_SOURCE_DIR}/src/Host/digiKam/common/)
-
 set(gmic_qt_editor_SRCS
-    ${gmic_qt_SRCS}
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/host_digikam_editor.cpp
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/gmicqttoolplugin.cpp
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/gmicqtwindow.cpp
-
-    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/common/gmicqtimageconverter.cpp
 )
 
-if(BUILD_WITH_QT6)
-
-    qt6_wrap_ui(gmic_qt_editor_SRCS ${gmic_qt_FORMS})
-
-else()
-
-    qt5_wrap_ui(gmic_qt_editor_SRCS ${gmic_qt_FORMS})
-
-endif()
-
-add_definitions(-DGMIC_HOST=digikam)
-add_definitions(-D_GMIC_QT_DISABLE_THEMING_)
-add_definitions(-D_GMIC_QT_DISABLE_HDPI_)
-add_definitions(-D_GMIC_QT_DISABLE_LOGO_)
-
-add_library(Editor_GmicQt_Plugin
-            MODULE ${gmic_qt_editor_SRCS} ${gmic_qt_QRC} ${gmic_qt_QM})
+add_library(Editor_GmicQt_Plugin MODULE ${gmic_qt_editor_SRCS})
 
 set_target_properties(Editor_GmicQt_Plugin PROPERTIES PREFIX "")
 
 target_link_libraries(Editor_GmicQt_Plugin
                       PRIVATE
+
+                      gmic_qt_common
 
                       Digikam::digikamcore
 
