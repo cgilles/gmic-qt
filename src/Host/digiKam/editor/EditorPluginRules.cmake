@@ -30,7 +30,7 @@ include_directories(${CMAKE_SOURCE_DIR}/src/Host/digiKam/common/
 )
 
 set(gmic_qt_editor_SRCS ${gmic_qt_SRCS}
-                        ${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/host_digikam.cpp
+                        ${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/host_digikam_editor.cpp
                         ${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/gmicqttoolplugin.cpp
                         ${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/gmicqtwindow.cpp
 
