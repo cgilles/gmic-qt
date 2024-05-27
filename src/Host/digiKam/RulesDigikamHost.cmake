@@ -168,8 +168,6 @@ add_definitions(-D_GMIC_QT_DISABLE_HDPI_)
 add_definitions(-D_GMIC_QT_DISABLE_LOGO_)
 
 add_library(gmic_qt_common STATIC
-            ${gmic_qt_QRC}
-            ${gmic_qt_QM}
             ${gmic_qt_SRCS}
             ${CMAKE_SOURCE_DIR}/src/Host/digiKam/common/gmicqtimageconverter.cpp
 )

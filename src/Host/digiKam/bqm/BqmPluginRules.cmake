@@ -28,7 +28,13 @@ set(gmic_bqm_SRCS
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicbqmplugin.cpp
 )
 
-add_library(Bqm_Gmic_Plugin MODULE ${gmic_bqm_SRCS})
+add_library(Bqm_Gmic_Plugin
+            MODULE
+
+            ${gmic_bqm_SRCS}
+            ${gmic_qt_QRC}
+            ${gmic_qt_QM}
+)
 
 set_target_properties(Bqm_Gmic_Plugin PROPERTIES PREFIX "")
 

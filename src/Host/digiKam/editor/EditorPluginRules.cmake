@@ -24,7 +24,12 @@ set(gmic_qt_editor_SRCS
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/gmicqtwindow.cpp
 )
 
-add_library(Editor_GmicQt_Plugin MODULE ${gmic_qt_editor_SRCS})
+add_library(Editor_GmicQt_Plugin
+            MODULE
+            ${gmic_qt_QRC}
+            ${gmic_qt_QM}
+            ${gmic_qt_editor_SRCS}
+)
 
 set_target_properties(Editor_GmicQt_Plugin PROPERTIES PREFIX "")
 
