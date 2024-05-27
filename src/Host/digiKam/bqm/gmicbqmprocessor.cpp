@@ -38,15 +38,6 @@
 #include "GmicQt.h"
 #include "gmicqtimageconverter.h"
 
-namespace GmicQtHost
-{
-
-const QString ApplicationName          = QString("digiKam");
-const char* const ApplicationShortname = GMIC_QT_XSTRINGIFY(GMIC_HOST);
-const bool DarkThemeIsDefault          = false;
-
-} // namespace GmicQtHost
-
 using namespace DigikamEditorGmicQtPlugin;
 using namespace GmicQt;
 

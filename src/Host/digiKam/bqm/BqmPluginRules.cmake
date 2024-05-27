@@ -49,6 +49,7 @@ include_directories(${CMAKE_SOURCE_DIR}/src/Host/digiKam/common/)
 
 set(gmic_bqm_SRCS
     ${gmic_qt_SRCS}
+    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/host_digikam_bqm.cpp
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicfilterwidget.cpp
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicfilternode.cpp
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicfiltermngr.cpp

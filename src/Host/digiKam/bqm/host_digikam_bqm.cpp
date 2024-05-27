@@ -5,7 +5,7 @@
  *
  *  Copyright (C) 2019-2024 Gilles Caulier <caulier dot gilles at gmail dot com>
  *
- *  Description: digiKam image editor plugin for GmicQt.
+ *  Description: digiKam Batch Queue Manager plugin for Gmic-Qt.
  *
  *  G'MIC-Qt is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,22 +29,13 @@
 
 // digiKam includes
 
-#include "imageiface.h"
 #include "digikam_debug.h"
 
 // Local includes
 
 #include "Common.h"
 #include "Host/GmicQtHost.h"
-#include "gmicqtwindow.h"
 #include "gmicqtimageconverter.h"
-
-namespace DigikamEditorGmicQtPlugin
-{
-
-extern GMicQtWindow* s_mainWindow;
-
-} // namespace DigikamEditorGmicQtPlugin
 
 using namespace DigikamEditorGmicQtPlugin;
 
@@ -65,11 +56,8 @@ void getImageSize(int* width,
 {
     qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Calling GmicQt getImageSize()";
 
-    ImageIface iface;
-    QSize size = iface.originalSize();
-
-    *width     = size.width();
-    *height    = size.height();
+    *width     = 0;
+    *height    = 0;
 }
 
 void getLayersExtent(int* width,
@@ -103,8 +91,7 @@ void getCroppedImages(cimg_library::CImgList<gmic_pixel_type>& images,
         return;
     }
 
-    ImageIface iface;
-    DImg* const input_image = iface.original();
+    DImg* const input_image = new DImg;  // FIXME
     const bool entireImage  = (
                                (x      < 0.0) &&
                                (y      < 0.0) &&
@@ -167,31 +154,9 @@ void outputImages(cimg_library::CImgList<gmic_pixel_type>& images,
 {
     qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Calling GmicQt outputImages()";
 
-    if (images.size() > 0)
-    {
-        ImageIface iface;
-        DImg dest;
-        GMicQtImageConverter::convertCImgtoDImg(images[0], dest, iface.originalSixteenBit());
-
-        // See bug #462137: force to save current filter applied
-        // to the image to store settings in history.
-
-        if (DigikamEditorGmicQtPlugin::s_mainWindow)
-        {
-            DigikamEditorGmicQtPlugin::s_mainWindow->saveParameters();
-        }
-
-        GmicQt::RunParameters parameters = lastAppliedFilterRunParameters(GmicQt::ReturnedRunParametersFlag::AfterFilterExecution);
-        FilterAction action(QLatin1String("G'MIC-Qt"),      1);
-        action.addParameter(QLatin1String("Command"),       QString::fromStdString(parameters.command));
-        action.addParameter(QLatin1String("FilterPath"),    QString::fromStdString(parameters.filterPath));
-        action.addParameter(QLatin1String("InputMode"),     (int)parameters.inputMode);
-        action.addParameter(QLatin1String("OutputMode"),    (int)parameters.outputMode);
-        action.addParameter(QLatin1String("FilterName"),    QString::fromStdString(parameters.filterName()));
-        action.addParameter(QLatin1String("GmicQtVersion"), GmicQt::gmicVersionString());
-
-        iface.setOriginal(QString::fromUtf8("G'MIC-Qt - %1").arg(QString::fromStdString(parameters.filterName())), action, dest);
-    }
+    Q_UNUSED(images);
+    Q_UNUSED(imageNames);
+    Q_UNUSED(mode);
 }
 
 } // namespace GmicQtHost
