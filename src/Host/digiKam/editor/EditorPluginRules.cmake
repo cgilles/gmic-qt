@@ -25,16 +25,17 @@ set_package_properties(DigikamCore PROPERTIES
                        DESCRIPTION "digiKam core library"
 )
 
-include_directories(${CMAKE_SOURCE_DIR}/src/Host/digiKam/common/
-                    $<TARGET_PROPERTY:Digikam::digikamcore,INTERFACE_INCLUDE_DIRECTORIES>
-)
+include_directories($<TARGET_PROPERTY:Digikam::digikamcore,INTERFACE_INCLUDE_DIRECTORIES>)
 
-set(gmic_qt_editor_SRCS ${gmic_qt_SRCS}
-                        ${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/host_digikam_editor.cpp
-                        ${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/gmicqttoolplugin.cpp
-                        ${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/gmicqtwindow.cpp
+include_directories(${CMAKE_SOURCE_DIR}/src/Host/digiKam/common/)
 
-                        ${CMAKE_SOURCE_DIR}/src/Host/digiKam/common/gmicqtimageconverter.cpp
+set(gmic_qt_editor_SRCS
+    ${gmic_qt_SRCS}
+    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/host_digikam_editor.cpp
+    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/gmicqttoolplugin.cpp
+    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/gmicqtwindow.cpp
+
+    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/common/gmicqtimageconverter.cpp
 )
 
 if(BUILD_WITH_QT6)
@@ -59,7 +60,9 @@ set_target_properties(Editor_GmicQt_Plugin PROPERTIES PREFIX "")
 
 target_link_libraries(Editor_GmicQt_Plugin
                       PRIVATE
+
                       Digikam::digikamcore
+
                       ${gmic_qt_LIBRARIES}
 )
 
