@@ -33,9 +33,15 @@
 #include <QComboBox>
 #include <QAbstractItemModel>
 
+// digiKam includes
+
+#include "dpluginbqm.h"
+
 // Local includes
 
 #include "gmicfiltermngr.h"
+
+using namespace Digikam;
 
 namespace DigikamBqmGmicQtPlugin
 {
@@ -48,13 +54,15 @@ public:
 
     explicit GmicFilterDialog(GmicFilterNode* const citem,
                               bool edit, bool filter,
-                              QWidget* const parent = nullptr,
-                              GmicFilterManager* const mngr = nullptr);
+                              QWidget* const parent,
+                              GmicFilterManager* const mngr,
+                              DPluginBqm* const plugin);
     ~GmicFilterDialog()     override;
 
 private Q_SLOTS:
 
     void accept()           override;
+    void slotGmicQt();
 
 private:
 
@@ -72,6 +80,8 @@ public:
 
     explicit GmicFilterWidget(QWidget* const parent = nullptr);
     ~GmicFilterWidget()                                  override;
+
+    void setPlugin(DPluginBqm* const plugin);
 
     QString currentPath()                          const;
     void setCurrentPath(const QString& path);

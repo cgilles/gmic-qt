@@ -33,6 +33,7 @@
 #include <QHeaderView>
 #include <QMessageBox>
 #include <QToolButton>
+#include <QPushButton>
 #include <QAction>
 #include <QCloseEvent>
 #include <QObject>
@@ -53,15 +54,19 @@
 #include "digikam_debug.h"
 #include "searchtextbar.h"
 #include "dtextedit.h"
+#include "bqminfoiface.h"
 
 // Local includes
 
 #include "gmicfilternode.h"
+#include "gmicqtwindow.h"
 
-using namespace Digikam;
+using namespace DigikamEditorGmicQtPlugin;
 
 namespace DigikamBqmGmicQtPlugin
 {
+
+BqmInfoIface* s_infoIface = nullptr;
 
 class Q_DECL_HIDDEN GmicFilterDialog::Private
 {
@@ -77,12 +82,16 @@ public:
     QLineEdit*               title           = nullptr;
     DTextEdit*               desc            = nullptr;
     QTextEdit*               command         = nullptr;
+    QPushButton*             commandBtn      = nullptr;
+    DPluginBqm*              plugin          = nullptr;
+
 };
 
 GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
                                    bool edit, bool filter,
                                    QWidget* const parent,
-                                   GmicFilterManager* const mngr)
+                                   GmicFilterManager* const mngr,
+                                   DPluginBqm* const plugin)
     : QDialog(parent),
       d      (new Private)
 {
@@ -90,6 +99,7 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
     d->filter      = filter;
     d->manager     = mngr;
     d->currentItem = citem;
+    d->plugin      = plugin;
 
     setObjectName(QLatin1String("GmicFilterDialog"));
     setModal(true);
@@ -108,6 +118,7 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
     frontLbl->setWordWrap(true);
 
     QLabel* const commandLbl = new QLabel(QObject::tr("Filter Command:"), this);
+    d->commandBtn            = new QPushButton(QObject::tr("Gmic-Qt..."), this);
     d->command               = new QTextEdit(this);
 
     QLabel* const titleLbl   = new QLabel(d->filter ? QObject::tr("Filter Title:")
@@ -135,14 +146,15 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
     buttonBox->setCenterButtons(false);
 
     QGridLayout* const grid           = new QGridLayout(this);
-    grid->addWidget(frontLbl,   0, 0, 1, 2);
-    grid->addWidget(commandLbl, 1, 0, 1, 2);
-    grid->addWidget(d->command, 2, 0, 1, 2);
-    grid->addWidget(titleLbl,   3, 0, 1, 1);
-    grid->addWidget(d->title,   3, 1, 1, 1);
-    grid->addWidget(descLbl,    4, 0, 1, 2);
-    grid->addWidget(d->desc,    5, 0, 1, 2);
-    grid->addWidget(buttonBox);
+    grid->addWidget(frontLbl,       0, 0, 1, 3);
+    grid->addWidget(commandLbl,     1, 0, 1, 1);
+    grid->addWidget(d->commandBtn,  1, 2, 1, 1);
+    grid->addWidget(d->command,     2, 0, 1, 3);
+    grid->addWidget(titleLbl,       3, 0, 1, 1);
+    grid->addWidget(d->title,       3, 1, 1, 2);
+    grid->addWidget(descLbl,        4, 0, 1, 3);
+    grid->addWidget(d->desc,        5, 0, 1, 3);
+    grid->addWidget(buttonBox,      6, 0, 1, 3);
 
     if (d->edit)
     {
@@ -186,6 +198,11 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
         }
     }
 
+    // ---
+
+    connect(d->commandBtn, SIGNAL(pressed()),
+            this, SLOT(slotGmicQt()));
+
     connect(buttonBox, SIGNAL(accepted()),
             this, SLOT(accept()));
 
@@ -198,6 +215,11 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
 GmicFilterDialog::~GmicFilterDialog()
 {
     delete d;
+}
+
+void GmicFilterDialog::slotGmicQt()
+{
+    GMicQtWindow::execWindow(d->plugin);
 }
 
 void GmicFilterDialog::accept()
@@ -255,6 +277,7 @@ public:
     QAction*              addSeparator     = nullptr;
     QAction*              remove           = nullptr;
     QAction*              edit             = nullptr;
+    DPluginBqm*           plugin           = nullptr;
 };
 
 GmicFilterWidget::GmicFilterWidget(QWidget* const parent)
@@ -367,6 +390,12 @@ GmicFilterWidget::~GmicFilterWidget()
     d->manager->save();
 
     delete d;
+}
+
+void GmicFilterWidget::setPlugin(DPluginBqm* const plugin)
+{
+    d->plugin   = plugin;
+    s_infoIface = d->plugin->infoIface();
 }
 
 bool GmicFilterWidget::saveExpandedNodes(const QModelIndex& parent)
@@ -606,7 +635,8 @@ void GmicFilterWidget::openCommandDialog(bool edit, bool filter)
                                                            edit,
                                                            filter,
                                                            this,
-                                                           d->manager
+                                                           d->manager,
+                                                           d->plugin
                                                           );
         dlg->exec();
         delete dlg;

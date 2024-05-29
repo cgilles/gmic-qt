@@ -73,6 +73,7 @@ BatchTool* GmicBqmTool::clone(QObject* const parent) const
 void GmicBqmTool::registerSettingsWidget()
 {
     d->gmicWidget    = new GmicFilterWidget();
+    d->gmicWidget->setPlugin(plugin());
     m_settingsWidget = d->gmicWidget;
 
     connect(d->gmicWidget, SIGNAL(signalSettingsChanged()),

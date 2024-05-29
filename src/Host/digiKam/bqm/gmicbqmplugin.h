@@ -25,7 +25,7 @@
 #ifndef DIGIKAM_BQM_GMIC_PLUGIN_H
 #define DIGIKAM_BQM_GMIC_PLUGIN_H
 
-// Local includes
+// digiKam includes
 
 #include "dpluginbqm.h"
 

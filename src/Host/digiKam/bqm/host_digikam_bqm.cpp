@@ -26,10 +26,12 @@
 
 #include <QDataStream>
 #include <QTextStream>
+#include <QStringList>
 
 // digiKam includes
 
 #include "digikam_debug.h"
+#include "bqminfoiface.h"
 
 // Local includes
 
@@ -37,6 +39,14 @@
 #include "Host/GmicQtHost.h"
 #include "gmicqtimageconverter.h"
 
+namespace DigikamBqmGmicQtPlugin
+{
+
+extern BqmInfoIface* s_infoIface;
+
+} // namespace DigikamBqmGmicQtPlugin
+
+using namespace DigikamBqmGmicQtPlugin;
 using namespace DigikamEditorGmicQtPlugin;
 
 /**
@@ -56,8 +66,19 @@ void getImageSize(int* width,
 {
     qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Calling GmicQt getImageSize()";
 
-    *width     = 0;
-    *height    = 0;
+    QStringList list = s_infoIface->selectedItemPathsFromCurrentQueue();
+
+    if (!list.isEmpty())
+    {
+        DImg img(list.first());
+        *width     = img.width();
+        *height    = img.height();
+    }
+    else
+    {
+        *width     = 0;
+        *height    = 0;
+    }
 }
 
 void getLayersExtent(int* width,
@@ -83,7 +104,9 @@ void getCroppedImages(cimg_library::CImgList<gmic_pixel_type>& images,
 {
     qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Calling GmicQt getCroppedImages()";
 
-    if (mode == GmicQt::InputMode::NoInput)
+    QStringList list = s_infoIface->selectedItemPathsFromCurrentQueue();
+
+    if (mode == GmicQt::InputMode::NoInput || list.isEmpty())
     {
         images.assign();
         imageNames.assign();
@@ -91,7 +114,7 @@ void getCroppedImages(cimg_library::CImgList<gmic_pixel_type>& images,
         return;
     }
 
-    DImg* const input_image = new DImg;  // FIXME
+    DImg* const input_image = new DImg(list.first());
     const bool entireImage  = (
                                (x      < 0.0) &&
                                (y      < 0.0) &&
