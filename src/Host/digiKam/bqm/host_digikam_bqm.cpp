@@ -66,18 +66,18 @@ void getImageSize(int* width,
 {
     qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Calling GmicQt getImageSize()";
 
-    QStringList list = s_infoIface->selectedItemPathsFromCurrentQueue();
+    QueuePoolItemsList list = s_infoIface->selectedItemInfoListFromCurrentQueue();
 
     if (!list.isEmpty())
     {
-        DImg img(list.first());
-        *width     = img.width();
-        *height    = img.height();
+        ItemInfoSet inf = list.first();
+        *width          = inf.info.dimensions().width();
+        *height         = inf.info.dimensions().height();
     }
     else
     {
-        *width     = 0;
-        *height    = 0;
+        *width  = 0;
+        *height = 0;
     }
 }
 
@@ -104,7 +104,7 @@ void getCroppedImages(cimg_library::CImgList<gmic_pixel_type>& images,
 {
     qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Calling GmicQt getCroppedImages()";
 
-    QStringList list = s_infoIface->selectedItemPathsFromCurrentQueue();
+    QueuePoolItemsList list = s_infoIface->selectedItemInfoListFromCurrentQueue();
 
     if (mode == GmicQt::InputMode::NoInput || list.isEmpty())
     {
@@ -114,7 +114,7 @@ void getCroppedImages(cimg_library::CImgList<gmic_pixel_type>& images,
         return;
     }
 
-    DImg* const input_image = new DImg(list.first());
+    DImg* const input_image = new DImg(list.first().info.filePath());
     const bool entireImage  = (
                                (x      < 0.0) &&
                                (y      < 0.0) &&
