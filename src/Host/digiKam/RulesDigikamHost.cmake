@@ -183,4 +183,4 @@ target_link_libraries(gmic_qt_common
 # --- Host Plugins Compilation Rules.
 
 include(${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/EditorPluginRules.cmake)
-include(${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/BqmPluginRules.cmake)
+#include(${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/BqmPluginRules.cmake)
