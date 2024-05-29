@@ -156,6 +156,8 @@ void getCroppedImages(cimg_library::CImgList<gmic_pixel_type>& images,
                                          );
 
     GMicQtImageConverter::convertDImgtoCImg(input_image->copy(ix, iy, iw, ih), images[0]);
+
+    delete input_image;
 }
 
 void applyColorProfile(cimg_library::CImg<gmic_pixel_type>& images)
