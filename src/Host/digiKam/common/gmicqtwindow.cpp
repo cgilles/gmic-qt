@@ -296,6 +296,10 @@ void GMicQtWindow::execWindow(DPlugin* const tool, const QString& command)
             &loop, SLOT(quit()));
 
     loop.exec();
+
+    // Copy the current G'MIC command on the clipboard.
+
+    s_mainWindow->onCopyGMICCommand();
 }
 
 } // namespace DigikamEditorGmicQtPlugin

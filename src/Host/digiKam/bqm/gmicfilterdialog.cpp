@@ -48,6 +48,7 @@
 #include <QLabel>
 #include <QItemDelegate>
 #include <QValidator>
+#include <QClipboard>
 
 // digiKam includes
 
@@ -218,6 +219,9 @@ GmicFilterDialog::~GmicFilterDialog()
 void GmicFilterDialog::slotGmicQt()
 {
     GMicQtWindow::execWindow(d->plugin, d->command->toPlainText());
+
+    QClipboard* const clipboard = QGuiApplication::clipboard();
+    d->command->setText(clipboard->text());
 }
 
 void GmicFilterDialog::accept()
