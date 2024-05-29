@@ -227,3 +227,5 @@ bool GmicBqmProcessor::processingComplete() const
 }
 
 } // namespace DigikamBqmGmicQtPlugin
+
+#include "moc_gmicbqmprocessor.cpp"

@@ -216,3 +216,5 @@ void GmicBqmPlugin::setup(QObject* const parent)
 }
 
 } // namespace DigikamBqmGmicQtPlugin
+
+#include "moc_gmicbqmplugin.cpp"

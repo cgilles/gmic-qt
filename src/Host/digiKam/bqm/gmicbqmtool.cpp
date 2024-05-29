@@ -187,3 +187,5 @@ void GmicBqmTool::cancel()
 }
 
 } // namespace DigikamBqmGmicQtPlugin
+
+#include "moc_gmicbqmtool.cpp"

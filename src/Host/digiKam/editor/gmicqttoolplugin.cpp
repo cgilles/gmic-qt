@@ -190,3 +190,5 @@ void GmicQtToolPlugin::slotGmicQt()
 }
 
 } // namespace DigikamEditorGmicQtPlugin
+
+#include "moc_gmicqttoolplugin.cpp"
