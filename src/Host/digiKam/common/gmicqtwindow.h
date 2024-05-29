@@ -39,13 +39,15 @@
 // Local includes
 
 #include "MainWindow.h"
+#include "GmicQt.h"
 
+using namespace GmicQt;
 using namespace Digikam;
 
 namespace DigikamEditorGmicQtPlugin
 {
 
-class GMicQtWindow : public GmicQt::MainWindow
+class GMicQtWindow : public MainWindow
 {
     Q_OBJECT
 
@@ -56,7 +58,7 @@ public:
 
     void saveParameters();
 
-    static void execWindow(DPlugin* const tool);
+    static void execWindow(DPlugin* const tool, const QString& prm = QString());
 
 protected:
 

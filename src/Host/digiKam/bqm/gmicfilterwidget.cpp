@@ -219,7 +219,7 @@ GmicFilterDialog::~GmicFilterDialog()
 
 void GmicFilterDialog::slotGmicQt()
 {
-    GMicQtWindow::execWindow(d->plugin);
+    GMicQtWindow::execWindow(d->plugin, d->command->toPlainText());
 }
 
 void GmicFilterDialog::accept()

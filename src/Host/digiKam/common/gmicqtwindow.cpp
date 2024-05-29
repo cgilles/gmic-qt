@@ -200,7 +200,7 @@ void GMicQtWindow::closeEvent(QCloseEvent* event)
     QWidget::closeEvent(event);
 }
 
-void GMicQtWindow::execWindow(DPlugin* const tool)
+void GMicQtWindow::execWindow(DPlugin* const tool, const QString& command)
 {
     // Code inspired from GmicQt.cpp::run() and host_none.cpp::main()
 
@@ -241,8 +241,20 @@ void GMicQtWindow::execWindow(DPlugin* const tool)
      * seen side effects, for example with the settings to host in RC file.
      */
 
-    s_mainWindow             = new GMicQtWindow(tool, qApp->activeWindow());
-    RunParameters parameters = lastAppliedFilterRunParameters(GmicQt::ReturnedRunParametersFlag::AfterFilterExecution);
+    s_mainWindow = new GMicQtWindow(tool, qApp->activeWindow());
+    RunParameters parameters;
+
+    if (!command.isEmpty())
+    {
+        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Start G'MIC-Qt dialog with command: \"" << command << "\"";
+
+        parameters.command = command.toStdString();
+    }
+    else
+    {
+        parameters = lastAppliedFilterRunParameters(GmicQt::ReturnedRunParametersFlag::AfterFilterExecution);
+    }
+
     s_mainWindow->setPluginParameters(parameters);
 
     // We want a non modal dialog here.
