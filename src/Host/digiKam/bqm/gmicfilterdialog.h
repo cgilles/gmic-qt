@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef DIGIKAM_GMIC_FILTER_WIDGET_H
-#define DIGIKAM_GMIC_FILTER_WIDGET_H
+#ifndef DIGIKAM_GMIC_FILTER_DIALOG_H
+#define DIGIKAM_GMIC_FILTER_DIALOG_H
 
 // Qt includes
 
@@ -46,43 +46,23 @@ using namespace Digikam;
 namespace DigikamBqmGmicQtPlugin
 {
 
-class GmicFilterWidget : public QWidget
+class GmicFilterDialog : public QDialog
 {
     Q_OBJECT
 
 public:
 
-    explicit GmicFilterWidget(QWidget* const parent = nullptr);
-    ~GmicFilterWidget()                                  override;
-
-    void setPlugin(DPluginBqm* const plugin);
-
-    QString currentPath()                          const;
-    void setCurrentPath(const QString& path);
-
-    QString currentGmicFilter()                    const;
-
-Q_SIGNALS:
-
-    void signalSettingsChanged();
+    explicit GmicFilterDialog(GmicFilterNode* const citem,
+                              bool edit, bool filter,
+                              QWidget* const parent,
+                              GmicFilterManager* const mngr,
+                              DPluginBqm* const plugin);
+    ~GmicFilterDialog()     override;
 
 private Q_SLOTS:
 
-    void slotCustomContextMenuRequested(const QPoint&);
-    void slotTreeViewItemClicked(const QModelIndex&);
-    void slotRemove();
-    void slotAddFilter();
-    void slotAddFolder();
-    void slotAddSeparator();
-    void slotEdit();
-
-private:
-
-    void expandNodes(GmicFilterNode* const node);
-    bool saveExpandedNodes(const QModelIndex& parent);
-    void readSettings();
-    void saveSettings();
-    void openCommandDialog(bool edit, bool filter);
+    void accept()           override;
+    void slotGmicQt();
 
 private:
 
@@ -92,4 +72,4 @@ private:
 
 } // namespace DigikamBqmGmicQtPlugin
 
-#endif // DIGIKAM_GMIC_FILTER_WIDGET_H
+#endif // DIGIKAM_GMIC_FILTER_DIALOG_H

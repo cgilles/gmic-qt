@@ -21,6 +21,7 @@
 set(gmic_bqm_SRCS
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/host_digikam_bqm.cpp
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicfilterwidget.cpp
+    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicfilterdialog.cpp
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicfilternode.cpp
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicfiltermngr.cpp
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicbqmprocessor.cpp
