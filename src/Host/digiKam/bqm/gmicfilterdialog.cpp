@@ -218,7 +218,7 @@ GmicFilterDialog::~GmicFilterDialog()
 
 void GmicFilterDialog::slotGmicQt()
 {
-    GMicQtWindow::execWindow(d->plugin, d->command->toPlainText());
+    GMicQtWindow::execWindow(d->plugin, d->command->toPlainText(), true);
 
     QClipboard* const clipboard = QGuiApplication::clipboard();
     d->command->setText(clipboard->text());

@@ -57,8 +57,11 @@ public:
     ~GMicQtWindow()                     override;
 
     void saveParameters();
+    void setViewerMode();
 
-    static void execWindow(DPlugin* const tool, const QString& prm = QString());
+    static void execWindow(DPlugin* const tool,
+                           const QString& prm = QString(),
+                           bool  viewer = false);
 
 protected:
 

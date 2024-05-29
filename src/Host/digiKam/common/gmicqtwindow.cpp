@@ -142,6 +142,18 @@ GMicQtWindow::~GMicQtWindow()
     delete d;
 }
 
+void GMicQtWindow::setViewerMode()
+{
+    QPushButton* const pbOk     = findChild<QPushButton*>("pbOk");
+    pbOk->setVisible(false);
+
+    QPushButton* const pbApply  = findChild<QPushButton*>("pbApply");
+    pbApply->setVisible(false);
+
+    QPushButton* const pbCancel = findChild<QPushButton*>("pbCancel");
+    pbCancel->setVisible(false);
+}
+
 void GMicQtWindow::slotAboutPlugin()
 {
     QPointer<DPluginAboutDlg> dlg = new DPluginAboutDlg(d->plugTool);
@@ -205,7 +217,7 @@ void GMicQtWindow::closeEvent(QCloseEvent* event)
     QWidget::closeEvent(event);
 }
 
-void GMicQtWindow::execWindow(DPlugin* const tool, const QString& command)
+void GMicQtWindow::execWindow(DPlugin* const tool, const QString& command, bool viewer)
 {
     // Code inspired from GmicQt.cpp::run() and host_none.cpp::main()
 
@@ -247,6 +259,12 @@ void GMicQtWindow::execWindow(DPlugin* const tool, const QString& command)
      */
 
     s_mainWindow = new GMicQtWindow(tool, qApp->activeWindow());
+
+    if (viewer)
+    {
+        s_mainWindow->setViewerMode();
+    }
+
     RunParameters parameters;
 
     if (!command.isEmpty())
