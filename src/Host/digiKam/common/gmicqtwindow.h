@@ -32,10 +32,13 @@
 #include <QShowEvent>
 #include <QWidget>
 
+// digiKam includes
+
+#include "dplugin.h"
+
 // Local includes
 
 #include "MainWindow.h"
-#include "gmicqttoolplugin.h"
 
 using namespace Digikam;
 
@@ -52,6 +55,8 @@ public:
     ~GMicQtWindow()                     override;
 
     void saveParameters();
+
+    static void execWindow(DPlugin* const tool);
 
 protected:
 

@@ -43,19 +43,11 @@
 
 // Local includes
 
-#include "LanguageSettings.h"
-#include "Settings.h"
-#include "GmicQt.h"
-#include "Widgets/InOutPanel.h"
 #include "gmicqtwindow.h"
 #include "gmic.h"
 
-using namespace GmicQt;
-
 namespace DigikamEditorGmicQtPlugin
 {
-
-GMicQtWindow* s_mainWindow = nullptr;
 
 GmicQtToolPlugin::GmicQtToolPlugin(QObject* const parent)
     : DPluginEditor(parent)
@@ -194,88 +186,7 @@ void GmicQtToolPlugin::setup(QObject* const parent)
 
 void GmicQtToolPlugin::slotGmicQt()
 {
-    // Code inspired from GmicQt.cpp::run() and host_none.cpp::main()
-
-    Settings::load(GmicQt::UserInterfaceMode::Full);
-    LanguageSettings::installTranslators();
-
-    // ---
-
-    std::list<GmicQt::InputMode> disabledInputModes;
-    disabledInputModes.push_back(GmicQt::InputMode::NoInput);
-    // disabledInputModes.push_back(InputMode::Active);
-    disabledInputModes.push_back(GmicQt::InputMode::All);
-    disabledInputModes.push_back(GmicQt::InputMode::ActiveAndBelow);
-    disabledInputModes.push_back(GmicQt::InputMode::ActiveAndAbove);
-    disabledInputModes.push_back(GmicQt::InputMode::AllVisible);
-    disabledInputModes.push_back(GmicQt::InputMode::AllInvisible);
-
-    std::list<GmicQt::OutputMode> disabledOutputModes;
-    // disabledOutputModes.push_back(GmicQt::OutputMode::InPlace);
-    disabledOutputModes.push_back(GmicQt::OutputMode::NewImage);
-    disabledOutputModes.push_back(GmicQt::OutputMode::NewLayers);
-    disabledOutputModes.push_back(GmicQt::OutputMode::NewActiveLayers);
-
-    for (const GmicQt::InputMode& mode : disabledInputModes)
-    {
-        GmicQt::InOutPanel::disableInputMode(mode);
-    }
-
-    for (const GmicQt::OutputMode& mode : disabledOutputModes)
-    {
-        GmicQt::InOutPanel::disableOutputMode(mode);
-    }
-
-    // ---
-
-    /**
-     * We need to backup QApplication instance properties between plugin sessions else we can
-     * seen side effects, for example with the settings to host in RC file.
-     */
-
-    s_mainWindow             = new GMicQtWindow(this, qApp->activeWindow());
-    RunParameters parameters = lastAppliedFilterRunParameters(GmicQt::ReturnedRunParametersFlag::AfterFilterExecution);
-    s_mainWindow->setPluginParameters(parameters);
-
-    // We want a non modal dialog here.
-
-#ifdef Q_OS_MACOS
-
-    s_mainWindow->setWindowFlags(Qt::Tool | Qt::Dialog);
-
-#else
-
-    s_mainWindow->setWindowFlags(Qt::Dialog);
-
-#endif
-
-    s_mainWindow->setWindowModality(Qt::ApplicationModal);
-
-    if (QSettings().value("Config/MainWindowMaximized", false).toBool())
-    {
-        s_mainWindow->showMaximized();
-    }
-    else
-    {
-        s_mainWindow->show();
-    }
-
-    // Bug #462066: force to load filters list at start-up.
-
-    s_mainWindow->updateFiltersFromSources(0, false);
-
-    // Make it destroy itself on close (signaling the event loop)
-
-    s_mainWindow->setAttribute(Qt::WA_DeleteOnClose);
-
-    // Wait than main widget is closed.
-
-    QEventLoop loop;
-
-    connect(s_mainWindow, SIGNAL(destroyed()),
-            &loop, SLOT(quit()));
-
-    loop.exec();
+    GMicQtWindow::execWindow(this);
 }
 
 } // namespace DigikamEditorGmicQtPlugin

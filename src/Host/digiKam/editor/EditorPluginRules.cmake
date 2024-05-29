@@ -21,7 +21,6 @@
 set(gmic_qt_editor_SRCS
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/host_digikam_editor.cpp
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/gmicqttoolplugin.cpp
-    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/gmicqtwindow.cpp
 )
 
 add_library(Editor_GmicQt_Plugin

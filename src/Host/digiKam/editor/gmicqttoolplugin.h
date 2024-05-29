@@ -25,7 +25,7 @@
 #ifndef DIGIKAM_EDITOR_GMICQT_TOOL_PLUGIN_H
 #define DIGIKAM_EDITOR_GMICQT_TOOL_PLUGIN_H
 
-// Local includes
+// digiKam includes
 
 #include "dplugineditor.h"
 
