@@ -282,9 +282,14 @@ void GMicQtWindow::execWindow(DPlugin* const tool, const QString& command, bool 
 
     if (!command.isEmpty())
     {
-        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Start G'MIC-Qt dialog with command: \"" << command << "\"";
-
         parameters.command = command.toStdString();
+
+        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Start G'MIC-Qt dialog with parameters:";
+        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Command:"     << parameters.command;
+        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Path:"        << parameters.filterPath;
+        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Input Mode:"  << (int)parameters.inputMode;
+        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Output Mode:" << (int)parameters.outputMode;
+        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Filter name:" << parameters.filterName();
     }
     else
     {
