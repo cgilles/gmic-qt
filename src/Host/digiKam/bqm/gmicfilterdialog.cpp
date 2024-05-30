@@ -221,7 +221,11 @@ void GmicFilterDialog::slotGmicQt()
     GMicQtWindow::execWindow(d->plugin, d->command->toPlainText(), true);
 
     QClipboard* const clipboard = QGuiApplication::clipboard();
-    d->command->setText(clipboard->text());
+
+    if (!clipboard->text().isEmpty())
+    {
+        d->command->setText(clipboard->text());
+    }
 }
 
 void GmicFilterDialog::accept()

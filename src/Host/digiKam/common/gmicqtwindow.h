@@ -57,7 +57,7 @@ public:
     ~GMicQtWindow()                     override;
 
     void saveParameters();
-    void setViewerMode();
+    void setCommandSelector();
 
     static void execWindow(DPlugin* const tool,
                            const QString& prm = QString(),
@@ -72,6 +72,7 @@ private Q_SLOTS:
 
     void slotAboutPlugin();
     void slotOpenWebSite();
+    void slotOkClicked();
     void slotLayersDialog();
 
 private:

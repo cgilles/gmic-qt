@@ -78,8 +78,8 @@ public:
 };
 
 GMicQtWindow::GMicQtWindow(DPlugin* const tool, QWidget* const parent)
-    : GmicQt::MainWindow(parent),
-      d                 (new Private(tool))
+    : MainWindow(parent),
+      d         (new Private(tool))
 {
     QHBoxLayout* const hlay = findChild<QHBoxLayout*>("horizontalLayout");
 
@@ -142,10 +142,16 @@ GMicQtWindow::~GMicQtWindow()
     delete d;
 }
 
-void GMicQtWindow::setViewerMode()
+void GMicQtWindow::setCommandSelector()
 {
     QPushButton* const pbOk     = findChild<QPushButton*>("pbOk");
-    pbOk->setVisible(false);
+    pbOk->setText(QObject::tr("Select Filter"));
+
+    disconnect(pbOk, &QPushButton::clicked,
+               static_cast<MainWindow*>(this), &MainWindow::onOkClicked);
+
+    connect(pbOk, &QPushButton::clicked,
+            this, &GMicQtWindow::slotOkClicked);
 
     QPushButton* const pbApply  = findChild<QPushButton*>("pbApply");
     pbApply->setVisible(false);
@@ -168,6 +174,14 @@ void GMicQtWindow::slotOpenWebSite()
                             d->plugTool->handbookChapter(),
                             d->plugTool->handbookReference()
                            );
+}
+
+void GMicQtWindow::slotOkClicked()
+{
+    // Copy the current G'MIC command on the clipboard.
+
+    s_mainWindow->onCopyGMICCommand();
+    close();
 }
 
 void GMicQtWindow::slotLayersDialog()
@@ -205,7 +219,6 @@ void GMicQtWindow::showEvent(QShowEvent* event)
 
 void GMicQtWindow::closeEvent(QCloseEvent* event)
 {
-
     // Copy the current G'MIC command on the clipboard.
 
     s_mainWindow->onCopyGMICCommand();
@@ -262,7 +275,7 @@ void GMicQtWindow::execWindow(DPlugin* const tool, const QString& command, bool 
 
     if (viewer)
     {
-        s_mainWindow->setViewerMode();
+        s_mainWindow->setCommandSelector();
     }
 
     RunParameters parameters;
