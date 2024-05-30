@@ -118,7 +118,7 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
     frontLbl->setWordWrap(true);
 
     QLabel* const commandLbl = new QLabel(QObject::tr("Filter Command:"), this);
-    d->commandBtn            = new QPushButton(QObject::tr("Select Filter..."), this);
+    d->commandBtn            = new QPushButton(this);
     d->command               = new QTextEdit(this);
 
     QLabel* const titleLbl   = new QLabel(d->filter ? QObject::tr("Filter Title:")
@@ -170,6 +170,7 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
             d->command->setFocus();
             d->desc->setText(d->currentItem->desc);
             setWindowTitle(QObject::tr("Edit G'MIC Filter"));
+            d->commandBtn->setText(QObject::tr("Edit Filter..."));
         }
         else
         {
@@ -190,6 +191,7 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
             d->command->setText(QString());     // TODO use Clipboard
             d->command->setFocus();
             setWindowTitle(QObject::tr("Add G'MIC Filter"));
+            d->commandBtn->setText(QObject::tr("Select Filter..."));
         }
         else
         {
