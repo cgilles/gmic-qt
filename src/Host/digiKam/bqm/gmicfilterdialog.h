@@ -64,7 +64,7 @@ private Q_SLOTS:
     void accept()           override;
     void slotGmicQt();
     void slotAboutPlugin();
-    void slotOpenWebSite();
+    void slotOnlineHandbook();
 
 private:
 

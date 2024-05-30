@@ -111,7 +111,7 @@ GMicQtWindow::GMicQtWindow(DPlugin* const tool, QWidget* const parent)
         help->setMenu(menu);
 
         connect(webAction, SIGNAL(triggered()),
-                this, SLOT(slotOpenWebSite()));
+                this, SLOT(slotOnlineHandbook()));
 
         connect(aboutAction, SIGNAL(triggered()),
                 this, SLOT(slotAboutPlugin()));
@@ -167,7 +167,7 @@ void GMicQtWindow::slotAboutPlugin()
     delete dlg;
 }
 
-void GMicQtWindow::slotOpenWebSite()
+void GMicQtWindow::slotOnlineHandbook()
 {
     openOnlineDocumentation(
                             d->plugTool->handbookSection(),

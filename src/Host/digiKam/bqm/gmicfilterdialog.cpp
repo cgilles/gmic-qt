@@ -249,7 +249,7 @@ void GmicFilterDialog::slotAboutPlugin()
     delete dlg;
 }
 
-void GmicFilterDialog::slotOpenWebSite()
+void GmicFilterDialog::slotOnlineHandbook()
 {
     openOnlineDocumentation(
                             d->plugin->handbookSection(),

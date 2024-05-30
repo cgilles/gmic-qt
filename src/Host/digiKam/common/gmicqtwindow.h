@@ -71,7 +71,7 @@ protected:
 private Q_SLOTS:
 
     void slotAboutPlugin();
-    void slotOpenWebSite();
+    void slotOnlineHandbook();
     void slotOkClicked();
     void slotLayersDialog();
 
