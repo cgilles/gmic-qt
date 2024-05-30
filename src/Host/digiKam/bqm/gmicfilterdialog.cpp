@@ -56,6 +56,7 @@
 #include "searchtextbar.h"
 #include "dtextedit.h"
 #include "bqminfoiface.h"
+#include "dpluginaboutdlg.h"
 
 // Local includes
 
@@ -117,7 +118,7 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
     frontLbl->setWordWrap(true);
 
     QLabel* const commandLbl = new QLabel(QObject::tr("Filter Command:"), this);
-    d->commandBtn            = new QPushButton(QObject::tr("Gmic-Qt..."), this);
+    d->commandBtn            = new QPushButton(QObject::tr("Select Filter..."), this);
     d->command               = new QTextEdit(this);
 
     QLabel* const titleLbl   = new QLabel(d->filter ? QObject::tr("Filter Title:")
@@ -141,7 +142,11 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
 
     QDialogButtonBox* const buttonBox = new QDialogButtonBox(this);
     buttonBox->setOrientation(Qt::Horizontal);
-    buttonBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
+    buttonBox->setStandardButtons(
+                                  QDialogButtonBox::Cancel |
+                                  QDialogButtonBox::Ok
+                                 );
+
     buttonBox->setCenterButtons(false);
 
     QGridLayout* const grid           = new QGridLayout(this);
@@ -172,6 +177,7 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
             frontLbl->setVisible(false);
             commandLbl->setVisible(false);
             d->command->setVisible(false);
+            d->commandBtn->setVisible(false);
             descLbl->setVisible(false);
             d->desc->setVisible(false);
             setWindowTitle(QObject::tr("Edit G'MIC Folder"));
@@ -191,11 +197,31 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
             frontLbl->setVisible(false);
             commandLbl->setVisible(false);
             d->command->setVisible(false);
+            d->commandBtn->setVisible(false);
             descLbl->setVisible(false);
             d->desc->setVisible(false);
             setWindowTitle(QObject::tr("Add G'MIC Folder"));
         }
     }
+
+    // ---
+
+    QPushButton* const help       = buttonBox->addButton(QDialogButtonBox::Help);
+    help->setIcon(QIcon::fromTheme(QLatin1String("help-browser")));
+    help->setText(QObject::tr("Help"));
+    help->setAutoDefault(false);
+    QMenu* const menu             = new QMenu(help);
+    QAction* const handbookAction = menu->addAction(QIcon::fromTheme(QLatin1String("globe")),
+                                                    QObject::tr("Online Handbook..."));
+    QAction* const aboutAction    = menu->addAction(QIcon::fromTheme(QLatin1String("help-about")),
+                                                    QObject::tr("About..."));
+    help->setMenu(menu);
+
+    connect(handbookAction, SIGNAL(triggered()),
+            this, SLOT(slotOnlineHandbook()));
+
+    connect(aboutAction, SIGNAL(triggered()),
+            this, SLOT(slotAboutPlugin()));
 
     // ---
 
@@ -214,6 +240,22 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
 GmicFilterDialog::~GmicFilterDialog()
 {
     delete d;
+}
+
+void GmicFilterDialog::slotAboutPlugin()
+{
+    QPointer<DPluginAboutDlg> dlg = new DPluginAboutDlg(d->plugin);
+    dlg->exec();
+    delete dlg;
+}
+
+void GmicFilterDialog::slotOpenWebSite()
+{
+    openOnlineDocumentation(
+                            d->plugin->handbookSection(),
+                            d->plugin->handbookChapter(),
+                            d->plugin->handbookReference()
+                           );
 }
 
 void GmicFilterDialog::slotGmicQt()
