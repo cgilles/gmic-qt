@@ -188,7 +188,7 @@ void GmicQtToolPlugin::slotGmicQt()
 {
     GMicQtWindow::HostType type = GMicQtWindow::ImageEditor;
 
-    if (qApp->applicationName() == QLatin1String("Showfoto"))
+    if (qApp->applicationName() == QLatin1String("showfoto"))
     {
         type = GMicQtWindow::Showfoto;
     }

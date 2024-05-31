@@ -151,13 +151,13 @@ void GMicQtWindow::setHostType(HostType type)
     {
         case BQM:
         {
-            d->dkModule = QLatin1String("bqm-");
+            d->dkModule = QLatin1String("digikam-bqm-");
             break;
         }
 
         case ImageEditor:
         {
-            d->dkModule = QLatin1String("editor-");
+            d->dkModule = QLatin1String("digikam-editor-");
             break;
         }
 
