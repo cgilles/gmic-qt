@@ -255,10 +255,6 @@ void GMicQtWindow::showEvent(QShowEvent* event)
 
 void GMicQtWindow::closeEvent(QCloseEvent* event)
 {
-    // Copy the current G'MIC command on the clipboard.
-
-    s_mainWindow->onCopyGMICCommand();
-
     QCoreApplication::setOrganizationName(d->hostOrg);
     QCoreApplication::setOrganizationDomain(d->hostDom);
     QCoreApplication::setApplicationName(d->hostName);
