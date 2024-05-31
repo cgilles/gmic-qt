@@ -65,10 +65,10 @@
 
 using namespace DigikamEditorGmicQtPlugin;
 
-extern BqmInfoIface* s_infoIface;
-
 namespace DigikamBqmGmicQtPlugin
 {
+
+extern BqmInfoIface* s_infoIface;
 
 class Q_DECL_HIDDEN GmicFilterDialog::Private
 {
@@ -86,7 +86,6 @@ public:
     QTextEdit*               command         = nullptr;
     QPushButton*             commandBtn      = nullptr;
     DPluginBqm*              plugin          = nullptr;
-
 };
 
 GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
