@@ -42,6 +42,7 @@
 #include "digikam_debug.h"
 #include "digikam_globals.h"
 #include "dpluginaboutdlg.h"
+#include "dinfointerface.h"
 
 // Local includes
 
@@ -207,14 +208,30 @@ void GMicQtWindow::showEvent(QShowEvent* event)
 
     if (d->plugName.isEmpty())
     {
-        d->plugName = QCoreApplication::applicationName();
+        DInfoInterface* const iface = d->plugTool->iface();
+        QString dkModule;
+
+        if      (iface->objectName() == QLatin1String("BqmInfoIface"))
+        {
+            dkModule = QLatin1String("bqm-");
+        }
+        else if (iface->objectName() == QLatin1String("EditorInfoIface"))
+        {
+            dkModule = QLatin1String("editor-");
+        }
+        else if (iface->objectName() == QLatin1String("ShowfotoInfoIface"))
+        {
+            dkModule = QLatin1String("showfoto-");
+        }
+
+        d->plugName = dkModule + QCoreApplication::applicationName();
     }
 
     QCoreApplication::setOrganizationName(d->plugOrg);
     QCoreApplication::setOrganizationDomain(d->plugDom);
     QCoreApplication::setApplicationName(d->plugName);
 
-    QWidget::showEvent(event);
+    MainWindow::showEvent(event);
 }
 
 void GMicQtWindow::closeEvent(QCloseEvent* event)
@@ -227,7 +244,7 @@ void GMicQtWindow::closeEvent(QCloseEvent* event)
     QCoreApplication::setOrganizationDomain(d->hostDom);
     QCoreApplication::setApplicationName(d->hostName);
 
-    QWidget::closeEvent(event);
+    MainWindow::closeEvent(event);
 }
 
 void GMicQtWindow::execWindow(DPlugin* const tool, const QString& command, bool viewer)
@@ -282,19 +299,20 @@ void GMicQtWindow::execWindow(DPlugin* const tool, const QString& command, bool 
 
     if (!command.isEmpty())
     {
-        parameters.command = command.toStdString();
+//        parameters.command = command.toStdString();
 
-        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Start G'MIC-Qt dialog with parameters:";
-        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Command:"     << parameters.command;
-        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Path:"        << parameters.filterPath;
-        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Input Mode:"  << (int)parameters.inputMode;
-        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Output Mode:" << (int)parameters.outputMode;
-        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Filter name:" << parameters.filterName();
     }
     else
     {
         parameters = lastAppliedFilterRunParameters(GmicQt::ReturnedRunParametersFlag::AfterFilterExecution);
     }
+
+    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Start G'MIC-Qt dialog with parameters:";
+    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Command:"     << parameters.command;
+    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Path:"        << parameters.filterPath;
+    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Input Mode:"  << (int)parameters.inputMode;
+    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Output Mode:" << (int)parameters.outputMode;
+    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Filter name:" << parameters.filterName();
 
     s_mainWindow->setPluginParameters(parameters);
 
@@ -320,10 +338,6 @@ void GMicQtWindow::execWindow(DPlugin* const tool, const QString& command, bool 
     {
         s_mainWindow->show();
     }
-
-    // Bug #462066: force to load filters list at start-up.
-
-    s_mainWindow->updateFiltersFromSources(0, false);
 
     // Make it destroy itself on close (signaling the event loop)
 

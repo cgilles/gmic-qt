@@ -394,6 +394,13 @@ void MainWindow::buildFiltersTree()
 
 void MainWindow::retrieveFilterAndParametersFromPluginParameters(QString & hash, QList<QString> & parameters)
 {
+    std::cout << "[gmic_qt] retrieveFilterAndParametersFromPluginParameters:" << std::endl;
+    std::cout << "Command: " << _pluginParameters.command << std::endl;
+    std::cout << "Path: " << _pluginParameters.filterPath << std::endl;
+    std::cout << "Input Mode: " << (int)_pluginParameters.inputMode << std::endl;
+    std::cout << "Output Mode: " << (int)_pluginParameters.outputMode << std::endl;
+    std::cout << "Filter Name: " << _pluginParameters.filterName() << std::endl;
+
   if (_pluginParameters.command.empty() && _pluginParameters.filterPath.empty()) {
     return;
   }

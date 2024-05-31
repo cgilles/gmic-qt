@@ -262,7 +262,11 @@ void GmicFilterDialog::slotOnlineHandbook()
 
 void GmicFilterDialog::slotGmicQt()
 {
-    GMicQtWindow::execWindow(d->plugin, d->command->toPlainText(), true);
+    GMicQtWindow::execWindow(
+                             d->plugin,                     // BQM plugin instance to get the digiKam interface and more.
+                             d->command->toPlainText(),     // The G'MIC command
+                             true                           // Viewver mode
+                            );
 
     QClipboard* const clipboard = QGuiApplication::clipboard();
 
