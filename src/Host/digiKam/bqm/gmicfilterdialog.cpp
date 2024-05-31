@@ -65,6 +65,8 @@
 
 using namespace DigikamEditorGmicQtPlugin;
 
+extern BqmInfoIface* s_infoIface;
+
 namespace DigikamBqmGmicQtPlugin
 {
 
@@ -263,9 +265,10 @@ void GmicFilterDialog::slotOnlineHandbook()
 void GmicFilterDialog::slotGmicQt()
 {
     GMicQtWindow::execWindow(
-                             d->plugin,                     // BQM plugin instance to get the digiKam interface and more.
-                             d->command->toPlainText(),     // The G'MIC command
-                             true                           // Viewver mode
+                             d->plugin,                     // BQM plugin instance.
+                             s_infoIface,                   // Host interface.
+                             d->command->toPlainText(),     // The G'MIC command.
+                             true                           // Viewver mode.
                             );
 
     QClipboard* const clipboard = QGuiApplication::clipboard();

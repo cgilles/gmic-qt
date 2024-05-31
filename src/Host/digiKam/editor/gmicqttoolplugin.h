@@ -62,6 +62,10 @@ public:
 private Q_SLOTS:
 
     void slotGmicQt();
+
+private:
+
+    DPluginAction* m_action = nullptr;
 };
 
 } // namespace DigikamEditorGmicQtPlugin

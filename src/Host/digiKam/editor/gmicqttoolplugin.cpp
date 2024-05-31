@@ -172,21 +172,21 @@ QString GmicQtToolPlugin::handbookReference() const
 
 void GmicQtToolPlugin::setup(QObject* const parent)
 {
-    DPluginAction* const ac = new DPluginAction(parent);
-    ac->setIcon(icon());
-    ac->setText(tr("G'MIC-Qt..."));
-    ac->setObjectName(QLatin1String("editorwindow_gmicqt"));
-    ac->setActionCategory(DPluginAction::EditorEnhance);
+    m_action = new DPluginAction(parent);
+    m_action->setIcon(icon());
+    m_action->setText(tr("G'MIC-Qt..."));
+    m_action->setObjectName(QLatin1String("editorwindow_gmicqt"));
+    m_action->setActionCategory(DPluginAction::EditorEnhance);
 
-    connect(ac, SIGNAL(triggered(bool)),
+    connect(m_action, SIGNAL(triggered(bool)),
             this, SLOT(slotGmicQt()));
 
-    addAction(ac);
+    addAction(m_action);
 }
 
 void GmicQtToolPlugin::slotGmicQt()
 {
-    GMicQtWindow::execWindow(this);
+    GMicQtWindow::execWindow(this, infoIface(m_action));
 }
 
 } // namespace DigikamEditorGmicQtPlugin

@@ -35,6 +35,7 @@
 // digiKam includes
 
 #include "dplugin.h"
+#include "dinfointerface.h"
 
 // Local includes
 
@@ -53,13 +54,16 @@ class GMicQtWindow : public MainWindow
 
 public:
 
-    explicit GMicQtWindow(DPlugin* const tool, QWidget* const parent);
+    explicit GMicQtWindow(DPlugin* const tool,
+                          DInfoInterface* const iface,
+                          QWidget* const parent);
     ~GMicQtWindow()                     override;
 
     void saveParameters();
     void setCommandSelector();
 
     static void execWindow(DPlugin* const tool,
+                           DInfoInterface* const iface,
                            const QString& prm = QString(),
                            bool  viewer = false);
 

@@ -42,7 +42,9 @@
 #include "digikam_debug.h"
 #include "digikam_globals.h"
 #include "dpluginaboutdlg.h"
-#include "dinfointerface.h"
+#include "bqminfoiface.h"
+#include "dbinfoiface.h"
+#include "dmetainfoiface.h"
 
 // Local includes
 
@@ -67,18 +69,21 @@ public:
     {
     }
 
-    QString  hostOrg  = QCoreApplication::organizationName();
-    QString  hostDom  = QCoreApplication::organizationDomain();
-    QString  hostName = QCoreApplication::applicationName();
+    QString         hostOrg  = QCoreApplication::organizationName();
+    QString         hostDom  = QCoreApplication::organizationDomain();
+    QString         hostName = QCoreApplication::applicationName();
 
-    QString  plugName;
-    QString  plugOrg;
-    QString  plugDom;
+    QString         plugName;
+    QString         plugOrg;
+    QString         plugDom;
 
-    DPlugin* plugTool = nullptr;
+    DPlugin*        plugTool = nullptr;
+    DInfoInterface* iface    = nullptr;
 };
 
-GMicQtWindow::GMicQtWindow(DPlugin* const tool, QWidget* const parent)
+GMicQtWindow::GMicQtWindow(DPlugin* const tool,
+                           DInfoInterface* const iface,
+                           QWidget* const parent)
     : MainWindow(parent),
       d         (new Private(tool))
 {
@@ -187,6 +192,7 @@ void GMicQtWindow::slotOkClicked()
 
 void GMicQtWindow::slotLayersDialog()
 {
+    // TODO
 }
 
 void GMicQtWindow::saveParameters()
@@ -208,18 +214,17 @@ void GMicQtWindow::showEvent(QShowEvent* event)
 
     if (d->plugName.isEmpty())
     {
-        DInfoInterface* const iface = d->plugTool->iface();
         QString dkModule;
 
-        if      (iface->objectName() == QLatin1String("BqmInfoIface"))
+        if      (dynamic_cast<BqmInfoIface*>(d->iface))
         {
             dkModule = QLatin1String("bqm-");
         }
-        else if (iface->objectName() == QLatin1String("EditorInfoIface"))
+        else if (dynamic_cast<DBInfoIface*>(d->iface))
         {
             dkModule = QLatin1String("editor-");
         }
-        else if (iface->objectName() == QLatin1String("ShowfotoInfoIface"))
+        else if (dynamic_cast<DMetaInfoIface*>(d->iface))
         {
             dkModule = QLatin1String("showfoto-");
         }
@@ -247,7 +252,12 @@ void GMicQtWindow::closeEvent(QCloseEvent* event)
     MainWindow::closeEvent(event);
 }
 
-void GMicQtWindow::execWindow(DPlugin* const tool, const QString& command, bool viewer)
+// --- Static method ---
+
+void GMicQtWindow::execWindow(DPlugin* const tool, 
+                              DInfoInterface* const iface,
+                              const QString& command,
+                              bool viewer)
 {
     // Code inspired from GmicQt.cpp::run() and host_none.cpp::main()
 
@@ -288,7 +298,7 @@ void GMicQtWindow::execWindow(DPlugin* const tool, const QString& command, bool 
      * seen side effects, for example with the settings to host in RC file.
      */
 
-    s_mainWindow = new GMicQtWindow(tool, qApp->activeWindow());
+    s_mainWindow = new GMicQtWindow(tool, iface, qApp->activeWindow());
 
     if (viewer)
     {
