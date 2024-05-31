@@ -36,15 +36,13 @@
 #include <QAction>
 #include <QPointer>
 #include <QDesktopServices>
+#include <QSettings>
 
 // digiKam includes
 
 #include "digikam_debug.h"
 #include "digikam_globals.h"
 #include "dpluginaboutdlg.h"
-#include "bqminfoiface.h"
-#include "dbinfoiface.h"
-#include "dmetainfoiface.h"
 
 // Local includes
 
@@ -78,11 +76,10 @@ public:
     QString         plugDom;
 
     DPlugin*        plugTool = nullptr;
-    DInfoInterface* iface    = nullptr;
+    QString         dkModule;
 };
 
 GMicQtWindow::GMicQtWindow(DPlugin* const tool,
-                           DInfoInterface* const iface,
                            QWidget* const parent)
     : MainWindow(parent),
       d         (new Private(tool))
@@ -148,7 +145,36 @@ GMicQtWindow::~GMicQtWindow()
     delete d;
 }
 
-void GMicQtWindow::setCommandSelector()
+void GMicQtWindow::setHostType(HostType type)
+{
+    switch (type)
+    {
+        case BQM:
+        {
+            d->dkModule = QLatin1String("bqm-");
+            break;
+        }
+
+        case ImageEditor:
+        {
+            d->dkModule = QLatin1String("editor-");
+            break;
+        }
+
+        case Showfoto:
+        {
+            d->dkModule = QLatin1String("showfoto-");
+            break;
+        }
+
+        default:
+        {
+            break;
+        }
+    }
+}
+
+void GMicQtWindow::setFilterSelectionMode()
 {
     QPushButton* const pbOk     = findChild<QPushButton*>("pbOk");
     pbOk->setText(QObject::tr("Select Filter"));
@@ -214,22 +240,8 @@ void GMicQtWindow::showEvent(QShowEvent* event)
 
     if (d->plugName.isEmpty())
     {
-        QString dkModule;
 
-        if      (dynamic_cast<BqmInfoIface*>(d->iface))
-        {
-            dkModule = QLatin1String("bqm-");
-        }
-        else if (dynamic_cast<DBInfoIface*>(d->iface))
-        {
-            dkModule = QLatin1String("editor-");
-        }
-        else if (dynamic_cast<DMetaInfoIface*>(d->iface))
-        {
-            dkModule = QLatin1String("showfoto-");
-        }
-
-        d->plugName = dkModule + QCoreApplication::applicationName();
+        d->plugName = d->dkModule + QCoreApplication::applicationName();
     }
 
     QCoreApplication::setOrganizationName(d->plugOrg);
@@ -254,10 +266,9 @@ void GMicQtWindow::closeEvent(QCloseEvent* event)
 
 // --- Static method ---
 
-void GMicQtWindow::execWindow(DPlugin* const tool, 
-                              DInfoInterface* const iface,
-                              const QString& command,
-                              bool viewer)
+void GMicQtWindow::execWindow(DPlugin* const tool,
+                              HostType type,
+                              const QString& command)
 {
     // Code inspired from GmicQt.cpp::run() and host_none.cpp::main()
 
@@ -298,12 +309,14 @@ void GMicQtWindow::execWindow(DPlugin* const tool,
      * seen side effects, for example with the settings to host in RC file.
      */
 
-    s_mainWindow = new GMicQtWindow(tool, iface, qApp->activeWindow());
+    s_mainWindow = new GMicQtWindow(tool, qApp->activeWindow());
 
-    if (viewer)
+    if (type == GMicQtWindow::BQM)
     {
-        s_mainWindow->setCommandSelector();
+        s_mainWindow->setFilterSelectionMode();
     }
+
+    s_mainWindow->setHostType(type);
 
     RunParameters parameters;
 
@@ -340,7 +353,17 @@ void GMicQtWindow::execWindow(DPlugin* const tool,
 
     s_mainWindow->setWindowModality(Qt::ApplicationModal);
 
-    if (QSettings().value("Config/MainWindowMaximized", false).toBool())
+    QSettings settings;
+/*
+    settings.setValue(QString("LastExecution/host_%1/FilterPath").arg(GmicQtHost::ApplicationShortname), _lastAppliedFilterPath);
+    settings.setValue(QString("LastExecution/host_%1/FilterHash").arg(GmicQtHost::ApplicationShortname), _lastAppliedFilterHash);
+    settings.setValue(QString("LastExecution/host_%1/Command").arg(GmicQtHost::ApplicationShortname), _lastAppliedCommand);
+    settings.setValue(QString("LastExecution/host_%1/Arguments").arg(GmicQtHost::ApplicationShortname), _lastAppliedCommandArguments);
+    settings.setValue(QString("LastExecution/host_%1/InputMode").arg(GmicQtHost::ApplicationShortname), (int)_lastAppliedCommandInOutState.inputMode);
+    settings.setValue(QString("LastExecution/host_%1/OutputMode").arg(GmicQtHost::ApplicationShortname), (int)_lastAppliedCommandInOutState.outputMode);
+    settings.sync();
+*/
+    if (settings.value("Config/MainWindowMaximized", false).toBool())
     {
         s_mainWindow->showMaximized();
     }

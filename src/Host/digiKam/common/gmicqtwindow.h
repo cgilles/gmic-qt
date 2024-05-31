@@ -54,18 +54,27 @@ class GMicQtWindow : public MainWindow
 
 public:
 
+    enum HostType
+    {
+        ImageEditor = 0,
+        BQM,
+        Showfoto,
+        Unknow
+    };
+
+public:
+
     explicit GMicQtWindow(DPlugin* const tool,
-                          DInfoInterface* const iface,
                           QWidget* const parent);
     ~GMicQtWindow()                     override;
 
     void saveParameters();
-    void setCommandSelector();
+    void setFilterSelectionMode();
+    void setHostType(HostType type);
 
     static void execWindow(DPlugin* const tool,
-                           DInfoInterface* const iface,
-                           const QString& prm = QString(),
-                           bool  viewer = false);
+                           HostType type,
+                           const QString& prm = QString());
 
 protected:
 

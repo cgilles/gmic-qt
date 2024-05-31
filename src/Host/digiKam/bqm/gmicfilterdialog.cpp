@@ -265,9 +265,8 @@ void GmicFilterDialog::slotGmicQt()
 {
     GMicQtWindow::execWindow(
                              d->plugin,                     // BQM plugin instance.
-                             s_infoIface,                   // Host interface.
-                             d->command->toPlainText(),     // The G'MIC command.
-                             true                           // Viewver mode.
+                             GMicQtWindow::BQM,             // Host type.
+                             d->command->toPlainText()      // The G'MIC command.
                             );
 
     QClipboard* const clipboard = QGuiApplication::clipboard();
