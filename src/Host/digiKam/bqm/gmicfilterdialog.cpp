@@ -279,6 +279,13 @@ void GmicFilterDialog::slotGmicQt()
 
 void GmicFilterDialog::accept()
 {
+    if (d->title->text().isEmpty())
+    {
+        QMessageBox::information(this, QObject::tr("Error"),
+                                 QObject::tr("Title cannot be empty..."));
+        return;
+    }
+
     if (d->edit)
     {
         d->currentItem->command   = d->command->toPlainText();
