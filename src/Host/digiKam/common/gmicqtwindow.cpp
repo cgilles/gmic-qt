@@ -147,6 +147,8 @@ GMicQtWindow::~GMicQtWindow()
 
 void GMicQtWindow::setHostType(HostType type)
 {
+    // Customize the rc settings file-name depending of the host application running Gmic-Qt.
+
     switch (type)
     {
         case BQM:
@@ -319,16 +321,16 @@ void GMicQtWindow::execWindow(DPlugin* const tool,
     s_mainWindow->setHostType(type);
 
     RunParameters parameters;
-
+/*
     if (!command.isEmpty())
     {
-//        parameters.command = command.toStdString();
+        parameters.command = command.toStdString();
 
     }
     else
-    {
-        parameters = lastAppliedFilterRunParameters(GmicQt::ReturnedRunParametersFlag::AfterFilterExecution);
-    }
+    {*/
+        parameters = lastAppliedFilterRunParameters(GmicQt::ReturnedRunParametersFlag::BeforeFilterExecution);
+//    }
 
     qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Start G'MIC-Qt dialog with parameters:";
     qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Command:"     << parameters.command;
