@@ -37,7 +37,7 @@
 #include <QAction>
 #include <QCloseEvent>
 #include <QObject>
-#include <QUndoCommand>
+#include <QTextBrowser>
 #include <QVariant>
 #include <QApplication>
 #include <QButtonGroup>
@@ -83,7 +83,7 @@ public:
     AddGmicFilterProxyModel* proxyModel      = nullptr;
     QLineEdit*               title           = nullptr;
     DTextEdit*               desc            = nullptr;
-    QTextEdit*               command         = nullptr;
+    QTextBrowser*            command         = nullptr;
     QPushButton*             commandBtn      = nullptr;
     DPluginBqm*              plugin          = nullptr;
 };
@@ -120,7 +120,7 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
 
     QLabel* const commandLbl = new QLabel(QObject::tr("Filter Command:"), this);
     d->commandBtn            = new QPushButton(this);
-    d->command               = new QTextEdit(this);
+    d->command               = new QTextBrowser(this);
 
     QLabel* const titleLbl   = new QLabel(d->filter ? QObject::tr("Filter Title:")
                                                     : QObject::tr("Folder Title:"), this);
