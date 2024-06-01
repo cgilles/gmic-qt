@@ -111,10 +111,9 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
 
     QLabel* const frontLbl = new QLabel(this);
     frontLbl->setText(QObject::tr("This dialog allow to customize the G'MIC Command string corresponding "
-                                  "to this new filter. "
+                                  "to this filter. "
                                   "Don't forget to assign at least a name and optionally a comment "
-                                  "to describe the filter. Finaly you can choose where to keep it in your "
-                                  "filters collection."));
+                                  "to describe the filter."));
     frontLbl->setTextFormat(Qt::PlainText);
     frontLbl->setWordWrap(true);
 

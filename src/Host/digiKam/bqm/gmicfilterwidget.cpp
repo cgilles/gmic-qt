@@ -44,7 +44,6 @@
 #include <QDialogButtonBox>
 #include <QGridLayout>
 #include <QHBoxLayout>
-#include <QSpacerItem>
 #include <QLabel>
 #include <QItemDelegate>
 #include <QValidator>
@@ -102,8 +101,6 @@ GmicFilterWidget::GmicFilterWidget(QWidget* const parent)
     d->manager         = new GmicFilterManager(db, this);
     d->manager->load();
 
-    d->search          = new SearchTextBar(this, QLatin1String("DigikamGmicFilterSearchBar"));
-    d->search->setObjectName(QLatin1String("search"));
 
     d->tree            = new QTreeView(this);
     d->tree->setUniformRowHeights(true);
@@ -113,6 +110,7 @@ GmicFilterWidget::GmicFilterWidget(QWidget* const parent)
     d->tree->setDragDropMode(QAbstractItemView::InternalMove);
     d->tree->setAlternatingRowColors(true);
     d->tree->setContextMenuPolicy(Qt::CustomContextMenu);
+    d->tree->setHeaderHidden(true);
 
     d->addButton       = new QToolButton(this);
     d->addButton->setToolTip(QObject::tr("Add new item."));
@@ -140,20 +138,17 @@ GmicFilterWidget::GmicFilterWidget(QWidget* const parent)
                                      QObject::tr("Edit..."));
     d->edtButton->setDefaultAction(d->edit);
 
-    QSpacerItem* const spacerItem1 = new QSpacerItem(40, 20, QSizePolicy::Expanding,
-                                                             QSizePolicy::Minimum);
-
-    QHBoxLayout* const hbox = new QHBoxLayout();
-    hbox->addWidget(d->addButton);
-    hbox->addWidget(d->remButton);
-    hbox->addWidget(d->edtButton);
-    hbox->addItem(spacerItem1);
+    d->search          = new SearchTextBar(this, QLatin1String("DigikamGmicFilterSearchBar"));
+    d->search->setObjectName(QLatin1String("search"));
 
     QGridLayout* const grid = new QGridLayout(this);
-    grid->addWidget(d->search,  0, 0, 1, 2);
-    grid->addWidget(d->tree,    1, 0, 1, 2);
-    grid->addLayout(hbox,       2, 0, 1, 3);
-    grid->setColumnStretch(1, 10);
+    grid->addWidget(d->tree,      0, 0, 1, 5);
+    grid->addWidget(d->addButton, 1, 0, 1, 1);
+    grid->addWidget(d->remButton, 1, 1, 1, 1);
+    grid->addWidget(d->edtButton, 1, 2, 1, 1);
+    grid->addWidget(d->search,    1, 4, 1, 1);
+    grid->setColumnStretch(3, 2);
+    grid->setColumnStretch(4, 8);
 
     d->commandsModel        = d->manager->commandsModel();
     d->proxyModel           = new TreeProxyModel(this);
