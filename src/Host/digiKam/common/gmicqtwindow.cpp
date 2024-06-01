@@ -113,6 +113,11 @@ GMicQtWindow::GMicQtWindow(DPlugin* const tool,
                                                      tr("About..."));
         help->setMenu(menu);
 
+        if (!d->plugTool)
+        {
+            help->setEnabled(false);
+        }
+
         connect(webAction, SIGNAL(triggered()),
                 this, SLOT(slotOnlineHandbook()));
 
@@ -317,16 +322,16 @@ void GMicQtWindow::execWindow(DPlugin* const tool,
     s_mainWindow->setHostType(type);
 
     RunParameters parameters;
-/*
+
     if (!command.isEmpty())
     {
         parameters.command = command.toStdString();
 
     }
     else
-    {*/
+    {
         parameters = lastAppliedFilterRunParameters(GmicQt::ReturnedRunParametersFlag::BeforeFilterExecution);
-//    }
+    }
 
     qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Start G'MIC-Qt dialog with parameters:";
     qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Command:"     << parameters.command;

@@ -8,6 +8,7 @@
 # Script to configure cmake build.
 
 export MAKEFILES_TYPE='Unix Makefiles'
+export Qt6_DIR=/opt/qt6
 
 ln -s ../gmic ./gmic
 
