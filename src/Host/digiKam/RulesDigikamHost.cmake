@@ -185,4 +185,6 @@ target_link_libraries(gmic_qt_common
 include(${CMAKE_SOURCE_DIR}/src/Host/digiKam/editor/EditorPluginRules.cmake)
 include(${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/BqmPluginRules.cmake)
 
-include(${CMAKE_SOURCE_DIR}/src/Host/digiKam/tests/TestsRules.cmake)
+if(ENABLE_TEST)
+    include(${CMAKE_SOURCE_DIR}/src/Host/digiKam/tests/TestsRules.cmake)
+endif()
