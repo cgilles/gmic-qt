@@ -157,7 +157,7 @@ void getCroppedImages(cimg_library::CImgList<gmic_pixel_type>& images,
     delete input_image;
 }
 
-void applyColorProfile(cimg_library::CImg<gmic_pixel_type>& images)
+void applyColorProfile(cimg_library::CImg<gmic_pixel_type>& images) // cppcheck-suppress constParameterReference
 {
     qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Calling GmicQt applyColorProfile()";
 
@@ -170,7 +170,7 @@ void showMessage(const char* message)
     qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "G'MIC-Qt:" << message;
 }
 
-void outputImages(cimg_library::CImgList<gmic_pixel_type>& images,
+void outputImages(cimg_library::CImgList<gmic_pixel_type>& images,  // cppcheck-suppress constParameterReference
                   const cimg_library::CImgList<char>& imageNames,
                   GmicQt::OutputMode mode)
 {

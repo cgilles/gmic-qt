@@ -148,7 +148,7 @@ void getCroppedImages(cimg_library::CImgList<gmic_pixel_type>& images,
     GMicQtImageConverter::convertDImgtoCImg(input_image->copy(ix, iy, iw, ih), images[0]);
 }
 
-void applyColorProfile(cimg_library::CImg<gmic_pixel_type>& images)
+void applyColorProfile(cimg_library::CImg<gmic_pixel_type>& images) // cppcheck-suppress constParameterReference
 {
     qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Calling GmicQt applyColorProfile()";
 
