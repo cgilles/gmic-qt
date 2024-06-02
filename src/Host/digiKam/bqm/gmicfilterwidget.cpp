@@ -490,9 +490,9 @@ QString GmicFilterWidget::currentPath() const
 
             hierarchy.append(node->title);
 
-            while (node->parent())
+            while (node && node->parent())
             {
-                node  = node->parent();
+                node = node->parent();
 
                 if (node)
                 {

@@ -1,8 +1,9 @@
 #!/bin/bash
 
-# SPDX-FileCopyrightText: 2008-2024 by Gilles Caulier, <caulier dot gilles at gmail dot com>
+# Copyright (c) 2008-2024 by Gilles Caulier, <caulier dot gilles at gmail dot com>
 #
-# SPDX-License-Identifier: BSD-3-Clause
+# Redistribution and use is allowed according to the terms of the GPL3 license.
+# For details see the accompanying COPYING file.
 #
 # Arguments : $1 : VCPKG install path (default ./project/mxe/build.win32).
 #             $2 : build type : 'debugfull' to hack (default), 'release' for production, relwithdebinfo for packaging.

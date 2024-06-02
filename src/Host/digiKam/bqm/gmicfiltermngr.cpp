@@ -271,7 +271,7 @@ void GmicFilterModel::signalEntryAdded(GmicFilterNode* item)
 {
     Q_ASSERT(item && item->parent());
 
-    int row                       = item->parent()->children().indexOf(item);
+    int row                      = item->parent()->children().indexOf(item);
     GmicFilterNode* const parent = item->parent();
 
     // item was already added so remove before beginInsertRows is called
