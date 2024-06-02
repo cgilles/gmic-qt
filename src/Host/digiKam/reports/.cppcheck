@@ -11,6 +11,7 @@
 
 IGNORE_DIRS="-i ../translations/ "
 IGNORE_DIRS+="-i ../patches/ "
+IGNORE_DIRS+="-i ../reports/ "
 
 # --- Defines to use with static analysis.
 

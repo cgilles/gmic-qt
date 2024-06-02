@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef DIGIKAM_GMIC_COMMAND_NODE_H
-#define DIGIKAM_GMIC_COMMAND_NODE_H
+#ifndef DIGIKAM_GMIC_FILTER_NODE_H
+#define DIGIKAM_GMIC_FILTER_NODE_H
 
 // Qt includes
 
@@ -128,4 +128,4 @@ private:
 
 } // namespace DigikamBqmGmicQtPlugin
 
-#endif // DIGIKAM_GMIC_COMMAND_NODE_H
+#endif // DIGIKAM_GMIC_FILTER_NODE_H

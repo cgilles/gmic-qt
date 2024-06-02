@@ -22,8 +22,8 @@
 *
 */
 
-#ifndef DIGIKAM_BQM_GMIC_PLUGIN_H
-#define DIGIKAM_BQM_GMIC_PLUGIN_H
+#ifndef DIGIKAM_GMIC_BQM_PLUGIN_H
+#define DIGIKAM_GMIC_BQM_PLUGIN_H
 
 // digiKam includes
 
@@ -45,7 +45,7 @@ class GmicBqmPlugin : public DPluginBqm
 public:
 
     explicit GmicBqmPlugin(QObject* const parent = nullptr);
-    ~GmicBqmPlugin()                      override = default;
+    ~GmicBqmPlugin()                     override = default;
 
     QString name()                 const override;
     QString iid()                  const override;
@@ -62,4 +62,4 @@ public:
 
 } // namespace DigikamBqmGmicQtPlugin
 
-#endif // DIGIKAM_BQM_GMIC_PLUGIN_H
+#endif // DIGIKAM_GMIC_BQM_PLUGIN_H

@@ -124,7 +124,7 @@ endif()
 find_package(DigikamCore CONFIG REQUIRED)
 
 set_package_properties(DigikamCore PROPERTIES
-                       URL "http://www.digikam.org"
+                       URL "https://www.digikam.org"
                        DESCRIPTION "digiKam core library"
 )
 
@@ -133,7 +133,7 @@ include_directories($<TARGET_PROPERTY:Digikam::digikamcore,INTERFACE_INCLUDE_DIR
 find_package(DigikamGui CONFIG REQUIRED)
 
 set_package_properties(DigikamGui PROPERTIES
-                       URL "http://www.digikam.org"
+                       URL "https://www.digikam.org"
                        DESCRIPTION "digiKam gui library"
 )
 
@@ -142,7 +142,7 @@ include_directories($<TARGET_PROPERTY:Digikam::digikamgui,INTERFACE_INCLUDE_DIRE
 find_package(DigikamDatabase CONFIG REQUIRED)
 
 set_package_properties(DigikamDatabase PROPERTIES
-                       URL "http://www.digikam.org"
+                       URL "https://www.digikam.org"
                        DESCRIPTION "digiKam database library"
 )
 

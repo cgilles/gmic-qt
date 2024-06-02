@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef DIGIKAM_GMIC_COMMAND_MNGR_H
-#define DIGIKAM_GMIC_COMMAND_MNGR_H
+#ifndef DIGIKAM_GMIC_FILTER_MNGR_H
+#define DIGIKAM_GMIC_FILTER_MNGR_H
 
 // Qt includes
 
@@ -262,4 +262,4 @@ private:
 
 } // namespace DigikamBqmGmicQtPlugin
 
-#endif // DIGIKAM_GMIC_COMMAND_MNGR_H
+#endif // DIGIKAM_GMIC_FILTER_MNGR_H

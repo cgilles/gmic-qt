@@ -5,7 +5,7 @@
 # Redistribution and use is allowed according to the terms of the GPL3 license.
 # For details see the accompanying COPYING file.
 #
-# Run CppCheck static analyzer on whole digiKam source code.
+# Run CppCheck static analyzer on whole digiKam plugin source code.
 # http://cppcheck.sourceforge.net/
 # Dependencies : Python::pygments module to export report as HTML.
 #

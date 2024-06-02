@@ -368,7 +368,7 @@ void GMicQtWindow::execWindow(DPlugin* const tool,
 */
     if (settings.value("Config/MainWindowMaximized", false).toBool())
     {
-        s_mainWindow->showMaximized();
+        s_mainWindow->showMaximized();  // krazy:exclude=qmethods
     }
     else
     {
