@@ -254,13 +254,14 @@ void GmicFilterDialog::slotOnlineHandbook()
 
 void GmicFilterDialog::slotGmicQt()
 {
+    QClipboard* const clipboard = QGuiApplication::clipboard();
+    clipboard->clear();
+
     GMicQtWindow::execWindow(
                              d->plugin,                     // BQM plugin instance.
                              GMicQtWindow::BQM,             // Host type.
                              d->command->toPlainText()      // The G'MIC command.
                             );
-
-    QClipboard* const clipboard = QGuiApplication::clipboard();
 
     if (!clipboard->text().isEmpty())
     {
