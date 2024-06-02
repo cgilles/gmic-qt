@@ -106,6 +106,11 @@ void getCroppedImages(cimg_library::CImgList<gmic_pixel_type>& images,
 
     QueuePoolItemsList list = s_infoIface->selectedItemInfoListFromCurrentQueue();
 
+    if (list.isEmpty())
+    {
+        list = s_infoIface->allItemInfoListFromCurrentQueue();
+    }
+
     if (mode == GmicQt::InputMode::NoInput || list.isEmpty())
     {
         images.assign();
