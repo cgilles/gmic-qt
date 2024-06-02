@@ -494,15 +494,12 @@ QString GmicFilterWidget::currentPath() const
             {
                 node = node->parent();
 
-                if (node)
+                if (node->type() == GmicFilterNode::RootFolder)
                 {
-                    if (node->type() == GmicFilterNode::RootFolder)
-                    {
-                        break;
-                    }
-
-                    hierarchy.append(node->title);
+                    break;
                 }
+
+                hierarchy.append(node->title);
             }
         }
 
