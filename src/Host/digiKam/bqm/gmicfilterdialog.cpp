@@ -27,10 +27,7 @@
 // Qt includes
 
 #include <QMenu>
-#include <QFile>
 #include <QIcon>
-#include <QStandardPaths>
-#include <QHeaderView>
 #include <QMessageBox>
 #include <QToolButton>
 #include <QPushButton>
@@ -38,15 +35,10 @@
 #include <QCloseEvent>
 #include <QObject>
 #include <QTextBrowser>
-#include <QVariant>
 #include <QApplication>
-#include <QButtonGroup>
 #include <QDialogButtonBox>
 #include <QGridLayout>
-#include <QHBoxLayout>
-#include <QSpacerItem>
 #include <QLabel>
-#include <QItemDelegate>
 #include <QValidator>
 #include <QClipboard>
 
@@ -84,7 +76,7 @@ public:
     QLineEdit*               title           = nullptr;
     DTextEdit*               desc            = nullptr;
     QTextBrowser*            command         = nullptr;
-    QPushButton*             commandBtn      = nullptr;
+    QPushButton*             editBtn         = nullptr;
     DPluginBqm*              plugin          = nullptr;
 };
 
@@ -112,13 +104,13 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
     QLabel* const frontLbl = new QLabel(this);
     frontLbl->setText(QObject::tr("This dialog allow to customize the G'MIC Command string corresponding "
                                   "to this filter. "
-                                  "Don't forget to assign at least a name and optionally a comment "
+                                  "Don't forget to assign at least a title and optionally a comment "
                                   "to describe the filter."));
     frontLbl->setTextFormat(Qt::PlainText);
     frontLbl->setWordWrap(true);
 
     QLabel* const commandLbl = new QLabel(QObject::tr("Filter Command:"), this);
-    d->commandBtn            = new QPushButton(this);
+    d->editBtn               = new QPushButton(this);
     d->command               = new QTextBrowser(this);
 
     QLabel* const titleLbl   = new QLabel(d->filter ? QObject::tr("Filter Title:")
@@ -152,7 +144,7 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
     QGridLayout* const grid           = new QGridLayout(this);
     grid->addWidget(frontLbl,       0, 0, 1, 3);
     grid->addWidget(commandLbl,     1, 0, 1, 1);
-    grid->addWidget(d->commandBtn,  1, 2, 1, 1);
+    grid->addWidget(d->editBtn,  1, 2, 1, 1);
     grid->addWidget(d->command,     2, 0, 1, 3);
     grid->addWidget(titleLbl,       3, 0, 1, 1);
     grid->addWidget(d->title,       3, 1, 1, 2);
@@ -167,10 +159,10 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
         if (d->filter)
         {
             d->command->setText(d->currentItem->command);
-            d->command->setFocus();
+            d->title->setFocus();
             d->desc->setText(d->currentItem->desc);
             setWindowTitle(QObject::tr("Edit G'MIC Filter"));
-            d->commandBtn->setText(QObject::tr("Edit Filter..."));
+            d->editBtn->setText(QObject::tr("Edit Filter..."));
         }
         else
         {
@@ -178,7 +170,7 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
             frontLbl->setVisible(false);
             commandLbl->setVisible(false);
             d->command->setVisible(false);
-            d->commandBtn->setVisible(false);
+            d->editBtn->setVisible(false);
             descLbl->setVisible(false);
             d->desc->setVisible(false);
             setWindowTitle(QObject::tr("Edit G'MIC Folder"));
@@ -189,9 +181,9 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
         if (d->filter)
         {
             d->command->setText(QString());     // TODO use Clipboard
-            d->command->setFocus();
+            d->title->setFocus();
             setWindowTitle(QObject::tr("Add G'MIC Filter"));
-            d->commandBtn->setText(QObject::tr("Select Filter..."));
+            d->editBtn->setText(QObject::tr("Select Filter..."));
         }
         else
         {
@@ -199,7 +191,7 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
             frontLbl->setVisible(false);
             commandLbl->setVisible(false);
             d->command->setVisible(false);
-            d->commandBtn->setVisible(false);
+            d->editBtn->setVisible(false);
             descLbl->setVisible(false);
             d->desc->setVisible(false);
             setWindowTitle(QObject::tr("Add G'MIC Folder"));
@@ -227,7 +219,7 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
 
     // ---
 
-    connect(d->commandBtn, SIGNAL(pressed()),
+    connect(d->editBtn, SIGNAL(pressed()),
             this, SLOT(slotGmicQt()));
 
     connect(buttonBox, SIGNAL(accepted()),

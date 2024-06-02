@@ -27,26 +27,15 @@
 // Qt includes
 
 #include <QMenu>
-#include <QFile>
 #include <QIcon>
 #include <QStandardPaths>
 #include <QHeaderView>
 #include <QMessageBox>
 #include <QToolButton>
-#include <QPushButton>
 #include <QAction>
-#include <QCloseEvent>
 #include <QObject>
-#include <QUndoCommand>
-#include <QVariant>
 #include <QApplication>
-#include <QButtonGroup>
-#include <QDialogButtonBox>
 #include <QGridLayout>
-#include <QHBoxLayout>
-#include <QLabel>
-#include <QItemDelegate>
-#include <QValidator>
 
 // digiKam includes
 
