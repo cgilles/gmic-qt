@@ -144,7 +144,7 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
     QGridLayout* const grid           = new QGridLayout(this);
     grid->addWidget(frontLbl,       0, 0, 1, 3);
     grid->addWidget(commandLbl,     1, 0, 1, 1);
-    grid->addWidget(d->editBtn,  1, 2, 1, 1);
+    grid->addWidget(d->editBtn,     1, 2, 1, 1);
     grid->addWidget(d->command,     2, 0, 1, 3);
     grid->addWidget(titleLbl,       3, 0, 1, 1);
     grid->addWidget(d->title,       3, 1, 1, 2);

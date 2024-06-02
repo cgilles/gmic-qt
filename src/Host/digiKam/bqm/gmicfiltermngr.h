@@ -52,11 +52,11 @@ public:
 
 protected:
 
-    int                m_row             = 0;
-    GmicFilterManager* m_bookmarkManager = nullptr;
-    GmicFilterNode*    m_node            = nullptr;
-    GmicFilterNode*    m_parent          = nullptr;
-    bool               m_done            = false;
+    int                m_row     = 0;
+    GmicFilterManager* m_manager = nullptr;
+    GmicFilterNode*    m_node    = nullptr;
+    GmicFilterNode*    m_parent  = nullptr;
+    bool               m_done    = false;
 };
 
 //---------------------------------------------------------------------------------
@@ -127,7 +127,7 @@ public:
                              QObject* const parent = nullptr);
     ~GmicFilterModel()                                                        override;
 
-    GmicFilterManager* bookmarksManager()                               const;
+    GmicFilterManager* manager()                                        const;
     QVariant headerData(int section,
                         Qt::Orientation orientation,
                         int role = Qt::DisplayRole)                     const override;
@@ -218,7 +218,7 @@ class GmicFilterManager : public QObject
 
 public:
 
-    explicit GmicFilterManager(const QString& bookmarksFile,
+    explicit GmicFilterManager(const QString& file,
                                QObject* const parent = nullptr);
     ~GmicFilterManager()                                              override;
 

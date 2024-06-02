@@ -52,11 +52,11 @@ namespace DigikamBqmGmicQtPlugin
 RemoveGmicFilter::RemoveGmicFilter(GmicFilterManager* const mngr,
                                    GmicFilterNode* const parent,
                                    int row)
-    : QUndoCommand     (QObject::tr("Remove Filter")),
-      m_row            (row),
-      m_bookmarkManager(mngr),
-      m_node           (parent->children().value(row)),
-      m_parent         (parent)
+    : QUndoCommand(QObject::tr("Remove Filter")),
+      m_row       (row),
+      m_manager   (mngr),
+      m_node      (parent->children().value(row)),
+      m_parent    (parent)
 {
 }
 
@@ -72,7 +72,7 @@ void RemoveGmicFilter::undo()
 {
     m_parent->add(m_node, m_row);
 
-    Q_EMIT m_bookmarkManager->signalEntryAdded(m_node);
+    Q_EMIT m_manager->signalEntryAdded(m_node);
 
     m_done = false;
 }
@@ -81,7 +81,7 @@ void RemoveGmicFilter::redo()
 {
     m_parent->remove(m_node);
 
-    Q_EMIT m_bookmarkManager->signalEntryRemoved(m_parent, m_row, m_node);
+    Q_EMIT m_manager->signalEntryRemoved(m_parent, m_row, m_node);
 
     m_done = true;
 }
@@ -250,7 +250,7 @@ GmicFilterModel::~GmicFilterModel()
     delete d;
 }
 
-GmicFilterManager* GmicFilterModel::bookmarksManager() const
+GmicFilterManager* GmicFilterModel::manager() const
 {
     return d->manager;
 }
@@ -306,11 +306,11 @@ bool GmicFilterModel::removeRows(int row, int count, const QModelIndex& parent)
         return false;
     }
 
-    GmicFilterNode* const bookmarkNode = node(parent);
+    GmicFilterNode* const fnode = node(parent);
 
     for (int i = (row + count - 1) ; i >= row ; --i)
     {
-        GmicFilterNode* const node = bookmarkNode->children().at(i);
+        GmicFilterNode* const node = fnode->children().at(i);
         d->manager->removeCommand(node);
     }
 
@@ -777,11 +777,11 @@ public:
     QString          commandsFile;
 };
 
-GmicFilterManager::GmicFilterManager(const QString& commandsFile, QObject* const parent)
+GmicFilterManager::GmicFilterManager(const QString& file, QObject* const parent)
     : QObject(parent),
       d      (new Private)
 {
-    d->commandsFile = commandsFile;
+    d->commandsFile = file;
     load();
 }
 
