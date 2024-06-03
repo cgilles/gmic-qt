@@ -33,32 +33,18 @@ public:
 
     Private() = default;
 
-    bool                        hasThumb = false;       ///< True if thumbnails is a real photo thumbs
-
-    int                         rating   = -1;          ///< Image Rating from host.
-    QString                     comments;               ///< Image comments from host.
-    QStringList                 tags;                   ///< List of keywords from host.
-    QUrl                        url;                    ///< Image url provided by host.
-    QPixmap                     thumb;                  ///< Image thumbnail.
-    GmicFilterChainView*             view     = nullptr;
-    State                       state    = Waiting;
+    QString                     command
+    GmicFilterChainView*        view     = nullptr;
 };
 
-GmicFilterChainViewItem::GmicFilterChainViewItem(GmicFilterChainView* const view, const QUrl& url)
+GmicFilterChainViewItem::GmicFilterChainViewItem(GmicFilterChainView* const view, const QString& command)
     : QTreeWidgetItem(view),
       d              (new Private)
 {
-    setUrl(url);
-    setRating(-1);
-    setFlags(Qt::ItemIsEnabled | Qt::ItemIsDragEnabled | Qt::ItemIsSelectable);
+    setCommand(command);
+    setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
 
-    d->view      = view;
-    int iconSize = d->view->iconSize().width();
-    setThumb(QIcon::fromTheme(QLatin1String("view-preview")).pixmap(iconSize, iconSize, QIcon::Disabled), false);
-/*
-    qCDebug(DIGIKAM_GENERAL_LOG) << "Creating new ImageListViewItem with url " << d->url
-                                 << " for list view " << d->view;
-*/
+    d->view = view;
 }
 
 GmicFilterChainViewItem::~GmicFilterChainViewItem()
@@ -66,133 +52,25 @@ GmicFilterChainViewItem::~GmicFilterChainViewItem()
     delete d;
 }
 
-bool GmicFilterChainViewItem::hasValidThumbnail() const
+void GmicFilterChainViewItem::setCommand(const QString& command)
 {
-    return d->hasThumb;
+    d->command = command;
+    setText(GmicFilterChainView::Command, d->command);
 }
 
-void GmicFilterChainViewItem::updateInformation()
+QString GmicFilterChainViewItem::command() const
 {
-    if (d->view->iface())
-    {
-        DItemInfo info(d->view->iface()->itemInfo(d->url));
-
-        setComments(info.comment());
-        setTags(info.keywords());
-        setRating(info.rating());
-    }
+    return d->command;
 }
 
-void GmicFilterChainViewItem::setUrl(const QUrl& url)
+void GmicFilterChainViewItem::setTitle(const QString& title)
 {
-    d->url = url;
-    setText(GmicFilterChainView::Filename, d->url.fileName());
+    d->title = title;
 }
 
-QUrl GmicFilterChainViewItem::url() const
+QString GmicFilterChainViewItem::title() const
 {
-    return d->url;
-}
-
-void GmicFilterChainViewItem::setComments(const QString& comments)
-{
-    d->comments = comments;
-}
-
-QString GmicFilterChainViewItem::comments() const
-{
-    return d->comments;
-}
-
-void GmicFilterChainViewItem::setTags(const QStringList& tags)
-{
-    d->tags = tags;
-}
-
-QStringList GmicFilterChainViewItem::tags() const
-{
-    return d->tags;
-}
-
-void GmicFilterChainViewItem::setRating(int rating)
-{
-    d->rating = rating;
-}
-
-int GmicFilterChainViewItem::rating() const
-{
-    return d->rating;
-}
-
-void GmicFilterChainViewItem::setPixmap(const QPixmap& pix)
-{
-    QIcon icon = QIcon(pix);
-
-    // We make sure the preview icon stays the same regardless of the role.
-
-    icon.addPixmap(pix, QIcon::Selected, QIcon::On);
-    icon.addPixmap(pix, QIcon::Selected, QIcon::Off);
-    icon.addPixmap(pix, QIcon::Active,   QIcon::On);
-    icon.addPixmap(pix, QIcon::Active,   QIcon::Off);
-    icon.addPixmap(pix, QIcon::Normal,   QIcon::On);
-    icon.addPixmap(pix, QIcon::Normal,   QIcon::Off);
-    setIcon(GmicFilterChainView::Thumbnail, icon);
-}
-
-void GmicFilterChainViewItem::setThumb(const QPixmap& pix, bool hasThumb)
-{
-/*
-    qCDebug(DIGIKAM_GENERAL_LOG) << "Received new thumbnail for url " << d->url
-                                 << ". My view is " << d->view;
-*/
-    if (!d->view)
-    {
-        qCCritical(DIGIKAM_GENERAL_LOG) << "This item do not have a tree view. "
-                                        << "This should never happen!";
-        return;
-    }
-
-    int iconSize = qMax<int>(d->view->iconSize().width(), d->view->iconSize().height());
-    QPixmap pixmap(iconSize + 2, iconSize + 2);
-    pixmap.fill(Qt::transparent);
-    QPainter p(&pixmap);
-    p.drawPixmap((pixmap.width()  / 2) - (pix.width()  / 2),
-                 (pixmap.height() / 2) - (pix.height() / 2), pix);
-    d->thumb     = pixmap;
-    setPixmap(d->thumb);
-
-    d->hasThumb  = hasThumb;
-}
-
-void GmicFilterChainViewItem::setProgressAnimation(const QPixmap& pix)
-{
-    QPixmap overlay = d->thumb;
-    QPixmap mask(overlay.size());
-    mask.fill(QColor(128, 128, 128, 192));
-    QPainter p(&overlay);
-    p.drawPixmap(0, 0, mask);
-    p.drawPixmap((overlay.width()  / 2) - (pix.width()  / 2),
-                 (overlay.height() / 2) - (pix.height() / 2), pix);
-    setPixmap(overlay);
-}
-
-void GmicFilterChainViewItem::setProcessedIcon(const QIcon& icon)
-{
-    setIcon(GmicFilterChainView::Filename, icon);
-
-    // reset thumbnail back to no animation pix.
-
-    setPixmap(d->thumb);
-}
-
-void GmicFilterChainViewItem::setState(State state)
-{
-    d->state = state;
-}
-
-GmicFilterChainViewItem::State GmicFilterChainViewItem::state() const
-{
-    return d->state;
+    return d->title;
 }
 
 GmicFilterChainView* GmicFilterChainViewItem::view() const

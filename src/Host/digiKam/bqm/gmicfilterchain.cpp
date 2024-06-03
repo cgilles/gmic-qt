@@ -33,27 +33,16 @@ public:
 
     Private() = default;
 
-    bool                        allowRAW                = true;
-    bool                        allowDuplicate          = false;
     bool                        controlButtonsEnabled   = true;
-    int                         iconSize                = 48;
 
     CtrlButton*                 addButton               = nullptr;
     CtrlButton*                 removeButton            = nullptr;
     CtrlButton*                 moveUpButton            = nullptr;
     CtrlButton*                 moveDownButton          = nullptr;
     CtrlButton*                 clearButton             = nullptr;
-    CtrlButton*                 loadButton              = nullptr;
-    CtrlButton*                 saveButton              = nullptr;
     QWidget*                    extraWidget             = nullptr;   ///< Extra widget append to the end of control buttons layout.
 
-    QList<QUrl>                 processItems;
-    DWorkingPixmap*             progressPix             = nullptr;
-    int                         progressCount           = 0;
-    QTimer*                     progressTimer           = nullptr;
-
     GmicFilterChainView*             listView                = nullptr;
-    ThumbnailLoadThread*        thumbLoadThread         = ThumbnailLoadThread::defaultThread();
 
     GmicFilterChainIsLessThanHandler isLessThan;
 };
@@ -62,7 +51,6 @@ GmicFilterChain::GmicFilterChain(QWidget* const parent)
     : QWidget(parent),
       d      (new Private)
 {
-    d->progressPix    = new DWorkingPixmap(this);
     d->listView       = new GmicFilterChainView(this);
     d->listView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
@@ -73,39 +61,25 @@ GmicFilterChain::GmicFilterChain(QWidget* const parent)
     d->moveUpButton   = new CtrlButton(QIcon::fromTheme(QLatin1String("go-up")).pixmap(16, 16),         this);
     d->moveDownButton = new CtrlButton(QIcon::fromTheme(QLatin1String("go-down")).pixmap(16, 16),       this);
     d->clearButton    = new CtrlButton(QIcon::fromTheme(QLatin1String("edit-clear")).pixmap(16, 16),    this);
-    d->loadButton     = new CtrlButton(QIcon::fromTheme(QLatin1String("document-open")).pixmap(16, 16), this);
-    d->saveButton     = new CtrlButton(QIcon::fromTheme(QLatin1String("document-save")).pixmap(16, 16), this);
 
     d->addButton->setToolTip(i18nc("@info", "Add new images to the list"));
     d->removeButton->setToolTip(i18nc("@info", "Remove selected images from the list"));
     d->moveUpButton->setToolTip(i18nc("@info", "Move current selected image up in the list"));
     d->moveDownButton->setToolTip(i18nc("@info", "Move current selected image down in the list"));
     d->clearButton->setToolTip(i18nc("@info", "Clear the list."));
-    d->loadButton->setToolTip(i18nc("@info", "Load a saved list."));
-    d->saveButton->setToolTip(i18nc("@info", "Save the list."));
-
-    d->progressTimer  = new QTimer(this);
 
     // --------------------------------------------------------
 
-    setIconSize(d->iconSize);
-    setControlButtons(Add | Remove | MoveUp | MoveDown | Clear | Save | Load ); // add all buttons      (default)
-    setControlButtonsPlacement(ControlButtonsBelow);                            // buttons on the bottom (default)
-    enableDragAndDrop(true);                                                    // enable drag and drop (default)
+    setControlButtons(Add | Remove | MoveUp | MoveDown | Clear ); // add all buttons      (default)
+    setControlButtonsPlacement(ControlButtonsBelow);              // buttons on the bottom (default)
 
     // --------------------------------------------------------
 
     connect(d->listView, &GmicFilterChainView::signalAddedDropedItems,
             this, &GmicFilterChain::slotAddImages);
 
-    connect(d->thumbLoadThread, SIGNAL(signalThumbnailLoaded(LoadingDescription,QPixmap)),
-            this, SLOT(slotThumbnail(LoadingDescription,QPixmap)));
-
     connect(d->listView, &GmicFilterChainView::signalItemClicked,
             this, &GmicFilterChain::signalItemClicked);
-
-    connect(d->listView, &GmicFilterChainView::signalContextMenuRequested,
-            this, &GmicFilterChain::signalContextMenuRequested);
 
     // queue this connection because itemSelectionChanged is emitted
     // while items are deleted, and accessing selectedItems at that
@@ -134,15 +108,6 @@ GmicFilterChain::GmicFilterChain(QWidget* const parent)
     connect(d->clearButton, &CtrlButton::clicked,
             this, &GmicFilterChain::slotClearItems);
 
-    connect(d->loadButton, &CtrlButton::clicked,
-            this, &GmicFilterChain::slotLoadItems);
-
-    connect(d->saveButton, &CtrlButton::clicked,
-            this, &GmicFilterChain::slotSaveItems);
-
-    connect(d->progressTimer, &QTimer::timeout,
-            this, &GmicFilterChain::slotProgressTimerDone);
-
     // --------------------------------------------------------
 
     QTimer::singleShot(1000, this, SIGNAL(signalImageListChanged()));
@@ -157,11 +122,6 @@ void GmicFilterChain::enableControlButtons(bool enable)
 {
     d->controlButtonsEnabled = enable;
     slotImageListChanged();
-}
-
-void GmicFilterChain::enableDragAndDrop(const bool enable)
-{
-    d->listView->enableDragAndDrop(enable);
 }
 
 void GmicFilterChain::appendControlButtonsWidget(QWidget* const widget)
@@ -285,87 +245,6 @@ void GmicFilterChain::setControlButtons(ControlButtons buttonMask)
     d->moveUpButton->setVisible(buttonMask & MoveUp);
     d->moveDownButton->setVisible(buttonMask & MoveDown);
     d->clearButton->setVisible(buttonMask & Clear);
-    d->loadButton->setVisible(buttonMask & Load);
-    d->saveButton->setVisible(buttonMask & Save);
-}
-
-void GmicFilterChain::setAllowDuplicate(bool allow)
-{
-  d->allowDuplicate = allow;
-}
-
-void GmicFilterChain::setAllowRAW(bool allow)
-{
-    d->allowRAW = allow;
-}
-
-void GmicFilterChain::setIconSize(int size)
-{
-    if      (size < 16)
-    {
-        d->iconSize = 16;
-    }
-    else if (size > 128)
-    {
-        d->iconSize = 128;
-    }
-    else
-    {
-        d->iconSize = size;
-    }
-
-    d->listView->setIconSize(QSize(iconSize(), iconSize()));
-}
-
-int GmicFilterChain::iconSize() const
-{
-    return d->iconSize;
-}
-
-void GmicFilterChain::loadImagesFromCurrentSelection()
-{
-    bool selection = checkSelection();
-
-    if (selection && d->iface)
-    {
-        QList<QUrl> images = d->iface->currentSelectedItems();
-
-        if (!images.isEmpty())
-        {
-            slotAddImages(images);
-        }
-    }
-    else
-    {
-        loadImagesFromCurrentAlbum();
-    }
-}
-
-void GmicFilterChain::loadImagesFromCurrentAlbum()
-{
-    if (!d->iface)
-    {
-        return;
-    }
-
-    QList<QUrl> images = d->iface->currentAlbumItems();
-
-    if (!images.isEmpty())
-    {
-        slotAddImages(images);
-    }
-}
-
-bool GmicFilterChain::checkSelection()
-{
-    if (!d->iface)
-    {
-        return false;
-    }
-
-    QList<QUrl> images = d->iface->currentSelectedItems();
-
-    return (!images.isEmpty());
 }
 
 void GmicFilterChain::slotAddImages(const QList<QUrl>& list)
@@ -540,7 +419,7 @@ void GmicFilterChain::slotClearItems()
     listView()->clear();
 }
 
-void GmicFilterChain::removeItemByUrl(const QUrl& url)
+void GmicFilterChain::removeItemByTitle(const QString& title)
 {
     bool found;
     QList<int> itemsIndex;
@@ -554,14 +433,9 @@ void GmicFilterChain::removeItemByUrl(const QUrl& url)
         {
             GmicFilterChainViewItem* const item = dynamic_cast<GmicFilterChainViewItem*>(*it);
 
-            if (item && (item->url() == url))
+            if (item && (item->title() == title))
             {
                 itemsIndex.append(d->listView->indexFromItem(item).row());
-
-                if (d->processItems.contains(item->url()))
-                {
-                    d->processItems.removeAll(item->url());
-                }
 
                 delete item;
                 found = true;
@@ -577,7 +451,7 @@ void GmicFilterChain::removeItemByUrl(const QUrl& url)
     Q_EMIT signalImageListChanged();
 }
 
-QList<QUrl> GmicFilterChain::imageUrls(bool onlyUnprocessed) const
+QList<QUrl> GmicFilterChain::imageCommands(bool onlyUnprocessed) const
 {
     QList<QUrl> list;
     QTreeWidgetItemIterator it(d->listView);

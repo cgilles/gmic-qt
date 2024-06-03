@@ -46,7 +46,7 @@ class GmicFilterChainView;
 /**
  * Type of static fonction used to customize sort items in list.
  * Sort items call this method in GmicFilterChainViewItem::operator<.
- * To setup this method, uses DItemList::setIsLessThanHandler().
+ * To setup this method, uses GmicFilterChain::setIsLessThanHandler().
  */
 typedef bool (*GmicFilterChainIsLessThanHandler)(const QTreeWidgetItem* current, const QTreeWidgetItem& other);
 
@@ -55,56 +55,23 @@ class GmicFilterChainViewItem : public QTreeWidgetItem
 
 public:
 
-    enum State
-    {
-        Waiting,
-        Success,
-        Failed
-    };
-
-public:
-
     explicit GmicFilterChainViewItem(GmicFilterChainView* const view, const QUrl& url);
-    ~GmicFilterChainViewItem()             override;
+    ~GmicFilterChainViewItem()            override;
 
-    bool hasValidThumbnail()    const;
+    void setCommand(const QString& command);
+    QString command()               const;
 
-    void setUrl(const QUrl& url);
-    QUrl url()                  const;
-
-    void setComments(const QString& comments);
-    QString comments()          const;
-
-    void setTags(const QStringList& tags);
-    QStringList tags()          const;
-
-    void setRating(int rating);
-    int rating()                const;
-
-    void setThumb(const QPixmap& pix, bool hasThumb=true);
-    void setProgressAnimation(const QPixmap& pix);
-
-    void setProcessedIcon(const QIcon& icon);
-    void setState(State state);
-    State state()               const;
-
-    void updateInformation();
+    void setTitle(const QString& title);
+    QString title()                 const;
 
     void setIsLessThanHandler(GmicFilterChainIsLessThanHandler fncptr);
 
-    /**
-     * Implement this, if you have special item widgets, e.g. an edit line
-     * they will be set automatically when adding items, changing order, etc.
-     */
-    virtual void updateItemWidgets() {};
-
 protected:
 
-    GmicFilterChainView* view()      const;
+    GmicFilterChainView* view()     const;
 
 private:
 
-    void setPixmap(const QPixmap& pix);
     bool operator<(const QTreeWidgetItem& other) const override;
 
 private:
@@ -127,14 +94,8 @@ public:
 
     enum ColumnType
     {
-        Thumbnail = 0,
-        Filename,
-        User1,
-        User2,
-        User3,
-        User4,
-        User5,
-        User6
+        Title = 0,
+        Command
     };
 
 public:
@@ -142,47 +103,21 @@ public:
     explicit GmicFilterChainView(GmicFilterChain* const parent);
     ~GmicFilterChainView()                                     override = default;
 
-    void setColumnLabel(ColumnType column, const QString& label);
-    void setColumnEnabled(ColumnType column, bool enable);
-    void setColumn(ColumnType column, const QString& label, bool enable);
-
-    GmicFilterChainViewItem* findItem(const QUrl& url);
+    GmicFilterChainViewItem* findItem(const QString& title);
     QModelIndex indexFromItem(GmicFilterChainViewItem* item,
-                              int column = 0)       const;
+                              int column = 0)            const;
 
     GmicFilterChainViewItem* getCurrentItem()            const;
 
-    DInfoInterface* iface()                         const;
     GmicFilterChainIsLessThanHandler isLessThanHandler() const;
 
 Q_SIGNALS:
 
-    void signalAddedDropedItems(const QList<QUrl>&);
     void signalItemClicked(QTreeWidgetItem*);
-    void signalContextMenuRequested();
 
 private Q_SLOTS:
 
     void slotItemClicked(QTreeWidgetItem* item, int column);
-
-public:
-
-    void enableDragAndDrop(const bool enable = true);
-
-private:
-
-    void dragEnterEvent(QDragEnterEvent* e)               override;
-    void dragMoveEvent(QDragMoveEvent* e)                 override;
-    void dropEvent(QDropEvent* e)                         override;
-    void contextMenuEvent(QContextMenuEvent* e)           override;
-
-    void drawRow(QPainter* p,
-                 const QStyleOptionViewItem& opt,
-                 const QModelIndex& index)          const override;
-
-private:
-
-    QTreeWidgetItem* m_itemDraged = nullptr;
 };
 
 // -------------------------------------------------------------------------
@@ -208,9 +143,7 @@ public:
        Remove    = 0x2,
        MoveUp    = 0x4,
        MoveDown  = 0x8,
-       Clear     = 0x10,
-       Load      = 0x20,
-       Save      = 0x40
+       Clear     = 0x10
     };
     Q_DECLARE_FLAGS(ControlButtons, ControlButton)
 
@@ -219,30 +152,7 @@ public:
     explicit GmicFilterChain(QWidget* const parent);
     ~GmicFilterChain()                                                     override;
 
-    void                setAllowRAW(bool allow);
-    void                setAllowDuplicate(bool allow);
-
-    void                loadImagesFromCurrentSelection();
-
-    /**
-     * A function to load all the images from the album if no image has been selected by user.
-     */
-    void                loadImagesFromCurrentAlbum();
-
-    /**
-     * a function to check whether an image has been selected or not.
-     */
-    bool                checkSelection();
-
-    void setIconSize(int size);
-    int                 iconSize()                                  const;
-
     GmicFilterChainView*     listView()                                  const;
-
-    void                processing(const QUrl& url);
-    void                processed(const QUrl& url, bool success);
-    void                cancelProcess();
-    void                clearProcessedStatus();
 
     void                setControlButtons(ControlButtons buttonMask);
 
@@ -261,13 +171,12 @@ public:
     void                appendControlButtonsWidget(QWidget* const widget);
 
     void                enableControlButtons(bool enable = true);
-    void                enableDragAndDrop(const bool enable = true);
 
-    virtual QList<QUrl> imageUrls(bool onlyUnprocessed = false)     const;
-    virtual void        removeItemByUrl(const QUrl& url);
+    virtual QStringList commands()                                  const;
+    virtual void        removeItemByUrl(const QString& title);
 
-    void                setCurrentUrl(const QUrl& url);
-    QUrl                getCurrentUrl()                             const;
+    void                setCurrentTitle(const QString& title);
+    QUrl                getCurrentTitle()                           const;
 
     ///@{
     /**
@@ -288,10 +197,6 @@ Q_SIGNALS:
     void signalFoundRAWImages(bool);
     void signalItemClicked(QTreeWidgetItem*);
     void signalContextMenuRequested();
-    void signalXMLSaveItem(QXmlStreamWriter&, int);         // clazy:exclude=signal-with-return-value
-    void signalXMLLoadImageElement(QXmlStreamReader&);      // clazy:exclude=signal-with-return-value
-    void signalXMLCustomElements(QXmlStreamWriter&);        // clazy:exclude=signal-with-return-value
-    void signalXMLCustomElements(QXmlStreamReader&);        // clazy:exclude=signal-with-return-value
 
 public Q_SLOTS:
 
@@ -299,8 +204,6 @@ public Q_SLOTS:
     virtual void slotRemoveItems();
 
 protected Q_SLOTS:
-
-    void slotProgressTimerDone();
 
     virtual void slotAddItems();
     virtual void slotMoveUpItems();
