@@ -27,6 +27,7 @@ cd build
       -DENABLE_SYSTEM_GMIC=OFF \
       -DGMIC_QT_HOST=digikam \
       -DBUILD_WITH_QT6=ON \
+      -DENABLE_TEST=ON \
       -Wno-dev \
       ..
 

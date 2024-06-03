@@ -64,7 +64,7 @@ const bool DarkThemeIsDefault          = false;
 void getImageSize(int* width,
                   int* height)
 {
-    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Calling GmicQt getImageSize()";
+    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Calling GmicQt getImageSize()";
 
     QueuePoolItemsList list = s_infoIface->selectedItemInfoListFromCurrentQueue();
 
@@ -85,13 +85,13 @@ void getLayersExtent(int* width,
                      int* height,
                      GmicQt::InputMode mode)
 {
-    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Calling GmicQt getLayersExtent(): InputMode="
-                                        << (int)mode;
+    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Calling GmicQt getLayersExtent(): InputMode="
+                                     << (int)mode;
 
     getImageSize(width, height);
 
-    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "W=" << *width;
-    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "H=" << *height;
+    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "W=" << *width;
+    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "H=" << *height;
 }
 
 void getCroppedImages(cimg_library::CImgList<gmic_pixel_type>& images,
@@ -102,7 +102,7 @@ void getCroppedImages(cimg_library::CImgList<gmic_pixel_type>& images,
                       double height,
                       GmicQt::InputMode mode)
 {
-    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Calling GmicQt getCroppedImages()";
+    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Calling GmicQt getCroppedImages()";
 
     QueuePoolItemsList list = s_infoIface->selectedItemInfoListFromCurrentQueue();
 
@@ -168,22 +168,22 @@ void getCroppedImages(cimg_library::CImgList<gmic_pixel_type>& images,
 void applyColorProfile(cimg_library::CImg<gmic_pixel_type>& images) // cppcheck-suppress constParameterReference
 
 {
-    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Calling GmicQt applyColorProfile()";
+    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Calling GmicQt applyColorProfile()";
 
     Q_UNUSED(images);
 }
 
 void showMessage(const char* message)
 {
-    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Calling GmicQt showMessage()";
-    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "G'MIC-Qt:" << message;
+    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Calling GmicQt showMessage()";
+    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "G'MIC-Qt:" << message;
 }
 
 void outputImages(cimg_library::CImgList<gmic_pixel_type>& images,  // cppcheck-suppress constParameterReference
                   const cimg_library::CImgList<char>& imageNames,
                   GmicQt::OutputMode mode)
 {
-    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Calling GmicQt outputImages()";
+    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Calling GmicQt outputImages()";
 
     Q_UNUSED(images);
     Q_UNUSED(imageNames);

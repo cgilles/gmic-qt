@@ -64,17 +64,20 @@ public:
 
 public:
 
-    explicit GMicQtWindow(DPlugin* const tool,
-                          QWidget* const parent);
+    explicit GMicQtWindow(
+                          DPlugin* const tool,
+                          QWidget* const parent,
+                          QString* const filterName
+                         );
     ~GMicQtWindow()                     override;
 
     void saveParameters();
     void setFilterSelectionMode();
     void setHostType(HostType type);
 
-    static void execWindow(DPlugin* const tool,
-                           HostType type,
-                           const QString& prm = QString());
+    static QString execWindow(DPlugin* const tool,
+                              HostType type,
+                              const QString& prm = QString());
 
 protected:
 

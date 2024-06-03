@@ -67,23 +67,37 @@ public:
     {
     }
 
-    QString         hostOrg  = QCoreApplication::organizationName();
-    QString         hostDom  = QCoreApplication::organizationDomain();
-    QString         hostName = QCoreApplication::applicationName();
+    QString         hostOrg     = QCoreApplication::organizationName();
+    QString         hostDom     = QCoreApplication::organizationDomain();
+    QString         hostName    = QCoreApplication::applicationName();
 
     QString         plugName;
     QString         plugOrg;
     QString         plugDom;
 
-    DPlugin*        plugTool = nullptr;
+    DPlugin*        plugTool    = nullptr;
     QString         dkModule;
+    QLabel*         filterLbl   = nullptr;
+    QString*        filterName  = nullptr;
 };
 
-GMicQtWindow::GMicQtWindow(DPlugin* const tool,
-                           QWidget* const parent)
+GMicQtWindow::GMicQtWindow(
+                           DPlugin* const tool,
+                           QWidget* const parent,
+                           QString* const filterName
+                          )
     : MainWindow(parent),
       d         (new Private(tool))
 {
+    d->filterName = filterName;
+    d->filterLbl  = findChild<QLabel*>("filterName");
+
+    if (!d->filterLbl)
+    {
+        qCWarning(DIGIKAM_DPLUGIN_EDITOR_LOG) << "G'MIC-Qt: Cannot found \"filterName\" "
+                                                 "label from plugin dialog!";
+    }
+
     QHBoxLayout* const hlay = findChild<QHBoxLayout*>("horizontalLayout");
 
     if (hlay)
@@ -217,6 +231,13 @@ void GMicQtWindow::slotOnlineHandbook()
 
 void GMicQtWindow::slotOkClicked()
 {
+    // Return current filter name.
+
+    if (d->filterName && d->filterLbl)
+    {
+        *d->filterName = d->filterLbl->text().remove(QLatin1String("<b>")).remove(QLatin1String("</b>"));
+    }
+
     // Copy the current G'MIC command on the clipboard.
 
     s_mainWindow->onCopyGMICCommand();
@@ -269,9 +290,9 @@ void GMicQtWindow::closeEvent(QCloseEvent* event)
 
 // --- Static method ---
 
-void GMicQtWindow::execWindow(DPlugin* const tool,
-                              HostType type,
-                              const QString& command)
+QString GMicQtWindow::execWindow(DPlugin* const tool,
+                                 HostType type,
+                                 const QString& command)
 {
     // Code inspired from GmicQt.cpp::run() and host_none.cpp::main()
 
@@ -312,7 +333,8 @@ void GMicQtWindow::execWindow(DPlugin* const tool,
      * seen side effects, for example with the settings to host in RC file.
      */
 
-    s_mainWindow = new GMicQtWindow(tool, qApp->activeWindow());
+    QString filterName;
+    s_mainWindow = new GMicQtWindow(tool, qApp->activeWindow(), &filterName);
 
     if (type == GMicQtWindow::BQM)
     {
@@ -326,7 +348,6 @@ void GMicQtWindow::execWindow(DPlugin* const tool,
     if (!command.isEmpty())
     {
         parameters.command = command.toStdString();
-
     }
     else
     {
@@ -387,6 +408,8 @@ void GMicQtWindow::execWindow(DPlugin* const tool,
             &loop, SLOT(quit()));
 
     loop.exec();
+
+    return filterName;
 }
 
 } // namespace DigikamEditorGmicQtPlugin

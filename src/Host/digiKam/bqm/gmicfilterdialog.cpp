@@ -257,15 +257,22 @@ void GmicFilterDialog::slotGmicQt()
     QClipboard* const clipboard = QGuiApplication::clipboard();
     clipboard->clear();
 
-    GMicQtWindow::execWindow(
-                             d->plugin,                     // BQM plugin instance.
-                             GMicQtWindow::BQM,             // Host type.
-                             d->command->toPlainText()      // The G'MIC command.
-                            );
+    QString fname = GMicQtWindow::execWindow(
+                                             d->plugin,                     // BQM plugin instance.
+                                             GMicQtWindow::BQM,             // Host type.
+                                             d->command->toPlainText()      // The G'MIC command.
+                                            );
 
-    if (!clipboard->text().isEmpty())
+    if (!clipboard->text().isEmpty() && !fname.isEmpty())
     {
         d->command->setText(clipboard->text());
+
+        // Only backport the filtername if title is empty.
+
+        if (d->title->text().isEmpty())
+        {
+            d->title->setText(fname);
+        }
     }
 }
 
