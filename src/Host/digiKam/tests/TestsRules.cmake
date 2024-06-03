@@ -16,16 +16,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-add_executable(GmicQt_Bqm_test
+add_executable(GmicQt_FilterSelector_test
                ${gmic_qt_QRC}
                ${gmic_qt_QM}
 
                ${CMAKE_SOURCE_DIR}/src/Host/digiKam/tests/host_test.cpp
-               ${CMAKE_SOURCE_DIR}/src/Host/digiKam/tests/main_bqm.cpp
+               ${CMAKE_SOURCE_DIR}/src/Host/digiKam/tests/main_filterselector.cpp
 )
 
-target_link_libraries(GmicQt_Bqm_test
-                      PUBLIC
+target_link_libraries(GmicQt_FilterSelector_test
+                      PRIVATE
 
                       gmic_qt_common
 
