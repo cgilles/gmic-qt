@@ -73,7 +73,12 @@ int main(int argc, char* argv[])
         img.load(path);
         gmicProcessor->setInputImage(img);
 
-        if (!gmicProcessor->setProcessingCommand(QLatin1String("samj_Barbouillage_Paint_Daub 2,2,100,0.2,1,4,1,0,8")))
+        QStringList chainedCommands;
+        chainedCommands << QLatin1String("gcd_aurora 6,1,0");               // Apply Aurora FX.
+        chainedCommands << QLatin1String("gcd_auto_balance 30,0,0,1,0");    // Apply auto color balance.
+        chainedCommands << QLatin1String("fx_old_photo 200,50,85");         // Add old photo frame.
+
+        if (!gmicProcessor->setProcessingCommand(chainedCommands.join(QLatin1Char(' '))))
         {
             delete gmicProcessor;
             qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "GmicBqmTool: cannot setup G'MIC filter!";
