@@ -49,15 +49,6 @@ GmicFilterChainView::GmicFilterChainView(GmicFilterChain* const parent)
             this, &GmicFilterChainView::slotItemClicked);
 }
 
-void GmicFilterChainView::enableDragAndDrop(const bool enable)
-{
-    setDragEnabled(enable);
-    viewport()->setAcceptDrops(enable);
-    setDragDropMode(enable ? QAbstractItemView::InternalMove : QAbstractItemView::NoDragDrop);
-    setDragDropOverwriteMode(enable);
-    setDropIndicatorShown(enable);
-}
-
 void GmicFilterChainView::slotItemClicked(QTreeWidgetItem* item, int column)
 {
     Q_UNUSED(column)

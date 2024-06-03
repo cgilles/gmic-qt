@@ -170,10 +170,8 @@ public:
     */
     void                appendControlButtonsWidget(QWidget* const widget);
 
-    void                enableControlButtons(bool enable = true);
-
     virtual QStringList commands()                                  const;
-    virtual void        removeItemByUrl(const QString& title);
+    virtual void        removeItemByTitle(const QString& title);
 
     void                setCurrentTitle(const QString& title);
     QUrl                getCurrentTitle()                           const;
@@ -189,10 +187,10 @@ public:
 
 Q_SIGNALS:
 
-    void signalAddItems(const QList<QUrl>&);
+    void signalAddItem(const QString& title, const QString& command);
     void signalMoveUpItem();
     void signalMoveDownItem();
-    void signalRemovedItems(const QList<int>&);
+    void signalRemovedItems(const QStringList& titles);
     void signalImageListChanged();
     void signalFoundRAWImages(bool);
     void signalItemClicked(QTreeWidgetItem*);
@@ -200,16 +198,15 @@ Q_SIGNALS:
 
 public Q_SLOTS:
 
-    virtual void slotAddImages(const QList<QUrl>& list);
+    virtual void slotAddItem(const QString& title, const QString& command);
     virtual void slotRemoveItems();
 
 protected Q_SLOTS:
 
-    virtual void slotAddItems();
     virtual void slotMoveUpItems();
     virtual void slotMoveDownItems();
     virtual void slotClearItems();
-    virtual void slotImageListChanged();
+    virtual void slotItemListChanged();
 
 private:
 

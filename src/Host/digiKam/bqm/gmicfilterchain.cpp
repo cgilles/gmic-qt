@@ -33,14 +33,14 @@ public:
 
     Private() = default;
 
-    bool                        controlButtonsEnabled   = true;
+    bool                             controlButtonsEnabled   = true;
 
-    CtrlButton*                 addButton               = nullptr;
-    CtrlButton*                 removeButton            = nullptr;
-    CtrlButton*                 moveUpButton            = nullptr;
-    CtrlButton*                 moveDownButton          = nullptr;
-    CtrlButton*                 clearButton             = nullptr;
-    QWidget*                    extraWidget             = nullptr;   ///< Extra widget append to the end of control buttons layout.
+    CtrlButton*                      addButton               = nullptr;
+    CtrlButton*                      removeButton            = nullptr;
+    CtrlButton*                      moveUpButton            = nullptr;
+    CtrlButton*                      moveDownButton          = nullptr;
+    CtrlButton*                      clearButton             = nullptr;
+    QWidget*                         extraWidget             = nullptr;   ///< Extra widget append to the end of control buttons layout.
 
     GmicFilterChainView*             listView                = nullptr;
 
@@ -62,11 +62,11 @@ GmicFilterChain::GmicFilterChain(QWidget* const parent)
     d->moveDownButton = new CtrlButton(QIcon::fromTheme(QLatin1String("go-down")).pixmap(16, 16),       this);
     d->clearButton    = new CtrlButton(QIcon::fromTheme(QLatin1String("edit-clear")).pixmap(16, 16),    this);
 
-    d->addButton->setToolTip(i18nc("@info", "Add new images to the list"));
-    d->removeButton->setToolTip(i18nc("@info", "Remove selected images from the list"));
-    d->moveUpButton->setToolTip(i18nc("@info", "Move current selected image up in the list"));
-    d->moveDownButton->setToolTip(i18nc("@info", "Move current selected image down in the list"));
-    d->clearButton->setToolTip(i18nc("@info", "Clear the list."));
+    d->addButton->setToolTip(tr("Add new filter to the list"));
+    d->removeButton->setToolTip(tr("Remove selected filters from the list"));
+    d->moveUpButton->setToolTip(tr("Move current selected filter up in the list"));
+    d->moveDownButton->setToolTip(tr("Move current selected filter down in the list"));
+    d->clearButton->setToolTip(tr("Clear the list."));
 
     // --------------------------------------------------------
 
@@ -116,12 +116,6 @@ GmicFilterChain::GmicFilterChain(QWidget* const parent)
 GmicFilterChain::~GmicFilterChain()
 {
     delete d;
-}
-
-void GmicFilterChain::enableControlButtons(bool enable)
-{
-    d->controlButtonsEnabled = enable;
-    slotImageListChanged();
 }
 
 void GmicFilterChain::appendControlButtonsWidget(QWidget* const widget)
@@ -247,13 +241,9 @@ void GmicFilterChain::setControlButtons(ControlButtons buttonMask)
     d->clearButton->setVisible(buttonMask & Clear);
 }
 
-void GmicFilterChain::slotAddImages(const QList<QUrl>& list)
+void GmicFilterChain::slotAddItem(const QString& title, const QString& command)
 {
-    if (list.count() == 0)
-    {
-        return;
-    }
-
+/*
     QList<QUrl> urls;
     bool raw = false;
 
@@ -297,23 +287,7 @@ void GmicFilterChain::slotAddImages(const QList<QUrl>& list)
     Q_EMIT signalAddItems(urls);
     Q_EMIT signalImageListChanged();
     Q_EMIT signalFoundRAWImages(raw);
-}
-
-void GmicFilterChain::slotAddItems()
-{
-    KSharedConfigPtr config = KSharedConfig::openConfig();
-    KConfigGroup grp        = config->group(objectName());
-    QUrl lastFileUrl        = QUrl::fromLocalFile(grp.readEntry("Last Image Path",
-                                                  QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)));
-
-    QList<QUrl> urls        = ImageDialog::getImageURLs(this, lastFileUrl);
-
-    if (!urls.isEmpty())
-    {
-        slotAddImages(urls);
-        grp.writeEntry("Last Image Path", urls.first().adjusted(QUrl::RemoveFilename).toLocalFile());
-        config->sync();
-    }
+*/
 }
 
 void GmicFilterChain::slotRemoveItems()
@@ -451,9 +425,9 @@ void GmicFilterChain::removeItemByTitle(const QString& title)
     Q_EMIT signalImageListChanged();
 }
 
-QList<QUrl> GmicFilterChain::imageCommands(bool onlyUnprocessed) const
+QStringList GmicFilterChain::commands() const
 {
-    QList<QUrl> list;
+    QStringList list;
     QTreeWidgetItemIterator it(d->listView);
 
     while (*it)
@@ -462,10 +436,7 @@ QList<QUrl> GmicFilterChain::imageCommands(bool onlyUnprocessed) const
 
         if (item)
         {
-            if ((onlyUnprocessed == false) || (item->state() != GmicFilterChainViewItem::Success))
-            {
-                list.append(item->url());
-            }
+            list.append(item->command());
         }
 
         ++it;
@@ -474,96 +445,15 @@ QList<QUrl> GmicFilterChain::imageCommands(bool onlyUnprocessed) const
     return list;
 }
 
-void GmicFilterChain::slotProgressTimerDone()
-{
-    if (!d->processItems.isEmpty())
-    {
-        Q_FOREACH (const QUrl& url, d->processItems)
-        {
-            GmicFilterChainViewItem* const item = listView()->findItem(url);
-
-            if (item)
-            {
-                item->setProgressAnimation(d->progressPix->frameAt(d->progressCount));
-            }
-        }
-
-        d->progressCount++;
-
-        if (d->progressCount == 8)
-        {
-            d->progressCount = 0;
-        }
-
-        d->progressTimer->start(300);
-    }
-}
-
-void GmicFilterChain::processing(const QUrl& url)
-{
-    GmicFilterChainViewItem* const item = listView()->findItem(url);
-
-    if (item)
-    {
-        d->processItems.append(url);
-        d->listView->setCurrentItem(item, true);
-        d->listView->scrollToItem(item);
-        d->progressTimer->start(300);
-    }
-}
-
-void GmicFilterChain::processed(const QUrl& url, bool success)
-{
-    GmicFilterChainViewItem* const item = listView()->findItem(url);
-
-    if (item)
-    {
-        d->processItems.removeAll(url);
-        item->setProcessedIcon(QIcon::fromTheme(success ? QLatin1String("dialog-ok-apply")
-                                                        : QLatin1String("dialog-cancel")).pixmap(16, 16));
-        item->setState(success ? GmicFilterChainViewItem::Success
-                               : GmicFilterChainViewItem::Failed);
-
-        if (d->processItems.isEmpty())
-        {
-            d->progressTimer->stop();
-        }
-    }
-}
-
-void GmicFilterChain::cancelProcess()
-{
-    Q_FOREACH (const QUrl& url, d->processItems)
-    {
-        processed(url, false);
-    }
-}
-
-void GmicFilterChain::clearProcessedStatus()
-{
-    QTreeWidgetItemIterator it(d->listView);
-
-    while (*it)
-    {
-        GmicFilterChainViewItem* const lvItem = dynamic_cast<GmicFilterChainViewItem*>(*it);
-
-        if (lvItem)
-        {
-            lvItem->setProcessedIcon(QIcon());
-        }
-
-        ++it;
-    }
-}
-
 GmicFilterChainView* GmicFilterChain::listView() const
 {
     return d->listView;
 }
 
-void GmicFilterChain::slotImageListChanged()
+void GmicFilterChain::slotItemListChanged()
 {
     const QList<QTreeWidgetItem*> selectedItemsList = d->listView->selectedItems();
+/*
     const bool haveImages                           = !(imageUrls().isEmpty())         && d->controlButtonsEnabled;
     const bool haveSelectedImages                   = !(selectedItemsList.isEmpty())   && d->controlButtonsEnabled;
     const bool haveOnlyOneSelectedImage             = (selectedItemsList.count() == 1) && d->controlButtonsEnabled;
@@ -582,6 +472,7 @@ void GmicFilterChain::slotImageListChanged()
 
     d->loadButton->setEnabled(d->controlButtonsEnabled);
     d->saveButton->setEnabled(d->controlButtonsEnabled);
+*/
 }
 
 GmicFilterChainViewItem* GmicFilterChainView::getCurrentItem() const
@@ -596,19 +487,19 @@ GmicFilterChainViewItem* GmicFilterChainView::getCurrentItem() const
     return dynamic_cast<GmicFilterChainViewItem*>(currentTreeItem);
 }
 
-QUrl GmicFilterChain::getCurrentUrl() const
+QString GmicFilterChain::getCurrentTitle() const
 {
     GmicFilterChainViewItem* const currentItem = d->listView->getCurrentItem();
 
     if (!currentItem)
     {
-        return QUrl();
+        return QString();
     }
 
-    return currentItem->url();
+    return currentItem->title();
 }
 
-void GmicFilterChain::setCurrentUrl(const QUrl& url)
+void GmicFilterChain::setCurrentTitle(const QString& title)
 {
     QTreeWidgetItemIterator it(d->listView);
 
@@ -616,7 +507,7 @@ void GmicFilterChain::setCurrentUrl(const QUrl& url)
     {
         GmicFilterChainViewItem* const item = dynamic_cast<GmicFilterChainViewItem*>(*it);
 
-        if (item && (item->url() == url))
+        if (item && (item->title() == title))
         {
             d->listView->setCurrentItem(item);
             return;
