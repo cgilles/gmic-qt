@@ -36,3 +36,19 @@ target_link_libraries(GmicQt_FilterSelector_test
                       ${gmic_qt_LIBRARIES}
 )
 
+###
+
+add_executable(GmicQt_Processor_test
+               ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicbqmprocessor.cpp
+               ${CMAKE_SOURCE_DIR}/src/Host/digiKam/tests/main_processor.cpp
+)
+
+target_link_libraries(GmicQt_Processor_test
+                      PRIVATE
+
+                      gmic_qt_common
+
+                      Digikam::digikamcore
+
+                      ${gmic_qt_LIBRARIES}
+)

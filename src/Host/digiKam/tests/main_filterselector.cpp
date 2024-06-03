@@ -66,13 +66,15 @@ int main(int argc, char* argv[])
     if (!parser.positionalArguments().isEmpty())
     {
         s_imagePath   = parser.positionalArguments().first();
-        qCDebug(DIGIKAM_TESTS_LOG) << path;
+        qCDebug(DIGIKAM_TESTS_LOG) << "Image to Process:" << path;
+
         QString fname = GMicQtWindow::execWindow(
                                                  nullptr,
                                                  GMicQtWindow::BQM,
                                                  QLatin1String("samj_Barbouillage_Paint_Daub 2,2,100,0.2,1,4,1,0,8")
                                                 );
-        qCDebug(DIGIKAM_TESTS_LOG) << fname;
+
+        qCDebug(DIGIKAM_TESTS_LOG) << "Selected Filter:" << fname;
     }
     else
     {
