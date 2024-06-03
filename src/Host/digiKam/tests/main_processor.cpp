@@ -24,6 +24,7 @@
 
 // Qt includes
 
+#include <QEventLoop>
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QCommandLineOption>
@@ -32,10 +33,18 @@
 
 #include "digikam_debug.h"
 #include "dpluginloader.h"
+#include "dimg.h"
 
 // local includes
 
 #include "gmicbqmprocessor.h"
+
+namespace DigikamBqmGmicQtPlugin
+{
+
+QString s_imagePath;
+
+} // namespace DigikamBqmGmicQtPlugin
 
 using namespace Digikam;
 using namespace DigikamBqmGmicQtPlugin;
@@ -53,12 +62,40 @@ int main(int argc, char* argv[])
     parser.process(app);
 
     QString path;
+    DImg img;
 
     if (!parser.positionalArguments().isEmpty())
     {
-        s_imagePath   = parser.positionalArguments().first();
+        path = parser.positionalArguments().first();
         qCDebug(DIGIKAM_TESTS_LOG) << "Image to Process:" << path;
 
+        GmicBqmProcessor* const gmicProcessor = new GmicBqmProcessor(&app);
+        img.load(path);
+        gmicProcessor->setInputImage(img);
+
+        if (!gmicProcessor->setProcessingCommand(QLatin1String("samj_Barbouillage_Paint_Daub 2,2,100,0.2,1,4,1,0,8")))
+        {
+            delete gmicProcessor;
+            qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "GmicBqmTool: cannot setup G'MIC filter!";
+
+            return false;
+        }
+
+        gmicProcessor->startProcessing();
+
+        QEventLoop loop;
+
+        QObject::connect(gmicProcessor, SIGNAL(signalDone(QString)),
+                         &loop, SLOT(quit()));
+
+        qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "GmicBqmTool: started G'MIC filter...";
+
+        loop.exec();
+
+        bool b = gmicProcessor->processingComplete();
+        gmicProcessor->outputImage().save(path + QLatin1String("_gmic.jpg"), "JPG");
+
+        delete gmicProcessor;
     }
     else
     {
