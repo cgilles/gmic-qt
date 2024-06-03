@@ -94,8 +94,8 @@ GMicQtWindow::GMicQtWindow(
 
     if (!d->filterLbl)
     {
-        qCWarning(DIGIKAM_DPLUGIN_EDITOR_LOG) << "G'MIC-Qt: Cannot found \"filterName\" "
-                                                 "label from plugin dialog!";
+        qCWarning(DIGIKAM_DPLUGIN_LOG) << "G'MIC-Qt: Cannot found \"filterName\" "
+                                          "label from plugin dialog!";
     }
 
     QHBoxLayout* const hlay = findChild<QHBoxLayout*>("horizontalLayout");
@@ -148,14 +148,14 @@ GMicQtWindow::GMicQtWindow(
         }
         else
         {
-            qCWarning(DIGIKAM_DPLUGIN_EDITOR_LOG) << "G'MIC-Qt: Cannot found \"messageLabel\" "
-                                                     "label from plugin dialog!";
+            qCWarning(DIGIKAM_DPLUGIN_LOG) << "G'MIC-Qt: Cannot found \"messageLabel\" "
+                                              "label from plugin dialog!";
         }
     }
     else
     {
-        qCWarning(DIGIKAM_DPLUGIN_EDITOR_LOG) << "G'MIC-Qt: Cannot found \"horizontalLayout\" "
-                                                 "layout from plugin dialog!";
+        qCWarning(DIGIKAM_DPLUGIN_LOG) << "G'MIC-Qt: Cannot found \"horizontalLayout\" "
+                                          "layout from plugin dialog!";
     }
 }
 
@@ -198,19 +198,50 @@ void GMicQtWindow::setHostType(HostType type)
 void GMicQtWindow::setFilterSelectionMode()
 {
     QPushButton* const pbOk     = findChild<QPushButton*>("pbOk");
-    pbOk->setText(QObject::tr("Select Filter"));
 
-    disconnect(pbOk, &QPushButton::clicked,
-               static_cast<MainWindow*>(this), &MainWindow::onOkClicked);
+    if (pbOk)
+    {
+        pbOk->setText(QObject::tr("Select Filter"));
 
-    connect(pbOk, &QPushButton::clicked,
-            this, &GMicQtWindow::slotOkClicked);
+        disconnect(pbOk, &QPushButton::clicked,
+                   static_cast<MainWindow*>(this), &MainWindow::onOkClicked);
+
+        connect(pbOk, &QPushButton::clicked,
+                this, &GMicQtWindow::slotOkClicked);
+    }
+    else
+    {
+        qCWarning(DIGIKAM_DPLUGIN_LOG) << "G'MIC-Qt: Cannot found \"pbOk\" "
+                                          "button from plugin dialog!";
+    }
+
+    // ---
 
     QPushButton* const pbApply  = findChild<QPushButton*>("pbApply");
-    pbApply->setVisible(false);
+
+    if (pbApply)
+    {
+        pbApply->setVisible(false);
+    }
+    else
+    {
+        qCWarning(DIGIKAM_DPLUGIN_LOG) << "G'MIC-Qt: Cannot found \"pbApply\" "
+                                          "button from plugin dialog!";
+    }
+
+    // ---
 
     QPushButton* const pbCancel = findChild<QPushButton*>("pbCancel");
-    pbCancel->setVisible(false);
+
+    if (pbCancel)
+    {
+        pbCancel->setVisible(false);
+    }
+    else
+    {
+        qCWarning(DIGIKAM_DPLUGIN_LOG) << "G'MIC-Qt: Cannot found \"pbCancel\" "
+                                          "button from plugin dialog!";
+    }
 }
 
 void GMicQtWindow::slotAboutPlugin()
@@ -235,7 +266,9 @@ void GMicQtWindow::slotOkClicked()
 
     if (d->filterName && d->filterLbl)
     {
-        *d->filterName = d->filterLbl->text().remove(QLatin1String("<b>")).remove(QLatin1String("</b>"));
+        *d->filterName = d->filterLbl->text()
+                         .remove(QLatin1String("<b>"))
+                         .remove(QLatin1String("</b>"));
     }
 
     // Copy the current G'MIC command on the clipboard.
@@ -354,12 +387,12 @@ QString GMicQtWindow::execWindow(DPlugin* const tool,
         parameters = lastAppliedFilterRunParameters(GmicQt::ReturnedRunParametersFlag::BeforeFilterExecution);
     }
 
-    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Start G'MIC-Qt dialog with parameters:";
-    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Command:"     << parameters.command;
-    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Path:"        << parameters.filterPath;
-    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Input Mode:"  << (int)parameters.inputMode;
-    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Output Mode:" << (int)parameters.outputMode;
-    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "Filter name:" << parameters.filterName();
+    qCDebug(DIGIKAM_DPLUGIN_LOG) << "Start G'MIC-Qt dialog with parameters:";
+    qCDebug(DIGIKAM_DPLUGIN_LOG) << "Command:"     << parameters.command;
+    qCDebug(DIGIKAM_DPLUGIN_LOG) << "Path:"        << parameters.filterPath;
+    qCDebug(DIGIKAM_DPLUGIN_LOG) << "Input Mode:"  << (int)parameters.inputMode;
+    qCDebug(DIGIKAM_DPLUGIN_LOG) << "Output Mode:" << (int)parameters.outputMode;
+    qCDebug(DIGIKAM_DPLUGIN_LOG) << "Filter name:" << parameters.filterName();
 
     s_mainWindow->setPluginParameters(parameters);
 

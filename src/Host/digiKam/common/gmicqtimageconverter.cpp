@@ -63,8 +63,8 @@ void GMicQtImageConverter::convertCImgtoDImg(const cimg_library::CImg<float>& in
 
     if      (in.spectrum() == 4) // RGB + Alpha
     {
-        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert CImg to DImg: RGB+Alpha image"
-                                            << "(" << (sixteenBit+1) * 8 << "bits)";
+        qCDebug(DIGIKAM_DPLUGIN_LOG) << "GMicQt: convert CImg to DImg: RGB+Alpha image"
+                                     << "(" << (sixteenBit+1) * 8 << "bits)";
 
         const float* srcR = in.data(0, 0, 0, 0);
         const float* srcG = in.data(0, 0, 0, 1);
@@ -106,7 +106,7 @@ void GMicQtImageConverter::convertCImgtoDImg(const cimg_library::CImg<float>& in
     }
     else if (in.spectrum() == 3) // RGB
     {
-        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert CImg to DImg: RGB image"
+        qCDebug(DIGIKAM_DPLUGIN_LOG) << "GMicQt: convert CImg to DImg: RGB image"
                                             << "(" << (sixteenBit+1) * 8 << "bits)";
 
         const float* srcR = in.data(0, 0, 0, 0);
@@ -148,8 +148,8 @@ void GMicQtImageConverter::convertCImgtoDImg(const cimg_library::CImg<float>& in
     }
     else if (in.spectrum() == 2) // Gray levels + Alpha
     {
-        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert CImg to DImg: Gray+Alpha image"
-                                            << "(" << (sixteenBit+1) * 8 << "bits)";
+        qCDebug(DIGIKAM_DPLUGIN_LOG) << "GMicQt: convert CImg to DImg: Gray+Alpha image"
+                                     << "(" << (sixteenBit+1) * 8 << "bits)";
 
         const float* src  = in.data(0, 0, 0, 0);
         const float* srcA = in.data(0, 0, 0, 1);
@@ -191,8 +191,8 @@ void GMicQtImageConverter::convertCImgtoDImg(const cimg_library::CImg<float>& in
     }
     else // Gray levels
     {
-        qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert CImg to DImg: Gray image"
-                                            << "(" << (sixteenBit+1) * 8 << "bits)";
+        qCDebug(DIGIKAM_DPLUGIN_LOG) << "GMicQt: convert CImg to DImg: Gray image"
+                                     << "(" << (sixteenBit+1) * 8 << "bits)";
 
         const float* src  = in.data(0, 0, 0, 0);
         int height        = out.height();
@@ -250,9 +250,9 @@ void GMicQtImageConverter::convertDImgtoCImg(const DImg& in,
         dstA = out.data(0, 0, 0, 3);
     }
 
-    qCDebug(DIGIKAM_DPLUGIN_EDITOR_LOG) << "GMicQt: convert DImg to CImg:"
-                                        << (in.sixteenBit() + 1) * 8 << "bits image"
-                                        << "with alpha channel:" << in.hasAlpha();
+    qCDebug(DIGIKAM_DPLUGIN_LOG) << "GMicQt: convert DImg to CImg:"
+                                 << (in.sixteenBit() + 1) * 8 << "bits image"
+                                 << "with alpha channel:" << in.hasAlpha();
 
     for (int y = 0 ; y < h ; ++y)
     {
