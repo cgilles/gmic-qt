@@ -311,22 +311,22 @@ void GmicFilterChain::slotMoveUpItems()
 {
     // move above item down, then we don't have to fix the focus
 
-    QModelIndex curIndex   = listView()->currentIndex();
+    QModelIndex curIndex   = d->listView->currentIndex();
 
     if (!curIndex.isValid())
     {
         return;
     }
 
-    QModelIndex aboveIndex = listView()->indexAbove(curIndex);
+    QModelIndex aboveIndex = d->listView->indexAbove(curIndex);
 
     if (!aboveIndex.isValid())
     {
         return;
     }
 
-    QTreeWidgetItem* const temp  = listView()->takeTopLevelItem(aboveIndex.row());
-    listView()->insertTopLevelItem(curIndex.row(), temp);
+    QTreeWidgetItem* const temp  = d->listView->takeTopLevelItem(aboveIndex.row());
+    d->listView->insertTopLevelItem(curIndex.row(), temp);
 
     Q_EMIT signalItemListChanged();
     Q_EMIT signalMoveUpItem();
@@ -336,22 +336,22 @@ void GmicFilterChain::slotMoveDownItems()
 {
     // move below item up, then we don't have to fix the focus
 
-    QModelIndex curIndex   = listView()->currentIndex();
+    QModelIndex curIndex   = d->listView->currentIndex();
 
     if (!curIndex.isValid())
     {
         return;
     }
 
-    QModelIndex belowIndex = listView()->indexBelow(curIndex);
+    QModelIndex belowIndex = d->listView->indexBelow(curIndex);
 
     if (!belowIndex.isValid())
     {
         return;
     }
 
-    QTreeWidgetItem* const temp  = listView()->takeTopLevelItem(belowIndex.row());
-    listView()->insertTopLevelItem(curIndex.row(), temp);
+    QTreeWidgetItem* const temp  = d->listView->takeTopLevelItem(belowIndex.row());
+    d->listView->insertTopLevelItem(curIndex.row(), temp);
 
     Q_EMIT signalItemListChanged();
     Q_EMIT signalMoveDownItem();
@@ -359,9 +359,9 @@ void GmicFilterChain::slotMoveDownItems()
 
 void GmicFilterChain::slotClearItems()
 {
-    listView()->selectAll();
+    d->listView->selectAll();
     slotRemoveItems();
-    listView()->clear();
+    d->listView->clear();
 }
 
 void GmicFilterChain::removeItemByTitle(const QString& title)
@@ -462,11 +462,6 @@ QStringList GmicFilterChain::chainedCommands() const
     }
 
     return list;
-}
-
-GmicFilterChainView* GmicFilterChain::listView() const
-{
-    return d->listView;
 }
 
 void GmicFilterChain::slotItemListChanged()

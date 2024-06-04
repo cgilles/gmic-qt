@@ -152,8 +152,6 @@ public:
     explicit GmicFilterChain(QWidget* const parent);
     ~GmicFilterChain()                                                     override;
 
-    GmicFilterChainView* listView()                                  const;
-
     void                setControlButtons(ControlButtons buttonMask);
 
     /**
