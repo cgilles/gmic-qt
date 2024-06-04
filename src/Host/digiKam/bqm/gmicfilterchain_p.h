@@ -37,7 +37,7 @@
 #include <QHeaderView>
 #include <QLabel>
 #include <QPainter>
-#include <QPushButton>
+#include <QToolButton>
 #include <QUrl>
 #include <QTimer>
 #include <QFile>
@@ -48,6 +48,7 @@
 #include <QIcon>
 #include <QApplication>
 #include <QStyle>
+#include <QAction>
 #include <QMessageBox>
 
 // Local includes
@@ -57,20 +58,18 @@
 namespace DigikamBqmGmicQtPlugin
 {
 
-class Q_DECL_HIDDEN CtrlButton : public QPushButton
+class Q_DECL_HIDDEN CtrlButton : public QToolButton
 {
     Q_OBJECT
 
 public:
 
-    explicit CtrlButton(const QIcon& icon, QWidget* const parent = nullptr)
-       : QPushButton(parent)
+    explicit CtrlButton(const QIcon& icon,
+                        const QString& tip,
+                        QWidget* const parent)
+       : QToolButton(parent)
     {
-        const int btnSize = 32;
-
-        setMinimumSize(btnSize, btnSize);
-        setMaximumSize(btnSize, btnSize);
-        setIcon(icon);
+        setDefaultAction(new QAction(icon, tip));
     }
 
     ~CtrlButton() override = default;

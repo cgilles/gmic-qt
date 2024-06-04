@@ -33,8 +33,6 @@ public:
 
     Private() = default;
 
-    bool                             controlButtonsEnabled   = true;
-
     CtrlButton*                      addButton               = nullptr;
     CtrlButton*                      removeButton            = nullptr;
     CtrlButton*                      moveUpButton            = nullptr;
@@ -56,17 +54,16 @@ GmicFilterChain::GmicFilterChain(QWidget* const parent)
 
     // --------------------------------------------------------
 
-    d->addButton      = new CtrlButton(QIcon::fromTheme(QLatin1String("list-add")).pixmap(16, 16),      this);
-    d->removeButton   = new CtrlButton(QIcon::fromTheme(QLatin1String("list-remove")).pixmap(16, 16),   this);
-    d->moveUpButton   = new CtrlButton(QIcon::fromTheme(QLatin1String("go-up")).pixmap(16, 16),         this);
-    d->moveDownButton = new CtrlButton(QIcon::fromTheme(QLatin1String("go-down")).pixmap(16, 16),       this);
-    d->clearButton    = new CtrlButton(QIcon::fromTheme(QLatin1String("edit-clear")).pixmap(16, 16),    this);
-
-    d->addButton->setToolTip(tr("Add new G'MIC filter to the list"));
-    d->removeButton->setToolTip(tr("Remove selected G'MIC filters from the list"));
-    d->moveUpButton->setToolTip(tr("Move current selected G'MIC filter up in the list"));
-    d->moveDownButton->setToolTip(tr("Move current selected G'MIC filter down in the list"));
-    d->clearButton->setToolTip(tr("Clear the list."));
+    d->addButton      = new CtrlButton(QIcon::fromTheme(QLatin1String("list-add")),
+                                       tr("Add new G'MIC filter to the list"), this);
+    d->removeButton   = new CtrlButton(QIcon::fromTheme(QLatin1String("list-remove")),
+                                       tr("Remove selected G'MIC filters from the list"), this);
+    d->moveUpButton   = new CtrlButton(QIcon::fromTheme(QLatin1String("go-up")),
+                                       tr("Move current selected G'MIC filter up in the list"), this);
+    d->moveDownButton = new CtrlButton(QIcon::fromTheme(QLatin1String("go-down")),
+                                       tr("Move current selected G'MIC filter down in the list"), this);
+    d->clearButton    = new CtrlButton(QIcon::fromTheme(QLatin1String("edit-clear")),
+                                       tr("Clear the list."), this);
 
     // --------------------------------------------------------
 
@@ -90,19 +87,19 @@ GmicFilterChain::GmicFilterChain(QWidget* const parent)
 
     // --------------------------------------------------------
 
-    connect(d->addButton, &CtrlButton::clicked,
+    connect(d->addButton, &CtrlButton::triggered,
             this, &GmicFilterChain::signalAddItem);
 
-    connect(d->removeButton, &CtrlButton::clicked,
+    connect(d->removeButton, &CtrlButton::triggered,
             this, &GmicFilterChain::slotRemoveItems);
 
-    connect(d->moveUpButton, &CtrlButton::clicked,
+    connect(d->moveUpButton, &CtrlButton::triggered,
             this, &GmicFilterChain::slotMoveUpItems);
 
-    connect(d->moveDownButton, &CtrlButton::clicked,
+    connect(d->moveDownButton, &CtrlButton::triggered,
             this, &GmicFilterChain::slotMoveDownItems);
 
-    connect(d->clearButton, &CtrlButton::clicked,
+    connect(d->clearButton, &CtrlButton::triggered,
             this, &GmicFilterChain::slotClearItems);
 
     // --------------------------------------------------------
@@ -395,19 +392,15 @@ void GmicFilterChain::slotItemListChanged()
 {
     const QList<QTreeWidgetItem*> selectedItemsList = d->listView->selectedItems();
 
-    const bool haveItems                            = !(chainedFilters().isEmpty())    && d->controlButtonsEnabled;
-    const bool haveSelectedItems                    = !(selectedItemsList.isEmpty())   && d->controlButtonsEnabled;
-    const bool haveOnlyOneSelectedItem              = (selectedItemsList.count() == 1) && d->controlButtonsEnabled;
+    const bool haveItems                            = !chainedFilters().isEmpty();
+    const bool haveSelectedItems                    = !selectedItemsList.isEmpty();
+    const bool haveOnlyOneSelectedItem              = (selectedItemsList.count() == 1);
 
     d->removeButton->setEnabled(haveSelectedItems);
     d->moveUpButton->setEnabled(haveOnlyOneSelectedItem);
     d->moveDownButton->setEnabled(haveOnlyOneSelectedItem);
     d->clearButton->setEnabled(haveItems);
-
-    // All buttons are enabled / disabled now, but the "Add" button should always be
-    // enabled, if the buttons are not explicitly disabled with enableControlButtons()
-
-    d->addButton->setEnabled(d->controlButtonsEnabled);
+    d->addButton->setEnabled(true);
 }
 
 void GmicFilterChain::createNewFilter(const QString& title, const QString& command)
