@@ -128,7 +128,6 @@ QBoxLayout* GmicFilterChain::setControlButtonsPlacement(ControlButtonPlacement p
     const int spacing = qMin(QApplication::style()->pixelMetric(QStyle::PM_LayoutHorizontalSpacing),
                              QApplication::style()->pixelMetric(QStyle::PM_LayoutVerticalSpacing));
 
-
     QGridLayout* const mainLayout = new QGridLayout;
     mainLayout->addWidget(d->listView, 1, 1, 1, 1);
     mainLayout->setRowStretch(1, 10);
@@ -365,7 +364,7 @@ void GmicFilterChain::setChainedFilters(const QMap<QString, QVariant>& filters)
     d->listView->clear();
 
     QStringList names = filters.keys();
-    int index = 0;
+    int index         = 0;
 
     foreach (const QVariant& cmd, filters.values())
     {
@@ -454,6 +453,8 @@ void GmicFilterChain::createNewFilter(const QString& title, const QString& comma
                                                                       title,
                                                                       command
                                                                      );
+
+    Q_EMIT signalItemListChanged();
 }
 
 void GmicFilterChain::updateCurrentFilter(const QString& title, const QString& command)
@@ -465,6 +466,8 @@ void GmicFilterChain::updateCurrentFilter(const QString& title, const QString& c
     {
         item->setTitle(title);
         item->setCommand(command);
+
+        Q_EMIT signalItemListChanged();
     }
 }
 
