@@ -57,6 +57,7 @@ namespace DigikamEditorGmicQtPlugin
 {
 
 GMicQtWindow* s_mainWindow = nullptr;
+QString       s_filterName;
 
 class Q_DECL_HIDDEN GMicQtWindow::Private
 {
@@ -366,8 +367,7 @@ QString GMicQtWindow::execWindow(DPlugin* const tool,
      * seen side effects, for example with the settings to host in RC file.
      */
 
-    QString filterName;
-    s_mainWindow = new GMicQtWindow(tool, qApp->activeWindow(), &filterName);
+    s_mainWindow = new GMicQtWindow(tool, qApp->activeWindow(), &s_filterName);
 
     if (type == GMicQtWindow::BQM)
     {
@@ -410,17 +410,7 @@ QString GMicQtWindow::execWindow(DPlugin* const tool,
 
     s_mainWindow->setWindowModality(Qt::ApplicationModal);
 
-    QSettings settings;
-/*
-    settings.setValue(QString("LastExecution/host_%1/FilterPath").arg(GmicQtHost::ApplicationShortname), _lastAppliedFilterPath);
-    settings.setValue(QString("LastExecution/host_%1/FilterHash").arg(GmicQtHost::ApplicationShortname), _lastAppliedFilterHash);
-    settings.setValue(QString("LastExecution/host_%1/Command").arg(GmicQtHost::ApplicationShortname), _lastAppliedCommand);
-    settings.setValue(QString("LastExecution/host_%1/Arguments").arg(GmicQtHost::ApplicationShortname), _lastAppliedCommandArguments);
-    settings.setValue(QString("LastExecution/host_%1/InputMode").arg(GmicQtHost::ApplicationShortname), (int)_lastAppliedCommandInOutState.inputMode);
-    settings.setValue(QString("LastExecution/host_%1/OutputMode").arg(GmicQtHost::ApplicationShortname), (int)_lastAppliedCommandInOutState.outputMode);
-    settings.sync();
-*/
-    if (settings.value("Config/MainWindowMaximized", false).toBool())
+    if (QSettings().value("Config/MainWindowMaximized", false).toBool())
     {
         s_mainWindow->showMaximized();  // krazy:exclude=qmethods
     }
@@ -442,7 +432,7 @@ QString GMicQtWindow::execWindow(DPlugin* const tool,
 
     loop.exec();
 
-    return filterName;
+    return s_filterName;
 }
 
 } // namespace DigikamEditorGmicQtPlugin
