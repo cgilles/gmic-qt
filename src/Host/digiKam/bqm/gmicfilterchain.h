@@ -64,6 +64,8 @@ public:
     void setTitle(const QString& title);
     QString title()                 const;
 
+    void setIndex(int index);
+
     void setIsLessThanHandler(GmicFilterChainIsLessThanHandler fncptr);
 
 private:
@@ -90,7 +92,8 @@ public:
 
     enum ColumnType
     {
-        Title = 0,
+        Index = 0,
+        Title,
         Command
     };
 
@@ -106,6 +109,8 @@ public:
     GmicFilterChainViewItem* currentFilterItem()         const;
 
     GmicFilterChainIsLessThanHandler isLessThanHandler() const;
+
+    void refreshIndex();
 
 Q_SIGNALS:
 

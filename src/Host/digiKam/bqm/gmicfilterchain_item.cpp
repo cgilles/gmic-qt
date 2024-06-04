@@ -33,6 +33,7 @@ public:
 
     Private() = default;
 
+    int                         index    = -1;
     QString                     title;
     QString                     command;
     GmicFilterChainView*        view     = nullptr;
@@ -76,6 +77,12 @@ void GmicFilterChainViewItem::setTitle(const QString& title)
 QString GmicFilterChainViewItem::title() const
 {
     return d->title;
+}
+
+void GmicFilterChainViewItem::setIndex(int index)
+{
+    d->index = index;
+    setText(GmicFilterChainView::Index, QString::fromUtf8("%1").arg(d->index + 1));
 }
 
 bool GmicFilterChainViewItem::operator<(const QTreeWidgetItem& other) const

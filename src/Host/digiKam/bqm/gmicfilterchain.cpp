@@ -392,6 +392,8 @@ void GmicFilterChain::slotItemListChanged()
     d->moveDownButton->setEnabled(haveOnlyOneSelectedItem);
     d->clearButton->setEnabled(haveItems);
     d->addButton->setEnabled(true);
+
+    d->listView->refreshIndex();
 }
 
 void GmicFilterChain::createNewFilter(const QString& title, const QString& command)

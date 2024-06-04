@@ -41,10 +41,12 @@ GmicFilterChainView::GmicFilterChainView(GmicFilterChain* const parent)
     setAllColumnsShowFocus(true);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    setColumnCount(2);
-    setHeaderLabels(QStringList() << tr("Name")
+    setColumnCount(3);
+    setHeaderLabels(QStringList() << tr("Id")
+                                  << tr("Name")
                                   << tr("G'MIC Command"));
 
+    header()->setSectionResizeMode(Index,   QHeaderView::ResizeToContents);
     header()->setSectionResizeMode(Title,   QHeaderView::Stretch);
     header()->setSectionResizeMode(Command, QHeaderView::Stretch);
 
@@ -112,6 +114,23 @@ GmicFilterChainViewItem* GmicFilterChainView::currentFilterItem() const
     }
 
     return dynamic_cast<GmicFilterChainViewItem*>(currentTreeItem);
+}
+
+void GmicFilterChainView::refreshIndex()
+{
+    QTreeWidgetItemIterator it(this);
+
+    while (*it)
+    {
+        GmicFilterChainViewItem* const item = dynamic_cast<GmicFilterChainViewItem*>(*it);
+
+        if (item)
+        {
+            item->setIndex(indexOfTopLevelItem(item));
+        }
+
+        ++it;
+    }
 }
 
 } // namespace DigikamBqmGmicQtPlugin
