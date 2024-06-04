@@ -234,6 +234,27 @@ void GmicFilterChain::setControlButtons(ControlButtons buttonMask)
     d->clearButton->setVisible(buttonMask & Clear);
 }
 
+void GmicFilterChain::slotClearItems()
+{
+   if (!d->listView->topLevelItemCount())
+    {
+        return;
+    }
+
+    if (QMessageBox::question(this, QObject::tr("Clear List"),
+                              QObject::tr("Do you want to clear the list of "
+                                          "chained G'MIC filters?"),
+                                     QMessageBox::Yes | QMessageBox::No
+                                     ) == QMessageBox::No)
+    {
+        return;
+    }
+
+    d->listView->selectAll();
+    slotRemoveItems();
+    d->listView->clear();
+}
+
 void GmicFilterChain::slotRemoveItems()
 {
     QList<QTreeWidgetItem*> selectedItemsList = d->listView->selectedItems();
@@ -322,12 +343,6 @@ void GmicFilterChain::slotMoveDownItems()
     Q_EMIT signalMoveDownItem();
 }
 
-void GmicFilterChain::slotClearItems()
-{
-    d->listView->selectAll();
-    slotRemoveItems();
-    d->listView->clear();
-}
 
 void GmicFilterChain::removeItemByTitle(const QString& title)
 {
