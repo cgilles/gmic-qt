@@ -55,15 +55,20 @@ GmicFilterChain::GmicFilterChain(QWidget* const parent)
     // --------------------------------------------------------
 
     d->addButton      = new CtrlButton(QIcon::fromTheme(QLatin1String("list-add")),
-                                       tr("Add new G'MIC filter to the list"), this);
+                                       tr("Add new G'MIC filter to the list"),
+                                       this, &GmicFilterChain::signalAddItem);
     d->removeButton   = new CtrlButton(QIcon::fromTheme(QLatin1String("list-remove")),
-                                       tr("Remove selected G'MIC filters from the list"), this);
+                                       tr("Remove selected G'MIC filters from the list"),
+                                       this, &GmicFilterChain::slotRemoveItems);
     d->moveUpButton   = new CtrlButton(QIcon::fromTheme(QLatin1String("go-up")),
-                                       tr("Move current selected G'MIC filter up in the list"), this);
+                                       tr("Move current selected G'MIC filter up in the list"),
+                                       this, &GmicFilterChain::slotMoveUpItems);
     d->moveDownButton = new CtrlButton(QIcon::fromTheme(QLatin1String("go-down")),
-                                       tr("Move current selected G'MIC filter down in the list"), this);
+                                       tr("Move current selected G'MIC filter down in the list"),
+                                       this, &GmicFilterChain::slotMoveDownItems);
     d->clearButton    = new CtrlButton(QIcon::fromTheme(QLatin1String("edit-clear")),
-                                       tr("Clear the list."), this);
+                                       tr("Clear the list."),
+                                       this, &GmicFilterChain::slotClearItems);
 
     // --------------------------------------------------------
 
@@ -87,20 +92,6 @@ GmicFilterChain::GmicFilterChain(QWidget* const parent)
 
     // --------------------------------------------------------
 
-    connect(d->addButton, &CtrlButton::triggered,
-            this, &GmicFilterChain::signalAddItem);
-
-    connect(d->removeButton, &CtrlButton::triggered,
-            this, &GmicFilterChain::slotRemoveItems);
-
-    connect(d->moveUpButton, &CtrlButton::triggered,
-            this, &GmicFilterChain::slotMoveUpItems);
-
-    connect(d->moveDownButton, &CtrlButton::triggered,
-            this, &GmicFilterChain::slotMoveDownItems);
-
-    connect(d->clearButton, &CtrlButton::triggered,
-            this, &GmicFilterChain::slotClearItems);
 
     // --------------------------------------------------------
 

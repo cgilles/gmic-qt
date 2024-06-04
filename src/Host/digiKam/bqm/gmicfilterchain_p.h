@@ -29,6 +29,7 @@
 
 // Qt includes
 
+#include <QMetaMethod>
 #include <QDragEnterEvent>
 #include <QFileInfo>
 #include <QGridLayout>
@@ -64,12 +65,17 @@ class Q_DECL_HIDDEN CtrlButton : public QToolButton
 
 public:
 
-    explicit CtrlButton(const QIcon& icon,
+        template<typename PointerToMemberFunction>
+        explicit CtrlButton(const QIcon& icon,
                         const QString& tip,
-                        QWidget* const parent)
+                        QWidget* const parent,
+                        PointerToMemberFunction method)
        : QToolButton(parent)
     {
         setDefaultAction(new QAction(icon, tip));
+
+        connect(this, &CtrlButton::triggered,
+                parent, method);
     }
 
     ~CtrlButton() override = default;
