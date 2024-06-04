@@ -113,11 +113,11 @@ public:
 
 Q_SIGNALS:
 
-    void signalItemClicked(QTreeWidgetItem*);
+    void signalEditItem(const QString& command);
 
 private Q_SLOTS:
 
-    void slotItemClicked(QTreeWidgetItem* item, int column);
+    void slotItemDoubleClicked(QTreeWidgetItem* item, int column);
 };
 
 // -------------------------------------------------------------------------
@@ -169,7 +169,7 @@ public:
     void                appendControlButtonsWidget(QWidget* const widget);
 
     void setChainedFilters(const QMap<QString, QVariant>& filters);
-    QMap<QString, QVariant> chainedFilters()                         const;
+    QMap<QString, QVariant> chainedFilters()                        const;
 
     QStringList         chainedCommands()                           const;
     QString             currentTitle()                              const;
@@ -195,11 +195,11 @@ public:
 Q_SIGNALS:
 
     void signalAddItem();
+    void signalEditItem(const QString& command);
     void signalMoveUpItem();
     void signalMoveDownItem();
     void signalRemovedItems(const QList<int>&);
     void signalItemListChanged();
-    void signalItemClicked(QTreeWidgetItem*);
 
 public Q_SLOTS:
 

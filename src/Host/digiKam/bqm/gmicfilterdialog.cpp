@@ -215,6 +215,9 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
     connect(d->filterChain, SIGNAL(signalAddItem()),
             this, SLOT(slotGmicQt()));
 
+    connect(d->filterChain, SIGNAL(signalEditItem(QString)),
+            this, SLOT(slotGmicQt(QString)));
+
     connect(buttonBox, SIGNAL(accepted()),
             this, SLOT(accept()));
 
@@ -245,7 +248,7 @@ void GmicFilterDialog::slotOnlineHandbook()
                            );
 }
 
-void GmicFilterDialog::slotGmicQt()
+void GmicFilterDialog::slotGmicQt(const QString& command)
 {
     QClipboard* const clipboard = QGuiApplication::clipboard();
     clipboard->clear();
@@ -253,12 +256,12 @@ void GmicFilterDialog::slotGmicQt()
     QString fname = GMicQtWindow::execWindow(
                                              d->plugin,                       // BQM plugin instance.
                                              GMicQtWindow::BQM,               // Host type.
-                                             d->filterChain->currentCommand() // The G'MIC command.
+                                             command                          // The G'MIC command in Edit mode, else empty in ADD mode.
                                             );
 
     if (!clipboard->text().isEmpty() && !fname.isEmpty())
     {
-        if (d->filterChain->currentCommand().isEmpty())
+        if (command.isEmpty())
         {
             d->filterChain->createNewFilter(fname, clipboard->text());
         }

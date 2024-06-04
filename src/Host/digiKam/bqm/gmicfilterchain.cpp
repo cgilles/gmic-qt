@@ -75,8 +75,8 @@ GmicFilterChain::GmicFilterChain(QWidget* const parent)
 
     // --------------------------------------------------------
 
-    connect(d->listView, &GmicFilterChainView::signalItemClicked,
-            this, &GmicFilterChain::signalItemClicked);
+    connect(d->listView, &GmicFilterChainView::signalEditItem,
+            this, &GmicFilterChain::signalEditItem);
 
     // queue this connection because itemSelectionChanged is emitted
     // while items are deleted, and accessing selectedItems at that
@@ -418,26 +418,20 @@ QStringList GmicFilterChain::chainedCommands() const
 void GmicFilterChain::slotItemListChanged()
 {
     const QList<QTreeWidgetItem*> selectedItemsList = d->listView->selectedItems();
-/*
-    const bool haveImages                           = !(imageUrls().isEmpty())         && d->controlButtonsEnabled;
-    const bool haveSelectedImages                   = !(selectedItemsList.isEmpty())   && d->controlButtonsEnabled;
-    const bool haveOnlyOneSelectedImage             = (selectedItemsList.count() == 1) && d->controlButtonsEnabled;
 
-    d->removeButton->setEnabled(haveSelectedImages);
-    d->moveUpButton->setEnabled(haveOnlyOneSelectedImage);
-    d->moveDownButton->setEnabled(haveOnlyOneSelectedImage);
-    d->clearButton->setEnabled(haveImages);
+    const bool haveItems                            = !(chainedFilters().isEmpty())    && d->controlButtonsEnabled;
+    const bool haveSelectedItems                    = !(selectedItemsList.isEmpty())   && d->controlButtonsEnabled;
+    const bool haveOnlyOneSelectedItem              = (selectedItemsList.count() == 1) && d->controlButtonsEnabled;
+
+    d->removeButton->setEnabled(haveSelectedItems);
+    d->moveUpButton->setEnabled(haveOnlyOneSelectedItem);
+    d->moveDownButton->setEnabled(haveOnlyOneSelectedItem);
+    d->clearButton->setEnabled(haveItems);
 
     // All buttons are enabled / disabled now, but the "Add" button should always be
     // enabled, if the buttons are not explicitly disabled with enableControlButtons()
 
     d->addButton->setEnabled(d->controlButtonsEnabled);
-
-    // TODO: should they be enabled by default now?
-
-    d->loadButton->setEnabled(d->controlButtonsEnabled);
-    d->saveButton->setEnabled(d->controlButtonsEnabled);
-*/
 }
 
 QString GmicFilterChain::currentTitle() const

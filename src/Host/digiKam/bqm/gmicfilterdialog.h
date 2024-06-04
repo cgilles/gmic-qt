@@ -57,12 +57,12 @@ public:
                               QWidget* const parent,
                               GmicFilterManager* const mngr,
                               DPluginBqm* const plugin);
-    ~GmicFilterDialog()     override;
+    ~GmicFilterDialog()                                     override;
 
 private Q_SLOTS:
 
-    void accept()           override;
-    void slotGmicQt();
+    void accept()                                           override;
+    void slotGmicQt(const QString& command = QString());
     void slotAboutPlugin();
     void slotOnlineHandbook();
 

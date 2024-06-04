@@ -48,20 +48,22 @@ GmicFilterChainView::GmicFilterChainView(GmicFilterChain* const parent)
     header()->setSectionResizeMode(Title,   QHeaderView::Stretch);
     header()->setSectionResizeMode(Command, QHeaderView::Stretch);
 
-    connect(this, &GmicFilterChainView::itemClicked,
-            this, &GmicFilterChainView::slotItemClicked);
+    connect(this, &GmicFilterChainView::itemDoubleClicked,
+            this, &GmicFilterChainView::slotItemDoubleClicked);
 }
 
-void GmicFilterChainView::slotItemClicked(QTreeWidgetItem* item, int column)
+void GmicFilterChainView::slotItemDoubleClicked(QTreeWidgetItem* item, int column)
 {
     Q_UNUSED(column)
 
-    if (!item)
+    GmicFilterChainViewItem* const fitem = dynamic_cast<GmicFilterChainViewItem*>(item);
+
+    if (!fitem)
     {
         return;
     }
 
-    Q_EMIT signalItemClicked(item);
+    Q_EMIT signalEditItem(fitem->command());
 }
 
 GmicFilterChainViewItem* GmicFilterChainView::findItem(const QString& title)
