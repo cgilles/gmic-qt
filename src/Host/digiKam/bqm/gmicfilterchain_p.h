@@ -48,6 +48,7 @@
 #include <QIcon>
 #include <QApplication>
 #include <QStyle>
+#include <QMessageBox>
 
 // Local includes
 

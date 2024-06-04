@@ -237,6 +237,21 @@ void GmicFilterChain::setControlButtons(ControlButtons buttonMask)
 void GmicFilterChain::slotRemoveItems()
 {
     QList<QTreeWidgetItem*> selectedItemsList = d->listView->selectedItems();
+
+    if (selectedItemsList.isEmpty())
+    {
+        return;
+    }
+
+    if (QMessageBox::question(this, QObject::tr("Remove Filters"),
+                              QObject::tr("Do you want to remove the current "
+                                          "selected G'MIC filters from the list?"),
+                                     QMessageBox::Yes | QMessageBox::No
+                                     ) == QMessageBox::No)
+    {
+        return;
+    }
+
     QList<int> itemsIndex;
 
     for (QList<QTreeWidgetItem*>::const_iterator it = selectedItemsList.constBegin() ;
