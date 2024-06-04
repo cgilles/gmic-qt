@@ -70,7 +70,7 @@ GmicFilterChain::GmicFilterChain(QWidget* const parent)
 
     // --------------------------------------------------------
 
-    setControlButtons(Add | Remove | MoveUp | MoveDown | Clear ); // add all buttons      (default)
+    setControlButtons(Add | Remove | MoveUp | MoveDown | Clear ); // add all buttons       (default)
     setControlButtonsPlacement(ControlButtonsBelow);              // buttons on the bottom (default)
 
     // --------------------------------------------------------

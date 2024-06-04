@@ -78,11 +78,6 @@ QString GmicFilterChainViewItem::title() const
     return d->title;
 }
 
-GmicFilterChainView* GmicFilterChainViewItem::view() const
-{
-    return d->view;
-}
-
 bool GmicFilterChainViewItem::operator<(const QTreeWidgetItem& other) const
 {
     if (d->view->isLessThanHandler())

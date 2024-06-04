@@ -66,10 +66,6 @@ public:
 
     void setIsLessThanHandler(GmicFilterChainIsLessThanHandler fncptr);
 
-protected:
-
-    GmicFilterChainView* view()     const;
-
 private:
 
     bool operator<(const QTreeWidgetItem& other) const override;
