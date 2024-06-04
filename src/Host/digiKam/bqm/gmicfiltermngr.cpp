@@ -31,6 +31,7 @@
 #include <QMimeData>
 #include <QDragEnterEvent>
 #include <QIcon>
+#include <QMap>
 #include <QHeaderView>
 #include <QMessageBox>
 #include <QToolButton>
@@ -118,14 +119,14 @@ public:
 
     GmicFilterManager* manager   = nullptr;
     GmicFilterData     type      = Command;
-    QString            oldValue;
-    QString            newValue;
+    QVariant           oldValue;
+    QVariant           newValue;
     GmicFilterNode*    node      = nullptr;
 };
 
 ChangeGmicFilter::ChangeGmicFilter(GmicFilterManager* const mngr,
                                    GmicFilterNode* const node,
-                                   const QString& newValue,
+                                   const QVariant& newValue,
                                    GmicFilterData type)
     : QUndoCommand(),
       d           (new Private)
@@ -151,10 +152,10 @@ ChangeGmicFilter::ChangeGmicFilter(GmicFilterManager* const mngr,
             break;
         }
 
-        default:    // Gmic Command
+        default:    // Gmic Commands
         {
-            d->oldValue = d->node->command;
-            setText(QObject::tr("Command Change"));
+            d->oldValue = d->node->commands;
+            setText(QObject::tr("Commands Change"));
             break;
         }
     }
@@ -171,19 +172,19 @@ void ChangeGmicFilter::undo()
     {
         case Title:
         {
-            d->node->title   = d->oldValue;
+            d->node->title    = d->oldValue.toString();
             break;
         }
 
         case Desc:
         {
-            d->node->desc    = d->oldValue;
+            d->node->desc     = d->oldValue.toString();
             break;
         }
 
         default:    // Gmic Command
         {
-            d->node->command = d->oldValue;
+            d->node->commands = d->oldValue.toMap();
             break;
         }
     }
@@ -197,19 +198,19 @@ void ChangeGmicFilter::redo()
     {
         case Title:
         {
-            d->node->title   = d->newValue;
+            d->node->title    = d->newValue.toString();
             break;
         }
 
         case Desc:
         {
-            d->node->desc    = d->newValue;
+            d->node->desc     = d->newValue.toString();
             break;
         }
 
         default:    // Gmic Command
         {
-            d->node->command = d->newValue;
+            d->node->commands = d->newValue.toMap();
             break;
         }
     }
@@ -391,7 +392,7 @@ QVariant GmicFilterModel::data(const QModelIndex& index, int role) const
 
         case GmicFilterModel::CommandRole:
         {
-            return commandNode->command;
+            return commandNode->commands;
         }
 
         case GmicFilterModel::DateAddedRole:

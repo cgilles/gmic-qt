@@ -27,6 +27,8 @@
 
 // Qt includes
 
+#include <QMap>
+#include <QString>
 #include <QWidget>
 #include <QDialog>
 #include <QTreeView>
@@ -60,7 +62,7 @@ public:
     QString currentPath()                          const;
     void setCurrentPath(const QString& path);
 
-    QString currentGmicFilter()                    const;
+    QMap<QString, QVariant> currentGmicFilter()     const;
 
 Q_SIGNALS:
 

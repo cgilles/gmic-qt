@@ -39,10 +39,12 @@ public:
 };
 
 GmicFilterChainViewItem::GmicFilterChainViewItem(GmicFilterChainView* const view,
+                                                 const QString& title,
                                                  const QString& command)
     : QTreeWidgetItem(view),
       d              (new Private)
 {
+    setCommand(title);
     setCommand(command);
     setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
 

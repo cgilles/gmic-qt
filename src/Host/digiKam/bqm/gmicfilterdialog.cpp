@@ -53,6 +53,7 @@
 // Local includes
 
 #include "gmicfilternode.h"
+#include "gmicfilterchain.h"
 #include "gmicqtwindow.h"
 
 using namespace DigikamEditorGmicQtPlugin;
@@ -75,7 +76,7 @@ public:
     AddGmicFilterProxyModel* proxyModel      = nullptr;
     QLineEdit*               title           = nullptr;
     DTextEdit*               desc            = nullptr;
-    QTextBrowser*            command         = nullptr;
+    GmicFilterChain*         filterChain     = nullptr;
     QPushButton*             editBtn         = nullptr;
     DPluginBqm*              plugin          = nullptr;
 };
@@ -102,22 +103,22 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
                    Qt::WindowMinMaxButtonsHint);
 
     QLabel* const frontLbl = new QLabel(this);
-    frontLbl->setText(QObject::tr("This dialog allow to customize the G'MIC Command string corresponding "
+    frontLbl->setText(QObject::tr("This dialog allow to customize the G'MIC chained command strings corresponding "
                                   "to this filter. "
                                   "Don't forget to assign at least a title and optionally a comment "
                                   "to describe the filter."));
     frontLbl->setTextFormat(Qt::PlainText);
     frontLbl->setWordWrap(true);
 
-    QLabel* const commandLbl = new QLabel(QObject::tr("Filter Command:"), this);
-    d->editBtn               = new QPushButton(this);
-    d->command               = new QTextBrowser(this);
+    QLabel* const filterLbl = new QLabel(QObject::tr("Chained Filters:"), this);
+    d->editBtn              = new QPushButton(this);
+    d->filterChain          = new GmicFilterChain(this);
 
-    QLabel* const titleLbl   = new QLabel(d->filter ? QObject::tr("Filter Title:")
-                                                    : QObject::tr("Folder Title:"), this);
-    d->title                 = new QLineEdit(this);
-    d->title->setPlaceholderText(d->filter ? QObject::tr("Enter here the filter title")
-                                           : QObject::tr("Enter here the folder title"));
+    QLabel* const titleLbl  = new QLabel(d->filter ? QObject::tr("Title:")
+                                                   : QObject::tr("Name:"), this);
+    d->title                = new QLineEdit(this);
+    d->title->setPlaceholderText(d->filter ? QObject::tr("Enter here the title")
+                                           : QObject::tr("Enter here the folder name"));
 
     /*
      * Accepts all UTF-8 Characters.
@@ -127,10 +128,10 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
     QValidator* const utf8Validator   = new QRegularExpressionValidator(utf8Rx, this);
     d->title->setValidator(utf8Validator);
 
-    QLabel* const descLbl             = new QLabel(QObject::tr("Filter Description:"), this);
+    QLabel* const descLbl             = new QLabel(QObject::tr("Description:"), this);
     d->desc                           = new DTextEdit(this);
     d->desc->setLinesVisible(3);
-    d->desc->setPlaceholderText(QObject::tr("Enter here the filter description"));
+    d->desc->setPlaceholderText(QObject::tr("Enter here the description"));
 
     QDialogButtonBox* const buttonBox = new QDialogButtonBox(this);
     buttonBox->setOrientation(Qt::Horizontal);
@@ -143,9 +144,9 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
 
     QGridLayout* const grid           = new QGridLayout(this);
     grid->addWidget(frontLbl,       0, 0, 1, 3);
-    grid->addWidget(commandLbl,     1, 0, 1, 1);
+    grid->addWidget(filterLbl,      1, 0, 1, 1);
     grid->addWidget(d->editBtn,     1, 2, 1, 1);
-    grid->addWidget(d->command,     2, 0, 1, 3);
+    grid->addWidget(d->filterChain, 2, 0, 1, 3);
     grid->addWidget(titleLbl,       3, 0, 1, 1);
     grid->addWidget(d->title,       3, 1, 1, 2);
     grid->addWidget(descLbl,        4, 0, 1, 3);
@@ -158,7 +159,7 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
 
         if (d->filter)
         {
-            d->command->setText(d->currentItem->command);
+            d->filterChain->setChainedFilters(d->currentItem->commands);
             d->title->setFocus();
             d->desc->setText(d->currentItem->desc);
             setWindowTitle(QObject::tr("Edit G'MIC Filter"));
@@ -168,8 +169,8 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
         {
             d->title->setFocus();
             frontLbl->setVisible(false);
-            commandLbl->setVisible(false);
-            d->command->setVisible(false);
+            filterLbl->setVisible(false);
+            d->filterChain->setVisible(false);
             d->editBtn->setVisible(false);
             descLbl->setVisible(false);
             d->desc->setVisible(false);
@@ -180,7 +181,6 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
     {
         if (d->filter)
         {
-            d->command->setText(QString());     // TODO use Clipboard
             d->title->setFocus();
             setWindowTitle(QObject::tr("Add G'MIC Filter"));
             d->editBtn->setText(QObject::tr("Select Filter..."));
@@ -189,8 +189,8 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
         {
             d->title->setFocus();
             frontLbl->setVisible(false);
-            commandLbl->setVisible(false);
-            d->command->setVisible(false);
+            filterLbl->setVisible(false);
+            d->filterChain->setVisible(false);
             d->editBtn->setVisible(false);
             descLbl->setVisible(false);
             d->desc->setVisible(false);
@@ -258,21 +258,14 @@ void GmicFilterDialog::slotGmicQt()
     clipboard->clear();
 
     QString fname = GMicQtWindow::execWindow(
-                                             d->plugin,                     // BQM plugin instance.
-                                             GMicQtWindow::BQM,             // Host type.
-                                             d->command->toPlainText()      // The G'MIC command.
+                                             d->plugin,                       // BQM plugin instance.
+                                             GMicQtWindow::BQM,               // Host type.
+                                             d->filterChain->currentCommand() // The G'MIC command.
                                             );
 
     if (!clipboard->text().isEmpty() && !fname.isEmpty())
     {
-        d->command->setText(clipboard->text());
-
-        // Only backport the filtername if title is empty.
-
-        if (d->title->text().isEmpty())
-        {
-            d->title->setText(fname);
-        }
+        d->filterChain->updateCurrentFilter(fname, clipboard->text());
     }
 }
 
@@ -287,7 +280,7 @@ void GmicFilterDialog::accept()
 
     if (d->edit)
     {
-        d->currentItem->command   = d->command->toPlainText();
+        d->currentItem->commands  = d->filterChain->chainedFilters();
         d->currentItem->title     = d->title->text();
         d->currentItem->desc      = d->desc->text();
         d->currentItem->dateAdded = QDateTime::currentDateTime();
@@ -298,17 +291,17 @@ void GmicFilterDialog::accept()
 
         if (d->filter)
         {
-            node          = new GmicFilterNode(GmicFilterNode::Item);
-            node->command = d->command->toPlainText();
-            node->desc    = d->desc->text();
+            node           = new GmicFilterNode(GmicFilterNode::Item);
+            node->commands = d->filterChain->chainedFilters();
+            node->desc     = d->desc->text();
         }
         else
         {
-            node          = new GmicFilterNode(GmicFilterNode::Folder);
+            node           = new GmicFilterNode(GmicFilterNode::Folder);
         }
 
-        node->title       = d->title->text();
-        node->dateAdded   = QDateTime::currentDateTime();
+        node->title        = d->title->text();
+        node->dateAdded    = QDateTime::currentDateTime();
         d->manager->addCommand(d->currentItem, node);
     }
 

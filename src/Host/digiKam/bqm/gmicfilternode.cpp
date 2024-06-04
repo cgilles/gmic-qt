@@ -79,7 +79,7 @@ GmicFilterNode::~GmicFilterNode()
 bool GmicFilterNode::operator==(const GmicFilterNode& other) const
 {
     if (
-        (command             != other.command)       ||
+        (commands            != other.commands)      ||
         (title               != other.title)         ||
         (desc                != other.desc)          ||
         (expanded            != other.expanded)      ||
@@ -176,7 +176,7 @@ GmicFilterNode* GmicXmlReader::read(QIODevice* const device, bool addRootFolder)
 
         if (
             (name() == QLatin1String("gmic")) &&
-            (version.isEmpty() || (version == QLatin1String("1.0")))
+            (version.isEmpty() || (version == QLatin1String("2.0")))
            )
         {
             if (addRootFolder)
@@ -192,7 +192,7 @@ GmicFilterNode* GmicXmlReader::read(QIODevice* const device, bool addRootFolder)
         }
         else
         {
-            raiseError(QObject::tr("The file is not an G'MIC filters database version 1.0 file."));
+            raiseError(QObject::tr("The file is not an G'MIC filters database version 2.0 file."));
         }
     }
 
@@ -277,14 +277,31 @@ void GmicXmlReader::readGmicFilterNode(GmicFilterNode* const parent)
     Q_ASSERT(isStartElement() && (name() == QLatin1String("item")));
 
     GmicFilterNode* const item = new GmicFilterNode(GmicFilterNode::Item, parent);
-    item->command              = attributes().value(QLatin1String("command")).toString();
+
+    QStringList names          = attributes().value(QLatin1String("names")).toString().split(QLatin1Char(';'));
+    QStringList filters        = attributes().value(QLatin1String("filters")).toString().split(QLatin1Char(';'));
+
+    if (names.size() == filters.size())
+    {
+        QMap<QString, QVariant> map;
+        int index = 0;
+
+        foreach (const QString& cmd, filters)
+        {
+            map.insert(names[index], cmd);
+            index++;
+        }
+
+        item->commands = map;
+    }
+
     QString date               = attributes().value(QLatin1String("added")).toString();
     item->dateAdded            = QDateTime::fromString(date, Qt::ISODate);
     item->desc                 = attributes().value(QLatin1String("desc")).toString();
 
     while (readNextStartElement())
     {
-        if      (name() == QLatin1String("title"))
+        if (name() == QLatin1String("title"))
         {
             readTitle(item);
         }
@@ -326,9 +343,9 @@ bool GmicXmlWriter::write(QIODevice* const device, const GmicFilterNode* const r
     writeStartDocument();
     writeDTD(QLatin1String("<!DOCTYPE gmic>"));
     writeStartElement(QLatin1String("gmic"));
-    writeAttribute(QLatin1String("version"), QLatin1String("1.0"));
+    writeAttribute(QLatin1String("version"), QLatin1String("2.0"));
 
-    if (root->type() == GmicFilterNode::Root)
+    if ((root->type() == GmicFilterNode::Root) && !root->children().isEmpty())
     {
         GmicFilterNode* const rootFolder = root->children().constFirst();
 
@@ -370,9 +387,19 @@ void GmicXmlWriter::writeItem(const GmicFilterNode* const parent)
         {
             writeStartElement(QLatin1String("item"));
 
-            if (!parent->command.isEmpty())
+            if (!parent->commands.isEmpty())
             {
-                writeAttribute(QLatin1String("command"), parent->command);
+                QStringList names = parent->commands.keys();
+                QVariantList vals = parent->commands.values();
+                QStringList filters;
+
+                foreach (const QVariant& v, vals)
+                {
+                    filters.append(v.toString());
+                }
+
+                writeAttribute(QLatin1String("names"),   names.join(QLatin1Char(';')));
+                writeAttribute(QLatin1String("filters"), filters.join(QLatin1Char(';')));
             }
 
             if (parent->dateAdded.isValid())

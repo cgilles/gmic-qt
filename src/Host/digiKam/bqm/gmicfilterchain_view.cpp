@@ -97,4 +97,16 @@ GmicFilterChainIsLessThanHandler GmicFilterChainView::isLessThanHandler() const
     return nullptr;
 }
 
+GmicFilterChainViewItem* GmicFilterChainView::currentFilterItem() const
+{
+    QTreeWidgetItem* const currentTreeItem = currentItem();
+
+    if (!currentTreeItem)
+    {
+        return nullptr;
+    }
+
+    return dynamic_cast<GmicFilterChainViewItem*>(currentTreeItem);
+}
+
 } // namespace DigikamBqmGmicQtPlugin

@@ -107,7 +107,7 @@ GmicFilterChain::GmicFilterChain(QWidget* const parent)
 
     // --------------------------------------------------------
 
-    QTimer::singleShot(1000, this, SIGNAL(signalImageListChanged()));
+    QTimer::singleShot(1000, this, SIGNAL(signalItemListChanged()));
 }
 
 GmicFilterChain::~GmicFilterChain()
@@ -396,7 +396,55 @@ void GmicFilterChain::removeItemByTitle(const QString& title)
     Q_EMIT signalItemListChanged();
 }
 
-QStringList GmicFilterChain::commands() const
+QString GmicFilterChain::currentCommand() const
+{
+    QString command;
+    GmicFilterChainViewItem* const item = d->listView->currentFilterItem();
+
+    if (item)
+    {
+        command = item->command();
+    }
+
+    return command;
+}
+
+void GmicFilterChain::setChainedFilters(const QMap<QString, QVariant>& filters)
+{
+    d->listView->clear();
+
+    QStringList names = filters.keys();
+    int index = 0;
+
+    foreach (const QVariant& cmd, filters.values())
+    {
+        new GmicFilterChainViewItem(d->listView, names[index], cmd.toString());
+        index++;
+    }
+}
+
+QMap<QString, QVariant> GmicFilterChain::chainedFilters() const
+{
+    QMap<QString, QVariant> map;
+
+    QTreeWidgetItemIterator it(d->listView);
+
+    while (*it)
+    {
+        GmicFilterChainViewItem* const item = dynamic_cast<GmicFilterChainViewItem*>(*it);
+
+        if (item)
+        {
+            map.insert(item->title(), item->command());
+        }
+
+        ++it;
+    }
+
+    return map;
+}
+
+QStringList GmicFilterChain::chainedCommands() const
 {
     QStringList list;
     QTreeWidgetItemIterator it(d->listView);
@@ -446,45 +494,28 @@ void GmicFilterChain::slotItemListChanged()
 */
 }
 
-GmicFilterChainViewItem* GmicFilterChainView::getCurrentItem() const
+QString GmicFilterChain::currentTitle() const
 {
-    QTreeWidgetItem* const currentTreeItem = currentItem();
+    GmicFilterChainViewItem* const item =
+        dynamic_cast<GmicFilterChainViewItem*>(d->listView->currentItem());
 
-    if (!currentTreeItem)
-    {
-        return nullptr;
-    }
-
-    return dynamic_cast<GmicFilterChainViewItem*>(currentTreeItem);
-}
-
-QString GmicFilterChain::getCurrentTitle() const
-{
-    GmicFilterChainViewItem* const currentItem = d->listView->getCurrentItem();
-
-    if (!currentItem)
+    if (!item)
     {
         return QString();
     }
 
-    return currentItem->title();
+    return item->title();
 }
 
-void GmicFilterChain::setCurrentTitle(const QString& title)
+void GmicFilterChain::updateCurrentFilter(const QString& title, const QString& command)
 {
-    QTreeWidgetItemIterator it(d->listView);
+    GmicFilterChainViewItem* const item =
+        dynamic_cast<GmicFilterChainViewItem*>(d->listView->currentItem());
 
-    while (*it)
+    if (item)
     {
-        GmicFilterChainViewItem* const item = dynamic_cast<GmicFilterChainViewItem*>(*it);
-
-        if (item && (item->title() == title))
-        {
-            d->listView->setCurrentItem(item);
-            return;
-        }
-
-        ++it;
+        item->setTitle(title);
+        item->setCommand(command);
     }
 }
 

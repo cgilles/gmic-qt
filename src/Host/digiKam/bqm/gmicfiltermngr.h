@@ -28,6 +28,7 @@
 // Qt includes
 
 #include <QObject>
+#include <QVariant>
 #include <QAbstractItemModel>
 #include <QUndoCommand>
 #include <QSortFilterProxyModel>
@@ -91,7 +92,7 @@ public:
 
     explicit ChangeGmicFilter(GmicFilterManager* const mngr,
                               GmicFilterNode* const node,
-                              const QString& newValue,
+                              const QVariant& newValue,
                               GmicFilterData type);
     ~ChangeGmicFilter()   override;
 

@@ -453,7 +453,7 @@ void GmicFilterWidget::saveSettings()
     }
 }
 
-QString GmicFilterWidget::currentGmicFilter() const
+QMap<QString, QVariant> GmicFilterWidget::currentGmicFilter() const
 {
     QModelIndex index = d->tree->currentIndex();
 
@@ -464,11 +464,11 @@ QString GmicFilterWidget::currentGmicFilter() const
 
         if (node && (node->type() == GmicFilterNode::Item))
         {
-            return node->command;
+            return node->commands;
         }
     }
 
-    return QString();
+    return QMap<QString, QVariant>();
 }
 
 QString GmicFilterWidget::currentPath() const

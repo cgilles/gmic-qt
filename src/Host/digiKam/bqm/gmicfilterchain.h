@@ -32,10 +32,8 @@
 #include <QStringList>
 #include <QTreeWidget>
 #include <QWidget>
-#include <QXmlStreamWriter>
-#include <QXmlStreamReader>
 #include <QIcon>
-#include <QUrl>
+#include <QMap>
 
 namespace DigikamBqmGmicQtPlugin
 {
@@ -56,6 +54,7 @@ class GmicFilterChainViewItem : public QTreeWidgetItem
 public:
 
     explicit GmicFilterChainViewItem(GmicFilterChainView* const view,
+                                     const QString& title,
                                      const QString& command);
     ~GmicFilterChainViewItem()            override;
 
@@ -108,7 +107,7 @@ public:
     QModelIndex indexFromItem(GmicFilterChainViewItem* item,
                               int column = 0)            const;
 
-    GmicFilterChainViewItem* getCurrentItem()            const;
+    GmicFilterChainViewItem* currentFilterItem()         const;
 
     GmicFilterChainIsLessThanHandler isLessThanHandler() const;
 
@@ -153,7 +152,7 @@ public:
     explicit GmicFilterChain(QWidget* const parent);
     ~GmicFilterChain()                                                     override;
 
-    GmicFilterChainView*     listView()                                  const;
+    GmicFilterChainView* listView()                                  const;
 
     void                setControlButtons(ControlButtons buttonMask);
 
@@ -171,11 +170,17 @@ public:
     */
     void                appendControlButtonsWidget(QWidget* const widget);
 
-    virtual QStringList commands()                                  const;
-    virtual void        removeItemByTitle(const QString& title);
+    void setChainedFilters(const QMap<QString, QVariant>& filters);
+    QMap<QString, QVariant> chainedFilters()                         const;
 
-    void                setCurrentTitle(const QString& title);
-    QString             getCurrentTitle()                           const;
+    QStringList         chainedCommands()                           const;
+    QString             currentTitle()                              const;
+    QString             currentCommand()                            const;
+
+    void                updateCurrentFilter(const QString& title,
+                                            const QString& command);
+
+    void                removeItemByTitle(const QString& title);
 
     ///@{
     /**
@@ -197,15 +202,15 @@ Q_SIGNALS:
 
 public Q_SLOTS:
 
-    virtual void slotAddItem();
-    virtual void slotRemoveItems();
+    void slotAddItem();
+    void slotRemoveItems();
 
-protected Q_SLOTS:
+private Q_SLOTS:
 
-    virtual void slotMoveUpItems();
-    virtual void slotMoveDownItems();
-    virtual void slotClearItems();
-    virtual void slotItemListChanged();
+    void slotMoveUpItems();
+    void slotMoveDownItems();
+    void slotClearItems();
+    void slotItemListChanged();
 
 private:
 

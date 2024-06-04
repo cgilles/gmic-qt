@@ -29,6 +29,7 @@
 
 #include <QObject>
 #include <QString>
+#include <QMap>
 #include <QList>
 #include <QDateTime>
 #include <QIODevice>
@@ -71,11 +72,11 @@ public:
 
 public:
 
-    QString   command;
-    QString   title;
-    QString   desc;
-    QDateTime dateAdded;
-    bool      expanded  = true;
+    QMap<QString, QVariant> commands;         ///< Map of filter name and filter command
+    QString                title;            ///< Node title 
+    QString                desc;             ///< Node description 
+    QDateTime              dateAdded;        ///< Node creation date 
+    bool                   expanded  = true; ///< Node expanded or not in tree-view 
 
 private:
 
