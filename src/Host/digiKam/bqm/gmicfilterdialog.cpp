@@ -265,7 +265,14 @@ void GmicFilterDialog::slotGmicQt()
 
     if (!clipboard->text().isEmpty() && !fname.isEmpty())
     {
-        d->filterChain->updateCurrentFilter(fname, clipboard->text());
+        if (d->filterChain->currentCommand().isEmpty())
+        {
+            d->filterChain->createNewFilter(fname, clipboard->text());
+        }
+        else
+        {
+            d->filterChain->updateCurrentFilter(fname, clipboard->text());
+        }
     }
 }
 

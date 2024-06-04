@@ -507,6 +507,15 @@ QString GmicFilterChain::currentTitle() const
     return item->title();
 }
 
+void GmicFilterChain::createNewFilter(const QString& title, const QString& command)
+{
+    GmicFilterChainViewItem* const item = new GmicFilterChainViewItem(
+                                                                      d->listView,
+                                                                      title,
+                                                                      command
+                                                                     );
+}
+
 void GmicFilterChain::updateCurrentFilter(const QString& title, const QString& command)
 {
     GmicFilterChainViewItem* const item =

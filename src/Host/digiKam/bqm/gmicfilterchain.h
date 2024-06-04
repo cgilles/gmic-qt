@@ -177,6 +177,9 @@ public:
     QString             currentTitle()                              const;
     QString             currentCommand()                            const;
 
+    void                createNewFilter(const QString& title,
+                                        const QString& command);
+
     void                updateCurrentFilter(const QString& title,
                                             const QString& command);
 

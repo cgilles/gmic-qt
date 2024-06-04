@@ -44,7 +44,7 @@ GmicFilterChainViewItem::GmicFilterChainViewItem(GmicFilterChainView* const view
     : QTreeWidgetItem(view),
       d              (new Private)
 {
-    setCommand(title);
+    setTitle(title);
     setCommand(command);
     setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
 
@@ -70,6 +70,7 @@ QString GmicFilterChainViewItem::command() const
 void GmicFilterChainViewItem::setTitle(const QString& title)
 {
     d->title = title;
+    setText(GmicFilterChainView::Title, d->command);
 }
 
 QString GmicFilterChainViewItem::title() const
