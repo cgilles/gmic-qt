@@ -109,7 +109,6 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
     frontLbl->setTextFormat(Qt::PlainText);
     frontLbl->setWordWrap(true);
 
-    QLabel* const filterLbl = new QLabel(QObject::tr("Chained G'MIC Filters:"), this);
     d->filterChain          = new GmicFilterChain(this);
 
     QLabel* const titleLbl  = new QLabel(d->filter ? QObject::tr("Title:")
@@ -142,13 +141,12 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
 
     QGridLayout* const grid           = new QGridLayout(this);
     grid->addWidget(frontLbl,       0, 0, 1, 3);
-    grid->addWidget(filterLbl,      1, 0, 1, 1);
-    grid->addWidget(d->filterChain, 2, 0, 1, 3);
-    grid->addWidget(titleLbl,       3, 0, 1, 1);
-    grid->addWidget(d->title,       3, 1, 1, 2);
-    grid->addWidget(descLbl,        4, 0, 1, 3);
-    grid->addWidget(d->desc,        5, 0, 1, 3);
-    grid->addWidget(buttonBox,      6, 0, 1, 3);
+    grid->addWidget(d->filterChain, 1, 0, 1, 3);
+    grid->addWidget(titleLbl,       2, 0, 1, 1);
+    grid->addWidget(d->title,       2, 1, 1, 2);
+    grid->addWidget(descLbl,        3, 0, 1, 3);
+    grid->addWidget(d->desc,        4, 0, 1, 3);
+    grid->addWidget(buttonBox,      5, 0, 1, 3);
 
     if (d->edit)
     {
@@ -165,7 +163,6 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
         {
             d->title->setFocus();
             frontLbl->setVisible(false);
-            filterLbl->setVisible(false);
             d->filterChain->setVisible(false);
             descLbl->setVisible(false);
             d->desc->setVisible(false);
@@ -183,7 +180,6 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
         {
             d->title->setFocus();
             frontLbl->setVisible(false);
-            filterLbl->setVisible(false);
             d->filterChain->setVisible(false);
             descLbl->setVisible(false);
             d->desc->setVisible(false);

@@ -31,7 +31,7 @@
 #include <QPushButton>
 #include <QStringList>
 #include <QTreeWidget>
-#include <QWidget>
+#include <QGroupBox>
 #include <QIcon>
 #include <QMap>
 
@@ -122,7 +122,7 @@ private Q_SLOTS:
 
 // -------------------------------------------------------------------------
 
-class GmicFilterChain : public QWidget
+class GmicFilterChain : public QGroupBox
 {
     Q_OBJECT
 

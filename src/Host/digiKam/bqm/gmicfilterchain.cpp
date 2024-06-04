@@ -47,9 +47,10 @@ public:
 };
 
 GmicFilterChain::GmicFilterChain(QWidget* const parent)
-    : QWidget(parent),
-      d      (new Private)
+    : QGroupBox(parent),
+      d        (new Private)
 {
+    setTitle(tr("Chained G'MIC Filters"));
     d->listView       = new GmicFilterChainView(this);
     d->listView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
