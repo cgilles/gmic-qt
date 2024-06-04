@@ -40,7 +40,6 @@ public:
     CtrlButton*                      moveUpButton            = nullptr;
     CtrlButton*                      moveDownButton          = nullptr;
     CtrlButton*                      clearButton             = nullptr;
-    QWidget*                         extraWidget             = nullptr;   ///< Extra widget append to the end of control buttons layout.
 
     GmicFilterChainView*             listView                = nullptr;
 
@@ -115,11 +114,6 @@ GmicFilterChain::~GmicFilterChain()
     delete d;
 }
 
-void GmicFilterChain::appendControlButtonsWidget(QWidget* const widget)
-{
-    d->extraWidget = widget;
-}
-
 QBoxLayout* GmicFilterChain::setControlButtonsPlacement(ControlButtonPlacement placement)
 {
     delete layout();
@@ -145,11 +139,6 @@ QBoxLayout* GmicFilterChain::setControlButtonsPlacement(ControlButtonPlacement p
     hBtnLayout->addWidget(d->clearButton);
     hBtnLayout->addStretch(1);
 
-    if (d->extraWidget)
-    {
-        hBtnLayout->addWidget(d->extraWidget);
-    }
-
     // --------------------------------------------------------
 
     QVBoxLayout* const vBtnLayout = new QVBoxLayout;
@@ -159,11 +148,6 @@ QBoxLayout* GmicFilterChain::setControlButtonsPlacement(ControlButtonPlacement p
     vBtnLayout->addWidget(d->removeButton);
     vBtnLayout->addWidget(d->clearButton);
     vBtnLayout->addStretch(1);
-
-    if (d->extraWidget)
-    {
-        vBtnLayout->addWidget(d->extraWidget);
-    }
 
     // --------------------------------------------------------
 
@@ -210,11 +194,6 @@ QBoxLayout* GmicFilterChain::setControlButtonsPlacement(ControlButtonPlacement p
             // set all buttons invisible
 
             setControlButtons(ControlButtons());
-
-            if (d->extraWidget)
-            {
-                d->extraWidget->setVisible(false);
-            }
 
             break;
         }

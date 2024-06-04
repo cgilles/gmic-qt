@@ -161,13 +161,6 @@ public:
      */
     QBoxLayout*         setControlButtonsPlacement(ControlButtonPlacement placement);
 
-   /**
-    * Append a extra widget to the end of Control Button layout (as a progress bar for exemple).
-    * This method must be call before setControlButtonsPlacement().
-    * Ownership of the widget is not transferred to this object.
-    */
-    void                appendControlButtonsWidget(QWidget* const widget);
-
     void setChainedFilters(const QMap<QString, QVariant>& filters);
     QMap<QString, QVariant> chainedFilters()                        const;
 
