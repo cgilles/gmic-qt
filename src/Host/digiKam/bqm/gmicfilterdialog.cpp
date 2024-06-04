@@ -110,7 +110,7 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
     frontLbl->setTextFormat(Qt::PlainText);
     frontLbl->setWordWrap(true);
 
-    QLabel* const filterLbl = new QLabel(QObject::tr("Chained Filters:"), this);
+    QLabel* const filterLbl = new QLabel(QObject::tr("Chained G'MIC Filters:"), this);
     d->editBtn              = new QPushButton(this);
     d->filterChain          = new GmicFilterChain(this);
 
