@@ -51,13 +51,7 @@
 
 // Local includes
 
-#include "drawdecoder.h"
-#include "imagedialog.h"
 #include "digikam_debug.h"
-#include "dlayoutbox.h"
-#include "dfiledialog.h"
-#include "thumbnailloadthread.h"
-#include "dworkingpixmap.h"
 
 namespace DigikamBqmGmicQtPlugin
 {

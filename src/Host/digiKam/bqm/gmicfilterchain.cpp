@@ -75,9 +75,6 @@ GmicFilterChain::GmicFilterChain(QWidget* const parent)
 
     // --------------------------------------------------------
 
-    connect(d->listView, &GmicFilterChainView::signalAddedDropedItems,
-            this, &GmicFilterChain::slotAddImages);
-
     connect(d->listView, &GmicFilterChainView::signalItemClicked,
             this, &GmicFilterChain::signalItemClicked);
 
@@ -86,15 +83,15 @@ GmicFilterChain::GmicFilterChain(QWidget* const parent)
     // time causes a crash ...
 
     connect(d->listView, &GmicFilterChainView::itemSelectionChanged,
-            this, &GmicFilterChain::slotImageListChanged, Qt::QueuedConnection);
+            this, &GmicFilterChain::slotItemListChanged, Qt::QueuedConnection);
 
-    connect(this, &GmicFilterChain::signalImageListChanged,
-            this, &GmicFilterChain::slotImageListChanged);
+    connect(this, &GmicFilterChain::signalItemListChanged,
+            this, &GmicFilterChain::slotItemListChanged);
 
     // --------------------------------------------------------
 
     connect(d->addButton, &CtrlButton::clicked,
-            this, &GmicFilterChain::slotAddItems);
+            this, &GmicFilterChain::slotAddItem);
 
     connect(d->removeButton, &CtrlButton::clicked,
             this, &GmicFilterChain::slotRemoveItems);
@@ -127,8 +124,9 @@ QBoxLayout* GmicFilterChain::setControlButtonsPlacement(ControlButtonPlacement p
 {
     delete layout();
 
-    QBoxLayout* lay               = nullptr;        // Layout instance to return;
-    const int spacing             = layoutSpacing();
+    QBoxLayout* lay   = nullptr;        // Layout instance to return;
+    const int spacing = qMin(QApplication::style()->pixelMetric(QStyle::PM_LayoutHorizontalSpacing),
+                             QApplication::style()->pixelMetric(QStyle::PM_LayoutVerticalSpacing));
 
 
     QGridLayout* const mainLayout = new QGridLayout;
@@ -145,8 +143,6 @@ QBoxLayout* GmicFilterChain::setControlButtonsPlacement(ControlButtonPlacement p
     hBtnLayout->addWidget(d->moveDownButton);
     hBtnLayout->addWidget(d->addButton);
     hBtnLayout->addWidget(d->removeButton);
-    hBtnLayout->addWidget(d->loadButton);
-    hBtnLayout->addWidget(d->saveButton);
     hBtnLayout->addWidget(d->clearButton);
     hBtnLayout->addStretch(1);
 
@@ -162,8 +158,6 @@ QBoxLayout* GmicFilterChain::setControlButtonsPlacement(ControlButtonPlacement p
     vBtnLayout->addWidget(d->moveDownButton);
     vBtnLayout->addWidget(d->addButton);
     vBtnLayout->addWidget(d->removeButton);
-    vBtnLayout->addWidget(d->loadButton);
-    vBtnLayout->addWidget(d->saveButton);
     vBtnLayout->addWidget(d->clearButton);
     vBtnLayout->addStretch(1);
 
@@ -241,7 +235,7 @@ void GmicFilterChain::setControlButtons(ControlButtons buttonMask)
     d->clearButton->setVisible(buttonMask & Clear);
 }
 
-void GmicFilterChain::slotAddItem(const QString& title, const QString& command)
+void GmicFilterChain::slotAddItem()
 {
 /*
     QList<QUrl> urls;
@@ -304,18 +298,13 @@ void GmicFilterChain::slotRemoveItems()
         {
             itemsIndex.append(d->listView->indexFromItem(item).row());
 
-            if (d->processItems.contains(item->url()))
-            {
-                d->processItems.removeAll(item->url());
-            }
-
             d->listView->removeItemWidget(*it, 0);
             delete *it;
         }
     }
 
     Q_EMIT signalRemovedItems(itemsIndex);
-    Q_EMIT signalImageListChanged();
+    Q_EMIT signalItemListChanged();
 }
 
 void GmicFilterChain::slotMoveUpItems()
@@ -339,16 +328,7 @@ void GmicFilterChain::slotMoveUpItems()
     QTreeWidgetItem* const temp  = listView()->takeTopLevelItem(aboveIndex.row());
     listView()->insertTopLevelItem(curIndex.row(), temp);
 
-    // this is a quick fix. We loose the extra tags in flickr upload, but at list we don't get a crash
-
-    GmicFilterChainViewItem* const uw = dynamic_cast<GmicFilterChainViewItem*>(temp);
-
-    if (uw)
-    {
-        uw->updateItemWidgets();
-    }
-
-    Q_EMIT signalImageListChanged();
+    Q_EMIT signalItemListChanged();
     Q_EMIT signalMoveUpItem();
 }
 
@@ -373,16 +353,7 @@ void GmicFilterChain::slotMoveDownItems()
     QTreeWidgetItem* const temp  = listView()->takeTopLevelItem(belowIndex.row());
     listView()->insertTopLevelItem(curIndex.row(), temp);
 
-    // This is a quick fix. We can loose extra tags in uploader, but at least we don't get a crash
-
-    GmicFilterChainViewItem* const uw = dynamic_cast<GmicFilterChainViewItem*>(temp);
-
-    if (uw)
-    {
-        uw->updateItemWidgets();
-    }
-
-    Q_EMIT signalImageListChanged();
+    Q_EMIT signalItemListChanged();
     Q_EMIT signalMoveDownItem();
 }
 
@@ -422,7 +393,7 @@ void GmicFilterChain::removeItemByTitle(const QString& title)
     while (found);
 
     Q_EMIT signalRemovedItems(itemsIndex);
-    Q_EMIT signalImageListChanged();
+    Q_EMIT signalItemListChanged();
 }
 
 QStringList GmicFilterChain::commands() const

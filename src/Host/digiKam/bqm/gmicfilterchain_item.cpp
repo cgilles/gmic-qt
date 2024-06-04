@@ -33,11 +33,13 @@ public:
 
     Private() = default;
 
-    QString                     command
+    QString                     title;
+    QString                     command;
     GmicFilterChainView*        view     = nullptr;
 };
 
-GmicFilterChainViewItem::GmicFilterChainViewItem(GmicFilterChainView* const view, const QString& command)
+GmicFilterChainViewItem::GmicFilterChainViewItem(GmicFilterChainView* const view,
+                                                 const QString& command)
     : QTreeWidgetItem(view),
       d              (new Private)
 {

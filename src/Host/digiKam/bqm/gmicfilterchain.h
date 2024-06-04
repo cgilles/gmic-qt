@@ -55,7 +55,8 @@ class GmicFilterChainViewItem : public QTreeWidgetItem
 
 public:
 
-    explicit GmicFilterChainViewItem(GmicFilterChainView* const view, const QUrl& url);
+    explicit GmicFilterChainViewItem(GmicFilterChainView* const view,
+                                     const QString& command);
     ~GmicFilterChainViewItem()            override;
 
     void setCommand(const QString& command);
@@ -174,7 +175,7 @@ public:
     virtual void        removeItemByTitle(const QString& title);
 
     void                setCurrentTitle(const QString& title);
-    QUrl                getCurrentTitle()                           const;
+    QString             getCurrentTitle()                           const;
 
     ///@{
     /**
@@ -190,15 +191,13 @@ Q_SIGNALS:
     void signalAddItem(const QString& title, const QString& command);
     void signalMoveUpItem();
     void signalMoveDownItem();
-    void signalRemovedItems(const QStringList& titles);
-    void signalImageListChanged();
-    void signalFoundRAWImages(bool);
+    void signalRemovedItems(const QList<int>&);
+    void signalItemListChanged();
     void signalItemClicked(QTreeWidgetItem*);
-    void signalContextMenuRequested();
 
 public Q_SLOTS:
 
-    virtual void slotAddItem(const QString& title, const QString& command);
+    virtual void slotAddItem();
     virtual void slotRemoveItems();
 
 protected Q_SLOTS:
@@ -219,6 +218,6 @@ private:
 
 } // namespace DigikamBqmGmicQtPlugin
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(Digikam::GmicFilterChain::ControlButtons)
+Q_DECLARE_OPERATORS_FOR_FLAGS(DigikamBqmGmicQtPlugin::GmicFilterChain::ControlButtons)
 
 #endif // DIGIKAM_GMIC_FILTER_CHAIN_H

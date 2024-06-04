@@ -28,9 +28,9 @@ set(gmic_bqm_SRCS
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicbqmtool.cpp
     ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicbqmplugin.cpp
 
-#    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicfilterchain.cpp
-#    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicfilterchain_item.cpp
-#    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicfilterchain_view.cpp
+    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicfilterchain.cpp
+    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicfilterchain_item.cpp
+    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicfilterchain_view.cpp
 )
 
 add_library(Bqm_Gmic_Plugin
