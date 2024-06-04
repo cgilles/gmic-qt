@@ -164,7 +164,7 @@ public:
    /**
     * Append a extra widget to the end of Control Button layout (as a progress bar for exemple).
     * This method must be call before setControlButtonsPlacement().
-    * Ownership of the widget is not transferred to the DItemList.
+    * Ownership of the widget is not transferred to this object.
     */
     void                appendControlButtonsWidget(QWidget* const widget);
 
@@ -172,7 +172,6 @@ public:
     QMap<QString, QVariant> chainedFilters()                        const;
 
     QStringList         chainedCommands()                           const;
-    QString             currentTitle()                              const;
     QString             currentCommand()                            const;
 
     void                createNewFilter(const QString& title,
@@ -180,8 +179,6 @@ public:
 
     void                updateCurrentFilter(const QString& title,
                                             const QString& command);
-
-    void                removeItemByTitle(const QString& title);
 
     ///@{
     /**

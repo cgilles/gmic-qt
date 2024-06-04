@@ -343,39 +343,6 @@ void GmicFilterChain::slotMoveDownItems()
     Q_EMIT signalMoveDownItem();
 }
 
-
-void GmicFilterChain::removeItemByTitle(const QString& title)
-{
-    bool found;
-    QList<int> itemsIndex;
-
-    do
-    {
-        found = false;
-        QTreeWidgetItemIterator it(d->listView);
-
-        while (*it)
-        {
-            GmicFilterChainViewItem* const item = dynamic_cast<GmicFilterChainViewItem*>(*it);
-
-            if (item && (item->title() == title))
-            {
-                itemsIndex.append(d->listView->indexFromItem(item).row());
-
-                delete item;
-                found = true;
-                break;
-            }
-
-            ++it;
-        }
-    }
-    while (found);
-
-    Q_EMIT signalRemovedItems(itemsIndex);
-    Q_EMIT signalItemListChanged();
-}
-
 QString GmicFilterChain::currentCommand() const
 {
     QString command;
@@ -461,19 +428,6 @@ void GmicFilterChain::slotItemListChanged()
     // enabled, if the buttons are not explicitly disabled with enableControlButtons()
 
     d->addButton->setEnabled(d->controlButtonsEnabled);
-}
-
-QString GmicFilterChain::currentTitle() const
-{
-    GmicFilterChainViewItem* const item =
-        dynamic_cast<GmicFilterChainViewItem*>(d->listView->currentItem());
-
-    if (!item)
-    {
-        return QString();
-    }
-
-    return item->title();
 }
 
 void GmicFilterChain::createNewFilter(const QString& title, const QString& command)
