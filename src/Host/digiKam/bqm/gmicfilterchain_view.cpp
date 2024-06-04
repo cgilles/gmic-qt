@@ -42,8 +42,11 @@ GmicFilterChainView::GmicFilterChainView(GmicFilterChain* const parent)
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     setColumnCount(2);
+    setHeaderLabels(QStringList() << tr("Name")
+                                  << tr("G'MIC Command"));
 
-    header()->setVisible(false);
+    header()->setSectionResizeMode(Title,   QHeaderView::Stretch);
+    header()->setSectionResizeMode(Command, QHeaderView::Stretch);
 
     connect(this, &GmicFilterChainView::itemClicked,
             this, &GmicFilterChainView::slotItemClicked);

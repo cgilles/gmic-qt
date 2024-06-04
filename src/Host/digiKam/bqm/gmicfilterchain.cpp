@@ -62,10 +62,10 @@ GmicFilterChain::GmicFilterChain(QWidget* const parent)
     d->moveDownButton = new CtrlButton(QIcon::fromTheme(QLatin1String("go-down")).pixmap(16, 16),       this);
     d->clearButton    = new CtrlButton(QIcon::fromTheme(QLatin1String("edit-clear")).pixmap(16, 16),    this);
 
-    d->addButton->setToolTip(tr("Add new filter to the list"));
-    d->removeButton->setToolTip(tr("Remove selected filters from the list"));
-    d->moveUpButton->setToolTip(tr("Move current selected filter up in the list"));
-    d->moveDownButton->setToolTip(tr("Move current selected filter down in the list"));
+    d->addButton->setToolTip(tr("Add new G'MIC filter to the list"));
+    d->removeButton->setToolTip(tr("Remove selected G'MIC filters from the list"));
+    d->moveUpButton->setToolTip(tr("Move current selected G'MIC filter up in the list"));
+    d->moveDownButton->setToolTip(tr("Move current selected G'MIC filter down in the list"));
     d->clearButton->setToolTip(tr("Clear the list."));
 
     // --------------------------------------------------------
@@ -91,7 +91,7 @@ GmicFilterChain::GmicFilterChain(QWidget* const parent)
     // --------------------------------------------------------
 
     connect(d->addButton, &CtrlButton::clicked,
-            this, &GmicFilterChain::slotAddItem);
+            this, &GmicFilterChain::signalAddItem);
 
     connect(d->removeButton, &CtrlButton::clicked,
             this, &GmicFilterChain::slotRemoveItems);
@@ -233,55 +233,6 @@ void GmicFilterChain::setControlButtons(ControlButtons buttonMask)
     d->moveUpButton->setVisible(buttonMask & MoveUp);
     d->moveDownButton->setVisible(buttonMask & MoveDown);
     d->clearButton->setVisible(buttonMask & Clear);
-}
-
-void GmicFilterChain::slotAddItem()
-{
-/*
-    QList<QUrl> urls;
-    bool raw = false;
-
-    for (QList<QUrl>::ConstIterator it = list.constBegin() ; it != list.constEnd() ; ++it)
-    {
-        QUrl imageUrl = *it;
-
-        // Check if the new item already exist in the list.
-
-        bool found    = false;
-
-        QTreeWidgetItemIterator iter(d->listView);
-
-        while (*iter)
-        {
-            GmicFilterChainViewItem* const item = dynamic_cast<GmicFilterChainViewItem*>(*iter);
-
-            if (item && (item->url() == imageUrl))
-            {
-                found = true;
-            }
-
-            ++iter;
-        }
-
-        if (d->allowDuplicate || !found)
-        {
-            // if RAW files are not allowed, skip the image
-
-            if (!d->allowRAW && DRawDecoder::isRawFile(imageUrl))
-            {
-                raw = true;
-                continue;
-            }
-
-            new GmicFilterChainViewItem(listView(), imageUrl);
-            urls.append(imageUrl);
-        }
-    }
-
-    Q_EMIT signalAddItems(urls);
-    Q_EMIT signalImageListChanged();
-    Q_EMIT signalFoundRAWImages(raw);
-*/
 }
 
 void GmicFilterChain::slotRemoveItems()

@@ -194,7 +194,7 @@ public:
 
 Q_SIGNALS:
 
-    void signalAddItem(const QString& title, const QString& command);
+    void signalAddItem();
     void signalMoveUpItem();
     void signalMoveDownItem();
     void signalRemovedItems(const QList<int>&);
@@ -203,7 +203,6 @@ Q_SIGNALS:
 
 public Q_SLOTS:
 
-    void slotAddItem();
     void slotRemoveItems();
 
 private Q_SLOTS:

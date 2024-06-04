@@ -70,7 +70,7 @@ QString GmicFilterChainViewItem::command() const
 void GmicFilterChainViewItem::setTitle(const QString& title)
 {
     d->title = title;
-    setText(GmicFilterChainView::Title, d->command);
+    setText(GmicFilterChainView::Title, d->title);
 }
 
 QString GmicFilterChainViewItem::title() const
