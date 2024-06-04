@@ -203,7 +203,6 @@ Q_SIGNALS:
 
 public Q_SLOTS:
 
-    void slotItemListChanged();
 
 private Q_SLOTS:
 
@@ -211,6 +210,7 @@ private Q_SLOTS:
     void slotMoveDownItems();
     void slotRemoveItems();
     void slotClearItems();
+    void slotItemListChanged();
 
 private:
 
