@@ -92,9 +92,6 @@ GmicFilterChain::GmicFilterChain(QWidget* const parent)
 
     // --------------------------------------------------------
 
-
-    // --------------------------------------------------------
-
     QTimer::singleShot(1000, this, SIGNAL(signalItemListChanged()));
 }
 

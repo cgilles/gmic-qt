@@ -192,9 +192,6 @@ Q_SIGNALS:
     void signalRemovedItems(const QList<int>&);
     void signalItemListChanged();
 
-public Q_SLOTS:
-
-
 private Q_SLOTS:
 
     void slotMoveUpItems();
