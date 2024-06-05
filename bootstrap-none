@@ -12,11 +12,11 @@ export Qt6_DIR=/opt/qt6
 
 ln -s ../gmic ./gmic
 
-if [ ! -d "build" ]; then
-    mkdir build
+if [ ! -d "build.none" ]; then
+    mkdir build.none
 fi
 
-cd build
+cd build.none
 
 /opt/qt6/bin/cmake -G "$MAKEFILES_TYPE" . \
       -DCMAKE_CXX_COMPILER=g++ \
