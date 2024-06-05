@@ -56,19 +56,19 @@ GmicFilterChain::GmicFilterChain(QWidget* const parent)
 
     d->addButton      = new CtrlButton(QIcon::fromTheme(QLatin1String("list-add")),
                                        tr("Add new G'MIC filter to the list"),
-                                       this, &GmicFilterChain::signalAddItem);
+                                       this, SLOT(signalAddItem()));
     d->removeButton   = new CtrlButton(QIcon::fromTheme(QLatin1String("list-remove")),
                                        tr("Remove selected G'MIC filters from the list"),
-                                       this, &GmicFilterChain::slotRemoveItems);
+                                       this, SLOT(slotRemoveItems()));
     d->moveUpButton   = new CtrlButton(QIcon::fromTheme(QLatin1String("go-up")),
                                        tr("Move current selected G'MIC filter up in the list"),
-                                       this, &GmicFilterChain::slotMoveUpItems);
+                                       this, SLOT(slotMoveUpItems()));
     d->moveDownButton = new CtrlButton(QIcon::fromTheme(QLatin1String("go-down")),
                                        tr("Move current selected G'MIC filter down in the list"),
-                                       this, &GmicFilterChain::slotMoveDownItems);
+                                       this, SLOT(slotMoveDownItems()));
     d->clearButton    = new CtrlButton(QIcon::fromTheme(QLatin1String("edit-clear")),
                                        tr("Clear the list."),
-                                       this, &GmicFilterChain::slotClearItems);
+                                       this, SLOT(slotClearItems()));
 
     // --------------------------------------------------------
 

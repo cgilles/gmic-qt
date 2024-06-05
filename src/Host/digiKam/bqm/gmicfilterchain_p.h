@@ -65,16 +65,17 @@ class Q_DECL_HIDDEN CtrlButton : public QToolButton
 
 public:
 
-    template<typename PointerToMemberFunction>
-    explicit CtrlButton(const QIcon& icon,
+    explicit CtrlButton(
+                        const QIcon& icon,
                         const QString& tip,
                         QWidget* const parent,
-                        PointerToMemberFunction method)
+                        const char* method
+                       )
        : QToolButton(parent)
     {
         setDefaultAction(new QAction(icon, tip));
 
-        connect(this, &CtrlButton::triggered,
+        connect(this, SIGNAL(triggered(QAction*)),
                 parent, method);
     }
 
