@@ -56,7 +56,7 @@ GmicFilterChain::GmicFilterChain(QWidget* const parent)
 
     d->addButton      = new CtrlButton(QIcon::fromTheme(QLatin1String("list-add")),
                                        tr("Add new G'MIC filter to the list"),
-                                       this, SLOT(signalAddItem()));
+                                       this, SIGNAL(signalAddItem()));
     d->removeButton   = new CtrlButton(QIcon::fromTheme(QLatin1String("list-remove")),
                                        tr("Remove selected G'MIC filters from the list"),
                                        this, SLOT(slotRemoveItems()));
