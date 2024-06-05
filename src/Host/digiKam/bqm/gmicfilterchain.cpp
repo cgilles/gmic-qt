@@ -72,7 +72,26 @@ GmicFilterChain::GmicFilterChain(QWidget* const parent)
 
     // --------------------------------------------------------
 
-    setControlButtonsPlacement(ControlButtonsBelow);              // buttons on the bottom (default)
+    const int spacing = qMin(QApplication::style()->pixelMetric(QStyle::PM_LayoutHorizontalSpacing),
+                             QApplication::style()->pixelMetric(QStyle::PM_LayoutVerticalSpacing));
+
+    QHBoxLayout* const hBtnLayout = new QHBoxLayout;
+    hBtnLayout->addWidget(d->moveUpButton);
+    hBtnLayout->addWidget(d->moveDownButton);
+    hBtnLayout->addWidget(d->addButton);
+    hBtnLayout->addWidget(d->removeButton);
+    hBtnLayout->addWidget(d->clearButton);
+    hBtnLayout->addStretch(1);
+
+    QGridLayout* const mainLayout = new QGridLayout;
+    mainLayout->addWidget(d->listView, 1, 1, 1, 1);
+    mainLayout->setRowStretch(1, 10);
+    mainLayout->setColumnStretch(1, 10);
+    mainLayout->setContentsMargins(spacing, spacing, spacing, spacing);
+    mainLayout->setSpacing(spacing);
+    mainLayout->addLayout(hBtnLayout, 2, 1, 1, 1);
+
+    setLayout(mainLayout);
 
     // --------------------------------------------------------
 
@@ -84,7 +103,8 @@ GmicFilterChain::GmicFilterChain(QWidget* const parent)
     // time causes a crash ...
 
     connect(d->listView, &GmicFilterChainView::itemSelectionChanged,
-            this, &GmicFilterChain::slotItemListChanged, Qt::QueuedConnection);
+            this, &GmicFilterChain::slotItemListChanged,
+            Qt::QueuedConnection);
 
     connect(this, &GmicFilterChain::signalItemListChanged,
             this, &GmicFilterChain::slotItemListChanged);
@@ -97,88 +117,6 @@ GmicFilterChain::GmicFilterChain(QWidget* const parent)
 GmicFilterChain::~GmicFilterChain()
 {
     delete d;
-}
-
-QBoxLayout* GmicFilterChain::setControlButtonsPlacement(ControlButtonPlacement placement)
-{
-    delete layout();
-
-    QBoxLayout* lay   = nullptr;        // Layout instance to return;
-    const int spacing = qMin(QApplication::style()->pixelMetric(QStyle::PM_LayoutHorizontalSpacing),
-                             QApplication::style()->pixelMetric(QStyle::PM_LayoutVerticalSpacing));
-
-    QGridLayout* const mainLayout = new QGridLayout;
-    mainLayout->addWidget(d->listView, 1, 1, 1, 1);
-    mainLayout->setRowStretch(1, 10);
-    mainLayout->setColumnStretch(1, 10);
-    mainLayout->setContentsMargins(spacing, spacing, spacing, spacing);
-    mainLayout->setSpacing(spacing);
-
-    // --------------------------------------------------------
-
-    QHBoxLayout* const hBtnLayout = new QHBoxLayout;
-    hBtnLayout->addWidget(d->moveUpButton);
-    hBtnLayout->addWidget(d->moveDownButton);
-    hBtnLayout->addWidget(d->addButton);
-    hBtnLayout->addWidget(d->removeButton);
-    hBtnLayout->addWidget(d->clearButton);
-    hBtnLayout->addStretch(1);
-
-    // --------------------------------------------------------
-
-    QVBoxLayout* const vBtnLayout = new QVBoxLayout;
-    vBtnLayout->addWidget(d->moveUpButton);
-    vBtnLayout->addWidget(d->moveDownButton);
-    vBtnLayout->addWidget(d->addButton);
-    vBtnLayout->addWidget(d->removeButton);
-    vBtnLayout->addWidget(d->clearButton);
-    vBtnLayout->addStretch(1);
-
-    // --------------------------------------------------------
-
-    switch (placement)
-    {
-        case ControlButtonsAbove:
-        {
-            lay = hBtnLayout;
-            mainLayout->addLayout(hBtnLayout, 0, 1, 1, 1);
-            delete vBtnLayout;
-            break;
-        }
-
-        case ControlButtonsBelow:
-        {
-            lay = hBtnLayout;
-            mainLayout->addLayout(hBtnLayout, 2, 1, 1, 1);
-            delete vBtnLayout;
-            break;
-        }
-
-        case ControlButtonsLeft:
-        {
-            lay = vBtnLayout;
-            mainLayout->addLayout(vBtnLayout, 1, 0, 1, 1);
-            delete hBtnLayout;
-            break;
-        }
-
-        case ControlButtonsRight:
-        {
-            lay = vBtnLayout;
-            mainLayout->addLayout(vBtnLayout, 1, 2, 1, 1);
-            delete hBtnLayout;
-            break;
-        }
-
-        default:
-        {
-            break;
-        }
-    }
-
-    setLayout(mainLayout);
-
-    return lay;
 }
 
 void GmicFilterChain::slotClearItems()

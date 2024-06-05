@@ -129,37 +129,20 @@ class GmicFilterChain : public QGroupBox
 
 public:
 
-    enum ControlButtonPlacement
-    {
-        ControlButtonsLeft = 0,
-        ControlButtonsRight,
-        ControlButtonsAbove,
-        ControlButtonsBelow
-    };
-
-public:
-
     explicit GmicFilterChain(QWidget* const parent);
     ~GmicFilterChain()                                                     override;
-
-    /**
-     * Plug the control buttons near to the list, following 'placement' position.
-     * Return the instance of the layout supporting the control buttons, if any.
-     * This method must be calls after to use appendControlButtonsWidget().
-     */
-    QBoxLayout*         setControlButtonsPlacement(ControlButtonPlacement placement);
 
     void setChainedFilters(const QMap<QString, QVariant>& filters);
     QMap<QString, QVariant> chainedFilters()                        const;
 
-    QStringList         chainedCommands()                           const;
-    QString             currentCommand()                            const;
+    QStringList chainedCommands()                                   const;
+    QString     currentCommand()                                    const;
 
-    void                createNewFilter(const QString& title,
-                                        const QString& command);
+    void createNewFilter(const QString& title,
+                         const QString& command);
 
-    void                updateCurrentFilter(const QString& title,
-                                            const QString& command);
+    void updateCurrentFilter(const QString& title,
+                             const QString& command);
 
     ///@{
     /**
@@ -167,7 +150,7 @@ public:
      * See GmicFilterChainIsLessThanHandler type for details.
      */
     void setIsLessThanHandler(GmicFilterChainIsLessThanHandler fncptr);
-    GmicFilterChainIsLessThanHandler isLessThanHandler() const;
+    GmicFilterChainIsLessThanHandler isLessThanHandler()            const;
     ///@}
 
 Q_SIGNALS:
