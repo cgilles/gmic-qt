@@ -388,11 +388,11 @@ QString GMicQtWindow::execWindow(DPlugin* const tool,
     }
 
     qCDebug(DIGIKAM_DPLUGIN_LOG) << "Start G'MIC-Qt dialog with parameters:";
-    qCDebug(DIGIKAM_DPLUGIN_LOG) << "Command:"     << parameters.command;
-    qCDebug(DIGIKAM_DPLUGIN_LOG) << "Path:"        << parameters.filterPath;
+    qCDebug(DIGIKAM_DPLUGIN_LOG) << "Command:"     << QString::fromStdString(parameters.command);
+    qCDebug(DIGIKAM_DPLUGIN_LOG) << "Path:"        << QString::fromStdString(parameters.filterPath);
     qCDebug(DIGIKAM_DPLUGIN_LOG) << "Input Mode:"  << (int)parameters.inputMode;
     qCDebug(DIGIKAM_DPLUGIN_LOG) << "Output Mode:" << (int)parameters.outputMode;
-    qCDebug(DIGIKAM_DPLUGIN_LOG) << "Filter name:" << parameters.filterName();
+    qCDebug(DIGIKAM_DPLUGIN_LOG) << "Filter name:" << QString::fromStdString(parameters.filterName());
 
     s_mainWindow->setPluginParameters(parameters);
 
