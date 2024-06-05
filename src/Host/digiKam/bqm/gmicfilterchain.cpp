@@ -33,10 +33,11 @@ public:
 
     Private() = default;
 
-    CtrlButton*                      addButton               = nullptr;
-    CtrlButton*                      removeButton            = nullptr;
+    CtrlButton*                      editButton              = nullptr;
     CtrlButton*                      moveUpButton            = nullptr;
     CtrlButton*                      moveDownButton          = nullptr;
+    CtrlButton*                      addButton               = nullptr;
+    CtrlButton*                      removeButton            = nullptr;
     CtrlButton*                      clearButton             = nullptr;
 
     GmicFilterChainView*             listView                = nullptr;
@@ -54,18 +55,21 @@ GmicFilterChain::GmicFilterChain(QWidget* const parent)
 
     // --------------------------------------------------------
 
-    d->addButton      = new CtrlButton(QIcon::fromTheme(QLatin1String("list-add")),
-                                       tr("Add new G'MIC filter to the list"),
-                                       this, SIGNAL(signalAddItem()));
-    d->removeButton   = new CtrlButton(QIcon::fromTheme(QLatin1String("list-remove")),
-                                       tr("Remove selected G'MIC filters from the list"),
-                                       this, SLOT(slotRemoveItems()));
+    d->editButton     = new CtrlButton(QIcon::fromTheme(QLatin1String("document-edit")),
+                                       tr("Edit the current G'MIC filter"),
+                                       this, SLOT(slotEditItem()));
     d->moveUpButton   = new CtrlButton(QIcon::fromTheme(QLatin1String("go-up")),
                                        tr("Move current selected G'MIC filter up in the list"),
                                        this, SLOT(slotMoveUpItems()));
     d->moveDownButton = new CtrlButton(QIcon::fromTheme(QLatin1String("go-down")),
                                        tr("Move current selected G'MIC filter down in the list"),
                                        this, SLOT(slotMoveDownItems()));
+    d->addButton      = new CtrlButton(QIcon::fromTheme(QLatin1String("list-add")),
+                                       tr("Add new G'MIC filter to the list"),
+                                       this, SIGNAL(signalAddItem()));
+    d->removeButton   = new CtrlButton(QIcon::fromTheme(QLatin1String("list-remove")),
+                                       tr("Remove selected G'MIC filters from the list"),
+                                       this, SLOT(slotRemoveItems()));
     d->clearButton    = new CtrlButton(QIcon::fromTheme(QLatin1String("edit-clear")),
                                        tr("Clear the list."),
                                        this, SLOT(slotClearItems()));
@@ -76,6 +80,7 @@ GmicFilterChain::GmicFilterChain(QWidget* const parent)
                              QApplication::style()->pixelMetric(QStyle::PM_LayoutVerticalSpacing));
 
     QHBoxLayout* const hBtnLayout = new QHBoxLayout;
+    hBtnLayout->addWidget(d->editButton);
     hBtnLayout->addWidget(d->moveUpButton);
     hBtnLayout->addWidget(d->moveDownButton);
     hBtnLayout->addWidget(d->addButton);
@@ -304,6 +309,7 @@ void GmicFilterChain::slotItemListChanged()
     const bool haveSelectedItems                    = !selectedItemsList.isEmpty();
     const bool haveOnlyOneSelectedItem              = (selectedItemsList.count() == 1);
 
+    d->editButton->setEnabled(haveOnlyOneSelectedItem);
     d->removeButton->setEnabled(haveSelectedItems);
     d->moveUpButton->setEnabled(haveOnlyOneSelectedItem);
     d->moveDownButton->setEnabled(haveOnlyOneSelectedItem);
@@ -322,6 +328,17 @@ void GmicFilterChain::createNewFilter(const QString& title, const QString& comma
                                                                      );
 
     Q_EMIT signalItemListChanged();
+}
+
+void GmicFilterChain::slotEditItem()
+{
+    GmicFilterChainViewItem* const item =
+        dynamic_cast<GmicFilterChainViewItem*>(d->listView->currentItem());
+
+    if (item)
+    {
+        Q_EMIT signalEditItem(item->command());
+    }
 }
 
 void GmicFilterChain::updateCurrentFilter(const QString& title, const QString& command)
