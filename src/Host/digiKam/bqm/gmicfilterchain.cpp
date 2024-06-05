@@ -72,7 +72,6 @@ GmicFilterChain::GmicFilterChain(QWidget* const parent)
 
     // --------------------------------------------------------
 
-    setControlButtons(Add | Remove | MoveUp | MoveDown | Clear ); // add all buttons       (default)
     setControlButtonsPlacement(ControlButtonsBelow);              // buttons on the bottom (default)
 
     // --------------------------------------------------------
@@ -171,16 +170,8 @@ QBoxLayout* GmicFilterChain::setControlButtonsPlacement(ControlButtonPlacement p
             break;
         }
 
-        case NoControlButtons:
         default:
         {
-            delete vBtnLayout;
-            delete hBtnLayout;
-
-            // set all buttons invisible
-
-            setControlButtons(ControlButtons());
-
             break;
         }
     }
@@ -188,15 +179,6 @@ QBoxLayout* GmicFilterChain::setControlButtonsPlacement(ControlButtonPlacement p
     setLayout(mainLayout);
 
     return lay;
-}
-
-void GmicFilterChain::setControlButtons(ControlButtons buttonMask)
-{
-    d->addButton->setVisible(buttonMask & Add);
-    d->removeButton->setVisible(buttonMask & Remove);
-    d->moveUpButton->setVisible(buttonMask & MoveUp);
-    d->moveDownButton->setVisible(buttonMask & MoveDown);
-    d->clearButton->setVisible(buttonMask & Clear);
 }
 
 void GmicFilterChain::slotClearItems()

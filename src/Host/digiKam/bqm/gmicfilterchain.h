@@ -131,29 +131,16 @@ public:
 
     enum ControlButtonPlacement
     {
-        NoControlButtons = 0,
-        ControlButtonsLeft,
+        ControlButtonsLeft = 0,
         ControlButtonsRight,
         ControlButtonsAbove,
         ControlButtonsBelow
     };
 
-    enum ControlButton
-    {
-       Add       = 0x1,
-       Remove    = 0x2,
-       MoveUp    = 0x4,
-       MoveDown  = 0x8,
-       Clear     = 0x10
-    };
-    Q_DECLARE_FLAGS(ControlButtons, ControlButton)
-
 public:
 
     explicit GmicFilterChain(QWidget* const parent);
     ~GmicFilterChain()                                                     override;
-
-    void                setControlButtons(ControlButtons buttonMask);
 
     /**
      * Plug the control buttons near to the list, following 'placement' position.
@@ -210,7 +197,5 @@ private:
 };
 
 } // namespace DigikamBqmGmicQtPlugin
-
-Q_DECLARE_OPERATORS_FOR_FLAGS(DigikamBqmGmicQtPlugin::GmicFilterChain::ControlButtons)
 
 #endif // DIGIKAM_GMIC_FILTER_CHAIN_H
