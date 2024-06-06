@@ -303,11 +303,11 @@ void GmicFilterChain::slotItemListChanged()
 
 void GmicFilterChain::createNewFilter(const QString& title, const QString& command)
 {
-    GmicFilterChainViewItem* const item = new GmicFilterChainViewItem(
-                                                                      d->listView,
-                                                                      title,
-                                                                      command
-                                                                     );
+    new GmicFilterChainViewItem(
+                                d->listView,
+                                title,
+                                command
+                               );
 
     Q_EMIT signalItemListChanged();
 }
