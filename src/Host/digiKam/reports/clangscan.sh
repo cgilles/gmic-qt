@@ -56,9 +56,8 @@ echo "Clang Scan Static Analyzer task name: $TITLE"
 # Clean up and prepare to scan.
 
 rm -fr $REPORT_DIR
-rm -fr $WEBSITE_DIR
 
-cd ../..
+cd ../../../..
 
 rm -fr build.scan
 mkdir -p build.scan
@@ -80,23 +79,13 @@ else
 fi
 
 $SCAN_BUILD_BIN $CMAKE_BINARY -G "Unix Makefiles" \
-      -DCMAKE_BUILD_TYPE=debug \
-      -DBUILD_WITH_QT6=$BUILD_WITH_QT6 \
+      -DCMAKE_BUILD_TYPE=Debug \
       -DBUILD_TESTING=ON \
-      -DDIGIKAMSC_CHECKOUT_PO=OFF \
-      -DDIGIKAMSC_CHECKOUT_DOC=OFF \
-      -DDIGIKAMSC_COMPILE_PO=OFF \
-      -DDIGIKAMSC_COMPILE_DOC=OFF \
-      -DENABLE_KFILEMETADATASUPPORT=ON \
-      -DENABLE_AKONADICONTACTSUPPORT=ON \
-      -DENABLE_MYSQLSUPPORT=ON \
-      -DENABLE_INTERNALMYSQL=ON \
-      -DENABLE_MEDIAPLAYER=ON \
-      -DENABLE_QTMULTIMEDIA=ON \
-      -DENABLE_DBUS=ON \
-      -DENABLE_APPSTYLES=ON \
-      -DENABLE_GEOLOCATION=ON \
-      -DENABLE_QWEBENGINE=ON \
+      -DBUILD_WITH_QT6=$BUILD_WITH_QT6 \
+      -DENABLE_ASAN=OFF \
+      -DENABLE_SYSTEM_GMIC=OFF \
+      -DGMIC_QT_HOST=digikam \
+      -DENABLE_TEST=ON \
       -Wno-dev \
       ..
 
@@ -129,4 +118,4 @@ echo "Clang Report $TITLE is located to $SCAN_BUILD_DIR"
 
 cd $ORIG_DIR
 
-rm -fr ../../build.scan
+rm -fr ../../../../build.scan
