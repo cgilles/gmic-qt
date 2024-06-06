@@ -98,6 +98,9 @@ int main(int argc, char* argv[])
         loop.exec();
 
         bool b = gmicProcessor->processingComplete();
+
+        qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "GmicBqmTool: G'MIC filter completed:" << b;
+
         gmicProcessor->outputImage().save(path + QLatin1String("_gmic.jpg"), "JPG");
 
         delete gmicProcessor;
