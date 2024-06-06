@@ -38,7 +38,7 @@
 #include "GmicQt.h"
 #include "gmicqtimageconverter.h"
 
-using namespace DigikamEditorGmicQtPlugin;
+using namespace DigikamGmicQtPluginCommon;
 using namespace GmicQt;
 
 namespace DigikamBqmGmicQtPlugin

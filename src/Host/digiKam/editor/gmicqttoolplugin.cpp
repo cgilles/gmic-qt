@@ -47,6 +47,8 @@
 #include "gmicqtwindow.h"
 #include "gmic.h"
 
+using namespace DigikamGmicQtPluginCommon;
+
 namespace DigikamEditorGmicQtPlugin
 {
 

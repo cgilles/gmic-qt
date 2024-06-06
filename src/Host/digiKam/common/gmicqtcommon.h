@@ -36,7 +36,7 @@
 
 using namespace Digikam;
 
-namespace DigikamEditorGmicQtPlugin
+namespace DigikamGmicQtPluginCommon
 {
 
 QString              s_gmicQtPluginDetails(const QString& title);
@@ -45,4 +45,4 @@ QList<DPluginAuthor> s_gmicQtPluginAuthors();
 
 QIcon                s_gmicQtPluginIcon();
 
-} // namespace DigikamEditorGmicQtPlugin
+} // namespace DigikamGmicQtPluginCommon

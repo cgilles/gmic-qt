@@ -39,14 +39,14 @@
 #include "gmicqtwindow.h"
 #include "gmicqtimageconverter.h"
 
-namespace DigikamEditorGmicQtPlugin
+namespace DigikamGmicQtPluginCommon
 {
 
 extern GMicQtWindow* s_mainWindow;
 
-} // namespace DigikamEditorGmicQtPlugin
+} // namespace DigikamGmicQtPluginCommon
 
-using namespace DigikamEditorGmicQtPlugin;
+using namespace DigikamGmicQtPluginCommon;
 
 /**
  * GMic-Qt plugin functions
@@ -176,9 +176,9 @@ void outputImages(cimg_library::CImgList<gmic_pixel_type>& images,
         // See bug #462137: force to save current filter applied
         // to the image to store settings in history.
 
-        if (DigikamEditorGmicQtPlugin::s_mainWindow)
+        if (DigikamGmicQtPluginCommon::s_mainWindow)
         {
-            DigikamEditorGmicQtPlugin::s_mainWindow->saveParameters();
+            DigikamGmicQtPluginCommon::s_mainWindow->saveParameters();
         }
 
         GmicQt::RunParameters parameters = lastAppliedFilterRunParameters(GmicQt::ReturnedRunParametersFlag::AfterFilterExecution);

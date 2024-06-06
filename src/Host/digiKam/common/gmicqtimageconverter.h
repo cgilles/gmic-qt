@@ -34,7 +34,7 @@
 
 using namespace Digikam;
 
-namespace DigikamEditorGmicQtPlugin
+namespace DigikamGmicQtPluginCommon
 {
 
 /**
@@ -61,4 +61,4 @@ private:
     ~GMicQtImageConverter() = delete;
 };
 
-} // namespace DigikamEditorGmicQtPlugin
+} // namespace DigikamGmicQtPluginCommon

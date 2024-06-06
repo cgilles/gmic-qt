@@ -52,7 +52,7 @@
 #include "gmicbqmtool.h"
 
 using namespace GmicQt;
-using namespace DigikamEditorGmicQtPlugin;
+using namespace DigikamGmicQtPluginCommon;
 
 namespace DigikamBqmGmicQtPlugin
 {

@@ -46,7 +46,7 @@
 
 #include "gmic.h"
 
-namespace DigikamEditorGmicQtPlugin
+namespace DigikamGmicQtPluginCommon
 {
 
 QString s_gmicQtPluginDetails(const QString& title)
@@ -136,4 +136,4 @@ QIcon s_gmicQtPluginIcon()
     return QIcon(":resources/gmic_hat.png");
 }
 
-} // namespace DigikamEditorGmicQtPlugin
+} // namespace DigikamGmicQtPluginCommon

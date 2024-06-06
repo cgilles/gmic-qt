@@ -47,7 +47,7 @@ extern QString s_imagePath;
 } // namespace DigikamBqmGmicQtPlugin
 
 using namespace Digikam;
-using namespace DigikamEditorGmicQtPlugin;
+using namespace DigikamGmicQtPluginCommon;
 using namespace DigikamBqmGmicQtPlugin;
 
 /**

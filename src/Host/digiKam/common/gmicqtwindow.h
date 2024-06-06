@@ -44,7 +44,7 @@
 using namespace GmicQt;
 using namespace Digikam;
 
-namespace DigikamEditorGmicQtPlugin
+namespace DigikamGmicQtPluginCommon
 {
 
 class GMicQtWindow : public MainWindow
@@ -96,4 +96,4 @@ private:
     Private* const d = nullptr;
 };
 
-} // namespace DigikamEditorGmicQtPlugin
+} // namespace DigikamGmicQtPluginCommon

@@ -47,7 +47,7 @@ extern BqmInfoIface* s_infoIface;
 } // namespace DigikamBqmGmicQtPlugin
 
 using namespace DigikamBqmGmicQtPlugin;
-using namespace DigikamEditorGmicQtPlugin;
+using namespace DigikamGmicQtPluginCommon;
 
 /**
  * GMic-Qt plugin functions

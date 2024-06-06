@@ -53,7 +53,7 @@
 
 using namespace GmicQt;
 
-namespace DigikamEditorGmicQtPlugin
+namespace DigikamGmicQtPluginCommon
 {
 
 GMicQtWindow* s_mainWindow = nullptr;
@@ -435,6 +435,6 @@ QString GMicQtWindow::execWindow(DPlugin* const tool,
     return s_filterName;
 }
 
-} // namespace DigikamEditorGmicQtPlugin
+} // namespace DigikamGmicQtPluginCommon
 
 #include "moc_gmicqtwindow.cpp"

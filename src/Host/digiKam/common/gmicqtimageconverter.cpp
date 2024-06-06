@@ -28,7 +28,7 @@
 
 #include "digikam_debug.h"
 
-namespace DigikamEditorGmicQtPlugin
+namespace DigikamGmicQtPluginCommon
 {
 
 inline unsigned char GMicQtImageConverter::float2ucharBounded(const float& in)
@@ -297,4 +297,4 @@ void GMicQtImageConverter::convertDImgtoCImg(const DImg& in,
     }
 }
 
-} // namespace DigikamEditorGmicQtPlugin
+} // namespace DigikamGmicQtPluginCommon

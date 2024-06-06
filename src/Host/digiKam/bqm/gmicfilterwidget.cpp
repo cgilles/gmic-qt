@@ -50,7 +50,7 @@
 #include "gmicfilterdialog.h"
 #include "gmicqtwindow.h"
 
-using namespace DigikamEditorGmicQtPlugin;
+using namespace DigikamGmicQtPluginCommon;
 
 namespace DigikamBqmGmicQtPlugin
 {
