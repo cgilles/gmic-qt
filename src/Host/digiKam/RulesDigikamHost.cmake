@@ -171,6 +171,7 @@ add_library(gmic_qt_common STATIC
             ${gmic_qt_SRCS}
             ${CMAKE_SOURCE_DIR}/src/Host/digiKam/common/gmicqtimageconverter.cpp
             ${CMAKE_SOURCE_DIR}/src/Host/digiKam/common/gmicqtwindow.cpp
+            ${CMAKE_SOURCE_DIR}/src/Host/digiKam/common/gmicqtcommon.cpp
 )
 
 target_link_libraries(gmic_qt_common

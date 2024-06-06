@@ -22,46 +22,30 @@
  *
  */
 
-#ifndef DIGIKAM_GMICQT_IMAGE_CONVERTER_H
-#define DIGIKAM_GMICQT_IMAGE_CONVERTER_H
+#ifndef DIGIKAM_GMICQT_GLOBALS_H
+#define DIGIKAM_GMICQT_GLOBALS_H
+
+// Qt includes
+
+#include <QString>
+#include <QList>
+#include <QIcon>
 
 // digiKam includes
 
-#include "dimg.h"
-
-// Local includes
-
-#include "gmic.h"
+#include "dplugin.h"
 
 using namespace Digikam;
 
 namespace DigikamEditorGmicQtPlugin
 {
 
-/**
- * Helper methods for Digikam::DImg to CImg image data container conversions and vis-versa.
- */
-class GMicQtImageConverter
-{
+QString              s_gmicQtPluginDetails(const QString& title);
 
-public:
+QList<DPluginAuthor> s_gmicQtPluginAuthors();
 
-    static void convertCImgtoDImg(const cimg_library::CImg<float>& in,
-                                  DImg& out, bool sixteenBit);
-
-    static void convertDImgtoCImg(const DImg& in,
-                                  cimg_library::CImg<float>& out);
-
-private:
-
-    static unsigned char  float2ucharBounded(const float& in);
-    static unsigned short float2ushortBounded(const float& in);
-
-    // Disable
-    GMicQtImageConverter()  = delete;
-    ~GMicQtImageConverter() = delete;
-};
+QIcon                s_gmicQtPluginIcon();
 
 } // namespace DigikamEditorGmicQtPlugin
 
-#endif // DIGIKAM_GMICQT_IMAGE_CONVERTER_H
+#endif // DIGIKAM_GMICQT_GLOBALS_H

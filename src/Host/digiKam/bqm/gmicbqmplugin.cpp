@@ -48,9 +48,11 @@
 #include "Widgets/InOutPanel.h"
 #include "Settings.h"
 #include "gmic.h"
+#include "gmicqtcommon.h"
 #include "gmicbqmtool.h"
 
 using namespace GmicQt;
+using namespace DigikamEditorGmicQtPlugin;
 
 namespace DigikamBqmGmicQtPlugin
 {
@@ -72,75 +74,17 @@ QString GmicBqmPlugin::iid() const
 
 QIcon GmicBqmPlugin::icon() const
 {
-    return QIcon(":resources/gmic_hat.png");
+    return s_gmicQtPluginIcon();
 }
 
 QString GmicBqmPlugin::description() const
 {
-    return tr("A tool to apply the G'MIC filters over the images");
+    return tr("A tool to apply the G'MIC filters to images");
 }
 
 QString GmicBqmPlugin::details() const
 {
-    QImage img(":resources/logos.png");
-    QByteArray byteArray;
-    QBuffer    buffer(&byteArray);
-    img.save(&buffer, "PNG");
-
-    QString logo = QString::fromLatin1("<p><img src=\"data:image/png;base64,%1\"></p>")
-                   .arg(QString::fromLatin1(byteArray.toBase64().data()));
-
-    return tr("<p><b>A Batch Queue Manager tool for G'MIC processor.</b></p>"
-              "<p><b>Overview:</b></p>"
-                "<p>G'MIC is a full-featured open-source framework for image processing. "
-                "It provides several user interfaces to convert / manipulate / filter / "
-                "visualize generic image datasets, ranging from 1D scalar signals to 3D+t sequences "
-                "of multi-spectral volumetric images, hence including 2D color images.</p>"
-              "<p><b>Credits:</b></p>"
-                "%1<br/>"
-                "<a href='https://gmic.eu/'>G'MIC</a><br/>"
-                "<a href='https://www.greyc.fr'>GREYC</a><br/>"
-                "<a href='https://www.cnrs.fr'>CNRS</a><br/>"
-                "<a href='https://www.unicaen.fr'>Normandy University</a><br/>"
-                "<a href='https://www.ensicaen.fr'>Ensicaen</a><br/>"
-              "<p><b>Configuration:</b></p>"
-                "Libcimg version: %2<br/>"
-                "Libgmic version: %3<br/>"
-             ).arg(logo)
-              .arg(cimg_version)
-              .arg(gmic_version)
-
-#ifdef cimg_use_fftw3_singlethread
-
-             + QString::fromUtf8("Use FFTW3 single thread: yes<br/>")
-
-#else
-
-             + QString::fromUtf8("Use FFTW3 single thread: no<br/>")
-
-#endif
-
-#ifdef cimg_use_curl
-
-             + QString::fromUtf8("Use Curl: yes<br/>")
-
-#else
-
-             + QString::fromUtf8("Use Curl: no<br/>")
-
-#endif
-
-#ifdef cimg_use_openmp
-
-             + QString::fromUtf8("Use OpenMP: yes<br/>")
-
-#else
-
-             + QString::fromUtf8("Use OpenMP: no<br/>")
-
-#endif
-
-    ;
+    return s_gmicQtPluginDetails(tr("A Batch Queue Manager tool for G'MIC processor."));
 }
 
 QString GmicBqmPlugin::handbookSection() const
@@ -160,19 +104,7 @@ QString GmicBqmPlugin::handbookReference() const
 
 QList<DPluginAuthor> GmicBqmPlugin::authors() const
 {
-    return QList<DPluginAuthor>()
-            << DPluginAuthor(QString::fromUtf8("Gilles Caulier"),
-                             QString::fromUtf8("caulier dot gilles at gmail dot com"),
-                             QString::fromUtf8("(C) 2019-2024"))
-            << DPluginAuthor(QString::fromUtf8("Sébastien Fourey"),
-                             QString::fromUtf8("Sebastien dot Fourey at ensicaen dot fr"),
-                             QString::fromUtf8("(C) 2017-2024"),
-                             QString::fromUtf8("G'MIC plugin"))
-            << DPluginAuthor(QString::fromUtf8("David Tschumperlé"),
-                             QString::fromUtf8("David dot Tschumperle at ensicaen dot fr"),
-                             QString::fromUtf8("(C) 2008-2024"),
-                             QString::fromUtf8("G'MIC core"))
-            ;
+    return s_gmicQtPluginAuthors();
 }
 
 void GmicBqmPlugin::setup(QObject* const parent)
