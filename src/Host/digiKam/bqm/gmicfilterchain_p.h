@@ -22,8 +22,7 @@
  *
  */
 
-#ifndef DIGIKAM_GMIC_FILTER_CHAIN_P_H
-#define DIGIKAM_GMIC_FILTER_CHAIN_P_H
+#pragma once
 
 #include "gmicfilterchain.h"
 
@@ -117,5 +116,3 @@ public:
 };
 
 } // namespace DigikamBqmGmicQtPlugin
-
-#endif // DIGIKAM_GMIC_FILTER_CHAIN_P_H

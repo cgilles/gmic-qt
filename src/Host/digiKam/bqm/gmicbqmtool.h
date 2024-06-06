@@ -22,8 +22,7 @@
  *
  */
 
-#ifndef DIGIKAM_GMIC_BQM_TOOL_H
-#define DIGIKAM_GMIC_BQM_TOOL_H
+#pragma once
 
 // Local includes
 
@@ -67,5 +66,3 @@ private:
 };
 
 } // namespace DigikamBqmGmicQtPlugin
-
-#endif // DIGIKAM_GMIC_BQM_TOOL_H

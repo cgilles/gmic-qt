@@ -22,8 +22,7 @@
  *
  */
 
-#ifndef DIGIKAM_GMICQT_GLOBALS_H
-#define DIGIKAM_GMICQT_GLOBALS_H
+#pragma once
 
 // Qt includes
 
@@ -47,5 +46,3 @@ QList<DPluginAuthor> s_gmicQtPluginAuthors();
 QIcon                s_gmicQtPluginIcon();
 
 } // namespace DigikamEditorGmicQtPlugin
-
-#endif // DIGIKAM_GMICQT_GLOBALS_H

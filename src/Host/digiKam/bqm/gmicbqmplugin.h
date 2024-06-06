@@ -22,8 +22,7 @@
 *
 */
 
-#ifndef DIGIKAM_GMIC_BQM_PLUGIN_H
-#define DIGIKAM_GMIC_BQM_PLUGIN_H
+#pragma once
 
 // digiKam includes
 
@@ -61,5 +60,3 @@ public:
 };
 
 } // namespace DigikamBqmGmicQtPlugin
-
-#endif // DIGIKAM_GMIC_BQM_PLUGIN_H

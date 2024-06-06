@@ -22,8 +22,7 @@
  *
  */
 
-#ifndef DIGIKAM_GMIC_BQM_PROCESSOR_H
-#define DIGIKAM_GMIC_BQM_PROCESSOR_H
+#pragma once
 
 // Qt includes
 
@@ -75,5 +74,3 @@ private:
 };
 
 } // namespace DigikamBqmGmicQtPlugin
-
-#endif // DIGIKAM_GMIC_BQM_PROCESSOR_H

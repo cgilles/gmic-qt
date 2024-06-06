@@ -22,8 +22,7 @@
  *
  */
 
-#ifndef DIGIKAM_GMICQT_IMAGE_CONVERTER_H
-#define DIGIKAM_GMICQT_IMAGE_CONVERTER_H
+#pragma once
 
 // digiKam includes
 
@@ -63,5 +62,3 @@ private:
 };
 
 } // namespace DigikamEditorGmicQtPlugin
-
-#endif // DIGIKAM_GMICQT_IMAGE_CONVERTER_H

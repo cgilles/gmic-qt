@@ -22,8 +22,7 @@
  *
  */
 
-#ifndef DIGIKAM_EDITOR_GMICQT_TOOL_PLUGIN_H
-#define DIGIKAM_EDITOR_GMICQT_TOOL_PLUGIN_H
+#pragma once
 
 // digiKam includes
 
@@ -69,5 +68,3 @@ private:
 };
 
 } // namespace DigikamEditorGmicQtPlugin
-
-#endif // DIGIKAM_EDITOR_GMICQT_TOOL_PLUGIN_H

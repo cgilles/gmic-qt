@@ -22,8 +22,7 @@
  *
  */
 
-#ifndef DIGIKAM_GMICQT_WINDOW_H
-#define DIGIKAM_GMICQT_WINDOW_H
+#pragma once
 
 // Qt includes
 
@@ -98,5 +97,3 @@ private:
 };
 
 } // namespace DigikamEditorGmicQtPlugin
-
-#endif // DIGIKAM_GMICQT_WINDOW_H
