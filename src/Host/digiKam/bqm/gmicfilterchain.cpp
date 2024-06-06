@@ -27,24 +27,6 @@
 namespace DigikamBqmGmicQtPlugin
 {
 
-class Q_DECL_HIDDEN GmicFilterChain::Private
-{
-public:
-
-    Private() = default;
-
-    CtrlButton*                      editButton              = nullptr;
-    CtrlButton*                      moveUpButton            = nullptr;
-    CtrlButton*                      moveDownButton          = nullptr;
-    CtrlButton*                      addButton               = nullptr;
-    CtrlButton*                      removeButton            = nullptr;
-    CtrlButton*                      clearButton             = nullptr;
-
-    GmicFilterChainView*             listView                = nullptr;
-
-    GmicFilterChainIsLessThanHandler isLessThan;
-};
-
 GmicFilterChain::GmicFilterChain(QWidget* const parent)
     : QGroupBox(parent),
       d        (new Private)

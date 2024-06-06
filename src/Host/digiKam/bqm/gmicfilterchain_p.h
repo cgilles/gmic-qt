@@ -59,6 +59,20 @@
 namespace DigikamBqmGmicQtPlugin
 {
 
+class Q_DECL_HIDDEN GmicFilterChainViewItem::Private
+{
+public:
+
+    Private() = default;
+
+    int                         index    = -1;
+    QString                     title;
+    QString                     command;
+    GmicFilterChainView*        view     = nullptr;
+};
+
+// ------------------------------------------------------------------------
+
 class Q_DECL_HIDDEN CtrlButton : public QToolButton
 {
     Q_OBJECT
@@ -80,6 +94,26 @@ public:
     }
 
     ~CtrlButton() override = default;
+};
+
+// ------------------------------------------------------------------------
+
+class Q_DECL_HIDDEN GmicFilterChain::Private
+{
+public:
+
+    Private() = default;
+
+    CtrlButton*                      editButton              = nullptr;
+    CtrlButton*                      moveUpButton            = nullptr;
+    CtrlButton*                      moveDownButton          = nullptr;
+    CtrlButton*                      addButton               = nullptr;
+    CtrlButton*                      removeButton            = nullptr;
+    CtrlButton*                      clearButton             = nullptr;
+
+    GmicFilterChainView*             listView                = nullptr;
+
+    GmicFilterChainIsLessThanHandler isLessThan;
 };
 
 } // namespace DigikamBqmGmicQtPlugin

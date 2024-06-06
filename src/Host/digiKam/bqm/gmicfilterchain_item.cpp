@@ -27,18 +27,6 @@
 namespace DigikamBqmGmicQtPlugin
 {
 
-class Q_DECL_HIDDEN GmicFilterChainViewItem::Private
-{
-public:
-
-    Private() = default;
-
-    int                         index    = -1;
-    QString                     title;
-    QString                     command;
-    GmicFilterChainView*        view     = nullptr;
-};
-
 GmicFilterChainViewItem::GmicFilterChainViewItem(GmicFilterChainView* const view,
                                                  const QString& title,
                                                  const QString& command)
