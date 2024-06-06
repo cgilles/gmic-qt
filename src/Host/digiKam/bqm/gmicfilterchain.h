@@ -94,7 +94,9 @@ public:
     {
         Index = 0,
         Title,
-        Command
+        Command,
+
+        NumberOfColumns     ///< The last one to enumerate
     };
 
 public:
@@ -104,7 +106,7 @@ public:
 
     GmicFilterChainViewItem* findItem(const QString& title);
     QModelIndex indexFromItem(GmicFilterChainViewItem* item,
-                              int column = 0)            const;
+                              int column = Index)        const;
 
     GmicFilterChainViewItem* currentFilterItem()         const;
 

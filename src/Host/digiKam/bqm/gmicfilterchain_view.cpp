@@ -41,7 +41,7 @@ GmicFilterChainView::GmicFilterChainView(GmicFilterChain* const parent)
     setAllColumnsShowFocus(true);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    setColumnCount(3);
+    setColumnCount(NumberOfColumns);
     setHeaderLabels(QStringList() << tr("Id")
                                   << tr("Name")
                                   << tr("G'MIC Command"));

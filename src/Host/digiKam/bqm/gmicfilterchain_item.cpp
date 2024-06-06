@@ -82,7 +82,7 @@ QString GmicFilterChainViewItem::title() const
 void GmicFilterChainViewItem::setIndex(int index)
 {
     d->index = index;
-    setText(GmicFilterChainView::Index, QString::fromUtf8("%1").arg(d->index + 1));
+    setText(GmicFilterChainView::Index, QString::fromLatin1("%1").arg(d->index + 1));
 }
 
 bool GmicFilterChainViewItem::operator<(const QTreeWidgetItem& other) const
