@@ -152,7 +152,7 @@ void GmicBqmProcessor::startProcessing()
 
 void GmicBqmProcessor::slotSendProgressInformation()
 {
-    if (!d->filterThread)
+    if (d->filterThread)
     {
         Q_EMIT signalProgress(d->filterThread->progress());
     }
