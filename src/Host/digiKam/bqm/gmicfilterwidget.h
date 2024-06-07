@@ -54,14 +54,15 @@ class GmicFilterWidget : public QWidget
 public:
 
     explicit GmicFilterWidget(QWidget* const parent = nullptr);
-    ~GmicFilterWidget()                                  override;
+    ~GmicFilterWidget()                                   override;
 
     void setPlugin(DPluginBqm* const plugin);
 
-    QString currentPath()                          const;
+    QString currentPath()                           const;
     void setCurrentPath(const QString& path);
 
-    QMap<QString, QVariant> currentGmicFilter()     const;
+    QMap<QString, QVariant> currentGmicFilters()    const;
+    QString currentGmicChainedCommands()            const;
 
 Q_SIGNALS:
 

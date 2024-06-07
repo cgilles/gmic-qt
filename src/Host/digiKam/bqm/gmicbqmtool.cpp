@@ -109,7 +109,7 @@ void GmicBqmTool::slotSettingsChanged()
     {
         BatchToolSettings settings;
 
-        settings.insert(QLatin1String("GmicBqmToolCommand"), d->gmicWidget->currentGmicFilter());
+        settings.insert(QLatin1String("GmicBqmToolCommand"), d->gmicWidget->currentGmicChainedCommands());
         settings.insert(QLatin1String("GmicBqmToolPath"),    d->gmicWidget->currentPath());
 
         BatchTool::slotSettingsChanged(settings);

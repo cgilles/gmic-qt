@@ -453,7 +453,7 @@ void GmicFilterWidget::saveSettings()
     }
 }
 
-QMap<QString, QVariant> GmicFilterWidget::currentGmicFilter() const
+QMap<QString, QVariant> GmicFilterWidget::currentGmicFilters() const
 {
     QModelIndex index = d->tree->currentIndex();
 
@@ -469,6 +469,25 @@ QMap<QString, QVariant> GmicFilterWidget::currentGmicFilter() const
     }
 
     return QMap<QString, QVariant>();
+}
+
+QString GmicFilterWidget::currentGmicChainedCommands() const
+{
+    QString chained;
+    QMap<QString, QVariant> filters = currentGmicFilters();
+
+    if (!filters.isEmpty())
+    {
+        QList<QVariant> lst = filters.values();
+
+        foreach (const QVariant& v, lst)
+        {
+            chained.append(QLatin1Char(' '));
+            chained.append(v.toString());
+        }
+    }
+
+    return chained.trimmed();
 }
 
 QString GmicFilterWidget::currentPath() const
