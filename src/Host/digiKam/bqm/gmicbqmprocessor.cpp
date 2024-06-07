@@ -124,7 +124,7 @@ void GmicBqmProcessor::startProcessing()
     qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << QString::fromUtf8("G'MIC: %1").arg(d->command);
 
     QString env = QString::fromLatin1("_input_layers=%1").arg((int)DefaultInputMode);
-    env        += QString::fromLatin1(" _output_mode=%1").arg((int)DefaultInputMode);
+    env        += QString::fromLatin1(" _output_mode=%1").arg((int)DefaultOutputMode);
     env        += QString::fromLatin1(" _output_messages=%1").arg((int)OutputMessageMode::VerboseConsole);
 
     d->filterThread = new FilterThread(this,
