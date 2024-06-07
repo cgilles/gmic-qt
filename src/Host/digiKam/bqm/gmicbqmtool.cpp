@@ -163,17 +163,19 @@ bool GmicBqmTool::toolOperations()
     bool b  = d->gmicProcessor->processingComplete();
     image() = d->gmicProcessor->outputImage();
 
+    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "GmicBqmTool: G'MIC filter completed:" << b;
+
+    if (b)
+    {
+        b = savefromDImg();
+    }
+
+    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "GmicBqmTool: G'MIC flush image data completed:" << b;
+
     delete d->gmicProcessor;
     d->gmicProcessor = nullptr;
 
-    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "GmicBqmTool: G'MIC filter completed:" << b;
-
-    if (!b)
-    {
-        return false;
-    }
-
-    return (savefromDImg());
+    return b;
 }
 
 void GmicBqmTool::cancel()
