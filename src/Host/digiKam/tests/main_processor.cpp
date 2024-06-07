@@ -61,12 +61,11 @@ int main(int argc, char* argv[])
     parser.addPositionalArgument(QString::fromLatin1("image"), QLatin1String("Image file path"), QString::fromLatin1("[image]"));
     parser.process(app);
 
-    QString path;
     DImg img;
 
     if (!parser.positionalArguments().isEmpty())
     {
-        path = parser.positionalArguments().first();
+        QString path = parser.positionalArguments().first();
         qCDebug(DIGIKAM_TESTS_LOG) << "Image to Process:" << path;
 
         GmicBqmProcessor* const gmicProcessor = new GmicBqmProcessor(&app);

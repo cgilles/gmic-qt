@@ -121,8 +121,7 @@ void GmicBqmProcessor::startProcessing()
                                             *d->gmicImages[0]
                                            );
 
-    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << QString::fromUtf8("G'MIC: %1")
-                                           .arg(d->command);
+    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << QString::fromUtf8("G'MIC: %1").arg(d->command);
 
     QString env = QString::fromLatin1("_input_layers=%1").arg((int)DefaultInputMode);
     env        += QString::fromLatin1(" _output_mode=%1").arg((int)DefaultInputMode);
@@ -164,8 +163,12 @@ void GmicBqmProcessor::slotProcessingFinished()
     QString errorMessage;
     QStringList status = d->filterThread->gmicStatus();
 
+    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "G'MIC Filter status" << status;
+
     if (d->filterThread->failed())
     {
+        qCWarning(DIGIKAM_DPLUGIN_BQM_LOG) << "G'MIC Filter execution failed!";
+
         errorMessage = d->filterThread->errorMessage();
 
         if (errorMessage.isEmpty())
@@ -182,6 +185,8 @@ void GmicBqmProcessor::slotProcessingFinished()
 
         if (!d->filterThread->aborted())
         {
+            qCWarning(DIGIKAM_DPLUGIN_BQM_LOG) << "G'MIC Filter execution aborted...";
+
             GMicQtImageConverter::convertCImgtoDImg(
                                                     images[0],
                                                     d->outImage,

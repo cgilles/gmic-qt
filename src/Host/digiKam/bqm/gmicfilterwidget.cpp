@@ -473,11 +473,11 @@ QMap<QString, QVariant> GmicFilterWidget::currentGmicFilter() const
 
 QString GmicFilterWidget::currentPath() const
 {
-    QStringList hierarchy;
     QModelIndex index = d->tree->currentIndex();
 
     if (index.isValid())
     {
+        QStringList hierarchy;
         index                      = d->proxyModel->mapToSource(index);
         const GmicFilterNode* node = d->manager->commandsModel()->node(index);
 

@@ -61,12 +61,10 @@ int main(int argc, char* argv[])
     parser.addPositionalArgument(QString::fromLatin1("image"), QLatin1String("Image file path"), QString::fromLatin1("[image]"));
     parser.process(app);
 
-    QString path;
-
     if (!parser.positionalArguments().isEmpty())
     {
         s_imagePath   = parser.positionalArguments().first();
-        qCDebug(DIGIKAM_TESTS_LOG) << "Image to Process:" << path;
+        qCDebug(DIGIKAM_TESTS_LOG) << "Image to Process:" << s_imagePath;
 
         QString fname = GMicQtWindow::execWindow(
                                                  nullptr,
