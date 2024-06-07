@@ -160,8 +160,10 @@ bool GmicBqmTool::toolOperations()
 
     loop.exec();
 
-    bool b  = d->gmicProcessor->processingComplete();
-    image() = d->gmicProcessor->outputImage();
+    bool b   = d->gmicProcessor->processingComplete();
+    DImg out = d->gmicProcessor->outputImage();
+    image().putImageData(out.width(), out.height(), out.sixteenBit(), out.hasAlpha(), out.bits());
+
 
     qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "GmicBqmTool: G'MIC filter completed:" << b;
 
