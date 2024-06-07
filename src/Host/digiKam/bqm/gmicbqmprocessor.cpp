@@ -185,16 +185,21 @@ void GmicBqmProcessor::slotProcessingFinished()
 
         if (!d->filterThread->aborted())
         {
-            qCWarning(DIGIKAM_DPLUGIN_BQM_LOG) << "G'MIC Filter execution aborted...";
-
             GMicQtImageConverter::convertCImgtoDImg(
                                                     images[0],
                                                     d->outImage,
                                                     d->inImage.sixteenBit()
                                                    );
 
+            qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "G'MIC Filter execution completed!";
+
             d->completed = true;
         }
+        else
+        {
+            qCWarning(DIGIKAM_DPLUGIN_BQM_LOG) << "G'MIC Filter execution aborted...";
+        }
+
     }
 
     d->filterThread->deleteLater();
