@@ -78,7 +78,7 @@ GmicBqmProcessor::~GmicBqmProcessor()
 
 void GmicBqmProcessor::setInputImage(const DImg& inImage)
 {
-    d->inImage  = inImage;
+    d->inImage = inImage;
 }
 
 bool GmicBqmProcessor::setProcessingCommand(const QString& command)
