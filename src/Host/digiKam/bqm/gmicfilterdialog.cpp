@@ -102,20 +102,20 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
                    Qt::WindowMinMaxButtonsHint);
 
     QLabel* const frontLbl = new QLabel(this);
-    frontLbl->setText(QObject::tr("This dialog allow to customize the G'MIC chained command strings corresponding "
-                                  "to this filter. "
-                                  "Don't forget to assign at least a title and optionally a comment "
-                                  "to describe the filter."));
+    frontLbl->setText(tr("This dialog allow to customize the G'MIC chained command strings corresponding "
+                         "to this filter. "
+                         "Don't forget to assign at least a title and optionally a comment "
+                         "to describe the filter."));
     frontLbl->setTextFormat(Qt::PlainText);
     frontLbl->setWordWrap(true);
 
     d->filterChain          = new GmicFilterChain(this);
 
-    QLabel* const titleLbl  = new QLabel(d->filter ? QObject::tr("Title:")
-                                                   : QObject::tr("Name:"), this);
+    QLabel* const titleLbl  = new QLabel(d->filter ? tr("Title:")
+                                                   : tr("Name:"), this);
     d->title                = new QLineEdit(this);
-    d->title->setPlaceholderText(d->filter ? QObject::tr("Enter here the title")
-                                           : QObject::tr("Enter here the folder name"));
+    d->title->setPlaceholderText(d->filter ? tr("Enter here the title")
+                                           : tr("Enter here the folder name"));
 
     /*
      * Accepts all UTF-8 Characters.
@@ -125,10 +125,10 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
     QValidator* const utf8Validator   = new QRegularExpressionValidator(utf8Rx, this);
     d->title->setValidator(utf8Validator);
 
-    QLabel* const descLbl             = new QLabel(QObject::tr("Description:"), this);
+    QLabel* const descLbl             = new QLabel(tr("Description:"), this);
     d->desc                           = new DTextEdit(this);
     d->desc->setLinesVisible(3);
-    d->desc->setPlaceholderText(QObject::tr("Enter here the description"));
+    d->desc->setPlaceholderText(tr("Enter here the description"));
 
     QDialogButtonBox* const buttonBox = new QDialogButtonBox(this);
     buttonBox->setOrientation(Qt::Horizontal);
@@ -157,7 +157,7 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
             d->filterChain->setChainedFilters(d->currentItem->commands);
             d->title->setFocus();
             d->desc->setText(d->currentItem->desc);
-            setWindowTitle(QObject::tr("Edit G'MIC Filter"));
+            setWindowTitle(tr("Edit G'MIC Filter"));
         }
         else
         {
@@ -166,7 +166,7 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
             d->filterChain->setVisible(false);
             descLbl->setVisible(false);
             d->desc->setVisible(false);
-            setWindowTitle(QObject::tr("Edit G'MIC Folder"));
+            setWindowTitle(tr("Edit G'MIC Folder"));
         }
     }
     else
@@ -174,7 +174,7 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
         if (d->filter)
         {
             d->title->setFocus();
-            setWindowTitle(QObject::tr("Add G'MIC Filter"));
+            setWindowTitle(tr("Add G'MIC Filter"));
         }
         else
         {
@@ -183,21 +183,21 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
             d->filterChain->setVisible(false);
             descLbl->setVisible(false);
             d->desc->setVisible(false);
-            setWindowTitle(QObject::tr("Add G'MIC Folder"));
+            setWindowTitle(tr("Add G'MIC Folder"));
         }
     }
 
     // ---
 
-    QPushButton* const help       = buttonBox->addButton(QDialogButtonBox::Help);
+    QPushButton* const help             = buttonBox->addButton(QDialogButtonBox::Help);
     help->setIcon(QIcon::fromTheme(QLatin1String("help-browser")));
-    help->setText(QObject::tr("Help"));
+    help->setText(tr("Help"));
     help->setAutoDefault(false);
-    QMenu* const menu             = new QMenu(help);
-    QAction* const handbookAction = menu->addAction(QIcon::fromTheme(QLatin1String("globe")),
-                                                    QObject::tr("Online Handbook..."));
-    QAction* const aboutAction    = menu->addAction(QIcon::fromTheme(QLatin1String("help-about")),
-                                                    QObject::tr("About..."));
+    QMenu* const menu                   = new QMenu(help);
+    const QAction* const handbookAction = menu->addAction(QIcon::fromTheme(QLatin1String("globe")),
+                                                          tr("Online Handbook..."));
+    const QAction* const aboutAction    = menu->addAction(QIcon::fromTheme(QLatin1String("help-about")),
+                                                          tr("About..."));
     help->setMenu(menu);
 
     connect(handbookAction, SIGNAL(triggered()),
@@ -272,8 +272,8 @@ void GmicFilterDialog::accept()
 {
     if (d->title->text().isEmpty())
     {
-        QMessageBox::information(this, QObject::tr("Error"),
-                                 QObject::tr("Title cannot be empty..."));
+        QMessageBox::information(this, tr("Error"),
+                                 tr("Title cannot be empty..."));
         return;
     }
 

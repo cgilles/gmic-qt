@@ -258,7 +258,7 @@ GmicFilterManager* GmicFilterModel::manager() const
 
 QModelIndex GmicFilterModel::index(GmicFilterNode* node) const
 {
-    GmicFilterNode* const parent = node->parent();
+    const GmicFilterNode* const parent = node->parent();
 
     if (!parent)
     {
@@ -473,7 +473,7 @@ QModelIndex GmicFilterModel::index(int row, int column, const QModelIndex& paren
 
     // get the parent node
 
-    GmicFilterNode* const parentNode = node(parent);
+    const GmicFilterNode* const parentNode = node(parent);
 
     return createIndex(row, column, parentNode->children().at(row));
 }
@@ -495,8 +495,8 @@ QModelIndex GmicFilterModel::parent(const QModelIndex& index) const
 
     // get the parent's row
 
-    GmicFilterNode* const grandParentNode = parentNode->parent();
-    int parentRow                         = grandParentNode->children().indexOf(parentNode);
+    const GmicFilterNode* const grandParentNode = parentNode->parent();
+    int parentRow                               = grandParentNode->children().indexOf(parentNode);
 
     Q_ASSERT(parentRow >= 0);
 
@@ -525,8 +525,8 @@ Qt::ItemFlags GmicFilterModel::flags(const QModelIndex& index) const
         return Qt::NoItemFlags;
     }
 
-    Qt::ItemFlags flags               = Qt::ItemIsSelectable | Qt::ItemIsEnabled;
-    GmicFilterNode* const commandNode = node(index);
+    Qt::ItemFlags flags                     = Qt::ItemIsSelectable | Qt::ItemIsEnabled;
+    const GmicFilterNode* const commandNode = node(index);
 
     if (commandNode->type() != GmicFilterNode::RootFolder)
     {

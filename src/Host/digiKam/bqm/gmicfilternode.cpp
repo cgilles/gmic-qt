@@ -347,7 +347,7 @@ bool GmicXmlWriter::write(QIODevice* const device, const GmicFilterNode* const r
 
     if ((root->type() == GmicFilterNode::Root) && !root->children().isEmpty())
     {
-        GmicFilterNode* const rootFolder = root->children().constFirst();
+        const GmicFilterNode* const rootFolder = root->children().constFirst();
 
         for (int i = 0 ; i < rootFolder->children().count() ; ++i)
         {

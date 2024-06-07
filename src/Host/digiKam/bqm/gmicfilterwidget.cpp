@@ -86,7 +86,7 @@ GmicFilterWidget::GmicFilterWidget(QWidget* const parent)
     setObjectName(QLatin1String("GmicFilterWidget"));
 
     const QString db   = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
-                                                        QLatin1String("/gmicfilters.xml");
+                                                          QLatin1String("/gmicfilters.xml");
     d->manager         = new GmicFilterManager(db, this);
     d->manager->load();
 
@@ -102,29 +102,29 @@ GmicFilterWidget::GmicFilterWidget(QWidget* const parent)
     d->tree->setHeaderHidden(true);
 
     d->addButton       = new QToolButton(this);
-    d->addButton->setToolTip(QObject::tr("Add new item."));
+    d->addButton->setToolTip(tr("Add new item."));
     d->addButton->setIcon(QIcon::fromTheme(QLatin1String("list-add")));
     d->addButton->setPopupMode(QToolButton::InstantPopup);
 
     QMenu* const menu  = new QMenu(d->addButton);
     d->addFilter       = menu->addAction(QIcon::fromTheme(QLatin1String("process-working-symbolic")),
-                                         QObject::tr("Add filter..."));
+                                         tr("Add filter..."));
     d->addFolder       = menu->addAction(QIcon::fromTheme(QLatin1String("folder")),
-                                         QObject::tr("Add folder..."));
+                                         tr("Add folder..."));
     d->addSeparator    = menu->addAction(QIcon::fromTheme(QLatin1String("view-more-horizontal-symbolic")),
-                                         QObject::tr("Add Separator..."));
+                                         tr("Add Separator..."));
     d->addButton->setMenu(menu);
 
     d->remButton       = new QToolButton(this);
-    d->remButton->setToolTip(QObject::tr("Remove current selected item."));
+    d->remButton->setToolTip(tr("Remove current selected item."));
     d->remove          = new QAction(QIcon::fromTheme(QLatin1String("list-remove")),
-                                     QObject::tr("Remove..."));
+                                     tr("Remove..."));
     d->remButton->setDefaultAction(d->remove);
 
     d->edtButton       = new QToolButton(this);
-    d->edtButton->setToolTip(QObject::tr("Edit current selected item."));
+    d->edtButton->setToolTip(tr("Edit current selected item."));
     d->edit            = new QAction(QIcon::fromTheme(QLatin1String("document-edit")),
-                                     QObject::tr("Edit..."));
+                                     tr("Edit..."));
     d->edtButton->setDefaultAction(d->edit);
 
     d->search          = new SearchTextBar(this, QLatin1String("DigikamGmicFilterSearchBar"));
@@ -240,8 +240,8 @@ void GmicFilterWidget::slotTreeViewItemClicked(const QModelIndex& index)
 {
     if (index.isValid())
     {
-        QModelIndex idx            = d->proxyModel->mapToSource(index);
-        GmicFilterNode* const node = d->manager->commandsModel()->node(idx);
+        QModelIndex idx                  = d->proxyModel->mapToSource(index);
+        const GmicFilterNode* const node = d->manager->commandsModel()->node(idx);
 
         switch (node->type())
         {
@@ -356,10 +356,10 @@ void GmicFilterWidget::slotRemove()
                 }
             }
 
-            if (QMessageBox::question(this, QObject::tr("G'MIC Filters Management"),
-                                      QObject::tr("Do you want to remove \"%1\" "
-                                                  "from your G'MIC filters collection?")
-                                                  .arg(title),
+            if (QMessageBox::question(this, tr("G'MIC Filters Management"),
+                                      tr("Do you want to remove \"%1\" "
+                                         "from your G'MIC filters collection?")
+                                         .arg(title),
                                       QMessageBox::Yes | QMessageBox::No
                                      ) == QMessageBox::No)
             {
@@ -404,8 +404,8 @@ void GmicFilterWidget::slotEdit()
 
     if (index.isValid())
     {
-        index                      = d->proxyModel->mapToSource(index);
-        GmicFilterNode* const node = d->manager->commandsModel()->node(index);
+        index                            = d->proxyModel->mapToSource(index);
+        const GmicFilterNode* const node = d->manager->commandsModel()->node(index);
 
         if (!node || (node->type() == GmicFilterNode::RootFolder))
         {
@@ -478,8 +478,8 @@ QString GmicFilterWidget::currentPath() const
 
     if (index.isValid())
     {
-        index                = d->proxyModel->mapToSource(index);
-        GmicFilterNode* node = d->manager->commandsModel()->node(index);
+        index                      = d->proxyModel->mapToSource(index);
+        const GmicFilterNode* node = d->manager->commandsModel()->node(index);
 
         if (node)
         {

@@ -58,7 +58,7 @@ void GmicFilterChainView::slotItemDoubleClicked(QTreeWidgetItem* item, int colum
 {
     Q_UNUSED(column)
 
-    GmicFilterChainViewItem* const fitem = dynamic_cast<GmicFilterChainViewItem*>(item);
+    const GmicFilterChainViewItem* const fitem = dynamic_cast<GmicFilterChainViewItem*>(item);
 
     if (!fitem)
     {

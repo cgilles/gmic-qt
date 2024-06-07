@@ -218,7 +218,7 @@ void GmicFilterChain::slotMoveDownItems()
 QString GmicFilterChain::currentCommand() const
 {
     QString command;
-    GmicFilterChainViewItem* const item = d->listView->currentFilterItem();
+    const GmicFilterChainViewItem* const item = d->listView->currentFilterItem();
 
     if (item)
     {
@@ -250,7 +250,7 @@ QMap<QString, QVariant> GmicFilterChain::chainedFilters() const
 
     while (*it)
     {
-        GmicFilterChainViewItem* const item = dynamic_cast<GmicFilterChainViewItem*>(*it);
+        const GmicFilterChainViewItem* const item = dynamic_cast<GmicFilterChainViewItem*>(*it);
 
         if (item)
         {
@@ -270,7 +270,7 @@ QStringList GmicFilterChain::chainedCommands() const
 
     while (*it)
     {
-        GmicFilterChainViewItem* const item = dynamic_cast<GmicFilterChainViewItem*>(*it);
+        const GmicFilterChainViewItem* const item = dynamic_cast<GmicFilterChainViewItem*>(*it);
 
         if (item)
         {
@@ -314,7 +314,7 @@ void GmicFilterChain::createNewFilter(const QString& title, const QString& comma
 
 void GmicFilterChain::slotEditItem()
 {
-    GmicFilterChainViewItem* const item =
+    const GmicFilterChainViewItem* const item =
         dynamic_cast<GmicFilterChainViewItem*>(d->listView->currentItem());
 
     if (item)

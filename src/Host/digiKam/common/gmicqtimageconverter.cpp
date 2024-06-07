@@ -78,7 +78,7 @@ void GMicQtImageConverter::convertCImgtoDImg(const cimg_library::CImg<float>& in
 
             if (sixteenBit)
             {
-                unsigned short* dst = (unsigned short*)out.scanLine(y);
+                unsigned short* dst = reinterpret_cast<unsigned short*>(out.scanLine(y));
 
                 while (n--)
                 {
@@ -107,7 +107,7 @@ void GMicQtImageConverter::convertCImgtoDImg(const cimg_library::CImg<float>& in
     else if (in.spectrum() == 3) // RGB
     {
         qCDebug(DIGIKAM_DPLUGIN_LOG) << "GMicQt: convert CImg to DImg: RGB image"
-                                            << "(" << (sixteenBit+1) * 8 << "bits)";
+                                     << "(" << (sixteenBit+1) * 8 << "bits)";
 
         const float* srcR = in.data(0, 0, 0, 0);
         const float* srcG = in.data(0, 0, 0, 1);
@@ -120,7 +120,7 @@ void GMicQtImageConverter::convertCImgtoDImg(const cimg_library::CImg<float>& in
 
             if (sixteenBit)
             {
-                unsigned short* dst = (unsigned short*)out.scanLine(y);
+                unsigned short* dst = reinterpret_cast<unsigned short*>(out.scanLine(y));
 
                 while (n--)
                 {
@@ -161,7 +161,7 @@ void GMicQtImageConverter::convertCImgtoDImg(const cimg_library::CImg<float>& in
 
             if (sixteenBit)
             {
-                unsigned short* dst = (unsigned short*)out.scanLine(y);
+                unsigned short* dst = reinterpret_cast<unsigned short*>(out.scanLine(y));
 
                 while (n--)
                 {
@@ -203,7 +203,7 @@ void GMicQtImageConverter::convertCImgtoDImg(const cimg_library::CImg<float>& in
 
             if (sixteenBit)
             {
-                unsigned short* dst = (unsigned short*)out.scanLine(y);
+                unsigned short* dst = reinterpret_cast<unsigned short*>(out.scanLine(y));
 
                 while (n--)
                 {
@@ -258,7 +258,7 @@ void GMicQtImageConverter::convertDImgtoCImg(const DImg& in,
     {
         if (in.sixteenBit())
         {
-            const unsigned short* src = (unsigned short*)in.scanLine(y);
+            const unsigned short* src = reinterpret_cast<unsigned short*>(in.scanLine(y));
             int n                     = in.width();
 
             while (n--)

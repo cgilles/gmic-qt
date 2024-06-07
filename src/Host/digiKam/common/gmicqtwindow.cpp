@@ -116,15 +116,15 @@ GMicQtWindow::GMicQtWindow(
 */
         // ---
 
-        QPushButton* const help    = new QPushButton(this);
+        QPushButton* const help          = new QPushButton(this);
         help->setText(tr("Help"));
         help->setIcon(QIcon::fromTheme(QLatin1String("help-browser")));
         help->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
-        QMenu* const menu          = new QMenu(help);
-        QAction* const webAction   = menu->addAction(QIcon::fromTheme(QLatin1String("globe")),
+        QMenu* const menu                = new QMenu(help);
+        const QAction* const webAction   = menu->addAction(QIcon::fromTheme(QLatin1String("globe")),
                                                      tr("Online Handbook..."));
-        QAction* const aboutAction = menu->addAction(QIcon::fromTheme(QLatin1String("help-about")),
+        const QAction* const aboutAction = menu->addAction(QIcon::fromTheme(QLatin1String("help-about")),
                                                      tr("About..."));
         help->setMenu(menu);
 
