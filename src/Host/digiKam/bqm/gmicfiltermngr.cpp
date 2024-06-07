@@ -258,28 +258,28 @@ GmicFilterManager* GmicFilterModel::manager() const
 
 QModelIndex GmicFilterModel::index(GmicFilterNode* node) const
 {
-    const GmicFilterNode* const parent = node->parent();
+    const GmicFilterNode* const item = node->parent();
 
-    if (!parent)
+    if (!item)
     {
         return QModelIndex();
     }
 
-    return createIndex(parent->children().indexOf(node), 0, node);
+    return createIndex(item->children().indexOf(node), 0, node);
 }
 
 void GmicFilterModel::signalEntryAdded(GmicFilterNode* item)
 {
     Q_ASSERT(item && item->parent());
 
-    int row                      = item->parent()->children().indexOf(item);
-    GmicFilterNode* const parent = item->parent();
+    int row                     = item->parent()->children().indexOf(item);
+    GmicFilterNode* const pitem = item->parent();
 
     // item was already added so remove before beginInsertRows is called
 
-    parent->remove(item);
-    beginInsertRows(index(parent), row, row);
-    parent->add(item, row);
+    pitem->remove(item);
+    beginInsertRows(index(pitem), row, row);
+    pitem->add(item, row);
     endInsertRows();
 }
 
@@ -311,8 +311,8 @@ bool GmicFilterModel::removeRows(int row, int count, const QModelIndex& parent)
 
     for (int i = (row + count - 1) ; i >= row ; --i)
     {
-        GmicFilterNode* const node = fnode->children().at(i);
-        d->manager->removeCommand(node);
+        GmicFilterNode* const item = fnode->children().at(i);
+        d->manager->removeCommand(item);
     }
 
     if (d->endMacro)
@@ -557,12 +557,12 @@ QStringList GmicFilterModel::mimeTypes() const
 QMimeData* GmicFilterModel::mimeData(const QModelIndexList& indexes) const
 {
     QMimeData* const mimeData = new QMimeData();
-    QByteArray data;
-    QDataStream stream(&data, QIODevice::WriteOnly);
+    QByteArray ba;
+    QDataStream stream(&ba, QIODevice::WriteOnly);
 
-    Q_FOREACH (QModelIndex index, indexes)
+    Q_FOREACH (QModelIndex id, indexes)
     {
-        if ((index.column() != 0) || !index.isValid())
+        if ((id.column() != 0) || !id.isValid())
         {
             continue;
         }
@@ -571,12 +571,12 @@ QMimeData* GmicFilterModel::mimeData(const QModelIndexList& indexes) const
         QBuffer buffer(&encodedData);
         buffer.open(QBuffer::ReadWrite);
         GmicXmlWriter writer;
-        const GmicFilterNode* const parentNode = node(index);
+        const GmicFilterNode* const parentNode = node(id);
         writer.write(&buffer, parentNode);
         stream << encodedData;
     }
 
-    mimeData->setData(QLatin1String("application/gmicfilters.xml"), data);
+    mimeData->setData(QLatin1String("application/gmicfilters.xml"), ba);
 
     return mimeData;
 }

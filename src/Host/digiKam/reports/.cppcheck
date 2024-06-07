@@ -48,5 +48,3 @@ CPPCHECK_SUPPRESSIONS="\
 --suppress=useStlAlgorithm \
 --suppress=checkersReport \
 "
-
-# --suppress=shadowFunction \
