@@ -82,7 +82,6 @@ $CMAKE_BINARY -G "Unix Makefiles" . \
       -DENABLE_ASAN=OFF \
       -DENABLE_SYSTEM_GMIC=OFF \
       -DGMIC_QT_HOST=digikam \
-      -DENABLE_TEST=ON \
       -Wno-dev \
       ..
 

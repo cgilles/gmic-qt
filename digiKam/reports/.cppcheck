@@ -12,7 +12,8 @@
 IGNORE_DIRS="-i ../translations/ "
 IGNORE_DIRS+="-i ../patches/ "
 IGNORE_DIRS+="-i ../reports/ "
-IGNORE_DIRS+="-i ../src/ "
+IGNORE_DIRS+="-i ../../src/ "
+IGNORE_DIRS+="-i ../../gmic/src/ "
 
 # --- Defines to use with static analysis.
 
@@ -32,6 +33,7 @@ CPPCHECK_SUPPRESSIONS="\
 --inline-suppr \
 --suppress=*:*cimg*.h \
 --suppress=*:*gmic*.h \
+--suppress=*:*Gmic*.h \
 --suppress=missingIncludeSystem \
 --suppress=missingInclude \
 --suppress=purgedConfiguration \

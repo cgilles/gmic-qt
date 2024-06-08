@@ -49,7 +49,7 @@ echo "Cppcheck options     : $CPPCHECK_OPTIONS"
 echo "Cppcheck suppressions: $CPPCHECK_SUPPRESSIONS"
 
 # List sub-dirs with headers to append as cppcheck includes paths
-HDIRS=$(find .. -name '*.h' -printf '%h\n' | sort -u)
+HDIRS=$(find ../.. -name '*.h' -printf '%h\n' | sort -u)
 
 for INCLUDE_PATH in $HDIRS ; do
     INCLUDE_DIRS+="-I $INCLUDE_PATH/ "
