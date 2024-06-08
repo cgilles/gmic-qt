@@ -33,19 +33,16 @@
 #include <QIcon>
 #include <QUrl>
 #include <QLabel>
-#include <QAction>
-#include <QPointer>
-#include <QDesktopServices>
 #include <QSettings>
 
 // digiKam includes
 
 #include "digikam_debug.h"
 #include "digikam_globals.h"
-#include "dpluginaboutdlg.h"
 
 // Local includes
 
+#include "gmicqtcommon.h"
 #include "LanguageSettings.h"
 #include "Settings.h"
 #include "GmicQt.h"
@@ -63,10 +60,7 @@ class Q_DECL_HIDDEN GMicQtWindow::Private
 {
 public:
 
-    explicit Private(DPlugin* const tool)
-        : plugTool(tool)
-    {
-    }
+    Private() = default;
 
     QString         hostOrg     = QCoreApplication::organizationName();
     QString         hostDom     = QCoreApplication::organizationDomain();
@@ -76,7 +70,6 @@ public:
     QString         plugOrg;
     QString         plugDom;
 
-    DPlugin*        plugTool    = nullptr;
     QString         dkModule;
     QLabel*         filterLbl   = nullptr;
     QString*        filterName  = nullptr;
@@ -88,7 +81,7 @@ GMicQtWindow::GMicQtWindow(
                            QString* const filterName
                           )
     : MainWindow(parent),
-      d         (new Private(tool))
+      d         (new Private)
 {
     d->filterName = filterName;
     d->filterLbl  = findChild<QLabel*>("filterName");
@@ -116,29 +109,8 @@ GMicQtWindow::GMicQtWindow(
 */
         // ---
 
-        QPushButton* const help          = new QPushButton(this);
-        help->setText(tr("Help"));
-        help->setIcon(QIcon::fromTheme(QLatin1String("help-browser")));
-        help->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-
-        QMenu* const menu                = new QMenu(help);
-        const QAction* const webAction   = menu->addAction(QIcon::fromTheme(QLatin1String("globe")),
-                                                     tr("Online Handbook..."));
-        const QAction* const aboutAction = menu->addAction(QIcon::fromTheme(QLatin1String("help-about")),
-                                                     tr("About..."));
-        help->setMenu(menu);
-
-        if (!d->plugTool)
-        {
-            help->setEnabled(false);
-        }
-
-        connect(webAction, SIGNAL(triggered()),
-                this, SLOT(slotOnlineHandbook()));
-
-        connect(aboutAction, SIGNAL(triggered()),
-                this, SLOT(slotAboutPlugin()));
-
+        QPushButton* const help = new QPushButton(this);
+        s_gmicQtPluginPopulateHelpButton(this, tool, help);
         hlay->insertWidget(0, help);
 
         QLabel* const lbl          = findChild<QLabel*>("messageLabel");
@@ -243,22 +215,6 @@ void GMicQtWindow::setFilterSelectionMode()
         qCWarning(DIGIKAM_DPLUGIN_LOG) << "G'MIC-Qt: Cannot found \"pbCancel\" "
                                           "button from plugin dialog!";
     }
-}
-
-void GMicQtWindow::slotAboutPlugin()
-{
-    QPointer<DPluginAboutDlg> dlg = new DPluginAboutDlg(d->plugTool);
-    dlg->exec();
-    delete dlg;
-}
-
-void GMicQtWindow::slotOnlineHandbook()
-{
-    openOnlineDocumentation(
-                            d->plugTool->handbookSection(),
-                            d->plugTool->handbookChapter(),
-                            d->plugTool->handbookReference()
-                           );
 }
 
 void GMicQtWindow::slotOkClicked()

@@ -29,6 +29,7 @@
 #include <QString>
 #include <QList>
 #include <QIcon>
+#include <QPushButton>
 
 // digiKam includes
 
@@ -63,5 +64,12 @@ FilterAction         s_gmicQtFilterAction(const QString& gmicCommand,
                                           int            inMode,
                                           int            outMode,
                                           const QString& filterName);
+
+/**
+ * Populate the dialog Help Button with about and documentation support.
+ */
+void s_gmicQtPluginPopulateHelpButton(QWidget* const parent,
+                                      DPlugin* const tool,
+                                      QPushButton* const help);
 
 } // namespace DigikamGmicQtPluginCommon

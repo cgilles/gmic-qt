@@ -62,8 +62,6 @@ private Q_SLOTS:
 
     void accept()                                           override;
     void slotGmicQt(const QString& command = QString());
-    void slotAboutPlugin();
-    void slotOnlineHandbook();
 
 private:
 

@@ -30,11 +30,15 @@
 #include <QByteArray>
 #include <QBuffer>
 #include <QObject>
+#include <QAction>
+#include <QPointer>
+#include <QMenu>
 
 // digiKam includes
 
 #include "digikam_debug.h"
 #include "digikam_globals.h"
+#include "dpluginaboutdlg.h"
 
 // Libfftw includes
 
@@ -154,6 +158,47 @@ FilterAction s_gmicQtFilterAction(const QString& gmicCommand,
     faction.addParameter(QLatin1String("GmicQtVersion"), GmicQt::gmicVersionString());
 
     return faction;
+}
+
+void s_gmicQtPluginPopulateHelpButton(QWidget* const parent,
+                                      DPlugin* const tool,
+                                      QPushButton* const help)
+{
+    help->setText(QObject::tr("Help"));
+    help->setIcon(QIcon::fromTheme(QLatin1String("help-browser")));
+    help->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+
+    QMenu* const menu                = new QMenu(help);
+    const QAction* const webAction   = menu->addAction(QIcon::fromTheme(QLatin1String("globe")),
+                                                       QObject::tr("Online Handbook..."));
+    const QAction* const aboutAction = menu->addAction(QIcon::fromTheme(QLatin1String("help-about")),
+                                                       QObject::tr("About..."));
+    help->setMenu(menu);
+
+    if (!tool)
+    {
+        help->setEnabled(false);
+    }
+
+    QObject::connect(webAction, &QAction::triggered,
+                     parent, [tool]()
+        {
+            openOnlineDocumentation(
+                                    tool->handbookSection(),
+                                    tool->handbookChapter(),
+                                    tool->handbookReference()
+                                   );
+        }
+    );
+
+    QObject::connect(aboutAction, &QAction::triggered,
+                     parent, [tool]()
+        {
+            QPointer<DPluginAboutDlg> dlg = new DPluginAboutDlg(tool);
+            dlg->exec();
+            delete dlg;
+        }
+    );
 }
 
 } // namespace DigikamGmicQtPluginCommon

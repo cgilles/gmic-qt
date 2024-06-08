@@ -48,13 +48,13 @@
 #include "searchtextbar.h"
 #include "dtextedit.h"
 #include "bqminfoiface.h"
-#include "dpluginaboutdlg.h"
 
 // Local includes
 
 #include "gmicfilternode.h"
 #include "gmicfilterchain.h"
 #include "gmicqtwindow.h"
+#include "gmicqtcommon.h"
 
 using namespace DigikamGmicQtPluginCommon;
 
@@ -189,22 +189,8 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
 
     // ---
 
-    QPushButton* const help             = buttonBox->addButton(QDialogButtonBox::Help);
-    help->setIcon(QIcon::fromTheme(QLatin1String("help-browser")));
-    help->setText(tr("Help"));
-    help->setAutoDefault(false);
-    QMenu* const menu                   = new QMenu(help);
-    const QAction* const handbookAction = menu->addAction(QIcon::fromTheme(QLatin1String("globe")),
-                                                          tr("Online Handbook..."));
-    const QAction* const aboutAction    = menu->addAction(QIcon::fromTheme(QLatin1String("help-about")),
-                                                          tr("About..."));
-    help->setMenu(menu);
-
-    connect(handbookAction, SIGNAL(triggered()),
-            this, SLOT(slotOnlineHandbook()));
-
-    connect(aboutAction, SIGNAL(triggered()),
-            this, SLOT(slotAboutPlugin()));
+    QPushButton* const help = buttonBox->addButton(QDialogButtonBox::Help);
+    s_gmicQtPluginPopulateHelpButton(this, d->plugin, help);
 
     // ---
 
@@ -226,22 +212,6 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
 GmicFilterDialog::~GmicFilterDialog()
 {
     delete d;
-}
-
-void GmicFilterDialog::slotAboutPlugin()
-{
-    QPointer<DPluginAboutDlg> dlg = new DPluginAboutDlg(d->plugin);
-    dlg->exec();
-    delete dlg;
-}
-
-void GmicFilterDialog::slotOnlineHandbook()
-{
-    openOnlineDocumentation(
-                            d->plugin->handbookSection(),
-                            d->plugin->handbookChapter(),
-                            d->plugin->handbookReference()
-                           );
 }
 
 void GmicFilterDialog::slotGmicQt(const QString& command)
