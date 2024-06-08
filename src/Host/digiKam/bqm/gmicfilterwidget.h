@@ -61,7 +61,6 @@ public:
     QString currentPath()                           const;
     void setCurrentPath(const QString& path);
 
-    QMap<QString, QVariant> currentGmicFilters()    const;
     QString currentGmicChainedCommands()            const;
 
 Q_SIGNALS:
@@ -85,6 +84,7 @@ private:
     void readSettings();
     void saveSettings();
     void openCommandDialog(bool edit, bool filter);
+    QMap<QString, QVariant> currentGmicFilters()    const;
 
 private:
 
