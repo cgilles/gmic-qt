@@ -8,8 +8,8 @@ cmake_minimum_required(VERSION 3.10.0 FATAL_ERROR)
 
 project(gmicqt-digiKam)
 
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/gmic-qt/cmake/modules ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/gmicqt/cmake/modules ${CMAKE_MODULE_PATH})
 
-include_directories(${CMAKE_SOURCE_DIR}/gmic-qt/src)
+include_directories(${CMAKE_SOURCE_DIR}/gmicqt/src)
 
-add_subdirectory(gmic-qt)
+add_subdirectory(gmicqt)

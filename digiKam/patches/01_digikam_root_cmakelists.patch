@@ -1,7 +1,7 @@
-diff --git a/qmic-qt/CMakeLists.txt b/qmic-qt/CMakeLists.txt
+diff --git a/qmicqt/CMakeLists.txt b/qmicqt/CMakeLists.txt
 index 47face8..a3a2fa1 100644
---- a/qmic-qt/CMakeLists.txt
-+++ b/qmic-qt/CMakeLists.txt
+--- a/qmicqt/CMakeLists.txt
++++ b/qmicqt/CMakeLists.txt
 @@ -45,8 +45,8 @@ else()
    option(ENABLE_DYNAMIC_LINKING "Dynamically link the binaries to the GMIC shared library" OFF)
  
