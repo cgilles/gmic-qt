@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
         QString path = parser.positionalArguments().first();
         qCDebug(DIGIKAM_TESTS_LOG) << "Image to Process:" << path;
 
-        GmicBqmProcessor* const gmicProcessor = new GmicBqmProcessor(&app);
+        GmicBqmProcessor* const gmicProcessor = new GmicBqmProcessor();
         img.load(path);
         gmicProcessor->setInputImage(img);
 
