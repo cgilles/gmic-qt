@@ -101,7 +101,7 @@ void GmicBqmTool::slotAssignSettings2Widget()
 {
     d->changeSettings = false;
 
-    QString path = settings()[QLatin1String("GmicBqmToolPath")].toString();
+    QString path      = settings().value(QLatin1String("GmicBqmToolPath")).toString();
 
     d->gmicWidget->setCurrentPath(path);
 
@@ -130,10 +130,10 @@ bool GmicBqmTool::toolOperations()
         return false;
     }
 
-    QString path     = settings()[QLatin1String("GmicBqmToolPath")].toString();
+    QString path     = settings().value(QLatin1String("GmicBqmToolPath")).toString();
     qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "GmicBqmTool: running G'MIC filter" << path;
 
-    QString command  = settings()[QLatin1String("GmicBqmToolCommand")].toString();
+    QString command  = settings().value(QLatin1String("GmicBqmToolCommand")).toString();
 
     if (command.isEmpty())
     {

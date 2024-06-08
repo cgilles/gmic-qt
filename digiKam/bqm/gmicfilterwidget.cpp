@@ -478,7 +478,7 @@ QString GmicFilterWidget::currentGmicChainedCommands() const
 
     if (!filters.isEmpty())
     {
-        QList<QVariant> lst = filters.values();
+        const QList<QVariant> lst = filters.values();
 
         foreach (const QVariant& v, lst)
         {

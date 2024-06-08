@@ -63,7 +63,7 @@ int main(int argc, char* argv[])
 
     if (!parser.positionalArguments().isEmpty())
     {
-        s_imagePath   = parser.positionalArguments().first();
+        s_imagePath   = parser.positionalArguments().constFirst();
         qCDebug(DIGIKAM_TESTS_LOG) << "Image to Process:" << s_imagePath;
 
         QString fname = GMicQtWindow::execWindow(
