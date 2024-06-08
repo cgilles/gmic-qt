@@ -1,7 +1,7 @@
-diff --git a/src/DialogSettings.cpp b/src/DialogSettings.cpp
+diff --git a/qmic-qt/src/DialogSettings.cpp b/qmic-qt/src/DialogSettings.cpp
 index 206a6a4..bf6b5cb 100644
---- a/src/DialogSettings.cpp
-+++ b/src/DialogSettings.cpp
+--- a/qmic-qt/src/DialogSettings.cpp
++++ b/qmic-qt/src/DialogSettings.cpp
 @@ -114,6 +114,7 @@ DialogSettings::DialogSettings(QWidget * parent) : QDialog(parent), ui(new Ui::D
    connect(ui->outputMessages, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DialogSettings::onOutputMessageModeChanged);
    connect(ui->cbNotifyFailedUpdate, &QCheckBox::toggled, this, &DialogSettings::onNotifyStartupUpdateFailedToggle);
@@ -21,10 +21,10 @@ index 206a6a4..bf6b5cb 100644
  
    ui->languageSelector->selectLanguage(Settings::languageCode());
    ui->languageSelector->enableFilterTranslation(Settings::filterTranslationEnabled());
-diff --git a/src/GmicQt.cpp b/src/GmicQt.cpp
+diff --git a/qmic-qt/src/GmicQt.cpp b/qmic-qt/src/GmicQt.cpp
 index 3af90b3..b47c299 100644
---- a/src/GmicQt.cpp
-+++ b/src/GmicQt.cpp
+--- a/qmic-qt/src/GmicQt.cpp
++++ b/qmic-qt/src/GmicQt.cpp
 @@ -549,11 +549,13 @@ void configureApplication()
    QCoreApplication::setOrganizationDomain(GMIC_QT_ORGANISATION_DOMAIN);
    QCoreApplication::setApplicationName(GMIC_QT_APPLICATION_NAME);

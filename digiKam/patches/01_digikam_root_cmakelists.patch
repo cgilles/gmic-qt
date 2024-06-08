@@ -1,7 +1,7 @@
-diff --git a/CMakeLists.txt b/CMakeLists.txt
+diff --git a/qmic-qt/CMakeLists.txt b/qmic-qt/CMakeLists.txt
 index 47face8..a3a2fa1 100644
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
+--- a/qmic-qt/CMakeLists.txt
++++ b/qmic-qt/CMakeLists.txt
 @@ -45,8 +45,8 @@ else()
    option(ENABLE_DYNAMIC_LINKING "Dynamically link the binaries to the GMIC shared library" OFF)
  
@@ -19,8 +19,8 @@ index 47face8..a3a2fa1 100644
  
 + elseif (${GMIC_QT_HOST} STREQUAL "digikam")
 +
-+    include("digiKam/MacroUtils.cmake")
-+    include("digiKam/RulesDigikamHost.cmake")
++    include("../digiKam/MacroUtils.cmake")
++    include("../digiKam/RulesDigikamHost.cmake")
 +
  else()
  
