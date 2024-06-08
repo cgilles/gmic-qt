@@ -11,4 +11,4 @@ This provide the port of G'MIC-Qt plugin as a digiKam/Showfoto Image Editor tool
 
 ...and a digiKam Batch Queue Manager tool of G'MIC processor:
 
-![digiKam G'MIC Batch Queue Manager plugin running under Linux](https://i.imgur.com/DG9Uzjv.png)
+![digiKam G'MIC Batch Queue Manager plugin running under Linux](https://i.imgur.com/9AKTu6B.png)
