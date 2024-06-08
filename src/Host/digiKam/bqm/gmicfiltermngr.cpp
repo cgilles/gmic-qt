@@ -46,6 +46,9 @@
 // Local includes
 
 #include "gmicfilternode.h"
+#include "gmicqtcommon.h"
+
+using namespace DigikamGmicQtPluginCommon;
 
 namespace DigikamBqmGmicQtPlugin
 {
@@ -420,7 +423,7 @@ QVariant GmicFilterModel::data(const QModelIndex& index, int role) const
                 }
                 else if (commandNode->type() == GmicFilterNode::RootFolder)
                 {
-                    return QIcon(":resources/gmic_hat.png");
+                    return s_gmicQtPluginIcon();
                 }
                 else if (commandNode->type() == GmicFilterNode::Separator)
                 {
