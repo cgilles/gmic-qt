@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
             delete gmicProcessor;
             qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "GmicBqmTool: cannot setup G'MIC filter!";
 
-            return false;
+            return (-1);
         }
 
         gmicProcessor->startProcessing();
