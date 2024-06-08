@@ -47,7 +47,7 @@ GmicFilterChainView::GmicFilterChainView(GmicFilterChain* const parent)
                                   << tr("G'MIC Command"));
 
     header()->setSectionResizeMode(Index,   QHeaderView::ResizeToContents);
-    header()->setSectionResizeMode(Title,   QHeaderView::Stretch);
+    header()->setSectionResizeMode(Title,   QHeaderView::Interactive);
     header()->setSectionResizeMode(Command, QHeaderView::Stretch);
 
     connect(this, &GmicFilterChainView::itemDoubleClicked,
