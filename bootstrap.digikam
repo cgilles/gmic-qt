@@ -141,5 +141,4 @@ $CMAKE_BINARY -G "$MAKEFILES_TYPE" . \
       -DENABLE_ASAN=OFF \
       -DENABLE_SYSTEM_GMIC=OFF \
       -DGMIC_QT_HOST=digikam \
-      -DENABLE_TEST=ON \
       $SOURCEDIR && echo "$MESSAGE"

@@ -22,6 +22,10 @@ include(GNUInstallDirs)
 
 MACOS_DEBUG_POLICIES()
 
+# To compile test codes.
+
+option(BUILD_TESTING "Compile test codes" OFF)
+
 # --- Manage C++ exception rules -----------------------------------------------
 
 string(REPLACE " -DQT_NO_EXCEPTIONS " " " CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} ")
@@ -186,6 +190,8 @@ target_link_libraries(gmic_qt_common
 include(${CMAKE_SOURCE_DIR}/digiKam/editor/EditorPluginRules.cmake)
 include(${CMAKE_SOURCE_DIR}/digiKam/bqm/BqmPluginRules.cmake)
 
-if(ENABLE_TEST)
+if(BUILD_TESTING)
+
     include(${CMAKE_SOURCE_DIR}/digiKam/tests/TestsRules.cmake)
+
 endif()
