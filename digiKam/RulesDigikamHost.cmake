@@ -116,7 +116,7 @@ if(NOT QT_PLUGINS_DIR)
 
 endif()
 
-if(MSVC)
+if(MSVC OR APPLE)
 
     file(COPY        ${CMAKE_SOURCE_DIR}/digiKam/translations/
          DESTINATION ${CMAKE_SOURCE_DIR}/translations/)
