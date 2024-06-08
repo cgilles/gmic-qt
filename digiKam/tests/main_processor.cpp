@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
 
     if (!parser.positionalArguments().isEmpty())
     {
-        QString path = parser.positionalArguments().first();
+        QString path = parser.positionalArguments().constFirst();
         qCDebug(DIGIKAM_TESTS_LOG) << "Image to Process:" << path;
 
         GmicBqmProcessor* const gmicProcessor = new GmicBqmProcessor();
