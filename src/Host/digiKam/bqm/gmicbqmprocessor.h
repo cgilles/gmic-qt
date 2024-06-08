@@ -44,7 +44,7 @@ class GmicBqmProcessor : public QObject
 
 public:
 
-    explicit GmicBqmProcessor(QObject* const parent);
+    explicit GmicBqmProcessor(QObject* const parent = nullptr);
     ~GmicBqmProcessor()                   override;
 
     QString processingCommand()     const;

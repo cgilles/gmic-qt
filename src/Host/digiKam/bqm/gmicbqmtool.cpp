@@ -139,7 +139,7 @@ bool GmicBqmTool::toolOperations()
         return false;
     }
 
-    d->gmicProcessor = new GmicBqmProcessor(this);
+    d->gmicProcessor = new GmicBqmProcessor();
     d->gmicProcessor->setInputImage(image());
 
     if (!d->gmicProcessor->setProcessingCommand(command))
