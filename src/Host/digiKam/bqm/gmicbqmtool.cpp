@@ -39,7 +39,10 @@
 
 #include "gmicfilterwidget.h"
 #include "gmicbqmprocessor.h"
+#include "gmicqtcommon.h"
 #include "GmicQt.h"
+
+using namespace DigikamGmicQtPluginCommon;
 
 namespace DigikamBqmGmicQtPlugin
 {
@@ -166,13 +169,14 @@ bool GmicBqmTool::toolOperations()
     DImg out = d->gmicProcessor->outputImage();
     image().putImageData(out.width(), out.height(), out.sixteenBit(), out.hasAlpha(), out.bits());
 
-    FilterAction action(QLatin1String("G'MIC-Qt"),      1);
-    action.addParameter(QLatin1String("Command"),       command);
-    action.addParameter(QLatin1String("FilterPath"),    path);
-    action.addParameter(QLatin1String("InputMode"),     (int)GmicQt::DefaultInputMode);
-    action.addParameter(QLatin1String("OutputMode"),    (int)GmicQt::DefaultOutputMode);
-    action.addParameter(QLatin1String("FilterName"),    d->gmicProcessor->filterName());
-    action.addParameter(QLatin1String("GmicQtVersion"), GmicQt::gmicVersionString());
+    FilterAction action = s_gmicQtFilterAction(
+                                               command,
+                                               path,
+                                               (int)GmicQt::DefaultInputMode,
+                                               (int)GmicQt::DefaultOutputMode,
+                                               d->gmicProcessor->filterName()
+                                              );
+
     image().addFilterAction(action);
 
     qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "GmicBqmTool: G'MIC filter completed:" << b;

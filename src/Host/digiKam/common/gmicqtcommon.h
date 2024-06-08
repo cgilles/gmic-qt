@@ -33,16 +33,35 @@
 // digiKam includes
 
 #include "dplugin.h"
+#include "filteraction.h"
 
 using namespace Digikam;
 
 namespace DigikamGmicQtPluginCommon
 {
 
+/**
+ * Return the G'MIC plugin description and details.
+ */
 QString              s_gmicQtPluginDetails(const QString& title);
 
+/**
+ * Return the G'MIC plugin authors list.
+ */
 QList<DPluginAuthor> s_gmicQtPluginAuthors();
 
+/**
+ * Return the G'MIC plugin icon.
+ */
 QIcon                s_gmicQtPluginIcon();
+
+/**
+ * Return the digiKam image versioning container populated with the G'MIC filter properties.
+ */
+FilterAction         s_gmicQtFilterAction(const QString& gmicCommand,
+                                          const QString& filterPath,
+                                          int            inMode,
+                                          int            outMode,
+                                          const QString& filterName);
 
 } // namespace DigikamGmicQtPluginCommon

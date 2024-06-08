@@ -44,6 +44,7 @@
 
 // Local includes
 
+#include "GmicQt.h"
 #include "gmic.h"
 
 namespace DigikamGmicQtPluginCommon
@@ -135,6 +136,24 @@ QList<DPluginAuthor> s_gmicQtPluginAuthors()
 QIcon s_gmicQtPluginIcon()
 {
     return QIcon(":resources/gmic_hat.png");
+}
+
+FilterAction s_gmicQtFilterAction(const QString& gmicCommand,
+                                  const QString& filterPath,
+                                  int            inMode,
+                                  int            outMode,
+                                  const QString& filterName)
+{
+    FilterAction faction(QLatin1String("G'MIC-Qt"),      1);
+
+    faction.addParameter(QLatin1String("Command"),       gmicCommand);
+    faction.addParameter(QLatin1String("FilterPath"),    filterPath);
+    faction.addParameter(QLatin1String("InputMode"),     inMode);
+    faction.addParameter(QLatin1String("OutputMode"),    outMode);
+    faction.addParameter(QLatin1String("FilterName"),    filterName);
+    faction.addParameter(QLatin1String("GmicQtVersion"), GmicQt::gmicVersionString());
+
+    return faction;
 }
 
 } // namespace DigikamGmicQtPluginCommon

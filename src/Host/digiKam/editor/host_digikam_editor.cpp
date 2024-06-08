@@ -37,6 +37,7 @@
 #include "Common.h"
 #include "Host/GmicQtHost.h"
 #include "gmicqtwindow.h"
+#include "gmicqtcommon.h"
 #include "gmicqtimageconverter.h"
 
 namespace DigikamGmicQtPluginCommon
@@ -182,15 +183,17 @@ void outputImages(cimg_library::CImgList<gmic_pixel_type>& images,
         }
 
         GmicQt::RunParameters parameters = lastAppliedFilterRunParameters(GmicQt::ReturnedRunParametersFlag::AfterFilterExecution);
-        FilterAction action(QLatin1String("G'MIC-Qt"),      1);
-        action.addParameter(QLatin1String("Command"),       QString::fromStdString(parameters.command));
-        action.addParameter(QLatin1String("FilterPath"),    QString::fromStdString(parameters.filterPath));
-        action.addParameter(QLatin1String("InputMode"),     (int)parameters.inputMode);
-        action.addParameter(QLatin1String("OutputMode"),    (int)parameters.outputMode);
-        action.addParameter(QLatin1String("FilterName"),    QString::fromStdString(parameters.filterName()));
-        action.addParameter(QLatin1String("GmicQtVersion"), GmicQt::gmicVersionString());
 
-        iface.setOriginal(QString::fromUtf8("G'MIC-Qt - %1").arg(QString::fromStdString(parameters.filterName())), action, dest);
+        FilterAction action = s_gmicQtFilterAction(
+                                                   QString::fromStdString(parameters.command),
+                                                   QString::fromStdString(parameters.filterPath),
+                                                   (int)parameters.inputMode,
+                                                   (int)parameters.outputMode,
+                                                   QString::fromStdString(parameters.filterName())
+                                                  );
+
+        iface.setOriginal(QString::fromUtf8("G'MIC-Qt - %1").arg(QString::fromStdString(parameters.filterName())),
+                          action, dest);
     }
 }
 
