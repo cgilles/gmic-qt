@@ -19,18 +19,18 @@
 # --- BQM Plugin Compilation Rules -----------------------------------------
 
 set(gmic_bqm_SRCS
-    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/host_digikam_bqm.cpp
-    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicfilterwidget.cpp
-    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicfilterdialog.cpp
-    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicfilternode.cpp
-    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicfiltermngr.cpp
-    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicbqmprocessor.cpp
-    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicbqmtool.cpp
-    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicbqmplugin.cpp
+    ${CMAKE_SOURCE_DIR}/digiKam/bqm/host_digikam_bqm.cpp
+    ${CMAKE_SOURCE_DIR}/digiKam/bqm/gmicfilterwidget.cpp
+    ${CMAKE_SOURCE_DIR}/digiKam/bqm/gmicfilterdialog.cpp
+    ${CMAKE_SOURCE_DIR}/digiKam/bqm/gmicfilternode.cpp
+    ${CMAKE_SOURCE_DIR}/digiKam/bqm/gmicfiltermngr.cpp
+    ${CMAKE_SOURCE_DIR}/digiKam/bqm/gmicbqmprocessor.cpp
+    ${CMAKE_SOURCE_DIR}/digiKam/bqm/gmicbqmtool.cpp
+    ${CMAKE_SOURCE_DIR}/digiKam/bqm/gmicbqmplugin.cpp
 
-    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicfilterchain.cpp
-    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicfilterchain_item.cpp
-    ${CMAKE_SOURCE_DIR}/src/Host/digiKam/bqm/gmicfilterchain_view.cpp
+    ${CMAKE_SOURCE_DIR}/digiKam/bqm/gmicfilterchain.cpp
+    ${CMAKE_SOURCE_DIR}/digiKam/bqm/gmicfilterchain_item.cpp
+    ${CMAKE_SOURCE_DIR}/digiKam/bqm/gmicfilterchain_view.cpp
 )
 
 add_library(Bqm_Gmic_Plugin

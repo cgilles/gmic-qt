@@ -12,9 +12,7 @@
 IGNORE_DIRS=".*include.*|"
 IGNORE_DIRS+=".*/opt/qt6/include/.*|"
 IGNORE_DIRS+=".*/usr/include/.*|"
-IGNORE_DIRS+=".*src/FilterParameters/.*|"
-IGNORE_DIRS+=".*src/FilterSelector/.*|"
-IGNORE_DIRS+=".*src/Widgets/.*|"
+IGNORE_DIRS+=".*src/.*|"
 IGNORE_DIRS+=".*gmic/src/.*|"
 # Remove last character
 IGNORE_DIRS=${IGNORE_DIRS::-1}

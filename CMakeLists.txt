@@ -783,8 +783,8 @@ elseif (${GMIC_QT_HOST} STREQUAL "8bf")
 
  elseif (${GMIC_QT_HOST} STREQUAL "digikam")
 
-    include("src/Host/digiKam/MacroUtils.cmake")
-    include("src/Host/digiKam/RulesDigikamHost.cmake")
+    include("digiKam/MacroUtils.cmake")
+    include("digiKam/RulesDigikamHost.cmake")
 
 else()
 

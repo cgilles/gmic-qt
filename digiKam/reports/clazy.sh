@@ -53,7 +53,7 @@ echo "CHECKERS CONFIGURATION:    $CLAZY_CHECKS"
 rm -fr $REPORT_DIR
 mkdir -p $REPORT_DIR
 
-cd ../../../..
+cd ../..
 
 rm -fr build.clazy
 mkdir -p build.clazy
@@ -97,4 +97,4 @@ mv clazy.html $REPORT_DIR/index.html
 
 cd $ORIG_DIR
 
-rm -fr ../../../../build.clazy
+rm -fr ../../build.clazy

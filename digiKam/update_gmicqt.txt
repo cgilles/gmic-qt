@@ -28,7 +28,7 @@ Under a Linux Ubuntu 22.04 or later:
     patch -p1 < 05_digikam_plugin_integration.patch
 
 13/ Check if new files are append with "git status" and add files to git repository
-14/ Update all .qm files in src/Host/digiKam/translations.
+14/ Update all .qm files in digiKam/translations.
 15/ Check compilation with "digikam" host.
 
 ---

@@ -10,7 +10,5 @@
 # Directories to exclude from Clang scan-build static analysis.
 IGNORE_DIRS="--exclude /opt/qt6/include/ "
 IGNORE_DIRS+="--exclude /usr/include/ "
-IGNORE_DIRS+="--exclude src/FilterParameters "
-IGNORE_DIRS+="--exclude src/FilterSelector "
-IGNORE_DIRS+="--exclude src/Widgets "
+IGNORE_DIRS+="--exclude src/ "
 IGNORE_DIRS+="--exclude gmic/src "

@@ -13,19 +13,8 @@ index bf6b5cb..3dc9cf8 100644
    ui->sbPreviewTimeout->setValue(Settings::previewTimeout());
    ui->cbPreviewZoom->setChecked(Settings::previewZoomAlwaysEnabled());
    ui->cbNotifyFailedUpdate->setChecked(Settings::notifyFailedStartupUpdate());
-diff --git a/src/Host/digiKam/update_gmicqt.txt b/src/Host/digiKam/update_gmicqt.txt
+diff --git a/digiKam/update_gmicqt.txt b/digiKam/update_gmicqt.txt
 index 709e0da..77430fb 100644
---- a/src/Host/digiKam/update_gmicqt.txt
-+++ b/src/Host/digiKam/update_gmicqt.txt
-@@ -21,7 +21,7 @@ Under a Linux Ubuntu 22.04 or later:
- 
- 11/ Patch DK::gmic-qt codes to disable logo settings and optimize space (logo moves in settings dialog):
- 
--    patch -p1 < 04_digikam_disable_hdpi.patch
-+    patch -p1 < 04_digikam_disable_logo.patch
- 
- 12/ Patch DK::gmic-qt codes to improve plugin integration
- 
 diff --git a/src/Settings.cpp b/src/Settings.cpp
 index 0640f04..3611def 100644
 --- a/src/Settings.cpp

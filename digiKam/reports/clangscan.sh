@@ -57,7 +57,7 @@ echo "Clang Scan Static Analyzer task name: $TITLE"
 
 rm -fr $REPORT_DIR
 
-cd ../../../..
+cd ../..
 
 rm -fr build.scan
 mkdir -p build.scan
@@ -118,4 +118,4 @@ echo "Clang Report $TITLE is located to $SCAN_BUILD_DIR"
 
 cd $ORIG_DIR
 
-rm -fr ../../../../build.scan
+rm -fr ../../build.scan

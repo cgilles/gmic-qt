@@ -19,8 +19,8 @@ index 47face8..a3a2fa1 100644
  
 + elseif (${GMIC_QT_HOST} STREQUAL "digikam")
 +
-+    include("src/Host/digiKam/MacroUtils.cmake")
-+    include("src/Host/digiKam/RulesDigikamHost.cmake")
++    include("digiKam/MacroUtils.cmake")
++    include("digiKam/RulesDigikamHost.cmake")
 +
  else()
  
