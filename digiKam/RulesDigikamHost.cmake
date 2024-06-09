@@ -119,7 +119,7 @@ endif()
 if(MSVC OR APPLE)
 
     file(COPY        ${CMAKE_SOURCE_DIR}/digiKam/translations/
-         DESTINATION ${CMAKE_SOURCE_DIR}/translations/)
+         DESTINATION ${CMAKE_SOURCE_DIR}/gmicqt/translations/)
 
 endif()
 
