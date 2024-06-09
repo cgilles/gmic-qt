@@ -8,11 +8,13 @@
 
 set(gmic_bqm_SRCS
     ${CMAKE_SOURCE_DIR}/digiKam/bqm/host_digikam_bqm.cpp
-    ${CMAKE_SOURCE_DIR}/digiKam/bqm/gmicfilterwidget.cpp
-    ${CMAKE_SOURCE_DIR}/digiKam/bqm/gmicfilterdialog.cpp
     ${CMAKE_SOURCE_DIR}/digiKam/bqm/gmicfilternode.cpp
     ${CMAKE_SOURCE_DIR}/digiKam/bqm/gmicfiltermngr.cpp
+    ${CMAKE_SOURCE_DIR}/digiKam/bqm/gmicfilterwidget.cpp
+#    ${CMAKE_SOURCE_DIR}/digiKam/bqm/gmicfilterlistview.cpp
+#    ${CMAKE_SOURCE_DIR}/digiKam/bqm/gmicfilterlistviewitem.cpp
     ${CMAKE_SOURCE_DIR}/digiKam/bqm/gmicfiltertooltip.cpp
+    ${CMAKE_SOURCE_DIR}/digiKam/bqm/gmicfilterdialog.cpp
     ${CMAKE_SOURCE_DIR}/digiKam/bqm/gmicbqmprocessor.cpp
     ${CMAKE_SOURCE_DIR}/digiKam/bqm/gmicbqmtool.cpp
     ${CMAKE_SOURCE_DIR}/digiKam/bqm/gmicbqmplugin.cpp
