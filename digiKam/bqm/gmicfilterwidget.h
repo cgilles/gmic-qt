@@ -83,7 +83,7 @@ private:
     bool saveExpandedNodes(const QModelIndex& parent);
     void readSettings();
     void saveSettings();
-    void openCommandDialog(bool edit, bool filter);
+    void openPropertiesDialog(bool editMode, bool isFilter);
     QMap<QString, QVariant> currentGmicFilters()    const;
 
 private:

@@ -69,8 +69,9 @@ public:
 
     Private() = default;
 
-    bool                     edit            = false;
-    bool                     filter          = true;
+    bool                     edit            = false;   ///< True: editing mode ; false: adding mode.
+    bool                     filter          = true;    ///< True: filtre       ; false: folder.
+
     GmicFilterNode*          currentItem     = nullptr;
     GmicFilterManager*       manager         = nullptr;
     AddGmicFilterProxyModel* proxyModel      = nullptr;
@@ -81,15 +82,15 @@ public:
 };
 
 GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
-                                   bool edit, bool filter,
+                                   bool editMode, bool isFilter,
                                    QWidget* const parent,
                                    GmicFilterManager* const mngr,
                                    DPluginBqm* const plugin)
     : QDialog(parent),
       d      (new Private)
 {
-    d->edit        = edit;
-    d->filter      = filter;
+    d->edit        = editMode;
+    d->filter      = isFilter;
     d->manager     = mngr;
     d->currentItem = citem;
     d->plugin      = plugin;

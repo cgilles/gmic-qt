@@ -52,7 +52,7 @@ class GmicFilterDialog : public QDialog
 public:
 
     explicit GmicFilterDialog(GmicFilterNode* const citem,
-                              bool edit, bool filter,
+                              bool editMode, bool isFilter,
                               QWidget* const parent,
                               GmicFilterManager* const mngr,
                               DPluginBqm* const plugin);

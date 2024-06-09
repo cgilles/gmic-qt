@@ -375,12 +375,12 @@ void GmicFilterWidget::slotRemove()
 
 void GmicFilterWidget::slotAddFilter()
 {
-    openCommandDialog(false, true);
+    openPropertiesDialog(false, true);
 }
 
 void GmicFilterWidget::slotAddFolder()
 {
-    openCommandDialog(false, false);
+    openPropertiesDialog(false, false);
 }
 
 void GmicFilterWidget::slotAddSeparator()
@@ -412,11 +412,11 @@ void GmicFilterWidget::slotEdit()
             return;
         }
 
-        openCommandDialog(true, (node->type() == GmicFilterNode::Item));
+        openPropertiesDialog(true, (node->type() == GmicFilterNode::Item));
     }
 }
 
-void GmicFilterWidget::openCommandDialog(bool edit, bool filter)
+void GmicFilterWidget::openPropertiesDialog(bool editMode, bool isFilter)
 {
     QModelIndex index = d->tree->currentIndex();
 
@@ -427,8 +427,8 @@ void GmicFilterWidget::openCommandDialog(bool edit, bool filter)
 
         GmicFilterDialog* const dlg = new GmicFilterDialog(
                                                            node,
-                                                           edit,
-                                                           filter,
+                                                           editMode,
+                                                           isFilter,
                                                            this,
                                                            d->manager,
                                                            d->plugin
