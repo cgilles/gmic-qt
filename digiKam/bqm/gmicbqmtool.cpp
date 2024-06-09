@@ -1,26 +1,16 @@
-/*
- *  This file is part of G'MIC-Qt, a generic plug-in for raster graphics
- *  editors, offering hundreds of filters thanks to the underlying G'MIC
- *  image processing framework.
+/* ============================================================
  *
- *  Copyright (C) 2019-2024 Gilles Caulier <caulier dot gilles at gmail dot com>
+ * This file is a part of digiKam project
+ * https://www.digikam.org
  *
- *  Description: digiKam Batch Queue Manager plugin for GmicQt.
+ * Date        : 2019-11-28
+ * Description : digiKam Batch Queue Manager plugin for GmicQt.
  *
- *  G'MIC-Qt is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
+ * SPDX-FileCopyrightText: 2019-2024 by Gilles Caulier <caulier dot gilles at gmail dot com>
  *
- *  G'MIC-Qt is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * SPDX-License-Identifier: GPL-2.0-or-later
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- */
+ * ============================================================ */
 
 #include "gmicbqmtool.h"
 

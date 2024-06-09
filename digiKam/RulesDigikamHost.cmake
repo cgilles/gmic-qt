@@ -108,7 +108,7 @@ endif()
 # are hard-coded with Makefiles running in source dir as well.
 # This is not compatible with bundle constrution on non-linux.
 
-if(MSVC OR APPLE)
+if(NOT EXISTS "${CMAKE_SOURCE_DIR}/gmicqt/translations/fr.ts")
 
     message(STATUS "Copy pre-compiled translation files into gmicqt source dir...")
 
