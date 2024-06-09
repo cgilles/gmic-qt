@@ -108,14 +108,10 @@ endif()
 # are hard-coded with Makefiles running in source dir as well.
 # This is not compatible with bundle constrution on non-linux.
 
-if(NOT EXISTS "${CMAKE_SOURCE_DIR}/gmicqt/translations/fr.ts")
+message(STATUS "Copy pre-compiled translation files into gmicqt source dir...")
 
-    message(STATUS "Copy pre-compiled translation files into gmicqt source dir...")
-
-    file(COPY        ${CMAKE_SOURCE_DIR}/digiKam/translations/
-         DESTINATION ${CMAKE_SOURCE_DIR}/gmicqt/translations/)
-
-endif()
+file(COPY        ${CMAKE_SOURCE_DIR}/digiKam/translations/
+     DESTINATION ${CMAKE_SOURCE_DIR}/gmicqt/translations/)
 
 # --- digiKam dependencies.
 
