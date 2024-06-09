@@ -657,9 +657,9 @@ else(ENABLE_DYNAMIC_LINKING)
 endif(ENABLE_DYNAMIC_LINKING)
 
 message("Producing translation .qm files")
-execute_process(COMMAND make WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/gmicqt/translations OUTPUT_QUIET)
+execute_process(COMMAND make WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/translations OUTPUT_QUIET)
 message("Producing filter translation .qm files")
-execute_process(COMMAND make WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/gmicqt/translations/filters OUTPUT_QUIET)
+execute_process(COMMAND make WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/translations/filters OUTPUT_QUIET)
 
 set(gmic_qt_QRC
     gmic_qt.qrc
