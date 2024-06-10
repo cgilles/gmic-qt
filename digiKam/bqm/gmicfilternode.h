@@ -62,10 +62,10 @@ public:
 public:
 
     QMap<QString, QVariant> commands;         ///< Map of filter name and filter command
-    QString                title;            ///< Node title 
-    QString                desc;             ///< Node description 
-    QDateTime              dateAdded;        ///< Node creation date 
-    bool                   expanded  = true; ///< Node expanded or not in tree-view 
+    QString                 title;            ///< Node title 
+    QString                 desc;             ///< Node description 
+    QDateTime               dateAdded;        ///< Node creation date 
+    bool                    expanded  = true; ///< Node expanded or not in tree-view 
 
 private:
 
