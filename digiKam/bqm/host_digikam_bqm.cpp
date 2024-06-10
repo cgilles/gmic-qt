@@ -128,7 +128,7 @@ void getCroppedImages(cimg_library::CImgList<gmic_pixel_type>& images,
     images.assign(1);
     imageNames.assign(1);
 
-    QString name  = QString("pos(0,0),name(%1)").arg("Image Editor Canvas");
+    QString name  = QString("pos(0,0),name(%1)").arg("Batch Queue Manager Item Preview");
     QByteArray ba = name.toUtf8();
     gmic_image<char>::string(ba.constData()).move_to(imageNames[0]);
 
