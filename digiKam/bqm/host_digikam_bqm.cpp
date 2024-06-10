@@ -22,6 +22,7 @@
 
 #include "digikam_debug.h"
 #include "bqminfoiface.h"
+#include "previewloadthread.h"
 
 // Local includes
 
@@ -60,9 +61,10 @@ void getImageSize(int* width,
 
     if (!list.isEmpty())
     {
-        ItemInfoSet inf = list.first();
-        *width          = inf.info.dimensions().width();
-        *height         = inf.info.dimensions().height();
+        DImg img = PreviewLoadThread::loadFastSynchronously(list.first().info.filePath(),
+                                                            1024);
+        *width   = img.width();
+        *height  = img.height();
     }
     else
     {
@@ -109,13 +111,14 @@ void getCroppedImages(cimg_library::CImgList<gmic_pixel_type>& images,
         return;
     }
 
-    DImg* const input_image = new DImg(list.first().info.filePath());
-    const bool entireImage  = (
-                               (x      < 0.0) &&
-                               (y      < 0.0) &&
-                               (width  < 0.0) &&
-                               (height < 0.0))
-                              ;
+    DImg input_image       = PreviewLoadThread::loadFastSynchronously(list.first().info.filePath(),
+                                                                      1024);
+    const bool entireImage = (
+                              (x      < 0.0) &&
+                              (y      < 0.0) &&
+                              (width  < 0.0) &&
+                              (height < 0.0)
+                             );
 
     if (entireImage)
     {
@@ -133,26 +136,24 @@ void getCroppedImages(cimg_library::CImgList<gmic_pixel_type>& images,
     gmic_image<char>::string(ba.constData()).move_to(imageNames[0]);
 
     const int ix = static_cast<int>(entireImage ? 0
-                                                : std::floor(x * input_image->width()));
+                                                : std::floor(x * input_image.width()));
 
     const int iy = static_cast<int>(entireImage ? 0
-                                                : std::floor(y * input_image->height()));
+                                                : std::floor(y * input_image.height()));
 
-    const int iw = entireImage ? input_image->width()
+    const int iw = entireImage ? input_image.width()
                                : std::min(
-                                          static_cast<int>(input_image->width()  - ix),
-                                          static_cast<int>(1 + std::ceil(width  * input_image->width()))
+                                          static_cast<int>(input_image.width()  - ix),
+                                          static_cast<int>(1 + std::ceil(width  * input_image.width()))
                                          );
 
-    const int ih = entireImage ? input_image->height()
+    const int ih = entireImage ? input_image.height()
                                : std::min(
-                                          static_cast<int>(input_image->height() - iy),
-                                          static_cast<int>(1 + std::ceil(height * input_image->height()))
+                                          static_cast<int>(input_image.height() - iy),
+                                          static_cast<int>(1 + std::ceil(height * input_image.height()))
                                          );
 
-    GMicQtImageConverter::convertDImgtoCImg(input_image->copy(ix, iy, iw, ih), images[0]);
-
-    delete input_image;
+    GMicQtImageConverter::convertDImgtoCImg(input_image.copy(ix, iy, iw, ih), images[0]);
 }
 
 void applyColorProfile(cimg_library::CImg<gmic_pixel_type>& images) // cppcheck-suppress constParameterReference
