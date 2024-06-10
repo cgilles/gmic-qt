@@ -99,10 +99,7 @@ public:
     CtrlButton*                      addButton               = nullptr;
     CtrlButton*                      removeButton            = nullptr;
     CtrlButton*                      clearButton             = nullptr;
-
     GmicFilterChainView*             listView                = nullptr;
-
-    GmicFilterChainIsLessThanHandler isLessThan;
 };
 
 } // namespace DigikamBqmGmicQtPlugin

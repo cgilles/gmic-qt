@@ -30,13 +30,6 @@ namespace DigikamBqmGmicQtPlugin
 class GmicFilterChain;
 class GmicFilterChainView;
 
-/**
- * Type of static fonction used to customize sort items in list.
- * Sort items call this method in GmicFilterChainViewItem::operator<.
- * To setup this method, uses GmicFilterChain::setIsLessThanHandler().
- */
-typedef bool (*GmicFilterChainIsLessThanHandler)(const QTreeWidgetItem* current, const QTreeWidgetItem& other);
-
 class GmicFilterChainViewItem : public QTreeWidgetItem
 {
 
@@ -56,8 +49,6 @@ public:
 
     void setIndex(int index);
     int index()                     const;
-
-    void setIsLessThanHandler(GmicFilterChainIsLessThanHandler fncptr);
 
 private:
 
@@ -101,8 +92,6 @@ public:
 
     GmicFilterChainViewItem* currentFilterItem()         const;
 
-    GmicFilterChainIsLessThanHandler isLessThanHandler() const;
-
     void refreshIndex();
 
 Q_SIGNALS:
@@ -136,15 +125,6 @@ public:
 
     void updateCurrentFilter(const QString& title,
                              const QString& command);
-
-    ///@{
-    /**
-     * Methods to handle function pointer used to customize sort items in list.
-     * See GmicFilterChainIsLessThanHandler type for details.
-     */
-    void setIsLessThanHandler(GmicFilterChainIsLessThanHandler fncptr);
-    GmicFilterChainIsLessThanHandler isLessThanHandler()            const;
-    ///@}
 
 Q_SIGNALS:
 

@@ -82,18 +82,6 @@ QModelIndex GmicFilterChainView::indexFromItem(GmicFilterChainViewItem* item, in
     return QTreeWidget::indexFromItem(item, column);
 }
 
-GmicFilterChainIsLessThanHandler GmicFilterChainView::isLessThanHandler() const
-{
-    GmicFilterChain* const p = dynamic_cast<GmicFilterChain*>(parent());
-
-    if (p)
-    {
-        return p->isLessThanHandler();
-    }
-
-    return nullptr;
-}
-
 GmicFilterChainViewItem* GmicFilterChainView::currentFilterItem() const
 {
     QTreeWidgetItem* const currentTreeItem = currentItem();

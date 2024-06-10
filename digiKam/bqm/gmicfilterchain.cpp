@@ -328,16 +328,6 @@ void GmicFilterChain::updateCurrentFilter(const QString& title, const QString& c
     }
 }
 
-void GmicFilterChain::setIsLessThanHandler(GmicFilterChainIsLessThanHandler fncptr)
-{
-    d->isLessThan = fncptr;
-}
-
-GmicFilterChainIsLessThanHandler GmicFilterChain::isLessThanHandler() const
-{
-    return d->isLessThan;
-}
-
 } // namespace DigikamBqmGmicQtPlugin
 
 #include "moc_gmicfilterchain.cpp"
