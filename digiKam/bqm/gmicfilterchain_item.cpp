@@ -72,9 +72,9 @@ int GmicFilterChainViewItem::index() const
 
 bool GmicFilterChainViewItem::operator<(const QTreeWidgetItem& other) const
 {
-    return (
-            index() < other.text(GmicFilterChainView::Index).toInt()
-           );
+    const GmicFilterChainViewItem& item = dynamic_cast<const GmicFilterChainViewItem&>(other);
+
+    return (index() < item.index());
 }
 
 } // namespace DigikamBqmGmicQtPlugin
