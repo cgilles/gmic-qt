@@ -43,6 +43,7 @@ class GmicFilterChainViewItem : public QTreeWidgetItem
 public:
 
     explicit GmicFilterChainViewItem(GmicFilterChainView* const view,
+                                     int index,
                                      const QString& title,
                                      const QString& command);
     ~GmicFilterChainViewItem()            override;
@@ -54,6 +55,7 @@ public:
     QString title()                 const;
 
     void setIndex(int index);
+    int index()                     const;
 
     void setIsLessThanHandler(GmicFilterChainIsLessThanHandler fncptr);
 

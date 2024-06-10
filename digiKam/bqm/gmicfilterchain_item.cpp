@@ -18,11 +18,13 @@ namespace DigikamBqmGmicQtPlugin
 {
 
 GmicFilterChainViewItem::GmicFilterChainViewItem(GmicFilterChainView* const view,
+                                                 int index,
                                                  const QString& title,
                                                  const QString& command)
     : QTreeWidgetItem(view),
       d              (new Private)
 {
+    setIndex(index);
     setTitle(title);
     setCommand(command);
     setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
@@ -63,14 +65,16 @@ void GmicFilterChainViewItem::setIndex(int index)
     setText(GmicFilterChainView::Index, QString::fromLatin1("%1").arg(d->index + 1));
 }
 
+int GmicFilterChainViewItem::index() const
+{
+    return d->index;
+}
+
 bool GmicFilterChainViewItem::operator<(const QTreeWidgetItem& other) const
 {
-    if (d->view->isLessThanHandler())
-    {
-        return d->view->isLessThanHandler()(this, other);
-    }
-
-    return QTreeWidgetItem::operator<(other);
+    return (
+            index() < other.text(GmicFilterChainView::Index).toInt()
+           );
 }
 
 } // namespace DigikamBqmGmicQtPlugin

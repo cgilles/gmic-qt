@@ -227,7 +227,7 @@ void GmicFilterChain::setChainedFilters(const QMap<QString, QVariant>& filters)
 
     foreach (const QVariant& cmd, filters.values())
     {
-        new GmicFilterChainViewItem(d->listView, names[index], cmd.toString());
+        new GmicFilterChainViewItem(d->listView, index, names[index], cmd.toString());
         index++;
     }
 }
@@ -295,6 +295,7 @@ void GmicFilterChain::createNewFilter(const QString& title, const QString& comma
 {
     new GmicFilterChainViewItem(
                                 d->listView,
+                                d->listView->topLevelItemCount() + 1,
                                 title,
                                 command
                                );
