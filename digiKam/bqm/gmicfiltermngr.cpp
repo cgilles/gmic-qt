@@ -32,12 +32,14 @@
 // digiKam includes
 
 #include "digikam_debug.h"
+#include "ditemtooltip.h"
 
 // Local includes
 
 #include "gmicfilternode.h"
 #include "gmicqtcommon.h"
 
+using namespace Digikam;
 using namespace DigikamGmicQtPluginCommon;
 
 namespace DigikamBqmGmicQtPlugin
@@ -349,6 +351,33 @@ QVariant GmicFilterModel::data(const QModelIndex& index, int role) const
 
     switch (role)
     {
+        case Qt::ToolTipRole:
+        {
+            if (commandNode->type() == GmicFilterNode::Item)
+            {
+                DToolTipStyleSheet cnt;
+                QString tip    = cnt.tipHeader;
+                QString header = commandNode->title;
+
+                tip += cnt.headBeg + header + cnt.headEnd;
+
+                tip += cnt.cellBeg +  QObject::tr("G'MIC items:") + cnt.cellMid;
+                tip += QString::number(commandNode->commands.count()) + cnt.cellEnd;
+
+                tip += cnt.cellBeg +  QObject::tr("Chained Filters:") + cnt.cellMid;
+                tip += cnt.breakString(commandNode->commands.keys().join(QLatin1String(", "))) + cnt.cellEnd;
+
+                tip += cnt.cellBeg +  QObject::tr("Description:") + cnt.cellMid;
+                tip += cnt.breakString(commandNode->desc) + cnt.cellEnd;
+
+                tip += cnt.tipFooter;
+
+                return tip;
+            }
+
+            return QVariant();
+        }
+
         case Qt::DisplayRole:
         {
             if (commandNode->type() == GmicFilterNode::Separator)
