@@ -216,17 +216,11 @@ class GmicFilterDelegate : public QStyledItemDelegate
 
 public:
 
-    explicit GmicFilterDelegate(TreeProxyModel* const pmodel,
-                                GmicFilterModel* const smodel);
+    explicit GmicFilterDelegate(TreeProxyModel* const pmodel);
     ~GmicFilterDelegate()                       override = default;
 
     void paint(QPainter* painter, const QStyleOptionViewItem& option,
                 const QModelIndex& index) const override;
-
-private:
-
-    TreeProxyModel* const m_pmodel  = nullptr;
-    GmicFilterModel* const m_smodel = nullptr;
 };
 
 //---------------------------------------------------------------------------------

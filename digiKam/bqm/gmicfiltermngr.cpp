@@ -213,30 +213,37 @@ void ChangeGmicFilter::redo()
 
     Q_EMIT d->manager->signalEntryChanged(d->node);
 }
-
-// --------------------------------------------------------------
-
-GmicFilterDelegate::GmicFilterDelegate(TreeProxyModel* const pmodel,
-                                       GmicFilterModel* const smodel)
-    : QStyledItemDelegate(pmodel),
-      m_pmodel           (pmodel),
-      m_smodel           (smodel)
+GmicFilterDelegate::GmicFilterDelegate(TreeProxyModel* const pmodel)
+    : QStyledItemDelegate(pmodel)
 {
 }
 
 void GmicFilterDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
                                const QModelIndex& index) const
-
 {
     QStyledItemDelegate::paint(painter, option, index);
 
     if (index.isValid())
     {
-        QModelIndex idx = m_pmodel->mapToSource(index);
+        const TreeProxyModel* const pmodel  = dynamic_cast<const TreeProxyModel*>(parent());
+
+        if (!pmodel)
+        {
+            return;
+        }
+
+        const GmicFilterModel* const smodel = dynamic_cast<const GmicFilterModel*>(pmodel->sourceModel());
+
+        if (!smodel)
+        {
+            return;
+        }
+
+        QModelIndex idx                     = pmodel->mapToSource(index);
 
         if (idx.isValid())
         {
-            const GmicFilterNode* const commandNode = m_smodel->node(idx);
+            const GmicFilterNode* const commandNode = smodel->node(idx);
 
             if (commandNode && (commandNode->type() == GmicFilterNode::Separator))
             {
