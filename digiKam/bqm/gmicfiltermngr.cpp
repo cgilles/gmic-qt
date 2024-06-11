@@ -423,20 +423,9 @@ QVariant GmicFilterModel::data(const QModelIndex& index, int role) const
         {
             if (commandNode->type() == GmicFilterNode::Separator)
             {
+                // NOTE: separator is draw in the delegate implmeentation.
+
                 return QVariant();
-
-/*                switch (index.column())
-                {
-                    case 0:
-                    {
-                        return QString(20, QChar(0xB7));
-                    }
-
-                    case 1:
-                    {
-                        return QString();
-                    }
-                }*/
             }
 
             switch (index.column())
