@@ -19,6 +19,7 @@
 #include <QObject>
 #include <QVariant>
 #include <QAbstractItemModel>
+#include <QStyledItemDelegate>
 #include <QUndoCommand>
 #include <QSortFilterProxyModel>
 
@@ -94,8 +95,10 @@ private:
     Private* const d = nullptr;
 };
 
+//---------------------------------------------------------------------------------
+
 /**
- * GmicFilterModel is a QAbstractItemModel wrapper around the BookmarkManager
+ * GmicFilterModel is a QAbstractItemModel wrapper around the GmicfilterManager
  */
 class GmicFilterModel : public QAbstractItemModel
 {
@@ -155,6 +158,9 @@ private:
     Private* const d = nullptr;
 };
 
+
+//---------------------------------------------------------------------------------
+
 /**
  *  Proxy model that filters out the Gmic Commands so only the folders
  *  are left behind.  Used in the add command dialog combobox.
@@ -199,8 +205,34 @@ private:
     void emitResult(bool v);
 };
 
+//---------------------------------------------------------------------------------
+
 /**
- *  Gmic Command manager, owner of the commands, loads, saves and basic tasks
+ * Model-View delegate re-implemented to draw the separator node on the tree-view.
+ */
+class GmicFilterDelegate : public QStyledItemDelegate
+{
+    Q_OBJECT
+
+public:
+
+    explicit GmicFilterDelegate(TreeProxyModel* const pmodel,
+                                GmicFilterModel* const smodel);
+    ~GmicFilterDelegate()                       override = default;
+
+    void paint(QPainter* painter, const QStyleOptionViewItem& option,
+                const QModelIndex& index) const override;
+
+private:
+
+    TreeProxyModel* const m_pmodel  = nullptr;
+    GmicFilterModel* const m_smodel = nullptr;
+};
+
+//---------------------------------------------------------------------------------
+
+/**
+ *  Gmic Filter manager, owner of the commands, loads, saves and basic tasks
  */
 class GmicFilterManager : public QObject
 {

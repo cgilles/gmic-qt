@@ -132,6 +132,7 @@ GmicFilterWidget::GmicFilterWidget(QWidget* const parent)
     d->commandsModel        = d->manager->commandsModel();
     d->proxyModel           = new TreeProxyModel(this);
     d->proxyModel->setSourceModel(d->commandsModel);
+    d->tree->setItemDelegate(new GmicFilterDelegate(d->proxyModel, d->commandsModel));
     d->tree->setModel(d->proxyModel);
     d->tree->setExpanded(d->proxyModel->index(0, 0), true);
     d->tree->header()->setSectionResizeMode(QHeaderView::Stretch);

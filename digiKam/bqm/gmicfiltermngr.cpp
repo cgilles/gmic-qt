@@ -33,6 +33,7 @@
 
 #include "digikam_debug.h"
 #include "ditemtooltip.h"
+#include "dexpanderbox.h"
 
 // Local includes
 
@@ -215,6 +216,46 @@ void ChangeGmicFilter::redo()
 
 // --------------------------------------------------------------
 
+GmicFilterDelegate::GmicFilterDelegate(TreeProxyModel* const pmodel,
+                                       GmicFilterModel* const smodel)
+    : QStyledItemDelegate(pmodel),
+      m_pmodel           (pmodel),
+      m_smodel           (smodel)
+{
+}
+
+void GmicFilterDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
+                               const QModelIndex& index) const
+
+{
+    QStyledItemDelegate::paint(painter, option, index);
+
+    if (index.isValid())
+    {
+        QModelIndex idx = m_pmodel->mapToSource(index);
+
+        if (idx.isValid())
+        {
+            const GmicFilterNode* const commandNode = m_smodel->node(idx);
+
+            if (commandNode && (commandNode->type() == GmicFilterNode::Separator))
+            {
+                QStyleOptionFrame frameOption;
+                frameOption.rect         = option.rect;
+                frameOption.features     = QStyleOptionFrame::Flat;
+                frameOption.frameShape   = QFrame::HLine;
+                frameOption.lineWidth    = 1;
+                frameOption.midLineWidth = 0;
+
+                QApplication::style()->drawControl(QStyle::CE_ShapedFrame,
+                                                   &frameOption, painter);
+            }
+        }
+    }
+}
+
+// --------------------------------------------------------------
+
 class Q_DECL_HIDDEN GmicFilterModel::Private
 {
 public:
@@ -382,7 +423,9 @@ QVariant GmicFilterModel::data(const QModelIndex& index, int role) const
         {
             if (commandNode->type() == GmicFilterNode::Separator)
             {
-                switch (index.column())
+                return QVariant();
+
+/*                switch (index.column())
                 {
                     case 0:
                     {
@@ -393,7 +436,7 @@ QVariant GmicFilterModel::data(const QModelIndex& index, int role) const
                     {
                         return QString();
                     }
-                }
+                }*/
             }
 
             switch (index.column())
