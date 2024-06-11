@@ -7,8 +7,8 @@
 #
 
 set(gmic_qt_editor_SRCS
-    ${CMAKE_SOURCE_DIR}/digiKam/editor/host_digikam_editor.cpp
-    ${CMAKE_SOURCE_DIR}/digiKam/editor/gmicqttoolplugin.cpp
+    ${CMAKE_SOURCE_DIR}/src/editor/host_digikam_editor.cpp
+    ${CMAKE_SOURCE_DIR}/src/editor/gmicqttoolplugin.cpp
 )
 
 add_library(Editor_GmicQt_Plugin

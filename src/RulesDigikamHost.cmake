@@ -110,7 +110,7 @@ endif()
 
 message(STATUS "Copy pre-compiled translation files into gmicqt source dir...")
 
-file(COPY        ${CMAKE_SOURCE_DIR}/digiKam/translations/
+file(COPY        ${CMAKE_SOURCE_DIR}/src/translations/
      DESTINATION ${CMAKE_SOURCE_DIR}/gmicqt/translations/)
 
 # --- digiKam dependencies.
@@ -144,7 +144,7 @@ include_directories($<TARGET_PROPERTY:Digikam::digikamdatabase,INTERFACE_INCLUDE
 
 # --- Compile common codes.
 
-include_directories(${CMAKE_SOURCE_DIR}/digiKam/common/)
+include_directories(${CMAKE_SOURCE_DIR}/src/common/)
 
 if(BUILD_WITH_QT6)
 
@@ -163,9 +163,9 @@ add_definitions(-D_GMIC_QT_DISABLE_LOGO_)
 
 add_library(gmic_qt_common STATIC
             ${gmic_qt_SRCS}
-            ${CMAKE_SOURCE_DIR}/digiKam/common/gmicqtimageconverter.cpp
-            ${CMAKE_SOURCE_DIR}/digiKam/common/gmicqtwindow.cpp
-            ${CMAKE_SOURCE_DIR}/digiKam/common/gmicqtcommon.cpp
+            ${CMAKE_SOURCE_DIR}/src/common/gmicqtimageconverter.cpp
+            ${CMAKE_SOURCE_DIR}/src/common/gmicqtwindow.cpp
+            ${CMAKE_SOURCE_DIR}/src/common/gmicqtcommon.cpp
 )
 
 target_link_libraries(gmic_qt_common
@@ -177,11 +177,11 @@ target_link_libraries(gmic_qt_common
 
 # --- Host Plugins Compilation Rules.
 
-include(${CMAKE_SOURCE_DIR}/digiKam/editor/EditorPluginRules.cmake)
-include(${CMAKE_SOURCE_DIR}/digiKam/bqm/BqmPluginRules.cmake)
+include(${CMAKE_SOURCE_DIR}/src/editor/EditorPluginRules.cmake)
+include(${CMAKE_SOURCE_DIR}/src/bqm/BqmPluginRules.cmake)
 
 if(BUILD_TESTING)
 
-    include(${CMAKE_SOURCE_DIR}/digiKam/tests/TestsRules.cmake)
+    include(${CMAKE_SOURCE_DIR}/src/tests/TestsRules.cmake)
 
 endif()

@@ -546,6 +546,8 @@ void GmicFilterWidget::setCurrentPath(const QString& path)
         return;
     }
 
+    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Settings current path:" << path;
+
     node         = children[0];
     int branches = 0;
     qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Hierarchy:" << hierarchy;
