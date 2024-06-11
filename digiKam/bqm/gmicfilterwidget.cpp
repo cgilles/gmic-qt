@@ -398,7 +398,11 @@ void GmicFilterWidget::slotEdit()
         index                            = d->proxyModel->mapToSource(index);
         const GmicFilterNode* const node = d->manager->commandsModel()->node(index);
 
-        if (!node || (node->type() == GmicFilterNode::RootFolder))
+        if (
+            !node                                           ||
+            (node->type() == GmicFilterNode::RootFolder)    ||
+            (node->type() == GmicFilterNode::Separator)
+           )
         {
             return;
         }
