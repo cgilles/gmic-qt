@@ -527,9 +527,13 @@ QString GmicFilterWidget::currentPath() const
 
 void GmicFilterWidget::setCurrentPath(const QString& path)
 {
+    QModelIndex idx;
+    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Settings current path:" << path;
+
     if (path.isEmpty())
     {
-        d->tree->setCurrentIndex(d->commandsModel->index(d->manager->commands()));
+        idx = d->proxyModel->mapFromSource(d->commandsModel->index(d->manager->commands()));
+        d->tree->setCurrentIndex(idx);
         return;
     }
 
@@ -542,11 +546,10 @@ void GmicFilterWidget::setCurrentPath(const QString& path)
 
     if (children.isEmpty())
     {
-        d->tree->setCurrentIndex(d->commandsModel->index(d->manager->commands()));
+        idx = d->proxyModel->mapFromSource(d->commandsModel->index(d->manager->commands()));
+        d->tree->setCurrentIndex(idx);
         return;
     }
-
-    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Settings current path:" << path;
 
     node         = children[0];
     int branches = 0;
@@ -573,13 +576,18 @@ void GmicFilterWidget::setCurrentPath(const QString& path)
 
     if (branches != hierarchy.size())
     {
-        // Hierarchy is broken. Select root item.
+        qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "branches:" << branches << "hierarchy:" << hierarchy;
+        qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Hierarchy is broken. Select root item.";
 
-        d->tree->setCurrentIndex(d->commandsModel->index(d->manager->commands()));
+        idx = d->proxyModel->mapToSource(d->commandsModel->index(d->manager->commands()));
+        d->tree->setCurrentIndex(idx);
         return;
     }
 
-    d->tree->setCurrentIndex(d->commandsModel->index(node));
+    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Select Item:" << node->title;
+    idx = d->commandsModel->index(node);
+    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Item index:" << idx;
+    d->tree->setCurrentIndex(d->proxyModel->mapFromSource(idx));
 }
 
 } // namespace DigikamBqmGmicQtPlugin
