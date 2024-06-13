@@ -527,18 +527,10 @@ QString GmicFilterWidget::currentPath() const
 
 void GmicFilterWidget::setCurrentPath(const QString& path)
 {
-    QModelIndex idx;
-    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Settings current path:" << path;
-
-    if (path.isEmpty())
-    {
-        idx = d->proxyModel->mapFromSource(d->commandsModel->index(d->manager->commands()));
-        d->tree->setCurrentIndex(idx);
-        return;
-    }
-
-    QStringList hierarchy = path.split(QLatin1Char('/'));
     GmicFilterNode* node  = d->manager->commands();
+    QModelIndex idx;
+
+    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Settings current path:" << path;
 
     // bypass the root folder.
 
@@ -546,13 +538,28 @@ void GmicFilterWidget::setCurrentPath(const QString& path)
 
     if (children.isEmpty())
     {
-        idx = d->proxyModel->mapFromSource(d->commandsModel->index(d->manager->commands()));
-        d->tree->setCurrentIndex(idx);
+        qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Tree-view is empty.";
+
         return;
     }
 
-    node         = children[0];
+    GmicFilterNode* const root = children[0]; // Root node
+    node                       = root;
+
+    if (path.isEmpty())
+    {
+        qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Path is empty. Select Root Item:" << root->title;
+
+        idx = d->proxyModel->mapFromSource(d->commandsModel->index(root));
+        d->tree->setCurrentIndex(idx);
+
+        return;
+    }
+
+    QStringList hierarchy = path.split(QLatin1Char('/'));
+
     int branches = 0;
+
     qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Hierarchy:" << hierarchy;
 
     foreach (const QString& title, hierarchy)
@@ -577,16 +584,17 @@ void GmicFilterWidget::setCurrentPath(const QString& path)
     if (branches != hierarchy.size())
     {
         qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "branches:" << branches << "hierarchy:" << hierarchy;
-        qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Hierarchy is broken. Select root item.";
 
-        idx = d->proxyModel->mapToSource(d->commandsModel->index(d->manager->commands()));
+        idx  = d->proxyModel->mapToSource(d->commandsModel->index(root));
         d->tree->setCurrentIndex(idx);
+
+        qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Hierarchy is broken. Select Root Item:" << root->title;
+
         return;
     }
 
     qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Select Item:" << node->title;
     idx = d->commandsModel->index(node);
-    qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Item index:" << idx;
     d->tree->setCurrentIndex(d->proxyModel->mapFromSource(idx));
 }
 
