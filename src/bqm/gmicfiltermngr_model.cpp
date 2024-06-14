@@ -94,7 +94,7 @@ bool GmicFilterModel::removeRows(int row, int count, const QModelIndex& parent)
         return false;
     }
 
-    GmicFilterNode* const fnode = node(parent);
+    const GmicFilterNode* const fnode = node(parent);
 
     for (int i = (row + count - 1) ; i >= row ; --i)
     {
@@ -290,8 +290,8 @@ QModelIndex GmicFilterModel::parent(const QModelIndex& index) const
         return QModelIndex();
     }
 
-    GmicFilterNode* const itemNode   = node(index);
-    GmicFilterNode* const parentNode = (itemNode ? itemNode->parent() : nullptr);
+    const GmicFilterNode* const itemNode = node(index);
+    GmicFilterNode* const parentNode     = (itemNode ? itemNode->parent() : nullptr);
 
     if (!parentNode || (parentNode == d->manager->commands()))
     {
