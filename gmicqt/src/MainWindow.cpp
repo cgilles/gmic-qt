@@ -1477,8 +1477,10 @@ void MainWindow::abortProcessingOnCloseRequest()
 
   QTimer::singleShot(2000, [this]() {
     _pendingActionAfterCurrentProcessing = ProcessingAction::ForceQuit;
+/*
     ui->pbClose->setText(_forceQuitText);
     ui->pbClose->setEnabled(true);
+*/
   });
 
   _processor.detachAllUnfinishedAbortedThreads(); // Keep only one thread in list after next line
