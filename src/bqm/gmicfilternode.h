@@ -87,8 +87,8 @@ public:
 
     GmicXmlReader() = default;
 
-    GmicFilterNode* read(const QString& fileName);
-    GmicFilterNode* read(QIODevice* const device, bool addRootFolder = false);
+    GmicFilterNode* read(const QString& fileName, QString& currentPath);
+    GmicFilterNode* read(QIODevice* const device, bool addRootFolder, QString& currentPath);
 
 private:
 
@@ -108,8 +108,11 @@ public:
 
     GmicXmlWriter();
 
-    bool write(const QString& fileName, const GmicFilterNode* const root);
-    bool write(QIODevice* const device, const GmicFilterNode* const root);
+    bool write(const QString& fileName, const GmicFilterNode* const root,
+               const QString& currentPath);
+
+    bool write(QIODevice* const device, const GmicFilterNode* const root,
+               const QString& currentPath);
 
 private:
 

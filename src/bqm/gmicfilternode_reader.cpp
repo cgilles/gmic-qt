@@ -17,7 +17,7 @@
 namespace DigikamBqmGmicQtPlugin
 {
 
-GmicFilterNode* GmicXmlReader::read(const QString& fileName)
+GmicFilterNode* GmicXmlReader::read(const QString& fileName, QString& currentPath)
 {
     QFile file(fileName);
 
@@ -30,10 +30,11 @@ GmicFilterNode* GmicXmlReader::read(const QString& fileName)
         return root;
     }
 
-    return read(&file, true);
+    return read(&file, true, currentPath);
 }
 
-GmicFilterNode* GmicXmlReader::read(QIODevice* const device, bool addRootFolder)
+GmicFilterNode* GmicXmlReader::read(QIODevice* const device, bool addRootFolder,
+                                    QString& currentPath)
 {
     GmicFilterNode* const root = new GmicFilterNode(GmicFilterNode::Root);
     setDevice(device);
@@ -41,6 +42,8 @@ GmicFilterNode* GmicXmlReader::read(QIODevice* const device, bool addRootFolder)
     if (readNextStartElement())
     {
         QString version = attributes().value(QLatin1String("version")).toString();
+        currentPath     = attributes().value(QLatin1String("currentpath")).toString()
+                                      .replace(QLatin1Char('|'), QLatin1Char('/'));
 
         if (
             (name() == QLatin1String("gmic")) &&

@@ -46,7 +46,8 @@ void GmicFilterManager::load()
     d->loaded = true;
 
     GmicXmlReader reader;
-    d->commandRootNode = reader.read(d->commandsFile);
+
+    d->commandRootNode = reader.read(d->commandsFile, d->currentPath);
 
     if (reader.error() != QXmlStreamReader::NoError)
     {
@@ -69,7 +70,7 @@ void GmicFilterManager::save()
 
     GmicXmlWriter writer;
 
-    if (!writer.write(d->commandsFile, d->commandRootNode))
+    if (!writer.write(d->commandsFile, d->commandRootNode, d->currentPath))
     {
         qCWarning(DIGIKAM_DPLUGIN_BQM_LOG) << "Error saving G'MIC filters to" << d->commandsFile;
     }
@@ -182,7 +183,8 @@ void GmicFilterManager::slotImportFilters()
     }
 
     GmicXmlReader reader;
-    GmicFilterNode* const importRootNode = reader.read(fileName);
+
+    GmicFilterNode* const importRootNode = reader.read(fileName, d->currentPath);
 
     if (reader.error() != QXmlStreamReader::NoError)
     {
@@ -214,11 +216,21 @@ void GmicFilterManager::slotExportFilters()
 
     GmicXmlWriter writer;
 
-    if (!writer.write(fileName, d->commandRootNode))
+    if (!writer.write(fileName, d->commandRootNode, d->currentPath))
     {
         QMessageBox::critical(nullptr, QObject::tr("Export filters"),
                                        QObject::tr("Error saving G'MIC filters"));
     }
+}
+
+void GmicFilterManager::setCurrentPath(const QString& cpath)
+{
+    d->currentPath = cpath;
+}
+
+QString GmicFilterManager::currentPath() const
+{
+    return d->currentPath;
 }
 
 } // namespace DigikamBqmGmicQtPlugin

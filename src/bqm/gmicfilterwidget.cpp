@@ -438,10 +438,14 @@ void GmicFilterWidget::openPropertiesDialog(bool editMode, bool isFilter)
 void GmicFilterWidget::readSettings()
 {
     expandNodes(d->manager->commands());
+
+    setCurrentPath(d->manager->currentPath());
 }
 
 void GmicFilterWidget::saveSettings()
 {
+    d->manager->setCurrentPath(currentPath());
+
     if (saveExpandedNodes(d->tree->rootIndex()))
     {
         d->manager->changeExpanded();
@@ -548,10 +552,7 @@ void GmicFilterWidget::setCurrentPath(const QString& path)
 
     if (path.isEmpty())
     {
-        qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Path is empty. Select Root Item:" << root->title;
-
-        idx = d->proxyModel->mapFromSource(d->commandsModel->index(root));
-        d->tree->setCurrentIndex(idx);
+        qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Path is empty.";
 
         return;
     }

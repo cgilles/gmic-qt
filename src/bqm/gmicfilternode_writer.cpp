@@ -22,7 +22,8 @@ GmicXmlWriter::GmicXmlWriter()
     setAutoFormatting(true);
 }
 
-bool GmicXmlWriter::write(const QString& fileName, const GmicFilterNode* const root)
+bool GmicXmlWriter::write(const QString& fileName, const GmicFilterNode* const root,
+                          const QString& currentPath)
 {
     QFile file(fileName);
 
@@ -31,17 +32,21 @@ bool GmicXmlWriter::write(const QString& fileName, const GmicFilterNode* const r
         return false;
     }
 
-    return write(&file, root);
+    return write(&file, root, currentPath);
 }
 
-bool GmicXmlWriter::write(QIODevice* const device, const GmicFilterNode* const root)
+bool GmicXmlWriter::write(QIODevice* const device, const GmicFilterNode* const root,
+                          const QString& currentPath)
 {
+    QString cpath = currentPath;
+
     setDevice(device);
 
     writeStartDocument();
     writeDTD(QLatin1String("<!DOCTYPE gmic>"));
     writeStartElement(QLatin1String("gmic"));
-    writeAttribute(QLatin1String("version"), QLatin1String("2.0"));
+    writeAttribute(QLatin1String("version"),     QLatin1String("2.0"));
+    writeAttribute(QLatin1String("currentpath"), cpath.replace(QLatin1Char('/'), QLatin1Char('|')));
 
     if ((root->type() == GmicFilterNode::Root) && !root->children().isEmpty())
     {

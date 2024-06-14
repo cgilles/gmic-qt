@@ -377,7 +377,7 @@ QMimeData* GmicFilterModel::mimeData(const QModelIndexList& indexes) const
         buffer.open(QBuffer::ReadWrite);
         GmicXmlWriter writer;
         const GmicFilterNode* const parentNode = node(id);
-        writer.write(&buffer, parentNode);
+        writer.write(&buffer, parentNode, QString());
         stream << encodedData;
     }
 
@@ -420,7 +420,10 @@ bool GmicFilterModel::dropMimeData(const QMimeData* data,
         buffer.open(QBuffer::ReadOnly);
 
         GmicXmlReader reader;
-        GmicFilterNode* const rootNode  = reader.read(&buffer);
+        QString currentPath;    // Not used.
+
+        GmicFilterNode* const rootNode  = reader.read(&buffer, false, currentPath);
+
         QList<GmicFilterNode*> children = rootNode->children();
 
         for (int i = 0 ; i < children.count() ; ++i)

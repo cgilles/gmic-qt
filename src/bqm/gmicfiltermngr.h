@@ -158,7 +158,6 @@ private:
     Private* const d = nullptr;
 };
 
-
 //---------------------------------------------------------------------------------
 
 /**
@@ -248,6 +247,9 @@ public:
     void setCommand(GmicFilterNode* const node, const QString& newcommand);
     void setComment(GmicFilterNode* const node, const QString& newDesc);
     void changeExpanded();
+
+    void setCurrentPath(const QString& cpath);
+    QString currentPath() const;
 
     GmicFilterNode*  commands();
     GmicFilterModel* commandsModel();

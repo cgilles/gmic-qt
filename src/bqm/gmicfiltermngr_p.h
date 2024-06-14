@@ -86,6 +86,7 @@ public:
     GmicFilterModel* commandModel       = nullptr;
     QUndoStack       commands;
     QString          commandsFile;
+    QString          currentPath;
 };
 
 } // namespace DigikamBqmGmicQtPlugin
