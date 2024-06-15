@@ -39,10 +39,10 @@ public:
 
     enum Roles
     {
-        TypeRole          = Qt::UserRole + 1,
-        CommandRole       = Qt::UserRole + 2,
-        SeparatorRole     = Qt::UserRole + 3,
-        DateAddedRole     = Qt::UserRole + 4
+        TypeRole      = Qt::UserRole + 1,
+        CommandRole   = Qt::UserRole + 2,
+        SeparatorRole = Qt::UserRole + 3,
+        DateAddedRole = Qt::UserRole + 4
     };
 
 public:
@@ -79,9 +79,9 @@ public:
 
 public Q_SLOTS:
 
-    void signalEntryAdded(GmicFilterNode* item);
-    void signalEntryRemoved(GmicFilterNode* parent, int row, GmicFilterNode* item);
-    void signalEntryChanged(GmicFilterNode* item);
+    void slotEntryAdded(GmicFilterNode* item);
+    void slotEntryRemoved(GmicFilterNode* parent, int row, GmicFilterNode* item);
+    void slotEntryChanged(GmicFilterNode* item);
 
 private:
 

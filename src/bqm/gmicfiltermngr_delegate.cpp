@@ -22,7 +22,8 @@ GmicFilterDelegate::GmicFilterDelegate(TreeProxyModel* const pmodel)
 {
 }
 
-void GmicFilterDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
+void GmicFilterDelegate::paint(QPainter* painter,
+                               const QStyleOptionViewItem& option,
                                const QModelIndex& index) const
 {
     QStyledItemDelegate::paint(painter, option, index);
@@ -55,11 +56,15 @@ void GmicFilterDelegate::paint(QPainter* painter, const QStyleOptionViewItem& op
                 frameOption.rect         = option.rect;
                 frameOption.features     = QStyleOptionFrame::Flat;
                 frameOption.frameShape   = QFrame::HLine;
+                frameOption.state        = QStyle::State_None;
                 frameOption.lineWidth    = 1;
                 frameOption.midLineWidth = 0;
 
-                QApplication::style()->drawControl(QStyle::CE_ShapedFrame,
-                                                   &frameOption, painter);
+                QApplication::style()->drawControl(
+                                                   QStyle::CE_ShapedFrame,
+                                                   &frameOption,
+                                                   painter
+                                                  );
             }
         }
     }

@@ -55,13 +55,13 @@ GmicFilterModel::GmicFilterModel(GmicFilterManager* const mngr, QObject* const p
     d->manager = mngr;
 
     connect(d->manager, SIGNAL(signalEntryAdded(GmicFilterNode*)),
-            this, SLOT(signalEntryAdded(GmicFilterNode*)));
+            this, SLOT(slotEntryAdded(GmicFilterNode*)));
 
     connect(d->manager, SIGNAL(signalEntryRemoved(GmicFilterNode*,int,GmicFilterNode*)),
-            this, SLOT(signalEntryRemoved(GmicFilterNode*,int,GmicFilterNode*)));
+            this, SLOT(slotEntryRemoved(GmicFilterNode*,int,GmicFilterNode*)));
 
     connect(d->manager, SIGNAL(signalEntryChanged(GmicFilterNode*)),
-            this, SLOT(signalEntryChanged(GmicFilterNode*)));
+            this, SLOT(slotEntryChanged(GmicFilterNode*)));
 }
 
 GmicFilterModel::~GmicFilterModel()
@@ -86,7 +86,7 @@ QModelIndex GmicFilterModel::index(GmicFilterNode* node) const
     return createIndex(item->children().indexOf(node), 0, node);
 }
 
-void GmicFilterModel::signalEntryAdded(GmicFilterNode* item)
+void GmicFilterModel::slotEntryAdded(GmicFilterNode* item)
 {
     Q_ASSERT(item && item->parent());
 
@@ -101,7 +101,7 @@ void GmicFilterModel::signalEntryAdded(GmicFilterNode* item)
     endInsertRows();
 }
 
-void GmicFilterModel::signalEntryRemoved(GmicFilterNode* parent, int row, GmicFilterNode* item)
+void GmicFilterModel::slotEntryRemoved(GmicFilterNode* parent, int row, GmicFilterNode* item)
 {
     // item was already removed, re-add so beginRemoveRows works
 
@@ -111,7 +111,7 @@ void GmicFilterModel::signalEntryRemoved(GmicFilterNode* parent, int row, GmicFi
     endRemoveRows();
 }
 
-void GmicFilterModel::signalEntryChanged(GmicFilterNode* item)
+void GmicFilterModel::slotEntryChanged(GmicFilterNode* item)
 {
     QModelIndex idx = index(item);
 
