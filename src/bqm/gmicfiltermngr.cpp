@@ -174,9 +174,12 @@ QUndoStack* GmicFilterManager::undoRedoStack() const
 
 void GmicFilterManager::slotImportFilters()
 {
-    QString fileName = QFileDialog::getOpenFileName(nullptr, QObject::tr("Open File"),
+    QString fileName = QFileDialog::getOpenFileName(
+                                                    nullptr,
+                                                    QObject::tr("Import Filters"),
                                                     QString(),
-                                                    QObject::tr("XML (*.xml)"));
+                                                    QObject::tr("XML (*.xml)")
+                                                   );
     if (fileName.isEmpty())
     {
         return;
@@ -188,15 +191,18 @@ void GmicFilterManager::slotImportFilters()
 
     if (reader.error() != QXmlStreamReader::NoError)
     {
-        QMessageBox::warning(nullptr, QObject::tr("Loading Filters"),
+        QMessageBox::warning(
+                             nullptr,
+                             QObject::tr("Loading Filters"),
                              QObject::tr("Error when loading G'MIC filters on line %1, column %2:\n%3")
                                   .arg(reader.lineNumber())
                                   .arg(reader.columnNumber())
-                                  .arg(reader.errorString()));
+                                  .arg(reader.errorString())
+                            );
     }
 
     importRootNode->setType(GmicFilterNode::Folder);
-    importRootNode->title = QObject::tr("Imported %1")
+    importRootNode->title = QObject::tr("Imported Filters %1")
                                 .arg(QLocale().toString(QDate::currentDate(),
                                      QLocale::ShortFormat));
 
@@ -205,10 +211,11 @@ void GmicFilterManager::slotImportFilters()
 
 void GmicFilterManager::slotExportFilters()
 {
-    QString fileName = QFileDialog::getSaveFileName(nullptr, QObject::tr("Save File"),
-                                                    QObject::tr("%1 Gmic Filters.xml")
-                                                    .arg(QCoreApplication::applicationName()),
-                                                    QObject::tr("XML ( *.xml)"));
+    QString fileName = QFileDialog::getSaveFileName(nullptr,
+                                                    QObject::tr("Save Filters"),
+                                                    QObject::tr("%1 G'MIC Filters.xml")
+                                                        .arg(QCoreApplication::applicationName()),
+                                                    QObject::tr("XML (*.xml)"));
     if (fileName.isEmpty())
     {
         return;
@@ -218,8 +225,11 @@ void GmicFilterManager::slotExportFilters()
 
     if (!writer.write(fileName, d->commandRootNode, d->currentPath))
     {
-        QMessageBox::critical(nullptr, QObject::tr("Export filters"),
-                                       QObject::tr("Error saving G'MIC filters"));
+        QMessageBox::critical(
+                              nullptr,
+                              QObject::tr("Export filters"),
+                              QObject::tr("Error saving G'MIC filters")
+                             );
     }
 }
 
