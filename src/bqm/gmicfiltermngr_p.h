@@ -40,6 +40,7 @@
 // Local includes
 
 #include "gmicfilternode.h"
+#include "gmicfiltermodel.h"
 #include "gmicqtcommon.h"
 
 using namespace Digikam;
@@ -62,18 +63,6 @@ public:
 };
 
 // --------------------------------------------------------------
-
-class Q_DECL_HIDDEN GmicFilterModel::Private
-{
-public:
-
-    Private() = default;
-
-    GmicFilterManager* manager   = nullptr;
-    bool               endMacro  = false;
-};
-
-// -----------------------------------------------------------------
 
 class Q_DECL_HIDDEN GmicFilterManager::Private
 {

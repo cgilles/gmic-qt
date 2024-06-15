@@ -12,10 +12,41 @@
  *
  * ============================================================ */
 
-#include "gmicfiltermngr_p.h"
+#include "gmicfiltermodel.h"
+
+// Qt includes
+
+#include <QBuffer>
+
+// digiKam includes
+
+#include "digikam_debug.h"
+#include "ditemtooltip.h"
+
+// Local includes
+
+#include "gmicfiltermngr.h"
+#include "gmicfilternode.h"
+#include "gmicqtcommon.h"
+
+using namespace Digikam;
+using namespace DigikamGmicQtPluginCommon;
 
 namespace DigikamBqmGmicQtPlugin
 {
+
+class Q_DECL_HIDDEN GmicFilterModel::Private
+{
+public:
+
+    Private() = default;
+
+    GmicFilterManager* manager   = nullptr;
+    bool               endMacro  = false;
+};
+
+// -----------------------------------------------------------------
+
 
 GmicFilterModel::GmicFilterModel(GmicFilterManager* const mngr, QObject* const parent)
     : QAbstractItemModel(parent),

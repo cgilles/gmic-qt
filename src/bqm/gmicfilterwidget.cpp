@@ -39,6 +39,7 @@
 #include "gmicfilternode.h"
 #include "gmicfilterdialog.h"
 #include "gmicqtwindow.h"
+#include "gmicfiltermodel.h"
 
 using namespace DigikamGmicQtPluginCommon;
 

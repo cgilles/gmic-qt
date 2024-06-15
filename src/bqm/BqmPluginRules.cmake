@@ -8,12 +8,12 @@
 
 set(gmic_bqm_SRCS
     ${CMAKE_SOURCE_DIR}/src/bqm/host_digikam_bqm.cpp
+    ${CMAKE_SOURCE_DIR}/src/bqm/gmicfiltermodel.cpp
     ${CMAKE_SOURCE_DIR}/src/bqm/gmicfilternode.cpp
     ${CMAKE_SOURCE_DIR}/src/bqm/gmicfilternode_reader.cpp
     ${CMAKE_SOURCE_DIR}/src/bqm/gmicfilternode_writer.cpp
     ${CMAKE_SOURCE_DIR}/src/bqm/gmicfiltermngr.cpp
     ${CMAKE_SOURCE_DIR}/src/bqm/gmicfiltermngr_stack.cpp
-    ${CMAKE_SOURCE_DIR}/src/bqm/gmicfiltermngr_model.cpp
     ${CMAKE_SOURCE_DIR}/src/bqm/gmicfiltermngr_proxy.cpp
     ${CMAKE_SOURCE_DIR}/src/bqm/gmicfiltermngr_delegate.cpp
     ${CMAKE_SOURCE_DIR}/src/bqm/gmicfilterwidget.cpp
