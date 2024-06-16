@@ -62,11 +62,14 @@ public:
     QToolButton*          addButton        = nullptr;
     QToolButton*          remButton        = nullptr;
     QToolButton*          edtButton        = nullptr;
+    QToolButton*          dbButton         = nullptr;
     QAction*              addFilter        = nullptr;
     QAction*              addFolder        = nullptr;
     QAction*              addSeparator     = nullptr;
     QAction*              remove           = nullptr;
     QAction*              edit             = nullptr;
+    QAction*              importdb         = nullptr;
+    QAction*              exportdb         = nullptr;
     DPluginBqm*           plugin           = nullptr;
 };
 
@@ -106,11 +109,15 @@ GmicFilterWidget::GmicFilterWidget(QWidget* const parent)
                                          tr("Add Separator..."));
     d->addButton->setMenu(menu);
 
+    // ---
+
     d->remButton       = new QToolButton(this);
     d->remButton->setToolTip(tr("Remove current selected item."));
     d->remove          = new QAction(QIcon::fromTheme(QLatin1String("list-remove")),
                                      tr("Remove..."));
     d->remButton->setDefaultAction(d->remove);
+
+    // ---
 
     d->edtButton       = new QToolButton(this);
     d->edtButton->setToolTip(tr("Edit current selected item."));
@@ -118,17 +125,34 @@ GmicFilterWidget::GmicFilterWidget(QWidget* const parent)
                                      tr("Edit..."));
     d->edtButton->setDefaultAction(d->edit);
 
-    d->search          = new SearchTextBar(this, QLatin1String("DigikamGmicFilterSearchBar"));
+    // ---
+
+    d->dbButton         = new QToolButton(this);
+    d->dbButton->setToolTip(tr("Import and export hierarchy."));
+    d->dbButton->setIcon(QIcon::fromTheme(QLatin1String("server-database")));
+    d->dbButton->setPopupMode(QToolButton::InstantPopup);
+
+    QMenu* const menudb = new QMenu(d->dbButton);
+    d->importdb         = menudb->addAction(QIcon::fromTheme(QLatin1String("document-import")),
+                                            tr("Import..."));
+    d->exportdb         = menudb->addAction(QIcon::fromTheme(QLatin1String("document-export")),
+                                            tr("Export..."));
+    d->dbButton->setMenu(menudb);
+
+    // ---
+
+    d->search           = new SearchTextBar(this, QLatin1String("DigikamGmicFilterSearchBar"));
     d->search->setObjectName(QLatin1String("search"));
 
     QGridLayout* const grid = new QGridLayout(this);
-    grid->addWidget(d->tree,      0, 0, 1, 5);
+    grid->addWidget(d->tree,      0, 0, 1, 6);
     grid->addWidget(d->addButton, 1, 0, 1, 1);
     grid->addWidget(d->remButton, 1, 1, 1, 1);
     grid->addWidget(d->edtButton, 1, 2, 1, 1);
-    grid->addWidget(d->search,    1, 4, 1, 1);
-    grid->setColumnStretch(3, 2);
-    grid->setColumnStretch(4, 8);
+    grid->addWidget(d->dbButton,  1, 3, 1, 1);
+    grid->addWidget(d->search,    1, 5, 1, 1);
+    grid->setColumnStretch(4, 2);
+    grid->setColumnStretch(5, 8);
 
     d->commandsModel        = d->manager->commandsModel();
     d->proxyModel           = new TreeProxyModel(this);
@@ -158,6 +182,12 @@ GmicFilterWidget::GmicFilterWidget(QWidget* const parent)
 
     connect(d->addSeparator, SIGNAL(triggered()),
             this, SLOT(slotAddSeparator()));
+
+    connect(d->importdb, SIGNAL(triggered()),
+            d->manager, SLOT(slotImportFilters()));
+
+    connect(d->exportdb, SIGNAL(triggered()),
+            d->manager, SLOT(slotExportFilters()));
 
     connect(d->tree, SIGNAL(clicked(QModelIndex)),
             this, SLOT(slotTreeViewItemClicked(QModelIndex)));
