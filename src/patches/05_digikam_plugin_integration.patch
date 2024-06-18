@@ -1,7 +1,7 @@
-diff --git a/qmicqt/src/FilterSelector/FiltersPresenter.cpp b/qmicqt/src/FilterSelector/FiltersPresenter.cpp
+diff --git a/gmicqt/src/FilterSelector/FiltersPresenter.cpp b/gmicqt/src/FilterSelector/FiltersPresenter.cpp
 index 3d2991c..1a0c2a4 100644
---- a/qmicqt/src/FilterSelector/FiltersPresenter.cpp
-+++ b/qmicqt/src/FilterSelector/FiltersPresenter.cpp
+--- a/gmicqt/src/FilterSelector/FiltersPresenter.cpp
++++ b/gmicqt/src/FilterSelector/FiltersPresenter.cpp
 @@ -91,6 +91,7 @@ void FiltersPresenter::rebuildFilterViewWithSelection(const QList<QString> & key
    _filtersView->clear();
    _filtersView->disableModel();
@@ -10,10 +10,10 @@ index 3d2991c..1a0c2a4 100644
      if (filter.matchKeywords(keywords)) {
        _filtersView->addFilter(filter.name(), filter.hash(), filter.path(), filter.isWarning());
      }
-diff --git a/qmicqt/src/HeadlessProcessor.cpp b/qmicqt/src/HeadlessProcessor.cpp
+diff --git a/gmicqt/src/HeadlessProcessor.cpp b/gmicqt/src/HeadlessProcessor.cpp
 index f10efc3..c11d69f 100644
---- a/qmicqt/src/HeadlessProcessor.cpp
-+++ b/qmicqt/src/HeadlessProcessor.cpp
+--- a/gmicqt/src/HeadlessProcessor.cpp
++++ b/gmicqt/src/HeadlessProcessor.cpp
 @@ -267,7 +267,7 @@ void HeadlessProcessor::endApplication(const QString & errorMessage)
    if (!errorMessage.isEmpty()) {
      Logger::error(errorMessage);

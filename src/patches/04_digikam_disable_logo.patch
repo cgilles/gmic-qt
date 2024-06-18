@@ -1,7 +1,7 @@
-diff --git a/qmicqt/src/DialogSettings.cpp b/qmicqt/src/DialogSettings.cpp
+diff --git a/gmicqt/src/DialogSettings.cpp b/gmicqt/src/DialogSettings.cpp
 index bf6b5cb..3dc9cf8 100644
---- a/qmicqt/src/DialogSettings.cpp
-+++ b/qmicqt/src/DialogSettings.cpp
+--- a/gmicqt/src/DialogSettings.cpp
++++ b/gmicqt/src/DialogSettings.cpp
 @@ -92,6 +92,10 @@ DialogSettings::DialogSettings(QWidget * parent) : QDialog(parent), ui(new Ui::D
    ui->cbNativeFileDialogs->setChecked(Settings::nativeFileDialogs());
    ui->cbNativeFileDialogs->setToolTip(tr("Check to use Native/OS file dialog, uncheck to use Qt's"));
@@ -13,12 +13,10 @@ index bf6b5cb..3dc9cf8 100644
    ui->sbPreviewTimeout->setValue(Settings::previewTimeout());
    ui->cbPreviewZoom->setChecked(Settings::previewZoomAlwaysEnabled());
    ui->cbNotifyFailedUpdate->setChecked(Settings::notifyFailedStartupUpdate());
-diff --git a/qmicqt/digiKam/update_gmicqt.txt b/qmicqt/digiKam/update_gmicqt.txt
-index 709e0da..77430fb 100644
-diff --git a/qmicqt/src/Settings.cpp b/qmicqt/src/Settings.cpp
+diff --git a/gmicqt/src/Settings.cpp b/gmicqt/src/Settings.cpp
 index 0640f04..3611def 100644
---- a/qmicqt/src/Settings.cpp
-+++ b/qmicqt/src/Settings.cpp
+--- a/gmicqt/src/Settings.cpp
++++ b/gmicqt/src/Settings.cpp
 @@ -121,7 +121,11 @@ void Settings::load(UserInterfaceMode userInterfaceMode)
  
  bool Settings::visibleLogos()

@@ -1,7 +1,7 @@
-diff --git a/qmicqt/src/DialogSettings.cpp b/qmicqt/src/DialogSettings.cpp
+diff --git a/gmicqt/src/DialogSettings.cpp b/gmicqt/src/DialogSettings.cpp
 index 6c1e6b9..206a6a4 100644
---- a/qmicqt/src/DialogSettings.cpp
-+++ b/qmicqt/src/DialogSettings.cpp
+--- a/gmicqt/src/DialogSettings.cpp
++++ b/gmicqt/src/DialogSettings.cpp
 @@ -84,6 +84,9 @@ DialogSettings::DialogSettings(QWidget * parent) : QDialog(parent), ui(new Ui::D
    const bool savedDarkTheme = QSettings().value(DARK_THEME_KEY, GmicQtHost::DarkThemeIsDefault).toBool();
    ui->rbDarkTheme->setChecked(savedDarkTheme);
@@ -38,10 +38,10 @@ index 6c1e6b9..206a6a4 100644
    ui->pbOk->setFocus();
    ui->tabWidget->setCurrentIndex(0);
  }
-diff --git a/qmicqt/src/FilterParameters/BoolParameter.cpp b/qmicqt/src/FilterParameters/BoolParameter.cpp
+diff --git a/gmicqt/src/FilterParameters/BoolParameter.cpp b/gmicqt/src/FilterParameters/BoolParameter.cpp
 index ffa324e..a9dfb04 100644
---- a/qmicqt/src/FilterParameters/BoolParameter.cpp
-+++ b/qmicqt/src/FilterParameters/BoolParameter.cpp
+--- a/gmicqt/src/FilterParameters/BoolParameter.cpp
++++ b/gmicqt/src/FilterParameters/BoolParameter.cpp
 @@ -64,12 +64,14 @@ bool BoolParameter::addTo(QWidget * widget, int row)
    _checkBox = new QCheckBox(widget);
    _checkBox->setChecked(_value);
@@ -57,10 +57,10 @@ index ffa324e..a9dfb04 100644
    _grid->addWidget(_label, row, 0, 1, 1);
    _grid->addWidget(_checkBox, row, 1, 1, 2);
    connectCheckBox();
-diff --git a/qmicqt/src/FilterParameters/FloatParameter.cpp b/qmicqt/src/FilterParameters/FloatParameter.cpp
+diff --git a/gmicqt/src/FilterParameters/FloatParameter.cpp b/gmicqt/src/FilterParameters/FloatParameter.cpp
 index fb271f0..4d9a022 100644
---- a/qmicqt/src/FilterParameters/FloatParameter.cpp
-+++ b/qmicqt/src/FilterParameters/FloatParameter.cpp
+--- a/gmicqt/src/FilterParameters/FloatParameter.cpp
++++ b/gmicqt/src/FilterParameters/FloatParameter.cpp
 @@ -73,12 +73,14 @@ bool FloatParameter::addTo(QWidget * widget, int row)
    _slider->setMinimumWidth(SLIDER_MIN_WIDTH);
    _slider->setRange(0, SLIDER_MAX_RANGE);
@@ -76,10 +76,10 @@ index fb271f0..4d9a022 100644
  
    _spinBox = new CustomDoubleSpinBox(widget, _min, _max);
    _spinBox->setSingleStep(double(_max - _min) / 100.0);
-diff --git a/qmicqt/src/FilterParameters/IntParameter.cpp b/qmicqt/src/FilterParameters/IntParameter.cpp
+diff --git a/gmicqt/src/FilterParameters/IntParameter.cpp b/gmicqt/src/FilterParameters/IntParameter.cpp
 index 2af87cb..bc0f77c 100644
---- a/qmicqt/src/FilterParameters/IntParameter.cpp
-+++ b/qmicqt/src/FilterParameters/IntParameter.cpp
+--- a/gmicqt/src/FilterParameters/IntParameter.cpp
++++ b/gmicqt/src/FilterParameters/IntParameter.cpp
 @@ -81,12 +81,14 @@ bool IntParameter::addTo(QWidget * widget, int row)
  
    _spinBox = new CustomSpinBox(widget, _min, _max);
@@ -95,10 +95,10 @@ index 2af87cb..bc0f77c 100644
    _grid->addWidget(_label = new QLabel(_name, widget), row, 0, 1, 1);
    setTextSelectable(_label);
    _grid->addWidget(_slider, row, 1, 1, 1);
-diff --git a/qmicqt/src/FilterParameters/NoteParameter.cpp b/qmicqt/src/FilterParameters/NoteParameter.cpp
+diff --git a/gmicqt/src/FilterParameters/NoteParameter.cpp b/gmicqt/src/FilterParameters/NoteParameter.cpp
 index e576b0f..be469de 100644
---- a/qmicqt/src/FilterParameters/NoteParameter.cpp
-+++ b/qmicqt/src/FilterParameters/NoteParameter.cpp
+--- a/gmicqt/src/FilterParameters/NoteParameter.cpp
++++ b/gmicqt/src/FilterParameters/NoteParameter.cpp
 @@ -88,12 +88,14 @@ bool NoteParameter::initFromText(const QString & /* filterName */, const char *
    _text.remove(QRegularExpression("^\"")).remove(QRegularExpression("\"$")).replace(QString("\\\""), "\"");
    _text.replace(QString("\\n"), "<br/>");
@@ -114,10 +114,10 @@ index e576b0f..be469de 100644
  
    _text.replace(QRegularExpression("color\\s*=\\s*\""), QString("style=\"color:"));
    _text.replace(QRegularExpression("foreground\\s*=\\s*\""), QString("style=\"color:"));
-diff --git a/qmicqt/src/FilterParameters/SeparatorParameter.cpp b/qmicqt/src/FilterParameters/SeparatorParameter.cpp
+diff --git a/gmicqt/src/FilterParameters/SeparatorParameter.cpp b/gmicqt/src/FilterParameters/SeparatorParameter.cpp
 index fad7b0a..7f6d317 100644
---- a/qmicqt/src/FilterParameters/SeparatorParameter.cpp
-+++ b/qmicqt/src/FilterParameters/SeparatorParameter.cpp
+--- a/gmicqt/src/FilterParameters/SeparatorParameter.cpp
++++ b/gmicqt/src/FilterParameters/SeparatorParameter.cpp
 @@ -58,9 +58,11 @@ bool SeparatorParameter::addTo(QWidget * widget, int row)
    _frame->setSizePolicy(sizePolicy);
    _frame->setFrameShape(QFrame::HLine);
@@ -130,10 +130,10 @@ index fad7b0a..7f6d317 100644
    _grid->addWidget(_frame, row, 0, 1, 3);
    return true;
  }
-diff --git a/qmicqt/src/MainWindow.cpp b/qmicqt/src/MainWindow.cpp
+diff --git a/gmicqt/src/MainWindow.cpp b/gmicqt/src/MainWindow.cpp
 index d48e095..23073c8 100644
---- a/qmicqt/src/MainWindow.cpp
-+++ b/qmicqt/src/MainWindow.cpp
+--- a/gmicqt/src/MainWindow.cpp
++++ b/gmicqt/src/MainWindow.cpp
 @@ -275,6 +275,7 @@ void MainWindow::setIcons()
    ui->tbExpandCollapse->setIcon(_expandIcon);
  }
@@ -177,10 +177,10 @@ index d48e095..23073c8 100644
    messageBox.setCheckBox(cb);
    int choice = messageBox.exec();
    if (choice != QMessageBox::Yes) {
-diff --git a/qmicqt/src/MainWindow.h b/qmicqt/src/MainWindow.h
+diff --git a/gmicqt/src/MainWindow.h b/gmicqt/src/MainWindow.h
 index e7ed69d..ea16e23 100644
---- a/qmicqt/src/MainWindow.h
-+++ b/qmicqt/src/MainWindow.h
+--- a/gmicqt/src/MainWindow.h
++++ b/gmicqt/src/MainWindow.h
 @@ -70,7 +70,9 @@ public:
    explicit MainWindow(QWidget * parent = nullptr);
    ~MainWindow() override;
@@ -191,10 +191,10 @@ index e7ed69d..ea16e23 100644
    void setPluginParameters(const RunParameters & parameters);
  
  public slots:
-diff --git a/qmicqt/src/Settings.cpp b/qmicqt/src/Settings.cpp
+diff --git a/gmicqt/src/Settings.cpp b/gmicqt/src/Settings.cpp
 index 4764218..0640f04 100644
---- a/qmicqt/src/Settings.cpp
-+++ b/qmicqt/src/Settings.cpp
+--- a/gmicqt/src/Settings.cpp
++++ b/gmicqt/src/Settings.cpp
 @@ -131,7 +131,11 @@ void Settings::setVisibleLogos(bool on)
  
  bool Settings::darkThemeEnabled()
@@ -207,10 +207,10 @@ index 4764218..0640f04 100644
  }
  
  void Settings::setDarkThemeEnabled(bool on)
-diff --git a/qmicqt/src/Widgets/InOutPanel.cpp b/qmicqt/src/Widgets/InOutPanel.cpp
+diff --git a/gmicqt/src/Widgets/InOutPanel.cpp b/gmicqt/src/Widgets/InOutPanel.cpp
 index 2a30f99..535ba84 100644
---- a/qmicqt/src/Widgets/InOutPanel.cpp
-+++ b/qmicqt/src/Widgets/InOutPanel.cpp
+--- a/gmicqt/src/Widgets/InOutPanel.cpp
++++ b/gmicqt/src/Widgets/InOutPanel.cpp
 @@ -157,10 +157,12 @@ void InOutPanel::onResetButtonClicked()
    setState(InputOutputState::Default, true);
  }
@@ -224,10 +224,10 @@ index 2a30f99..535ba84 100644
  
  void InOutPanel::setDefaultInputMode()
  {
-diff --git a/qmicqt/src/Widgets/InOutPanel.h b/qmicqt/src/Widgets/InOutPanel.h
+diff --git a/gmicqt/src/Widgets/InOutPanel.h b/gmicqt/src/Widgets/InOutPanel.h
 index 381bc64..7939d3a 100644
---- a/qmicqt/src/Widgets/InOutPanel.h
-+++ b/qmicqt/src/Widgets/InOutPanel.h
+--- a/gmicqt/src/Widgets/InOutPanel.h
++++ b/gmicqt/src/Widgets/InOutPanel.h
 @@ -79,7 +79,9 @@ public slots:
    void onInputModeSelected(int);
    void onOutputModeSelected(int);
@@ -238,10 +238,10 @@ index 381bc64..7939d3a 100644
  
  private:
    static void setDefaultInputMode();
-diff --git a/qmicqt/src/Widgets/ProgressInfoWindow.cpp b/qmicqt/src/Widgets/ProgressInfoWindow.cpp
+diff --git a/gmicqt/src/Widgets/ProgressInfoWindow.cpp b/gmicqt/src/Widgets/ProgressInfoWindow.cpp
 index 533d257..604cf47 100644
---- a/qmicqt/src/Widgets/ProgressInfoWindow.cpp
-+++ b/qmicqt/src/Widgets/ProgressInfoWindow.cpp
+--- a/gmicqt/src/Widgets/ProgressInfoWindow.cpp
++++ b/gmicqt/src/Widgets/ProgressInfoWindow.cpp
 @@ -59,9 +59,11 @@ ProgressInfoWindow::ProgressInfoWindow(HeadlessProcessor * processor) : QMainWin
    connect(processor, &HeadlessProcessor::done, this, &ProgressInfoWindow::onProcessingFinished);
    _isShown = false;
@@ -270,10 +270,10 @@ index 533d257..604cf47 100644
  
  void ProgressInfoWindow::onCancelClicked(bool)
  {
-diff --git a/qmicqt/src/Widgets/ProgressInfoWindow.h b/qmicqt/src/Widgets/ProgressInfoWindow.h
+diff --git a/gmicqt/src/Widgets/ProgressInfoWindow.h b/gmicqt/src/Widgets/ProgressInfoWindow.h
 index 615dd16..9db9a1a 100644
---- a/qmicqt/src/Widgets/ProgressInfoWindow.h
-+++ b/qmicqt/src/Widgets/ProgressInfoWindow.h
+--- a/gmicqt/src/Widgets/ProgressInfoWindow.h
++++ b/gmicqt/src/Widgets/ProgressInfoWindow.h
 @@ -57,7 +57,9 @@ public:
  protected:
    void showEvent(QShowEvent *) override;

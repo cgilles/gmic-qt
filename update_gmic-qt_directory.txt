@@ -9,27 +9,27 @@ Under a Linux Ubuntu 22.04 or later:
 
 7/  Patch gmicqt/CMakeLists.txt to add the "digikam" host rules and to use local gmic dir:
 
-    patch -p1 < 01_digikam_root_cmakelists.patch
+    patch -p1 < ./src/patches/01_digikam_root_cmakelists.patch
 
 8/  Patch gmicqt/ codes to disable theming (redondant with digiKam one and crash host):
 
-    patch -p1 < 02_digikam_disable_theming.patch
+    patch -p1 < ./src/patches/02_digikam_disable_theming.patch
 
 9/  Patch gmicqt/ codes to disable HDPI settings (redondant with digiKam one):
 
-    patch -p1 < 03_digikam_disable_hdpi.patch
+    patch -p1 < ./src/patches/03_digikam_disable_hdpi.patch
 
 10/ Patch gmicqt/ codes to disable logo settings and optimize space (logo moves in settings dialog):
 
-    patch -p1 < 04_digikam_disable_logo.patch
+    patch -p1 < ./src/patches/04_digikam_disable_logo.patch
 
 11/ Patch gmicqt/ codes to improve plugin integration
 
-    patch -p1 < 05_digikam_plugin_integration.patch
+    patch -p1 < ./src/patches/05_digikam_plugin_integration.patch
 
 12/ Patch gmicqt/ codes to fix crash when Cancel button is pressed while computing.
 
-    patch -p1 < 06_digikam_fix_cancel_crash.patch
+    patch -p1 < ./src/patches/06_digikam_fix_cancel_crash.patch
 
 13/ Check if new files need to be appended with "git status". Add files to git repository if necessary.
 14/ Update all .qm files in src/translations.
