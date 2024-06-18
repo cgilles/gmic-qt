@@ -89,7 +89,7 @@ QString GmicBqmPlugin::handbookChapter() const
 
 QString GmicBqmPlugin::handbookReference() const
 {
-    return QLatin1String("bqm-enhancetools");
+    return QLatin1String("bqm-gmictools");
 }
 
 QList<DPluginAuthor> GmicBqmPlugin::authors() const
