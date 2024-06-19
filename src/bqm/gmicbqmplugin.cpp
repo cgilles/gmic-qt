@@ -54,7 +54,7 @@ GmicBqmPlugin::GmicBqmPlugin(QObject* const parent)
 
 QString GmicBqmPlugin::name() const
 {
-    return QString::fromUtf8("G'MIC");
+    return tr("G'MIC Processor");
 }
 
 QString GmicBqmPlugin::iid() const
@@ -69,12 +69,12 @@ QIcon GmicBqmPlugin::icon() const
 
 QString GmicBqmPlugin::description() const
 {
-    return tr("A tool to apply the G'MIC filters to images");
+    return tr("A tool to apply in batch the G'MIC processor filters to the images");
 }
 
 QString GmicBqmPlugin::details() const
 {
-    return s_gmicQtPluginDetails(tr("A Batch Queue Manager tool for G'MIC processor."));
+    return s_gmicQtPluginDetails(tr("A Batch Queue Manager tool for the G'MIC processor."));
 }
 
 QString GmicBqmPlugin::handbookSection() const
