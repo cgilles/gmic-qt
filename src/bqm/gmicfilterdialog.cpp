@@ -110,9 +110,9 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
 
     /*
      * Accepts all UTF-8 Characters.
-     * Excludes the "/" symbol (for the absolute filter title path support).
+     * Excludes the "/" and '|' symbols for the absolute filter title path support..
      */
-    QRegularExpression utf8Rx(QLatin1String("[^/]*"));
+    QRegularExpression utf8Rx(QLatin1String("[^/|]*"));
     QValidator* const utf8Validator   = new QRegularExpressionValidator(utf8Rx, this);
     d->title->setValidator(utf8Validator);
 
