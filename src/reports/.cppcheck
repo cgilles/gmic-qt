@@ -12,8 +12,8 @@
 IGNORE_DIRS="-i ../translations/ "
 IGNORE_DIRS+="-i ../patches/ "
 IGNORE_DIRS+="-i ../reports/ "
-IGNORE_DIRS+="-i ../../src/ "
-IGNORE_DIRS+="-i ../../gmic/src/ "
+IGNORE_DIRS+="-i ../../gmicqt/src/ "
+IGNORE_DIRS+="-i ../../gmicqt/gmic/src/ "
 
 # --- Defines to use with static analysis.
 

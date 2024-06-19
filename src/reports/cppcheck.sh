@@ -65,7 +65,7 @@ cppcheck -j$CPU_CORES \
          --output-file=report.cppcheck.xml \
          $IGNORE_DIRS \
          $INCLUDE_DIRS \
-         ..
+         ../..
 
 cppcheck-htmlreport --file=report.cppcheck.xml \
                     --report-dir=$REPORT_DIR \
