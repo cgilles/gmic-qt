@@ -82,7 +82,7 @@ void GmicXmlReader::readXml(GmicFilterNode* const parent)
         }
         else if (name() == QLatin1String("item"))
         {
-            readGmicFilterNode(parent);
+            readItem(parent);
         }
         else if (name() == QLatin1String("separator"))
         {
@@ -114,7 +114,7 @@ void GmicXmlReader::readFolder(GmicFilterNode* const parent)
         }
         else if (name() == QLatin1String("item"))
         {
-            readGmicFilterNode(folder);
+            readItem(folder);
         }
         else if (name() == QLatin1String("separator"))
         {
@@ -143,7 +143,7 @@ void GmicXmlReader::readSeparator(GmicFilterNode* const parent)
     readNext();
 }
 
-void GmicXmlReader::readGmicFilterNode(GmicFilterNode* const parent)
+void GmicXmlReader::readItem(GmicFilterNode* const parent)
 {
     Q_ASSERT(isStartElement() && (name() == QLatin1String("item")));
 

@@ -97,7 +97,7 @@ private:
     void readDescription(GmicFilterNode* const parent);
     void readSeparator(GmicFilterNode* const parent);
     void readFolder(GmicFilterNode* const parent);
-    void readGmicFilterNode(GmicFilterNode* const parent);
+    void readItem(GmicFilterNode* const parent);
 };
 
 // -----------------------------------------------------------
