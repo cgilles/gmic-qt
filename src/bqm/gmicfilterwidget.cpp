@@ -388,7 +388,7 @@ void GmicFilterWidget::slotRemove()
                 return;
             }
 
-            d->manager->removeCommand(node);
+            d->manager->removeEntry(node);
 
             Q_EMIT signalSettingsChanged();
         }
@@ -415,7 +415,7 @@ void GmicFilterWidget::slotAddSeparator()
         GmicFilterNode* const parent = d->manager->commandsModel()->node(index);
         GmicFilterNode* const node   = new GmicFilterNode(GmicFilterNode::Separator);
 
-        d->manager->addCommand(parent, node);
+        d->manager->addEntry(parent, node);
         d->manager->save();
     }
 }

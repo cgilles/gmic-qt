@@ -76,8 +76,8 @@ void GmicFilterManager::save()
     }
 }
 
-void GmicFilterManager::addCommand(GmicFilterNode* const parent,
-                                   GmicFilterNode* const node, int row)
+void GmicFilterManager::addEntry(GmicFilterNode* const parent,
+                                 GmicFilterNode* const node, int row)
 {
     if (!d->loaded)
     {
@@ -90,7 +90,7 @@ void GmicFilterManager::addCommand(GmicFilterNode* const parent,
     d->commands.push(command);
 }
 
-void GmicFilterManager::removeCommand(GmicFilterNode* const node)
+void GmicFilterManager::removeEntry(GmicFilterNode* const node)
 {
     if (!d->loaded)
     {
@@ -206,7 +206,7 @@ void GmicFilterManager::slotImportFilters()
                                 .arg(QLocale().toString(QDate::currentDate(),
                                      QLocale::ShortFormat));
 
-    addCommand(commands(), importRootNode);
+    addEntry(commands(), importRootNode);
 }
 
 void GmicFilterManager::slotExportFilters()

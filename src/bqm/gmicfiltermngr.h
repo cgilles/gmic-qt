@@ -175,11 +175,11 @@ public:
                                QObject* const parent = nullptr);
     ~GmicFilterManager()                                              override;
 
-    void addCommand(GmicFilterNode* const parent,
-                    GmicFilterNode* const node,
-                    int row = -1);
+    void addEntry(GmicFilterNode* const parent,
+                  GmicFilterNode* const node,
+                  int row = -1);
 
-    void removeCommand(GmicFilterNode* const node);
+    void removeEntry(GmicFilterNode* const node);
 
     void setTitle(GmicFilterNode* const node, const QString& newTitle);
     void setCommand(GmicFilterNode* const node, const QString& newcommand);
@@ -187,11 +187,11 @@ public:
     void changeExpanded();
 
     void setCurrentPath(const QString& cpath);
-    QString currentPath() const;
+    QString currentPath()               const;
 
     GmicFilterNode*  commands();
     GmicFilterModel* commandsModel();
-    QUndoStack*      undoRedoStack() const;
+    QUndoStack*      undoRedoStack()    const;
 
     void save();
     void load();

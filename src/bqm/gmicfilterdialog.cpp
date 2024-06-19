@@ -262,7 +262,7 @@ void GmicFilterDialog::accept()
 
         node->title        = d->title->text();
         node->dateAdded    = QDateTime::currentDateTime();
-        d->manager->addCommand(d->currentItem, node);
+        d->manager->addEntry(d->currentItem, node);
     }
 
     d->manager->save();

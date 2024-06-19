@@ -130,7 +130,7 @@ bool GmicFilterModel::removeRows(int row, int count, const QModelIndex& parent)
     for (int i = (row + count - 1) ; i >= row ; --i)
     {
         GmicFilterNode* const item = fnode->children().at(i);
-        d->manager->removeCommand(item);
+        d->manager->removeEntry(item);
     }
 
     if (d->endMacro)
@@ -463,7 +463,7 @@ bool GmicFilterModel::dropMimeData(const QMimeData* data,
             rootNode->remove(commandNode);
             row                               = qMax(0, row);
             GmicFilterNode* const parentNode  = node(parent);
-            d->manager->addCommand(parentNode, commandNode, row);
+            d->manager->addEntry(parentNode, commandNode, row);
             d->endMacro                       = true;
         }
 
