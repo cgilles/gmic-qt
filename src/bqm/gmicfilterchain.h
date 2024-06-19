@@ -56,12 +56,12 @@ private:
 
 private:
 
-    class Private;
-    Private* const d = nullptr;
+    Q_DISABLE_COPY(GmicFilterChainViewItem)
 
 private:
 
-    Q_DISABLE_COPY(GmicFilterChainViewItem)
+    class Private;
+    Private* const d = nullptr;
 };
 
 // -------------------------------------------------------------------------
@@ -148,6 +148,8 @@ private:
 
     // Disable
     GmicFilterChain() = delete;
+
+private:
 
     class Private;
     Private* const d = nullptr;

@@ -54,10 +54,10 @@ public:
 
     Private() = default;
 
-    int                         index    = -1;
-    QString                     title;
-    QString                     command;
-    GmicFilterChainView*        view     = nullptr;
+    int                  index    = -1;
+    QString              title;
+    QString              command;
+    GmicFilterChainView* view     = nullptr;
 };
 
 // ------------------------------------------------------------------------
@@ -93,13 +93,13 @@ public:
 
     Private() = default;
 
-    CtrlButton*                      editButton              = nullptr;
-    CtrlButton*                      moveUpButton            = nullptr;
-    CtrlButton*                      moveDownButton          = nullptr;
-    CtrlButton*                      addButton               = nullptr;
-    CtrlButton*                      removeButton            = nullptr;
-    CtrlButton*                      clearButton             = nullptr;
-    GmicFilterChainView*             listView                = nullptr;
+    CtrlButton*          editButton     = nullptr;
+    CtrlButton*          moveUpButton   = nullptr;
+    CtrlButton*          moveDownButton = nullptr;
+    CtrlButton*          addButton      = nullptr;
+    CtrlButton*          removeButton   = nullptr;
+    CtrlButton*          clearButton    = nullptr;
+    GmicFilterChainView* listView       = nullptr;
 };
 
 } // namespace DigikamBqmGmicQtPlugin
