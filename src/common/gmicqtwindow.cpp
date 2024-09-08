@@ -74,7 +74,7 @@ GMicQtWindow::GMicQtWindow(
       d         (new Private)
 {
     d->filterName = filterName;
-    d->filterLbl  = findChild<QLabel*>("filterName");
+    d->filterLbl  = findChild<QLabel*>(QLatin1String("filterName"));
 
     if (!d->filterLbl)
     {
@@ -82,7 +82,7 @@ GMicQtWindow::GMicQtWindow(
                                           "label from plugin dialog!";
     }
 
-    QHBoxLayout* const hlay = findChild<QHBoxLayout*>("horizontalLayout");
+    QHBoxLayout* const hlay = findChild<QHBoxLayout*>(QLatin1String("horizontalLayout"));
 
     if (hlay)
     {
@@ -103,7 +103,7 @@ GMicQtWindow::GMicQtWindow(
         s_gmicQtPluginPopulateHelpButton(this, tool, help);
         hlay->insertWidget(0, help);
 
-        QLabel* const lbl          = findChild<QLabel*>("messageLabel");
+        QLabel* const lbl          = findChild<QLabel*>(QLatin1String("messageLabel"));
 
         if (lbl)
         {
@@ -160,7 +160,7 @@ void GMicQtWindow::setHostType(HostType type)
 
 void GMicQtWindow::setFilterSelectionMode()
 {
-    QPushButton* const pbOk     = findChild<QPushButton*>("pbOk");
+    QPushButton* const pbOk     = findChild<QPushButton*>(QLatin1String("pbOk"));
 
     if (pbOk)
     {
@@ -180,7 +180,7 @@ void GMicQtWindow::setFilterSelectionMode()
 
     // ---
 
-    QPushButton* const pbApply  = findChild<QPushButton*>("pbApply");
+    QPushButton* const pbApply  = findChild<QPushButton*>(QLatin1String("pbApply"));
 
     if (pbApply)
     {
@@ -194,7 +194,7 @@ void GMicQtWindow::setFilterSelectionMode()
 
     // ---
 
-    QPushButton* const pbCancel = findChild<QPushButton*>("pbCancel");
+    QPushButton* const pbCancel = findChild<QPushButton*>(QLatin1String("pbCancel"));
 
     if (pbCancel)
     {

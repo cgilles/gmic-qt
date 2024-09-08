@@ -161,11 +161,34 @@ add_definitions(-D_GMIC_QT_DISABLE_THEMING_)
 add_definitions(-D_GMIC_QT_DISABLE_HDPI_)
 add_definitions(-D_GMIC_QT_DISABLE_LOGO_)
 
+# Enforce modern Qt code
+set(modern_qt_definitions -DQT_DEPRECATED_WARNINGS
+                          -DQT_USE_QSTRINGBUILDER
+                          -DQT_NO_CAST_TO_ASCII
+                          -DQT_NO_CAST_FROM_ASCII
+                          -DQT_NO_CAST_FROM_BYTEARRAY
+                          -DQT_NO_URL_CAST_FROM_STRING
+                          -DQT_STRICT_ITERATORS
+                          -DQT_NO_NARROWING_CONVERSIONS_IN_CONNECT
+                          -DQT_DEPRECATED_WARNINGS_SINCE=0x060000
+                          -DQT_DISABLE_DEPRECATED_BEFORE=0x050E00
+#                          -DQT_NO_KEYWORDS
+                          -DQT_NO_FOREACH
+)
+
+
+set(digikam_common_SRCS ${CMAKE_SOURCE_DIR}/src/common/gmicqtimageconverter.cpp
+                        ${CMAKE_SOURCE_DIR}/src/common/gmicqtwindow.cpp
+                        ${CMAKE_SOURCE_DIR}/src/common/gmicqtcommon.cpp
+)
+
+foreach(_file ${digikam_common_SRCS})
+    set_property(SOURCE ${_file} PROPERTY COMPILE_DEFINITIONS ${modern_qt_definitions})
+endforeach()
+
 add_library(gmic_qt_common STATIC
             ${gmic_qt_SRCS}
-            ${CMAKE_SOURCE_DIR}/src/common/gmicqtimageconverter.cpp
-            ${CMAKE_SOURCE_DIR}/src/common/gmicqtwindow.cpp
-            ${CMAKE_SOURCE_DIR}/src/common/gmicqtcommon.cpp
+            ${digikam_common_SRCS}
 )
 
 target_link_libraries(gmic_qt_common

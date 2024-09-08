@@ -46,7 +46,7 @@ namespace DigikamGmicQtPluginCommon
 
 QString s_gmicQtPluginDetails(const QString& title)
 {
-    QImage img(":resources/logos.png");
+    QImage img(QLatin1String(":resources/logos.png"));
     QByteArray byteArray;
     QBuffer    buffer(&byteArray);
     img.save(&buffer, "PNG");
@@ -129,7 +129,7 @@ QList<DPluginAuthor> s_gmicQtPluginAuthors()
 
 QIcon s_gmicQtPluginIcon()
 {
-    return QIcon(":resources/gmic_hat.png");
+    return QIcon(QLatin1String(":resources/gmic_hat.png"));
 }
 
 FilterAction s_gmicQtFilterAction(const QString& gmicCommand,

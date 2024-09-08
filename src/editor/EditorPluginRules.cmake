@@ -11,6 +11,10 @@ set(gmic_qt_editor_SRCS
     ${CMAKE_SOURCE_DIR}/src/editor/gmicqttoolplugin.cpp
 )
 
+foreach(_file ${gmic_qt_editor_SRCS})
+    set_property(SOURCE ${_file} PROPERTY COMPILE_DEFINITIONS ${modern_qt_definitions})
+endforeach()
+
 add_library(Editor_GmicQt_Plugin
             MODULE
             ${gmic_qt_QRC}

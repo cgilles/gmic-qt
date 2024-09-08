@@ -224,8 +224,9 @@ void GmicFilterChain::setChainedFilters(const QMap<QString, QVariant>& filters)
 
     QStringList names = filters.keys();
     int index         = 0;
+    const auto cmds   = filters.values();
 
-    foreach (const QVariant& cmd, filters.values())
+    for (const QVariant& cmd : cmds)
     {
         new GmicFilterChainViewItem(d->listView, index, names[index], cmd.toString());
         index++;

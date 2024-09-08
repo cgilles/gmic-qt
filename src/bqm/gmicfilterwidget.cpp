@@ -510,7 +510,7 @@ QString GmicFilterWidget::currentGmicChainedCommands() const
     {
         const QList<QVariant> lst = filters.values();
 
-        foreach (const QVariant& v, lst)
+        for (const QVariant& v : std::as_const(lst))
         {
             chained.append(QLatin1Char(' '));
             chained.append(v.toString());
@@ -594,12 +594,12 @@ void GmicFilterWidget::setCurrentPath(const QString& path)
 
     qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Hierarchy:" << hierarchy;
 
-    foreach (const QString& title, hierarchy)
+    for (const QString& title : std::as_const(hierarchy))
     {
         children = node->children();
         qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Title:" << title;
 
-        foreach (GmicFilterNode* const child, children)
+        for (GmicFilterNode* const child : std::as_const(children))
         {
             qCDebug(DIGIKAM_DPLUGIN_BQM_LOG) << "Child node:" << child->title;
 

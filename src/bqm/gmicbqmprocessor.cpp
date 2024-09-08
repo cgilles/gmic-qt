@@ -95,7 +95,7 @@ void GmicBqmProcessor::startProcessing()
     d->gmicImages->assign(1);
     imageNames.assign(1);
 
-    QString name  = QString("pos(0,0),name(%1)").arg("Batch Queue Manager");
+    QString name  = QString::fromUtf8("pos(0,0),name(%1)").arg(QLatin1String("Batch Queue Manager"));
     QByteArray ba = name.toUtf8();
     gmic_image<char>::string(ba.constData()).move_to(imageNames[0]);
 

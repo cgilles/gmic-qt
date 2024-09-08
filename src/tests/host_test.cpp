@@ -48,7 +48,7 @@ using namespace DigikamBqmGmicQtPlugin;
 namespace GmicQtHost
 {
 
-const QString ApplicationName          = QString("digiKam");
+const QString ApplicationName          = QLatin1String("digiKam");
 const char* const ApplicationShortname = GMIC_QT_XSTRINGIFY(GMIC_HOST);
 const bool DarkThemeIsDefault          = false;
 
@@ -120,7 +120,7 @@ void getCroppedImages(cimg_library::CImgList<gmic_pixel_type>& images,
     images.assign(1);
     imageNames.assign(1);
 
-    QString name  = QString("pos(0,0),name(%1)").arg("Image Editor Canvas");
+    QString name  = QString::fromUtf8("pos(0,0),name(%1)").arg(QLatin1String("Image Editor Canvas"));
     QByteArray ba = name.toUtf8();
     gmic_image<char>::string(ba.constData()).move_to(imageNames[0]);
 

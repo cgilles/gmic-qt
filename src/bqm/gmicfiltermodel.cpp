@@ -396,7 +396,7 @@ QMimeData* GmicFilterModel::mimeData(const QModelIndexList& indexes) const
     QByteArray ba;
     QDataStream stream(&ba, QIODevice::WriteOnly);
 
-    Q_FOREACH (QModelIndex id, indexes)
+    for (QModelIndex id : std::as_const(indexes))
     {
         if ((id.column() != 0) || !id.isValid())
         {

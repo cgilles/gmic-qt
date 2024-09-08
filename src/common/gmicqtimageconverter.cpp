@@ -45,7 +45,7 @@ void GMicQtImageConverter::convertCImgtoDImg(const cimg_library::CImg<float>& in
     Q_ASSERT_X(
                (in.spectrum() <= 4),
                "GMicQtImageConverter::convertCImgtoDImg()",
-               QString("bad input spectrum (%1)").arg(in.spectrum()).toLatin1()
+               QString::fromLatin1("bad input spectrum (%1)").arg(in.spectrum()).toLatin1().data()
               );
 
     bool alpha = ((in.spectrum() == 4) || (in.spectrum() == 2));

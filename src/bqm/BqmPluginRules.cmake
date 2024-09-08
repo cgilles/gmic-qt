@@ -26,6 +26,10 @@ set(gmic_bqm_SRCS
     ${CMAKE_SOURCE_DIR}/src/bqm/gmicfilterchain_view.cpp
 )
 
+foreach(_file ${gmic_bqm_SRCS})
+    set_property(SOURCE ${_file} PROPERTY COMPILE_DEFINITIONS ${modern_qt_definitions})
+endforeach()
+
 add_library(Bqm_Gmic_Plugin
             MODULE
 
