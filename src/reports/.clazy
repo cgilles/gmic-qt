@@ -1,19 +1,25 @@
 #!/bin/bash
 
-# Copyright (c) 2008-2024 by Gilles Caulier, <caulier dot gilles at gmail dot com>
+# SPDX-FileCopyrightText: 2008-2024 by Gilles Caulier, <caulier dot gilles at gmail dot com>
 #
-# Redistribution and use is allowed according to the terms of the GPL3 license.
-# For details see the accompanying COPYING file.
+# SPDX-License-Identifier: BSD-3-Clause
 #
-# Clazy static analyzer configuration used by reports/clazy.sh
+# Clazy static analyzer configuration used by project/reports/clazy.sh
 
 # --- Directories to exclude from Clazy static analysis.
 
 IGNORE_DIRS=".*include.*|"
 IGNORE_DIRS+=".*/opt/qt6/include/.*|"
 IGNORE_DIRS+=".*/usr/include/.*|"
-IGNORE_DIRS+=".*gmicqt/src/.*|"
-IGNORE_DIRS+=".*gmicqt/gmic/src/.*|"
+IGNORE_DIRS+=".*core/libs/dimg/filters/transform/lqr/.*|"
+IGNORE_DIRS+=".*core/libs/pgfutils/libpgf/.*|"
+IGNORE_DIRS+=".*core/libs/dimg/filters/greycstoration/cimg/.*|"
+IGNORE_DIRS+=".*core/libs/jpegutils/libjpeg/.*|"
+IGNORE_DIRS+=".*core/libs/rawengine/libraw/.*|"
+IGNORE_DIRS+=".*core/libs/dngwriter/extra/.*|"
+IGNORE_DIRS+=".*core/libs/dplugins/webservices/o2/.*|"
+IGNORE_DIRS+=".*core/dplugins/generic/tools/mediaserver/upnpsdk/.*|"
+IGNORE_DIRS+=".*core/libs/video/QtAVPlayer/.*|"
 # Remove last character
 IGNORE_DIRS=${IGNORE_DIRS::-1}
 
@@ -27,12 +33,13 @@ no-fully-qualified-moc-types,\
 no-qproperty-without-notify,\
 no-old-style-connect,\
 no-rule-of-three,\
-no-inefficient-qlist-soft,\
 no-qstring-allocations,\
 no-qstring-arg,\
 no-qstring-insensitive-allocation,\
 no-qstring-ref,\
 no-function-args-by-value,\
+no-qproperty-without-notify,\
+no-fully-qualified-moc-types,\
 qt6-qhash-signature,\
 qt6-deprecated-api-fixes,\
 qt6-fwd-fixes,\
@@ -41,7 +48,6 @@ unexpected-flag-enumerator-value,\
 signal-with-return-value,\
 raw-environment-function,\
 qt-keywords,\
-missing-qobject-macro\
+missing-qobject-macro,\
+range-loop-detach\
 "
-
-#qt6-qlatin1stringchar-to-u         What is that exactly ???
