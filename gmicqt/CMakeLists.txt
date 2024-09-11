@@ -354,7 +354,7 @@ if (APPLE)
     add_definitions(-Wno-macro-redefined -Wno-deprecated-register)
     if (CMAKE_OSX_ARCHITECTURES MATCHES "x86_64")
         add_definitions(-mmacosx-version-min=10.15)
-    else
+    else()
         add_definitions(-mmacosx-version-min=11.3)
     endif()
 endif()
