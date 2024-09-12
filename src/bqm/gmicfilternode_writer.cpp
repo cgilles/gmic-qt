@@ -96,7 +96,7 @@ void GmicXmlWriter::writeItem(const GmicFilterNode* const parent)
                 QVariantList vals = parent->commands.values();
                 QStringList filters;
 
-                for (const QVariant& v : std::as_const(vals))
+                for (const QVariant& v : qAsConst(vals))
                 {
                     filters.append(v.toString());
                 }

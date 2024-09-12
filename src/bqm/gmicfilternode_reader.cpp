@@ -157,7 +157,7 @@ void GmicXmlReader::readItem(GmicFilterNode* const parent)
         QMap<QString, QVariant> map;
         int index = 0;
 
-        for (const QString& cmd : std::as_const(filters))
+        for (const QString& cmd : qAsConst(filters))
         {
             map.insert(names[index], cmd);
             index++;
