@@ -356,7 +356,7 @@ QString GMicQtWindow::execWindow(DPlugin* const tool,
 
     s_mainWindow->setWindowModality(Qt::ApplicationModal);
 
-    if (QSettings().value("Config/MainWindowMaximized", false).toBool())
+    if (QSettings().value(QLatin1String("Config/MainWindowMaximized"), false).toBool())
     {
         s_mainWindow->showMaximized();  // krazy:exclude=qmethods
     }
