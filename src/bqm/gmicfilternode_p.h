@@ -16,6 +16,10 @@
 
 #include "gmicfilternode.h"
 
+// C++ includes
+
+#include <utility>
+
 // Qt includes
 
 #include <QPointer>
