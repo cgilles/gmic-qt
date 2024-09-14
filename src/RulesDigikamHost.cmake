@@ -162,18 +162,18 @@ add_definitions(-D_GMIC_QT_DISABLE_HDPI_)
 add_definitions(-D_GMIC_QT_DISABLE_LOGO_)
 
 # Enforce modern Qt code
-set(modern_qt_definitions -DQT_DEPRECATED_WARNINGS
-                          -DQT_USE_QSTRINGBUILDER
-                          -DQT_NO_CAST_TO_ASCII
-                          -DQT_NO_CAST_FROM_ASCII
-                          -DQT_NO_CAST_FROM_BYTEARRAY
-                          -DQT_NO_URL_CAST_FROM_STRING
-                          -DQT_STRICT_ITERATORS
-                          -DQT_NO_NARROWING_CONVERSIONS_IN_CONNECT
-                          -DQT_DEPRECATED_WARNINGS_SINCE=0x060000
-                          -DQT_DISABLE_DEPRECATED_BEFORE=0x050E00
-#                          -DQT_NO_KEYWORDS
-                          -DQT_NO_FOREACH
+set(modern_qt_definitions QT_DEPRECATED_WARNINGS
+                          QT_USE_QSTRINGBUILDER
+                          QT_NO_CAST_TO_ASCII
+                          QT_NO_CAST_FROM_ASCII
+                          QT_NO_CAST_FROM_BYTEARRAY
+                          QT_NO_URL_CAST_FROM_STRING
+                          QT_STRICT_ITERATORS
+                          QT_NO_NARROWING_CONVERSIONS_IN_CONNECT
+                          QT_DEPRECATED_WARNINGS_SINCE=0x060000
+                          QT_DISABLE_DEPRECATED_BEFORE=0x050E00
+                          QT_NO_FOREACH
+#                          QT_NO_KEYWORDS
 )
 
 
