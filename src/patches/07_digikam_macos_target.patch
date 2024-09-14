@@ -1,0 +1,18 @@
+diff --git a/gmicqt/src/CMakeLists.txt b/gmicqt/src/CMakeLists.txt
+index 47face8..bfca33e 100644
+--- a/gmicqt/src/CMakeLists.txt
++++ b/gmicqt/src/CMakeLists.txt
+@@ -351,7 +351,12 @@ if (APPLE)
+     add_definitions(-D_IS_MACOS_)
+     set(CMAKE_MACOSX_RPATH 1)
+     set(BUILD_WITH_INSTALL_RPATH 1)
+-    add_definitions(-mmacosx-version-min=10.9 -Wno-macro-redefined -Wno-deprecated-register)
++    add_definitions(-Wno-macro-redefined -Wno-deprecated-register)
++    if (CMAKE_OSX_ARCHITECTURES MATCHES "x86_64")
++        add_definitions(-mmacosx-version-min=10.15)
++    else()
++        add_definitions(-mmacosx-version-min=11.3)
++    endif()
+ endif()
+ 
+ if (WIN32)
