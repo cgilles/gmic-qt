@@ -21,7 +21,7 @@ trap 'echo "FAILED COMMAND: $PREVIOUS_COMMAND"' ERR
 
 # Check run-time dependencies
 
-if [ ! -f /usr/bin/clazy ] ; then
+if [ ! -f /opt/clazy/bin/clazy ] ; then
 
     echo "Clazy static analyzer is not installed in /opt/clazy."
     echo "Please install Clazy from https://github.com/KDE/clazy"
@@ -57,6 +57,8 @@ cd ../..
 rm -fr build.clazy
 mkdir -p build.clazy
 cd build.clazy
+
+export PATH=$PATH:/opt/clazy/bin
 
 if [[ -d /opt/qt6 ]] ; then
 
