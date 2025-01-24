@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# SPDX-FileCopyrightText: 2008-2024 by Gilles Caulier, <caulier dot gilles at gmail dot com>
+# SPDX-FileCopyrightText: 2008-2025 by Gilles Caulier, <caulier dot gilles at gmail dot com>
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -11,15 +11,8 @@
 IGNORE_DIRS=".*include.*|"
 IGNORE_DIRS+=".*/opt/qt6/include/.*|"
 IGNORE_DIRS+=".*/usr/include/.*|"
-IGNORE_DIRS+=".*core/libs/dimg/filters/transform/lqr/.*|"
-IGNORE_DIRS+=".*core/libs/pgfutils/libpgf/.*|"
-IGNORE_DIRS+=".*core/libs/dimg/filters/greycstoration/cimg/.*|"
-IGNORE_DIRS+=".*core/libs/jpegutils/libjpeg/.*|"
-IGNORE_DIRS+=".*core/libs/rawengine/libraw/.*|"
-IGNORE_DIRS+=".*core/libs/dngwriter/extra/.*|"
-IGNORE_DIRS+=".*core/libs/dplugins/webservices/o2/.*|"
-IGNORE_DIRS+=".*core/dplugins/generic/tools/mediaserver/upnpsdk/.*|"
-IGNORE_DIRS+=".*core/libs/video/QtAVPlayer/.*|"
+IGNORE_DIRS+=".*gmicqt/src/.*|"
+IGNORE_DIRS+=".*gmicqt/gmic/src/.*|"
 # Remove last character
 IGNORE_DIRS=${IGNORE_DIRS::-1}
 
