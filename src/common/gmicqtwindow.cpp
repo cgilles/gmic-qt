@@ -6,7 +6,7 @@
  * Date        : 2019-11-28
  * Description : common implementations for the digiKam plugin for GmicQt.
  *
- * SPDX-FileCopyrightText: 2019-2024 by Gilles Caulier <caulier dot gilles at gmail dot com>
+ * SPDX-FileCopyrightText: 2019-2025 by Gilles Caulier <caulier dot gilles at gmail dot com>
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
  *

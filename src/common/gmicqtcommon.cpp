@@ -6,7 +6,7 @@
  * Date        : 2019-11-28
  * Description : common implementations for the digiKam plugin for GmicQt.
  *
- * SPDX-FileCopyrightText: 2019-2024 by Gilles Caulier <caulier dot gilles at gmail dot com>
+ * SPDX-FileCopyrightText: 2019-2025 by Gilles Caulier <caulier dot gilles at gmail dot com>
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
  *
@@ -114,15 +114,15 @@ QList<DPluginAuthor> s_gmicQtPluginAuthors()
     return QList<DPluginAuthor>()
             << DPluginAuthor(QString::fromUtf8("Gilles Caulier"),
                              QString::fromUtf8("caulier dot gilles at gmail dot com"),
-                             QString::fromUtf8("(C) 2019-2024"),
+                             QString::fromUtf8("(C) 2019-2025"),
                              QObject::tr("Port to digiKam and maintainer"))
             << DPluginAuthor(QString::fromUtf8("Sébastien Fourey"),
                              QString::fromUtf8("Sebastien dot Fourey at ensicaen dot fr"),
-                             QString::fromUtf8("(C) 2017-2024"),
-                             QObject::tr("G'MIC plugin"))
+                             QString::fromUtf8("(C) 2017-2025"),
+                             QObject::tr("Original G'MIC-qt plugin"))
             << DPluginAuthor(QString::fromUtf8("David Tschumperlé"),
                              QString::fromUtf8("David dot Tschumperle at ensicaen dot fr"),
-                             QString::fromUtf8("(C) 2008-2024"),
+                             QString::fromUtf8("(C) 2008-2025"),
                              QObject::tr("G'MIC core"))
             ;
 }
