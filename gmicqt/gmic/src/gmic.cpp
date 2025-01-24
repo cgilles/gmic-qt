@@ -2260,7 +2260,7 @@ double gmic::mp_set(const double *const ptrs, const unsigned int siz, const char
     CImg<char> s_value;
     if (siz) { // Value is a string
       s_value.assign(siz + 1);
-      cimg_for_inX(s_value,0,s_value.width() - 1,i) s_value[i] = (char)ptrs[i];
+      cimg_for_inX(s_value,0,s_value.width() - 2,i) s_value[i] = (char)ptrs[i];
       s_value.back() = 0;
     } else { // Value is a scalar
       s_value.assign(24);
@@ -10339,7 +10339,8 @@ gmic& gmic::_run(const CImgList<char>& commands_line, unsigned int& position,
                (cimg_sscanf(argument,"[%255[a-zA-Z0-9_.%+-]],%f,%c0%c%x%c",
                             indices,&opacity,&sep0,&sep1,&pattern,&end)==5 && sep0=='-' && sep1=='x') ||
                (cimg_sscanf(argument,"[%255[a-zA-Z0-9_.%+-]],%f,%c0%c%x,%4095[0-9.eEinfa,+-]%c",
-                            indices,&opacity,&sep0,&sep1,&pattern,&(*color=0),&end)==6 && sep0=='-' && sep1=='x')) &&
+                            indices,&opacity,&(sep0=0),&sep1,&pattern,
+                            &(*color=0),&end)==6 && sep0=='-' && sep1=='x')) &&
               (ind=selection2cimg(indices,images.size(),images_names,"polygon")).height()==1) {
 
             vertices.assign(images[*ind],false);
@@ -10394,7 +10395,8 @@ gmic& gmic::_run(const CImgList<char>& commands_line, unsigned int& position,
               *color = 0;
             }
             if (nargument<eargument &&
-                ((sep0 = *nargument=='-' && nargument + 1<eargument?(++nargument, '-'):0) || true) &&
+                ((sep0 = *nargument=='-' && nargument[1]=='0' && nargument[2]=='x' && nargument + 3<eargument?
+                  (++nargument, '-'):0) || true) &&
                 cimg_sscanf(nargument,"0%c%4095[0-9a-fA-F]",&sep1,gmic_use_color)==2 && sep1=='x' &&
                 cimg_sscanf(color,"%x%c",&pattern,&end)==1) {
               nargument+=std::strlen(color) + 3;
@@ -13070,8 +13072,12 @@ gmic& gmic::_run(const CImgList<char>& commands_line, unsigned int& position,
             const char *curr_command = "";
             for (unsigned int k = initial_callstack_size - 1; k>0 && *(curr_command = callstack[k])=='*'; --k) {}
             curr_command+=*curr_command=='+';
-            const bool run_subcommand = *curr_command && *command=='_' && command[1]=='_' &&
-              !std::strncmp(command + 2,curr_command,std::strlen(curr_command));
+            bool run_subcommand = false;
+            if (*curr_command && *command=='_' && command[1]=='_') {
+              const unsigned int l_curr_command = std::strlen(curr_command);
+              run_subcommand = !std::strncmp(command + 2,curr_command,l_curr_command) &&
+                command[2 + l_curr_command]=='_';
+            }
 
             if (is_debug) {
               CImg<char> command_code_text(264);

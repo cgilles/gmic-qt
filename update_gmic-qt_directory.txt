@@ -1,9 +1,13 @@
 Under a Linux Ubuntu 22.04 or later:
 
-1/  Checkout G'MIC at the desired release tag (https://github.com/GreycLab/gmic).
-2/  Checkout G'MIC-Qt at the same desired release tag (https://github.com/c-koi/gmic-qt).
-3/  Fix dependencies to complete the configuration of source code.
-4/  Use the bootstrap-none script to configure G'MIC-Qt directory with the "none" host.
+Note: desired release tag must be the same for CImg, G'MIC, and C'MIC-Qt.
+
+1/  Checkout CImg at the desired release tag (https://github.com/GreycLab/gmic).
+2/  Checkout G'MIC at the desired release tag (https://github.com/GreycLab/gmic).
+3/  Checkout G'MIC-Qt at the same desired release tag (https://github.com/c-koi/gmic-qt).
+4/  Fix dependencies to complete the configuration of G'MIC-Qt source code.
+    Use the bootstrap-none script to configure G'MIC-Qt directory with the "none" host.
+    Note: The G'MIC-Qt/translations and G'MIC-Qt/translations/filters must be build before.
 5/  When configuration is done copy the G'MIC directory contents to the DK::gmicqt/gmic.
 6/  Copy the G'MIC-Qt contents to the DK::gmicqt.
 

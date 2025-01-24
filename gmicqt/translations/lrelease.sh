@@ -31,7 +31,7 @@ in="$1"
 if exists lrelease-qt5 ; then
   exec lrelease-qt5 -compress "$in"
 elif exists lrelease ; then
-  exec lrelease -compress "$in"
+  exec /opt/qt6/bin/lrelease -compress "$in"
 else
   die "No lrelease(-qt5) command available."
 fi

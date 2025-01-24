@@ -123,6 +123,10 @@ MainWindow::MainWindow(QWidget * parent) : QMainWindow(parent), ui(new Ui::MainW
   closeShortcut->setContext(Qt::ApplicationShortcut);
   connect(closeShortcut, &QShortcut::activated, this, &MainWindow::close);
 
+  QShortcut * previewTypeShortcut = new QShortcut(QKeySequence("Ctrl+Shift+P"), this);
+  previewTypeShortcut->setContext(Qt::ApplicationShortcut);
+  connect(previewTypeShortcut, &QShortcut::activated, this, &MainWindow::switchPreviewType);
+
   ui->tbRenameFave->setToolTip(tr("Rename fave"));
   ui->tbRenameFave->setEnabled(false);
   ui->tbRemoveFave->setToolTip(tr("Remove fave"));
@@ -238,6 +242,24 @@ MainWindow::MainWindow(QWidget * parent) : QMainWindow(parent), ui(new Ui::MainW
   _forceQuitText = tr("Force &quit");
 
   ui->pbCancel->setEnabled(false);
+
+  ui->cbPreviewType->addItem(tr("Full"), int(PreviewWidget::PreviewType::Full));
+  ui->cbPreviewType->addItem(tr("Forward Horizontal"), int(PreviewWidget::PreviewType::ForwardHorizontal));
+  ui->cbPreviewType->addItem(tr("Forward Vertical"), int(PreviewWidget::PreviewType::ForwardVertical));
+  ui->cbPreviewType->addItem(tr("Backward Horizontal"), int(PreviewWidget::PreviewType::BackwardHorizontal));
+  ui->cbPreviewType->addItem(tr("Backward Vertical"), int(PreviewWidget::PreviewType::BackwardVertical));
+  ui->cbPreviewType->addItem(tr("Duplicate Top"), int(PreviewWidget::PreviewType::DuplicateTop));
+  ui->cbPreviewType->addItem(tr("Duplicate Left"), int(PreviewWidget::PreviewType::DuplicateLeft));
+  ui->cbPreviewType->addItem(tr("Duplicate Bottom"), int(PreviewWidget::PreviewType::DuplicateBottom));
+  ui->cbPreviewType->addItem(tr("Duplicate Right"), int(PreviewWidget::PreviewType::DuplicateRight));
+  ui->cbPreviewType->addItem(tr("Duplicate Horizontal"), int(PreviewWidget::PreviewType::DuplicateHorizontal));
+  ui->cbPreviewType->addItem(tr("Duplicate Vertical"), int(PreviewWidget::PreviewType::DuplicateVertical));
+  ui->cbPreviewType->addItem(tr("Checkered"), int(PreviewWidget::PreviewType::Checkered));
+  ui->cbPreviewType->addItem(tr("Checkered Inverse"), int(PreviewWidget::PreviewType::CheckeredInverse));
+  connect(ui->cbPreviewType, QOverload<int>::of(&QComboBox::currentIndexChanged), //
+          [this](int index) {                                                     //
+            ui->previewWidget->setPreviewType(PreviewWidget::PreviewType(ui->cbPreviewType->itemData(index).toInt()));
+          });
 
   makeConnections();
 }
@@ -1478,6 +1500,36 @@ void MainWindow::abortProcessingOnCloseRequest()
 
   _processor.detachAllUnfinishedAbortedThreads(); // Keep only one thread in list after next line
   _processor.cancel();
+}
+
+void MainWindow::selectPreviewType(PreviewWidget::PreviewType previewType)
+{
+
+  if (ui->previewWidget->previewType() == PreviewWidget::PreviewType::Full) {
+    for (int index = 0; index < ui->cbPreviewType->count(); ++index) {
+      if (previewType == static_cast<PreviewWidget::PreviewType>(ui->cbPreviewType->itemData(index).toInt())) {
+        ui->cbPreviewType->setCurrentIndex(index);
+        return;
+      }
+    }
+  } else {
+    for (int index = 0; index < ui->cbPreviewType->count(); ++index) {
+      if (PreviewWidget::PreviewType::Full == static_cast<PreviewWidget::PreviewType>(ui->cbPreviewType->itemData(index).toInt())) {
+        ui->cbPreviewType->setCurrentIndex(index);
+        return;
+      }
+    }
+  }
+}
+
+void MainWindow::switchPreviewType()
+{
+  ui->cbPreview->setChecked(true);
+  if (ui->previewWidget->previewType() == PreviewWidget::PreviewType::Full) {
+    selectPreviewType(ui->previewWidget->savedPreviewType());
+  } else {
+    selectPreviewType(PreviewWidget::PreviewType::Full);
+  }
 }
 
 void MainWindow::onCancelClicked()

@@ -417,7 +417,7 @@ reference : skip "${2=}"
 "  - When it starts by the underscore character '_'. In that case, it becomes also accessible by any command invoked "\
 "outside the current command scope (global variable)."\n\
 "  - When defined in a _subcommand_ of the current command, a variable becomes also accessible in the parent command. "\
-"A _subcommand_ of a command `foo` is a command whose name starts with `_foo` (e.g. `_foo_sub`) and that is called "\
+"A _subcommand_ of a command `foo` is a command whose name starts with `__foo_` (e.g. `__foo_sub`) and that is called "\
 "from `foo`."\n\
 "* If a variable name starts with two underscores `__`, the global variable is also shared among different threads "\
 "and can be read/set by commands running in parallel (see command ''parallel'' for this purpose). "\
@@ -1497,7 +1497,7 @@ reference_end_pdf :
 "      <h1 class=\"ref_h1\">The Handbook</h1>"\n\
 "      <h3>Version "${strver" "$_version,$_prerelease}"</h3>"\n\
 "      <p>&copy; David Tschumperlé / GREYC / CNRS</p>"\n\
-"      <p>"{$-date}"</p>"\n\
+"      <p>"${-date}"</p>"\n\
 "    </div>"':y)
   ('"<img style=\"margin-top: 2em; width: 100%;\" src=\"reference_pdf.png\"/>"\n\
     "<p style=\"text-align: center;\">&squ; End of document</p>"\n\
@@ -1979,7 +1979,7 @@ d :
 #@cli :   - '_display_is_grid' can be { 0:off | 1:on } (default value: '1').
 #@cli :   - '_display_is_info' can be { 0:off | 1:on } (default value: '1').
 #@cli :   - '_display_normalization' can be { -1:auto | 0:off | 1:cut | 2:stretch channelwise | 3:stretch global | \
-# 4: stretch (global once) } (default value: '-1').
+# 4: stretch (global-once) } (default value: '-1').
 #@cli :   - '_display_print_images' can be { 0:off | N>0 } (default value: '5'). It sets the max number 'N' of images \
 # whose information is initially printed on `stderr` or `stdout`.
 #@cli :   - '_display_3d_is_rendered' can be { 0:off | 1:on } (default value: '1').
@@ -2481,7 +2481,6 @@ _display : skip ${1=},${3=}
               permute. zyxc
             fi
           fi
-
           if !$setting_normalization # Normalize: none
             and. 255
           elif $setting_normalization==1 # Normalize: cut
@@ -2494,10 +2493,10 @@ _display : skip ${1=},${3=}
               fi
             elif $setting_normalization==3 # Normalize: stretch (global)
               if {is_infnan,i[$selected]} $0_normalize_infnan. else n. 0,255 fi
-            else # Normalize: stretch (global once)
+            else # Normalize: stretch (global-once)
               if !narg(${display_range_global$selected})
                 if {is_infnan,i[$selected]} display_range_global$selected=${-_display_minmax_infnan}
-                else sh[$selected] $cmin,$cmax display_range_global$selected:=[im,iM] rm.
+                else display_range_global$selected={$selected,[im,iM]}
                 fi
               fi
               im,iM:=${display_range_global$selected}
@@ -3533,7 +3532,7 @@ _display : skip ${1=},${3=}
         setting_normalization:=($setting_normalization+1)%5
         notification="Normalization: "${"arg0 "$setting_normalization,\
                                         "Off,Cut,\"Stretch (channelwise)\",\
-                                        \"Stretch (global)\",\"Stretch (global once)\""}
+                                        \"Stretch (global)\",\"Stretch (global-once)\""}
         $0_flush_thumb_cache
         $0_rmn canvas_base,canvas_label_notification
       elif {*,-R} # Rotate view
@@ -5236,7 +5235,7 @@ _input_csv_val :
 #@cli : Insert new images from several filenames that match the specified glob pattern.
 #@cli : (eq. to 'ig').
 +input_glob :
-  _input_glob "$*"
+  v + _input_glob "$*"
 
 _input_glob :
   e[0--3] "Input all files that match glob pattern '"{/"$*"}"'."
@@ -5297,6 +5296,38 @@ _input_glob :
   if !$file_found
     error[0--3] "Command 'input_cached': Unknown filename '"{/"$1"}"'."
   fi
+
+#@cli in : eq. to 'input_normalized'.
++in :
+  v + _input_normalized "$*"
+
+#@cli input_normalized : filename
+#@cli : Input specified filename and constrain its value range to be in [0,255].
+#@cli : (eq. to 'in').
++input_normalized :
+  v + _input_normalized "$*"
+
+_input_normalized :
+  e[0--3] "Input file '"{/"$*"}"', in normalized range [0,255]."
+  l[] {
+    u 0 i "$1" bpp=${} autodetect=1
+    if $!==1" && "isnum($bpp)
+      if $bpp==8 autodetect=0
+      elif $bpp==16 / 257 autodetect=0
+      fi
+    fi
+    if $autodetect foreach {
+      im,iM:=im,iM
+      if $im>=0
+        if $iM<=255 # Do nothing
+        elif $iM<=1 * 255
+        elif inrange($iM,255,65535,0,1) / 257
+        else n 0,255
+        fi
+      else n 0,255
+      fi
+    } fi
+  }
 
 #@cli input_obj : filename
 #@cli : Input specified 3D mesh from a .obj Wavefront file.
@@ -7442,11 +7473,12 @@ gmd2html : skip "${1=}"
   if $is_arg embed_html=$1 else embed_html=1 noarg fi
 
   parse_gmd
-  s_section,e_section={${-_gmd_tokens}"[s_section,e_section]"}
+  s_section,e_section,s_gmic,e_gmic={${-_gmd_tokens}"[s_section,e_section,s_gmic,e_gmic]"}
   foreach {
     nm$>={b} strvar ${nm$>} fnm=${}
     if "i=="$s_section" && find(#-1,"$e_section")>0"
-      +rows 1,{"find(#-1,"$e_section")-1"} title$>={t} rm.
+      +rows 1,{"find(#-1,"$e_section")-1"}
+      replace_seq. $s_gmic,{``{'G\47MIC'}} f. "i<0?-1:i" discard. -1 title$>={t} rm.
     else title$>=
     fi
     . # [0] = Output, [1] = Input
@@ -10705,7 +10737,7 @@ update_deprecate : check "isint($1,1,999)"
 
 # update_download_html.
 # Update file versions on G'MIC download page, with specified version number.
-# $1 = version number (e.g. '3.4.0').
+# $1 = version number (e.g. '3.4.2').
 update_download_html : check "
     is_digit(c)=(c>=_'0' && c<=_'9');
     ver = ['${1=undefined}'];
@@ -12444,7 +12476,7 @@ upload_filters :
   x "cd "$HOME"/work/src/gmic-community && git pull"
 
   # Define the list of compatible versions.
-  (340,$_version) sort. discard. store. compat
+  versions=340,341,342,$_version
 
   # Import filters from stdlib and community.
   files $HOME/work/src/gmic-community/include/*.gmic
@@ -12461,27 +12493,44 @@ upload_filters :
   } }
   i[1--2] ('"\n#@gui _________________\n"') y a y
 
-  # Create update file.
+  # Create update files.
   +l. {
-    e "** Generate filter update file."
+    e "** Generate filter update files."
     m "parse_gui_trigger_update : _upload_filters_move"
     v + parse_gui. update v -
     um parse_gui_trigger_update
 
+    url=http://bit.ly/2uaBRMB
+    replace_str "<i>David Tschumperlé</i>","<i><a href=\""$url"\">David Tschumperlé</a></i>"
+    is_nonnative_preview_removed=0
+    repeat narg($versions) {
+      ver:=arg0($>,$versions)
+      if !$is_nonnative_preview_removed" && "$ver>=342 # Remove non-native preview splitter for version 3.4.2+
+        l {
+          s +,{'\n'}
+          foreach {
+            if "S='#@gui :Preview Type=choice(\"Full\",';crop(0,0,1,size(S))==S"
+              rm ('"#@gui :_=value(0)"':y)
+            elif "S='#@gui :Preview Split=point(50,50';crop(0,0,1,size(S))==S"
+              rm ('"#@gui :_=point(50,50,-1)_0"':y)
+            fi
+          }
+          a y
+          replace_str "#@gui :_=separator()\n#@gui :_=value(0)\n#@gui :_=point(50,50,-1)_0",\
+                      "#@gui :_=value(0),_=point(50,50,-1)_0"
+        }
+        is_nonnative_preview_removed=1
+      fi
+      ot ${_path_rc}update$ver.gmic # Plain-text
+      o cimgz:/tmp/update$ver.gmic,uint8 # Binary-compressed
+    }
+
     # Upload filter files on G'MIC server.
     e "** Upload filter update."
-    ot ${_path_rc}update$_version.gmic
-    if "d = date(3); h = date(4); h>=7 && d>=1 && d<=5" url=http://bit.ly/2uaBRMB # url=http://bit.ly/2CmhX65
-    else url=http://bit.ly/2uaBRMB # https://bit.ly/33lRzX4 # https://bit.ly/2WeKVPv url=http://bit.ly/2uaBRMB #
-    fi
-    replace_str "<i>David Tschumperlé</i>","<i><a href=\""$url"\">David Tschumperlé</a></i>"
-    o cimgz:/tmp/update$_version.gmic,uint8
-
-    $compat
-    repeat h {
-      v:=i[$>]
-      _upload[] ${_path_rc}update$_version.gmic,plain_update$v.gmic,1
-      _upload[] /tmp/update$_version.gmic,update$v.gmic,1
+    repeat narg($versions) {
+      ver:=arg0($>,$versions)
+      _upload[] ${_path_rc}update$ver.gmic,plain_update$ver.gmic,1
+      _upload[] /tmp/update$ver.gmic,update$ver.gmic,1
     }
     rm
   }
@@ -12495,10 +12544,9 @@ upload_filters :
     e "** Upload JSON filters."
     ot ${_path_rc}/update$_version.json
 
-    $compat
-    repeat h {
-      v:=i[$>]
-      _upload[] ${_path_rc}/update$_version.json,update$v.json,1
+    repeat narg($versions) {
+      ver:=arg0($>,$versions)
+      _upload[] ${_path_rc}/update$ver.json,update$ver.json,1
     }
     rm
   }
@@ -27498,6 +27546,10 @@ nn_lib :
       );
     );
 
+    nn_optimizer_generic_update_mp(P) = (
+      repeat(w##P#_ind,_nn_k, draw(##P#_ind,unitnorm(crop(##P#_ind,_nn_k,1)),_nn_k,0,0,0,1,h##P#_ind,1,1));
+    );
+
     # Stochastic gradient descent.
     #-----------------------------
     nn_optimizer_sgd_init() = 0;
@@ -27529,19 +27581,14 @@ nn_lib :
       learning_mode?nn_optimizer_sgd_update_conv_or_fc(#P,learning_mode);
     );
 
-    nn_optimizer_sgd_update_normalize(P,learning_mode) = (
-      nn_optimizer_generic_update_normalize(sgd,#P,#learning_mode);
+    nn_optimizer_sgd_update_mp(P,learning_mode) = (
+      nn_optimizer_sgd_update_weights(P#_weights);
+      draw(##P#_ind,P#_weights,0,0,w##P#_ind,h##P#_ind);
+      nn_optimizer_generic_update_mp(#P);
     );
 
-    nn_optimizer_sgd_update_nlfc(P,learning_mode) = (
-      learning_mode&1?(
-        nn_optimizer_sgd_update_weights(P#_weights);
-        draw(##P#_ind,P#_weights,0,0,w##P#_ind/2,h##P#_ind);
-      );
-      learning_mode&2?(
-        nn_optimizer_sgd_update_weights(P#_biases);
-        draw(##P#_ind,P#_biases,w##P#_ind/2,0,w##P#_ind/2,h##P#_ind);
-      );
+    nn_optimizer_sgd_update_normalize(P,learning_mode) = (
+      nn_optimizer_generic_update_normalize(sgd,#P,#learning_mode);
     );
 
     # RMSprop optimizer.
@@ -27583,6 +27630,15 @@ nn_lib :
       learning_mode?nn_optimizer_rmsprop_update_conv_or_fc(#P,learning_mode);
     );
 
+    nn_optimizer_rmsprop_update_mp(P,learning_mode) = (
+      const P#_ind_g2 = $P#_g2;
+      d#P#_weights_g2 = crop(##P#_ind_g2,0,0,w##P#_ind,h##P#_ind);
+      nn_optimizer_rmsprop_update_weights(P#_weights);
+      draw(##P#_ind,P#_weights,0,0,w##P#_ind,h##P#_ind);
+      draw(##P#_ind_g2,d#P#_weights_g2,0,0,w##P#_ind,h##P#_ind);
+      nn_optimizer_generic_update_mp(#P);
+    );
+
     nn_optimizer_rmsprop_update_normalize(P,learning_mode) = (
       const P#_ind_g2 = $P#_g2;
       learning_mode?(
@@ -27595,22 +27651,6 @@ nn_lib :
         );
       );
       nn_optimizer_generic_update_normalize(rmsprop,#P,#learning_mode);
-    );
-
-    nn_optimizer_rmsprop_update_nlfc(P,learning_mode) = (
-      const P#_ind_g2 = $P#_g2;
-      learning_mode&1?(
-        d#P#_weights_g2 = crop(##P#_ind_g2,0,0,w##P#_ind/2,h##P#_ind);
-        nn_optimizer_rmsprop_update_weights(P#_weights);
-        draw(##P#_ind,P#_weights,0,0,w##P#_ind/2,h##P#_ind);
-        draw(##P#_ind_g2,d#P#_weights_g2,0,0,w##P#_ind/2,h##P#_ind);
-      );
-      learning_mode&2?(
-        d#P#_biases_g2 = crop(##P#_ind_g2,w##P#_ind/2,0,w##P#_ind/2,h##P#_ind);
-        nn_optimizer_rmsprop_update_weights(P#_biases);
-        draw(##P#_ind,P#_biases,w##P#_ind/2,0,w##P#_ind/2,h##P#_ind);
-        draw(##P#_ind_g2,d#P#_biases_g2,w##P#_ind/2,0,w##P#_ind/2,h##P#_ind);
-      );
     );
 
     # Adam optimizer.
@@ -27664,6 +27704,18 @@ nn_lib :
       learning_mode?nn_optimizer_adam_update_conv_or_fc(#P,learning_mode);
     );
 
+    nn_optimizer_adam_update_mp(P,learning_mode) = (
+      const P#_ind_m = $P#_m;
+      const P#_ind_v = $P#_v;
+      d#P#_weights_m = crop(##P#_ind_m,0,0,w##P#_ind,h##P#_ind);
+      d#P#_weights_v = crop(##P#_ind_v,0,0,w##P#_ind,h##P#_ind);
+      nn_optimizer_adam_update_weights(P#_weights);
+      draw(##P#_ind,P#_weights,0,0,w##P#_ind,h##P#_ind);
+      draw(##P#_ind_m,d#P#_weights_m,0,0,w##P#_ind,h##P#_ind);
+      draw(##P#_ind_v,d#P#_weights_v,0,0,w##P#_ind,h##P#_ind);
+      nn_optimizer_generic_update_mp(#P);
+    );
+
     nn_optimizer_adam_update_normalize(P,learning_mode) = (
       const P#_ind_m = $P#_m;
       const P#_ind_v = $P#_v;
@@ -27681,29 +27733,6 @@ nn_lib :
         );
       );
       nn_optimizer_generic_update_normalize(adam,#P,#learning_mode);
-    );
-
-    nn_optimizer_adam_update_nlfc(P,learning_mode) = (
-      learning_mode?(
-        const P#_ind_m = $P#_m;
-        const P#_ind_v = $P#_v;
-        learning_mode&1?(
-          d#P#_weights_m = crop(##P#_ind_m,0,0,w##P#_ind/2,h##P#_ind);
-          d#P#_weights_v = crop(##P#_ind_v,0,0,w##P#_ind/2,h##P#_ind);
-          nn_optimizer_adam_update_weights(P#_weights);
-          draw(##P#_ind,P#_weights,0,0,w##P#_ind/2,h##P#_ind);
-          draw(##P#_ind_m,d#P#_weights_m,0,0,w##P#_ind/2,h##P#_ind);
-          draw(##P#_ind_v,d#P#_weights_v,0,0,w##P#_ind/2,h##P#_ind);
-        );
-        learning_mode&2?(
-          d#P#_biases_m = crop(##P#_ind_m,w##P#_ind/2,0,w##P#_ind/2,h##P#_ind);
-          d#P#_biases_v = crop(##P#_ind_v,w##P#_ind/2,0,w##P#_ind/2,h##P#_ind);
-          nn_optimizer_adam_update_weights(P#_biases);
-          draw(##P#_ind,P#_biases,w##P#_ind/2,0,w##P#_ind/2,h##P#_ind);
-          draw(##P#_ind_m,d#P#_biases_m,w##P#_ind/2,0,w##P#_ind/2,h##P#_ind);
-          draw(##P#_ind_v,d#P#_biases_v,w##P#_ind/2,0,w##P#_ind/2,h##P#_ind);
-        );
-      );
     );
 
     # Adamax optimizer.
@@ -27755,6 +27784,18 @@ nn_lib :
       learning_mode?nn_optimizer_adamax_update_conv_or_fc(#P,learning_mode);
     );
 
+    nn_optimizer_adamax_update_mp(P,learning_mode) = (
+      const P#_ind_m = $P#_m;
+      const P#_ind_v = $P#_v;
+      d#P#_weights_m = crop(##P#_ind_m,0,0,w##P#_ind,h##P#_ind);
+      d#P#_weights_v = crop(##P#_ind_v,0,0,w##P#_ind,h##P#_ind);
+      nn_optimizer_adamax_update_weights(P#_weights);
+      draw(##P#_ind,P#_weights,0,0,w##P#_ind,h##P#_ind);
+      draw(##P#_ind_m,d#P#_weights_m,0,0,w##P#_ind,h##P#_ind);
+      draw(##P#_ind_v,d#P#_weights_v,0,0,w##P#_ind,h##P#_ind);
+      nn_optimizer_generic_update_mp(#P);
+    );
+
     nn_optimizer_adamax_update_normalize(P,learning_mode) = (
       const P#_ind_m = $P#_m;
       const P#_ind_v = $P#_v;
@@ -27772,27 +27813,6 @@ nn_lib :
         );
       );
       nn_optimizer_generic_update_normalize(adamax,#P,#learning_mode);
-    );
-
-    nn_optimizer_adamax_update_nlfc(P,learning_mode) = (
-      const P#_ind_m = $P#_m;
-      const P#_ind_v = $P#_v;
-      learning_mode&1?(
-        d#P#_weights_m = crop(##P#_ind_m,0,0,w##P#_ind/2,h##P#_ind);
-        d#P#_weights_v = crop(##P#_ind_v,0,0,w##P#_ind/2,h##P#_ind);
-        nn_optimizer_adamax_update_weights(P#_weights);
-        draw(##P#_ind,P#_weights,0,0,w##P#_ind/2,h##P#_ind);
-        draw(##P#_ind_m,d#P#_weights_m,0,0,w##P#_ind/2,h##P#_ind);
-        draw(##P#_ind_v,d#P#_weights_v,0,0,w##P#_ind/2,h##P#_ind);
-      );
-      learning_mode&2?(
-        d#P#_biases_m = crop(##P#_ind_m,w##P#_ind/2,0,w##P#_ind/2,h##P#_ind);
-        d#P#_biases_v = crop(##P#_ind_v,w##P#_ind/2,0,w##P#_ind/2,h##P#_ind);
-        nn_optimizer_adamax_update_weights(P#_biases);
-        draw(##P#_ind,P#_biases,w##P#_ind/2,0,w##P#_ind/2,h##P#_ind);
-        draw(##P#_ind_m,d#P#_biases_m,w##P#_ind/2,0,w##P#_ind/2,h##P#_ind);
-        draw(##P#_ind_v,d#P#_biases_v,w##P#_ind/2,0,w##P#_ind/2,h##P#_ind);
-      );
     );
 
     #----------------
@@ -28213,71 +28233,6 @@ nn_lib :
       batch_d#OUT#_biases/=nn_batch_size;
     );
 
-    # nlfc: Nonlinear fully-connected layer.
-    #---------------------------------------
-    nn_nlfc_init_forward(OUT,IN) = (
-      const OUT#_ind = $OUT#;
-      const OUT#_width = 1;
-      const OUT#_height = 1;
-      const OUT#_depth = 1;
-      const OUT#_spectrum = h##OUT#_ind;
-      OUT#_weights = crop(##OUT#_ind,0,0,size(IN#),h##OUT#_ind);
-      OUT#_biases = crop(##OUT#_ind,size(IN#),0,size(IN#),h##OUT#_ind);
-    );
-
-    nn_nlfc_forward(OUT,IN,activation) = (
-      OUT# = vector(##OUT#_spectrum);
-      repeat(OUT#_spectrum,_nn_i,
-        _nn_res = 0;
-        repeat (size(IN#),_nn_j,
-          _nn_off = _nn_i*size(IN#) + _nn_j;
-          _nn_res+=nn_activation_#activation(OUT#_weights[_nn_off]*IN#[_nn_j] + OUT#_biases[_nn_off]);
-        );
-        OUT#[_nn_i] = _nn_res;
-      );
-    );
-
-    nn_nlfc_init_backward(OUT) = (
-      batch_d#OUT#_weights = vector(#size(OUT#_weights));
-      batch_d#OUT#_biases = vector(#size(OUT#_biases));
-    );
-
-    nn_nlfc_backward(OUT,IN,activation) = (
-      d#IN = vector(#size(IN#));
-      repeat (size(IN#),_nn_j,
-        _nn_res = _nn_off = 0;
-        repeat (OUT#_spectrum,_nn_i,
-          _nn_off = _nn_i*size(IN#) + _nn_j;
-          _nn_Wij = OUT#_weights[_nn_off];
-          _nn_res+=nn_activation_d_#activation(_nn_Wij*IN#[_nn_j] + OUT#_biases[_nn_off])*_nn_Wij*d#OUT[_nn_i];
-        );
-        d#IN[_nn_j] = _nn_res;
-      );
-
-      d#OUT#_weights = vector(#size(OUT#_weights));
-      d#OUT#_biases = vector(#size(OUT#_biases));
-      _nn_ptr = 0;
-      repeat (OUT#_spectrum,_nn_i,
-        repeat (size(IN#),_nn_j,
-          _nn_off = _nn_i*size(IN#) + _nn_j;
-          _nn_Wij = OUT#_weights[_nn_off];
-          _nn_sigmad = nn_activation_d_#activation(_nn_Wij*IN#[_nn_j] + OUT#_biases[_nn_off]);
-          d#OUT#_weights[_nn_ptr] = _nn_sigmad*IN#[_nn_j]*d#OUT[_nn_i];
-          d#OUT#_biases[_nn_ptr] = _nn_sigmad*d#OUT#[_nn_i];
-          ++_nn_ptr;
-        );
-      );
-      batch_d#OUT#_weights+=d#OUT#_weights;
-      batch_d#OUT#_biases+=d#OUT#_biases;
-    );
-
-    nn_nlfc_end_backward(OUT) = (
-      merge(batch_d#OUT#_weights,+);
-      merge(batch_d#OUT#_biases,+);
-      batch_d#OUT#_weights/=nn_batch_size;
-      batch_d#OUT#_biases/=nn_batch_size;
-    );
-
     # input: Input image or vector data.
     #-----------------------------------
     nn_input_init_forward(OUT,w,h,d,s) = (
@@ -28391,6 +28346,40 @@ nn_lib :
           );
         );
       );
+    );
+
+    # mp: Matching Pursuit layer.
+    #----------------------------
+    nn_mp_init_forward(OUT,IN,iterations) = (
+      const OUT#_ind = $OUT#;
+      const OUT#_width = 1;
+      const OUT#_height = 1;
+      const OUT#_depth = 1;
+      const OUT#_spectrum = w##OUT#_ind;
+      const OUT#_iterations = iterations;
+      OUT#_weights = crop(##OUT#_ind);
+    );
+
+    nn_mp_forward(OUT,IN) = (
+      OUT# = mproj(IN#,1,OUT#_weights,w##OUT#_ind,1,OUT#_iterations);
+#      OUT# = mproj(IN#,1,OUT#_weights,w##OUT#_ind,0);
+    );
+
+    nn_mp_init_backward(OUT) = (
+      batch_d#OUT#_weights = vector(#size(OUT#_weights));
+    );
+
+    nn_mp_backward(OUT,IN) = (
+      OUT#_tweights = transpose(OUT#_weights,OUT#_spectrum);
+     d#IN = mproj(d#OUT,1,OUT#_tweights,h##OUT#_ind,0);
+#      d#IN = mproj(d#OUT,1,OUT#_tweights,h##OUT#_ind,2);
+      d#OUT#_weights = mul(d#IN,OUT#,size(OUT#));
+      batch_d#OUT#_weights+=d#OUT#_weights;
+    );
+
+    nn_mp_end_backward(OUT) = (
+      merge(batch_d#OUT#_weights,+);
+      batch_d#OUT#_weights/=nn_batch_size;
     );
 
     # mul: Multiply two inputs.
@@ -28935,7 +28924,7 @@ nn_lib :
     );"
 
 #@cli nn_init
-#@cli : Initialize a new network.
+#@cli : Initialize a new neural network.
 nn_init :
   e[^-1] "[nn_lib] Initialize new network."
   _nn_modules_names,_nn_modules_types,_nn_trainer_data,_nn_forward,_nn_loss,_nn_backward,_nn_update,_nn_latest=
@@ -29292,41 +29281,6 @@ _nn_fc :
                  "end(nn_fc_end_backward($1));"
   _nn_init.="$0 $* "
 
-#@cli nn_nlfc : out,in,nb_channels>0,_activation,0<=_learning_mode<=3
-#@cli : Add a 'nlfc' layer (nonlinear fully connected layer) to the network.
-#@cli : 'learning_mode' can be { 0:no learning | 1:weights only | 2:biases only | 3:weights+biases }.
-#@cli : Default values: 'activation=leakyrelu' and 'learning_mode=3'.
-nn_nlfc : if ['$2']=='.' in=$_nn_latest else in=$2 fi nn_check_layer $in
-          check "isvarname('$1') && isint($3,1) && isint(${5=3},0,3)"
-          skip ${4=leakyrelu}
-  e[^-1] "[nn_lib] Add 'nlfc' layer '$1', with input '"$in"', $3 channels and '$4' activation."
-  init=$_nn_init
-  _nn_nlfc $1_nlfc,$in,${3-5}
-  nn_rename $1,$1_nlfc
-  _nn_init=${init}"$0 $* "
-  _nn_latest=$1
-
-# [Internal] Insert 'fc' layer, with parameter image having name '$1'.
-_nn_nlfc :
-  _nn_modules_names.=$1,
-  _nn_modules_types.=nlfc,
-  _nn_$1_size=1,1,1,$3
-  _nn_$1_learning_mode=$5
-  _nn_$1_input=$2
-  _nn_$1_properties="activation=$4, learning_mode=$5"
-  if !isint($$1)
-    {2*prod($_nn_$2_size)},$3
-    f. 4*g/(w-1)
-    if $5<2 50%,100% j.. .,50% rm. fi # Set biases to 0 if they are not learnt
-    => $1
-  fi
-  _nn_forward.="begin(nn_nlfc_init_forward($1,$2));"\
-               "nn_nlfc_forward($1,$2,$4);"
-  _nn_backward..="begin(nn_nlfc_init_backward($1));"\
-                 "nn_nlfc_backward($1,$2,$4);"\
-                 "end(nn_nlfc_end_backward($1));"
-  _nn_init.="$0 $* "
-
 #@cli nn_fcnl : out,in,nb_neurons>0,_activation,0<=_learning_mode<=3
 #@cli : Add a 'fcnl' layer (fully connected layer followed by a non-linearity) to the network.
 #@cli : 'learning_mode' can be { 0:no learning | 1:weights only | 2:biases only | 3:weights+biases }.
@@ -29403,6 +29357,38 @@ nn_maxpool3d : if ['${2=.}']=='.' in=$_nn_latest else in=$2 fi nn_check_layer $i
   _nn_backward..="nn_maxpool3d_backward($1,"$in");"
   _nn_init.="$0 $* "
   _nn_latest=$1
+
+#@cli nn_mp : out,in,nb_atoms>0,_nb_iterations>=0
+#@cli : Add a 'mp' layer (matching pursuit layer) to the network.
+nn_mp : if ['$2']=='.' in=$_nn_latest else in=$2 fi nn_check_layer $in
+        check "isvarname('$1') && isint($3,1) && isint(${4=0},0)"
+  e[^-1] "[nn_lib] Add 'mp' layer '$1', with input '"$in"', $3 atoms and $4 iterations."
+  init=$_nn_init
+  _nn_mp $1_mp,$in,${3-4}
+  nn_rename $1,$1_mp
+  _nn_init=${init}"$0 $* "
+  _nn_latest=$1
+
+# [Internal] Insert 'mp' layer, with parameter image having name '$1'.
+_nn_mp :
+  _nn_modules_names.=$1,
+  _nn_modules_types.=mp,
+  _nn_$1_size=1,1,1,$3
+  _nn_$1_learning_mode=1
+  _nn_$1_input=$2
+  _nn_$1_properties="nb_iterations=$4"
+  if !isint($$1)
+    $3,{prod($_nn_$2_size)}
+    f. 4*g/(w-1)
+    100%,1,1,1,"draw(#-1,unitnorm(crop(#-1,x,1)),x,0,0,0,1,h#-1,1,1)" rm.
+    => $1
+  fi
+  _nn_forward.="begin(nn_mp_init_forward($1,$2,$4));"\
+               "nn_mp_forward($1,$2);"
+  _nn_backward..="begin(nn_mp_init_backward($1));"\
+                 "nn_mp_backward($1,$2);"\
+                 "end(nn_mp_end_backward($1));"
+  _nn_init.="$0 $* "
 
 #@cli nn_mul : out,in0,_in1
 #@cli : Add an 'mul' layer to the network.
@@ -29953,7 +29939,7 @@ nn_trainer : if ['${2=.}']=='.' loss=$_nn_latest else loss=$2 fi nn_check_layer 
     name=${arg0\ $>,$_nn_modules_names}
     learning_mode=${_nn_${name}_learning_mode}
 
-    if isin('$type','conv2d','conv3d','fc','nlfc','normalize')
+    if isin('$type','conv2d','conv3d','fc','mp','normalize')
       _nn_$1_update.="nn_optimizer_$4_update_"$type"("$name,$learning_mode");"
 
       # Allocate data for storing optimizer extra data (moments,...).
@@ -29993,7 +29979,7 @@ nn_size :
   repeat narg($_nn_modules_names)-1 {
     type=${arg0\ $>,$_nn_modules_types}
     name=${arg0\ $>,$_nn_modules_names}
-    if isin('$type','conv2d','conv3d','fc','nlfc','normalize') siz+={$name,whds} fi
+    if isin('$type','conv2d','conv3d','fc','mp','normalize') siz+={$name,whds} fi
   }
   u $siz
 
@@ -30021,7 +30007,7 @@ nn_save : check "s=['$1']; find(s,'.gmz')==size(s) - 4 && isbool(${2=1})"
   repeat narg($_nn_modules_names)-1 {
     type=${arg0\ $>,$_nn_modules_types}
     name=${arg0\ $>,$_nn_modules_names}
-    if isin('$type','conv2d','conv3d','fc','nlfc','normalize','trainer') sel.=$c$name c=, fi
+    if isin('$type','conv2d','conv3d','fc','mp','normalize','trainer') sel.=$c$name c=, fi
   }
   ('$_nn_init') autocrop. {'" "'} => _nn_init
   o[$sel,-1] "$1"
@@ -30037,7 +30023,7 @@ nn_store : check "isbool(${2=1})"
   repeat narg($_nn_modules_names)-1 {
     type=${arg0\ $>,$_nn_modules_types}
     name=${arg0\ $>,$_nn_modules_names}
-    if isin('$type','conv2d','conv3d','fc','nlfc','normalize','trainer') sel.=$c$name c=, fi
+    if isin('$type','conv2d','conv3d','fc','mp','normalize','trainer') sel.=$c$name c=, fi
   }
   ('$_nn_init') autocrop. {'" "'} => _nn_init
   +store[$sel,-1] "$1"
@@ -32612,6 +32598,14 @@ shadow_patch : skip ${1=0.7}
     n. $1,1 *
   }
 
+#@cli shuffle
+#@cli : Shuffle vectors of selected images with Fisher-Yates algorithm, \
+# as described in <https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle>.
+#@cli : $ uniform_distribution 8,3 shuffle
+shuffle :
+  e[^-1] "Shuffle vector values of images$? with Fisher-Yates algorithm."
+  f "<begin(P = whd);swap(I[v(0,--P)],I());I"
+
 #@cli spread : _dx>=0,_dy>=0,_dz>=0
 #@cli : Spread pixel values of selected images randomly along x,y and z.
 #@cli : Default values: 'dx=3', 'dy=dx' and 'dz=0'.
@@ -32740,8 +32734,8 @@ blend : skip "${1=},${2=},${3=}" check "isbool(${4=0})"
   # Manage when '[layer]' argument is specified.
   if $is_image_arg
     pass$1
-    if $4 foreach[^-1] { pass$1 0 rv $0 $mode,$opacity } # Selection = top layers
-    else foreach[^-1] { pass$1 $0 $mode,$opacity } # Selection = base layers
+    if $4 foreach[^-1] { pass. 0 rv $0 $mode,$opacity } # Selection = top layers
+    else foreach[^-1] { pass. $0 $mode,$opacity } # Selection = base layers
     fi
     rm.
     return
@@ -34682,11 +34676,21 @@ is_ext : skip "${1=},${2=}"
   0 => "_$1" u {"lowercase(['"{x}"'])==lowercase(['$2'])"} rm.
 
 #@cli is_image_arg : string
-#@cli : Return 1 if specified string looks like '[ind]'.
+#@cli : Return 1 if specified string is a valid single image argument like '[ind]'.
 is_image_arg : skip "${1=;}"
   u {"str = ['$1'];
       s1 = size(str) - 1;
-      (str[0]==_'[' && str[s1]==_']') || (str[0]==_'.' && str[s1]==_'.') && min(str)>=45 && max(str)<=122"}
+      str=='.' || str=='..' || str=='...' || (
+        str[0]==_'[' && str[s1]==_']' && (
+          ok_charset = 1;
+          repeat (size(str) - 2,k,
+            c = str[k + 1];
+            ok_charset&=(isin(c,_'%',_'+',_'-',_'.',_'^') || inrange(c,_'0',_'9') ||
+                         inrange(c,_'A',_'Z')) || inrange(c,_'a',_'z');
+          );
+          ok_charset
+        )
+      )"}
 
 #@cli is_pattern : string
 #@cli : Return 1 if specified string looks like a drawing pattern '0x......'.
@@ -35046,6 +35050,13 @@ math_lib :
   _doi_orientation(px,py,qx,qy,rx,ry) = (
     _doi_orientation_val = (qy - py)*(rx - qx) - (qx - px)*(ry - qy);
     !_doi_orientation_val?0:_doi_orientation_val>0?1:2;
+  );
+
+  # Check if two circles intersect.
+  # Return (0:false or 1:true).
+  do_intersect(x0,y0,r0,x1,y1,r1) = (
+    _doi_dist = norm(x0 - x1,y0 - y1);
+    _doi_dist<r0 + r1 && _doi_dist<abs(r1 - r0);
   );
 
   length_spline(P0,T0,P1,T1) = ( # Compute the length of a spline P0-P1 with tangents T0,T1
@@ -41798,255 +41809,6 @@ fx_logo : skip "${1= }"
 #@gui ____<i>About</i>
 #---------------------
 
-#@gui ♥ Support Us ! ♥ : _none_,fx_support_us
-#@gui : note = note{"<center><a href="https://gmic.eu"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAA\
-# BXCAMAAACJMYjxAAAAXVBMVEX+/v4cO0s7OU4wPnEiJSju6+qiqrCMlZu3u8BufoHd3+FDY2JRLzljS2bLz9Lp9vrteR34lyZqHE3puI3S7/hbX6GUW4z\
-# wza97QiOaYUa6mqTdfz25i22+VxzqoGYqrht5AAAWRklEQVR42uyabZfiKBCFFYUCDDg7TqIh0f//M7duBSEx2p09Z18+7NzTPUYaE/J4qyjI7H7rt/5m\
-# nXe/9VtfS+vdb21U7Me/hNbblPzu/6czEs/Y39LmT/jU36C0+7/p/OvXeaf7S3+7bkQ19uN4uVzGG3/i31X0/3GyEFjXnu+991sCMN36dIGu479tLR9Cl\
-# +J/ll3PLMBKbJXbipbW+nq9Lgan2U/cl8V/4Tz3r8r+hEKMu/9CDCrDStdLz7RKXDGly+MxTBqZjM4hyJ3GR4Y1/suwOoHVuf8EFmgxK6YFWMyBI0yaGd\
-# Two+qPH8PwuDAvLX36fiyw/oFKRcdEHYuS9UtXB4GVSP/9HLw15JwjMtGfzx/jELwyLCjp3fUx/AEBUzlgYI8rh6oItBCGl+/TjH975Rj9p5QI+4gaVug\
-# YWPnQxOrvN5an0yFrv9+rE9m3oz7zD5xlxyviEBpHRiV+KqQgHAzoIeLAxAe+nw2tifq88pKn5P3bUTccZqzC69g0nc0f7f4ZY3l3OLQioQUdTsb/eu0W\
-# /RSKu8iwsrXuHHWvKsju2Vlgde3774cd2dxRe0s2xjI4psEhtl5ZpvAzdIVVNVgQXDo8jaWJQ9RGCdLtgeZjtAi26BftBqgyrCrg0suqxdvcoEdm1fdgx\
-# Uiqo1YOuxdjbasc6DmO1j5haeqgkLxe5e9uxQpid/EdpoYPA5FGxwYi+55WtCzDIlaMku6EgFL7gzJ2Hvbu0BKrsKq07KKfib/K150uOQoZzicVWr0E4a\
-# 3XG2AZMhgGw/LzcollzeLzuiu2Wotj0YcmG8sz6aYBMPM+fSl1UECzVyxjcEnFDS2i7HCYw9KnfQukS1Lod2ILzg1oTfTPW/DjBOtebPVKaUZrFFa3DYl\
-# WOzLmgKGbikaH0DIr8i+Z/QXVglqiCD6pMxwFAqthWDTjXRWVaqkFLdx1hnUgk3OStTNWh/YV1WmC5cwsN6K+MtZH87QW0wKrAmjOavq3RGJ/vT5uN7sp\
-# dz7tbWNtVbCWNFSljmml9POtGjaUt10TkN2TIBVrBeN3azlmxbBYFRY72+QmYxcxiAEKo6JWPjY3FiZBS9YXJ/N67zGxenwOQ2hAJG5k1eLKIuNrs7E2d\
-# fB0VQwpMau3MZgzlY+J/bVLPRJeppXsGzerYLquPYSDaILVSjZol7DoUPP66XQCMMkYMBbRnBVEZA35PLVzgr8Lq8vlBRfauLHQYlQbqgYGUFmpEP0MVp\
-# QEUBU7NhZ+wwoU+CWHzjryffq+76q1yOxWsgod2swqCCxdqVRYtrDKtFrhJZnNOL+Edf4VnTPGABZ07X9kLqBVA5KboFrV3/uL3jBZW6SJIoql3NJ4lbm\
-# wZrEEUBlV6JKoe2b3TpjggxptcBYnLT56F4cyfTzDsM2wGN0rLH+qrNDTiMidOK85fAsra52MLcGphwGskL3FRiVjXbIeBdYGVlKmE3+1eTjB+o/rHNsh\
-# BGEWqEsO8wIlFrCwscqH/E9+3zMxwFrFYc2IXeCJMKgShqDxhGLnQVjKKoOLEpEAY2OtYJ396eScezrrDmMB1eUKWktjQUOGdU+bHmboGC2PrQWq0JqPh\
-# HUnsEJmRS7q536ssYnZ2YoCjPpeWCEO3eqsRmAFwOLL5jD0cqzmzvJBWO0zK0dRT9eMfFGy690ZnPp0Utlyo0ShFPLjDNYPbuJlRz+D9dFaZ1zK4BuyXg\
-# LOU2gxYMvKCN4ZC4KHEHNUawrhZRPpJSx0E3EcpvgahSqwlKgmeD5+gUXzIKQCPQPT7zaUz+HIbtWzlDU2Y2qa8TJz1tiH4/EYZrDub/O7NxzvEM/IJlq\
-# pryPKQH4X/eddziCsWAp371531crIK6wGKvNhsfKEBcZ6AwuqsHQ7M5Yj0lv2SO2xCYrw9oLCgac6e22OxwbOyrQefeIW1fRDhTW+OR0dGBOEuGcjTTmK\
-# z26snnWrL1m2EVaN8MqFc+2Onh9gsRWbzujF+QhRWKz1ARab3s6NhRT1LSzQcrBWRBRKlXUftQ4Mq6+whhEtoPWjwOr96mwtk5LrE5lqBm0dWHnnQDDGC\
-# IMtAThJMpAKKDu/2vjygMRgWRlbiuhUunHiE1TfwNJUWSEOdltgcZzg4o4v2Aus4bo7O0ZzGzIrNHmGtVfuNoO1SvEGrKRWIDsnqWUNaLFIZFkogViRlr\
-# oo3yAS1lznNSyo0mpSwr3nE8rdFFisAmuvFrCe6X2/0ViSs1gEa1meC5+wrFNHNYel6XRUh1PqMyvWsIrDYixeKmj9mnK8td5r7JIYsqGbP3mwKvwEK9F\
-# 6t+r8AuvYzMVLnuRn/nPcxD6tsMISViuw5KLFWOC5VVodQwhaYLEuu2idc/0cliEub91lmMHq9RtYeTxEbrXXiCmZnCDpQkewUt7Vo9Bx5DQKCmS/WUFV\
-# TjXFV6Y6iLPU2lnsCGzRnDIsUihSJ4DOxbwP+oWtOGGJDJ8oULrdp9WOzNZpnIfh1aAeyLDu0GO13rHTOgHI2N5tG5zxHknKskzX5jsIiiFxW2JcTUD0c\
-# NleYJHzfxEWth7qTRrZilZvYYFVmQ15NO0hwzKoeeVHz3iti9KcFNlaamRYU6Glr8yKYZUEz0V9onTlakJYyXpnlbR0ttbkbqQDHLYQv1VZoTOWlZg+Xm\
-# yEGQIytmr4l0hvhFUVbAW8NlYNQ2EFeja/z3WDMjQRgfjlLatKKx4bsleeDbGl/ED9joUgU2IBliyBuHHIrADrNr6eMeLiUFs8VqWODArFFyhFryGplQF\
-# LyQ0GFk9Lm2Dd5rSsnf9VWK1z1mQslWHF4/4QcnpHg6ACj/fOmmDlN2TxPLUfhMZDuNwHNhQzY1x3pgUN8NRkrsdlvafsY766WGlBCqBkp9eua9MISp3t\
-# Al7IboA1Lo01W/KkEF5ZlZ1SNa/gLb/l99NwKWZWrC+sVdo1i601INCYDfYXJlbyoJXh8KF4amKFh/1xt6ZFe/7GXtUSMwIopK8YnERNlT2q4iyi+D2s/\
-# trfFrCaso8YXmDBS7MELw0Cy4BjzllTnnzCOn/I7/gLDsCq0GIhhXPsZY0XpgUNhdXt8X4DXsdIbYXUGgk6cPI+GpkKwyotGYEl6Yxh+e9h3fopDsfQZC\
-# Uz+SEWVqbQqrBYBRbhgOGV/H6usM7vH0aDE5gJLAnEsgU/cAAKKn6Qwz4rAkjeg+8/bJT6aCFjJ0X8IjWRUxDGR+YTLAG5ARaDAi2imuJ1jsJMy5njN7A\
-# wOeYwRH6vzvpsrHOOxgLrxt7KsC5PVgKrosLj6C+egmmfgcXImKKhVsbUYnABG7avOZxU0SZYRc7WFB/zTk92lnErWDUuAcsdi7P2Aqsm+PPnyVAOsrPw\
-# KJBpAcqAnA5cMjMWWBOqy4b/+BaJKK8mltPinsdaVBYQrLCCpckVAQfkb002FvupxCFZuWZZNNl3sMISFqZGHt9+goUYg/jwa1jnJ6x0Y2sJLZ4KJ00lA\
-# 5rQeAeqccsGvJ0/tMRx0SusKWKCc2tY6lj0/IuvK8OQahwaL1GYa1tHQX3tLJKL7iGEIaQ/FfGCaOI00cxR2PR4ajGwYCxgkRfOX9CIRu6QNmwqWzCCch\
-# lRZa3Wi55SW/OQD29gcdZvBJYrsIpCSuUYAHRN71tgIWWJDGUoAuxLWKwCK/AUAx4PcdTY31h9P/KxmExQjVHvNsiAi7B6kVnDkoG70wqW54bUHdewssi\
-# EfCSzhi2wyLyDFWqCFztzBIqmi+pC6nMYZmkA6dnfNyZ1haRBlN9PpvK7bTLqhdXzKBirX4pSZLa9fOmO/CwWvMIzH0ahlmFYCRFeGixtTdy55mksZ9ew\
-# JDPu1T4Xpcc/STe7JSdCIArLCDQ97OCFVZaxtnz/x7RPA2kGknEsj7pGFoT56NPLTyKdbgZLDXYLFhTEakiaHw/kJQix1d71h5ACKQTVTZFHMhhZ4Tdep\
-# Cln7QJJB67r/NLt8E1h0Q/W5x5hCRMABKyi3/NAkvYeO0ehfZth1fDdXIO1g1I7AscMic0uYInqOsti67tsI/LHQ7K46PMTyATWdymvhvz8l0+osHdu9S\
-# BglTQ1wATXBLJlzf5BWSkskeSsGRbiSURpP8DKq/MSFmp4ySUBlptguZbQNWcFvK6spKDU1eaF1rgLvz4O2tVvKknsYkqQgnCSfF8H4hyimdZkQ3BVXJv\
-# IUQxQxbVL+DQABsvj9A9FgBWifAtcDk4kVTU+iUqosNwJVjt1UFjfssFyKDAat5GVoid0WMdUXHCfkoIeTLHs98JLYBmfZ4Q5PXoOq2Mx45DBUht6ZBqV\
-# RZZHDuuVi7oQKnwIANCKHELF5s42bCldo5eciaTGLVZjkk+Uh5XNQ9VYiR/l3gfF2Evsd05fDZYh02hLU/OCvFu1HbFYaFnmGWBhCB0Wznd0TKKUcw2nL\
-# M/eYTlL8K6haqvi5A3WelF7eQIIUoy+vOkDYSVSVhBgVW3HJa8e9i/k5HcqpyEALLrGL03UQVUja8ubW2E1gQrJv7UG91Umc6mw6hT0yAIm9A4bosANSu\
-# WfYEVMS84SWabP7w0X1qi/DVaLr8sOkt9ew+ozawo7t8gCF05liCy4cIK1mWCfIiOWlmNC59BhbQYLL5VV6z+wM3EKtz5cUWkxYjgzyVeLLGwOdSPd3kE\
-# zwNqgdLlyyPkNrK+Uzldde3FQfd4eWl/GyHIjLH+CFTKG02BDWUs396RlsKAO61u8H1q2iAeruLHg4lTGpHUAkpyatn2jhNaHsVJdTEc+udCNtPJ5HkMI\
-# AsC5nmMyQgsVDJYbYdXeUZaVOnzYLdddqClT9Tz8m374KT5TnvNo2FcDthPAmGMUDxIx3OiruO5xoF1pPc6s/ArL0pDHuF7JidrIbEeW9HFt4KEvSl2H5\
-# aacpZ5VWMVXyL15REXg7wUtZ3VWHVZgb7A8lzAMKWFC12zVLjSqDTNYVeHdDsdD94Vd338aKQ/F91GbBlYrrjgHPZ7NlKPSUlgZjzzDciOskFuyao0p2n\
-# 84wvLKqsGCihvk8/OisxCcTeXFogGs4GC1/ihXE9cvoVRhsT/puLI5e4WVF1D6hdIC17tRWI+LSAKrP4zB6qGFWu08rBuzubDD+noJCyk+D7g2pogT3ea\
-# eF2nsuT8MkbPwaTnL9MGfDwGW6BhLN06X+RDDtgvqSS4ve8ydR1q+yWV7mBFWNx3FZ4ScXGg5C3QGWF8NFhpml+deTWbEFRYiTXhx9quwvxhB0d821LEm\
-# 3RlUv632UzpF1nInSXNBknONDQNjNrSyb1nBmAtf2vDJzvkOK0Rnsn67Ynp7hQ9YUGEkrEWW2incOXLoUQ9ABsrpnaL3a4jv5CcnGirIs8GC3UZYZC3hw\
-# hVWAKxngVHYyUpN/pnFymqZad21H6qtHxqdJN+If2cVEtbvdSJNHVx2jAx/acRVRH1vZFQpPvlV6bHXfVihcG26yox4+VnNwIdpm1jdg6WbELcIsNQoGL\
-# 7pYuAmP8Lq9Sh9OfvQbxR12idYAbC8wbrq1GDd2AX9NyyoxNwAQQZL1wX1jGalRRe0PNsKXoXHabBCREGtxQWwQoWlf3yNLG+KaezU+TewMnG6AevHD4N\
-# 1y4arSoq8GaSmzDFiO/PGvDE3XNgVTWmXDFZXjpbHqhxqIbJGpP2noTVLp07f+v7ChpY88NnJ/4SFOcNCibNrws4zTqjWJrSt0ZWdd0wU57tEijFNZZGG\
-# EmplKZ6bUUxTp1NwecwqMZalN2CB1ltY9OWmQr/KF9W/UtnDdd/gi6A4jZuJmPqZUIhkKj08qMpqpakWCqzS0mluy6xOCqjCHQMd17D4Hiq7yy9JoI1vg\
-# 7/GFYUGtvW5hgEpqWHkwbQWDj2b1mZnhd4pVDu8iP/l0xzM/BoWDpj+tHN2u23DMBSObfBXG32Tvf+r7hxaabu18RJsHXYxAi4tRTSlLyRttU3kc79oS4\
-# pTf5GTcPxDc9in0xePTzi09V51n/WxLp8tu2Rm4WAU/DWBM7p8yuTrAevuY/xqv/N2quf5AHakvG2p5W3gp0vKU058nbDu7njiBH5FWIqbOrZRUGrlxJO\
-# aqRF+jeEvEFw+xherypvWMuwnj6n56Jry0VLdUks8lTcBWBEBWPfkq5/Uu3WM8LFCe8YCHYal77HaWMYY9gorl6FCtf38mQoQz9cWjOrdmiwfXP2g6CO0\
-# XBNohz/BqsBqwno+tBJs1LWwPgWVAClFKyq3wQBxVw1Xc2lYvWRtWKWK3KOqynSX7iEr3wZa2a/vVX1f9CUyq0yvr3ZXKlP3lN21ZuQFSLk7wri7Kt386\
-# kajKp6zD5eH08B0kuaean5clM2L/Dqw7sP6cje0fA2HEswwdbFgTInY6rZg1kQj6YwwK8ICBgTOtkXagJQ4foKpDhWGRDhmGhimxYgtgaKHhhVbS/+Vyb\
-# axvZpnQIM0JDuq9sseS3fFyhHrgBEuDG2JyHVkhGr/cWBE1cLLaBbVaVr6OmGhvj8fWgbnByzfcR6LeSXiDSx0GX4Dam7eaXhAWSwdhKCip3s7VXV+FnY\
-# bhrw+1rGiN2+wQgHJdH1vDlOGYw+sozwMM3jjVYPnMIqFQ5U8d5gU2swJL0DTMcpWqsizW2GzOof1ZdV7YWkyYXF6sSwMBOFvh3va8832LCGsGIypI/yz\
-# 5zv8ipcdPWAr0hfjV40wFXXV2qImg6QvrhnwfzIPrHZgRA9stdNT4YihbXSg1UxYHbBMjPNoWFHUNqzH32UV6yOw8GCadyIL11b47z1zsWYxhoq5cYO1O\
-# xYyYcXwMQwTTR3s9aExRgHW621p375Vt9i7de+MLKxxM3GsPZXJTHOD2/nsf8BqtTOGZRCnXgBBJqx+5wb0hCVywMrWDMaTeq9kdVqyzp+1dDUhMRBYzY\
-# HektEhDJMxXjdyI6phKcaFYXIsUAByjU5N3ybbvWGNyg0Bou9gXRrWBnOk4zbNScEKIh3GhwEjBE4OWOsLLKnlPiwxFMqTu649BIvyMSxG+gFLbXh2gSc\
-# e1isbrEBEJ9kReKRAVxss3glLtzDPC2F9iwKrCWv/9g3H9jGstc3txVyUYZTSxjGKHnVRHDOylglr9jWXhqU/Rhbv5XW2h57lnVl4JncqvOgIG13PK47i\
-# EVYXWUcx4q3LRJjh9IBly1BlZEV0Gm6DFdyPkm/hcsAivgDxn9Nw1qxCBNzM6YGTCG/UhfMIB5F2SljxAot91CyurGMc9zYNIWfPc6LY7JwG1vlTaSo9K\
-# JdZYWywfO4WIFaBRpRoKxbIqMRRQTRcoBpUELTJVedUD2NlpqVYZLuhSejOgfnOPOkpfOY8vRqctNPDSIU+Y/QwtGkWyQ638MT5ruHK7hNakDTgWk8fHF\
-# ROzOfnmRJwvAWnO9vo4EvHECi0S3ik144+x/gRWjas5jBYQcrl1pI+B0BvswtN5Y35gPkaKdUeWrKUlrMrcToNBSDQJ+CJEe4ihYHlKY6ghA5OhHXlTMR\
-# jPdnrnG8d9sc3vHsfrWbjGsPiw80Jx/F4Z/1Wprkxd0926Tcd7ej+Fa3vhiw455Ia64dPDNyTfp4cGWE5574/bz5T9yFLDz+HYEe9eECk+h9aXzn1feqT\
-# halb8huwnzGXXwyVdH9qySJZkPz/XfH/5b/88/IdcfPxH+J0LVIAAAAASUVORK5CYII="/></a></center>"}
-#@gui : note = note{"<center>is proposed to you by</center>"}
-#@gui : note = note("<center><a href="https://tschumperle.users.greyc.fr/"><img src="data:image/png;base64,iVBORw0KGgo\
-# AAAANSUhEUgAAAEAAAABBCAMAAABW61JJAAADAFBMVEX27vz06viVWEaZZlbz5/Tv3urwxMeFXE2icmuBUT7w4u7QzeKaaFqRVUPs5vWKVEKBRyvr4vKR\
-# WEfSj4d/aGWuaVjkqqaca1+ATjnAfHCVWkh7UD/z6Pbv1d6DVUSGUT2TY1ONWUji1ubv0NiHeoaLd3zEgHW8d2qQYFCOX0+LUDri2uvcnpeQen+md3GKY\
-# laYYlGXXk3p3u3Z0uTFyN7nr62Aa2uoaFehYE93Tz/tvb7su7yYf4XIhHqgb2WRZVieY1KKXk/u1+Lvys/uwcPPi4KkZ1eiZladXk2ZW0nn2unXxNHpwM\
-# XqtrXntLPfr7DhpqKtk5yHdXuEcXSoc2uSbWeeZlaIWUjj3u/uzdPTvsrdu8LHrrmjipKQfYZ2ZWalbF9zYF+TaV6gaVurZ1aCYFakYlF9WEyJW0uDWUm\
-# PUz5yTDyETDTd1efSyNrRt8HOtsG8pK7go52IgpTMlJCbhY+rbF2QXEt7U0RiSTxXQjJ1PiLv5/bx4/Hw2+Xfztvmxs6WpMLlvMHNsbvCp7CalqqkjpuR\
-# h5iefX+iene3eW23c2VhXGWpbmKLZl2wa1unZFN0U0hrT0U/OzlRPC5aPCsrKyrKzOHCw9nnzdffx9K3u9KvudKnsszAtca+r76tqL2UnLfcqqp6iqiGj\
-# KWxmKK5mZ7VnZmbipbZmpLUlo68jY1rdY3JioC7f3eveXGfdG6wdmxpY2yIbGqxc2ZRTVNkUk9LQTt6STGFSjBHOS8qJR4gHhkWFxLd2ey5wNjGvM2Jmr\
-# mvobGCka+mnK6Pk6zZpKNpgaJ+g5mtjJB4eo6UgYu4hYHBh3+ZeHl2anBsV1RwSDM9MytmPig7IxPSz+ShsM3lubvetbl4k7TOq7LFoqnSpqd1hKLHnZ9\
-# paXmVcm6FaWRMU2F7XVZDRUpeRTZTMBxgMReaqsezrcC8n6mklaKfkaC/l5pbcY+nhoqvhYNMY4Cnfnx3b3xbY3eOc3W1cGFcWGBiVVZbTEliS0O4qbjS\
-# oKBQaYhBSFRDMiYCeYKqAAAKU0lEQVRYw42WBVhaaxjH4XDOoUREUhBEBQRFBLu7u2N2TqdzttO56czN3Kauu7u77rq7u7fb3X2/g9db3OeBv/Dg83D+P\
-# /7v+d7vPR8OhmE8Jhx4GSLsSuytFYyHceD9l/+fiPFrwD9/0/FjiHEM3tiYMXaZ9vt/+rVULNxfoHE39oH5MTcex8DhYB03EDCmL+z6+NTPVStWLj+xPA\
-# oGtH+GGxNAjPPB57/lOPNS/74D+18m7d7d359/3btTCAj/QowVB0LouLGvnbd+8/2Bw7cOHz584Kf9+3+4keSdMAXRvQxE0Amvzb/ss1f7h5tv3Rr5/ff\
-# Dzc0/zct/kZ2QMAHWJWgpugu17Mt9Tc0HRppHm0dGR9++bX7blP8y4aMOoc5CG4M/XRkv+/LNyEhzU/lUUVrARKKDQ/GNn35smnVxymKK7sX/V8Hdz74f\
-# fjdKLi1tJBBS85KTe32uSH840OSQKTTXTWv8P7yH3+w/cFBOAApzcxvY2ysLYSqz9428zqQY1qrOX/7wI9FI6w8NbRjYa2MWwuTEf/5jQSZiEIBx/rf9x\
-# SQMkOof6ubG7sMANS5xl1OqFxkEeO/X/te+JMyv9ncLZbP7zMyYTE6MV/vG9Y8M2m4Pn+c7+HIJav9UcAfC3NhsGzOmkhODCk90P55hgP/4+eusAl9QQV\
-# hqqFtDQ2gD20bG5Lh4oojd2exoAxIseOq6hwQAqeAWlLiFjiXgeAajCLKkPhM24BY83UMikQYVRAGZrvEPCy3SAoJRAKD2PKLoByzbmkIicec2jb7//m0\
-# yFD6nKLShoXfbhlg0EGntemwA4IPnJBWpeG75zZu3D5LpUAm7kJDWVB6wY3MQJfJUpwGAmbt3qmbtKSb67fDzOGgLsWXbjSx5Nz3SemMojmc+MgBwMufa\
-# i8+/HSwOMJo41YOn+S7u2UTBQQuaenvcDMrZ9QYA1vTv/Mo75fU8oHKBwK8vfhaoR6D29fklg7JqPWxACf2k2df2TJw7r7z8puBguE2NN2tu01uLbXVxb\
-# cKVj/QCjFf2sJJJvgUOxLKpHqIyD3ez2E7XufNul+/d4rIoavlivN4usJ+VsgPsJEVpY5qInkYrkcU8uvhyIj2sZvXqzJ+r2/QCloEm2EEqJKghuoUF3R\
-# SaI4uPjd+yk7tXpryfuXij/k78QOWbDABhBD5EmwRB4SV9yuDVzO1m25gcNIOS5WmtL8LSr/J2qUh5oe4REA2CNCVFQ/FI9BYwEWqCUSEyIUGmD7Bw1sC\
-# u2aS8VPdwQACvkqJN94VbGmxC4tEg6xkZCdtgfXvRPg8DhLlH8EEJ797R2HmjVwfY3/nUoNbW1tHrz+lLcFySl0wiFWIl2NraVlTQbOp2MZPDi8yUwRnW\
-# 1pkbMvQ++2eqVMmkwtQICAIEMrlizjaO57PC8O+YMWhG0ON4/Z1ot+KiimTkD4EloNF5PAtan9Kz/aI/2ycWRdEn7doK9N7HnVwN1gOgFeg0/lBI7P3Hu\
-# 9x8OGhQUHQgzgDdrVUZhdPJPBML3qFDkyLYPkrlFzsIZvEAYA0bkoCxlsRVQ4BQMc3E5BDE3hx/pUAcZlaDZgSO+/VM99OkQjUEKjA1nUQDvczxav80ZQ\
-# CUkAGPGVsWdnbM+BuhC5v5woig4YM+VJta0N3BAnrGbfFhuqBjBeDxH9SqZLGANX5i021newJB3Qjx1RpL8sEKdkgs+uDJBiUHHdsHeOcLKYShDfBfBz1\
-# dQPoF8FhpbOTz+TSybbgN08WrPY7DcUG1sc0ZJ7+Va4qYQlhrNsebm//PTQAPRjkxjUa3oEUMhShdUM/ouDgvdLr2YHX3aQqB7w4AY348rAvArykAE4Uo\
-# IpN5FlCJjdIlGkWjY70QGPPjl1wqEPPdNyEw5ofxxuYtuhuq1k8sJhInepDJZAtoKORce3Bb8APwk1rAUkmBBhriAABsDsPGeGNYdxXsxfIAAJgqwAjuv\
-# XWrH7Q/CMJjUUHiBbVG/PC+GCwB3MLAw/8F4BlLan3VmlIsgQfIwKMXXa17sjpa+OdpFLa7QIhwt8EA5uCkyzBnMIBpvL9aIiuXbH3lQNBAjUTR1LkeHg\
-# IyT6BW1f0SgyIUBA8DAmy3JiVijpknBYbh6S3TGY7gsA1WogWhWFm1RmV19fT8Np8M8fmNpSKBQHCTTBaQ1bvqXLxiAx0roygYIP00FyrZ5oVMh7VuR0d\
-# HnFNr1ASgqhWf5OS4SoeP3qZBfFNLOkYANYgK6+I80csJFKvjkaAKSvoabvicTVgiBoNh55iezsBNAerI6ly3MTExKTf36LE7h2iQKd80TUTmlfMEctBI\
-# KPrxDSF1uqMdSEC9IIaKNnkhiB0jMjLdzsrODldVVZXVvTGhW+LqmpSbf+TYHZMKGoSFEIl4ZNO9Sk8UDTrzZrWTFeVuZIvxaVeyRYQsVohgXiuryZOtc\
-# Fkd1R9vrM++LGW5uubemH/s2DSTCjCQTC1NIRotXAYGOprRtefqs+qsrI4JCy8Npvn3bj7XBqxO4AWE6zy1rt47J8dbwmK5sjDA+yYmk0ACrcAo8vIK/v\
-# QayTc5WUXaqbpy5eoGl/uZ0dZWVKoV1cmJSnXCJdRftgfyTsQA+fNvHQUAWzpkSoNABnaIC4cDxqQvF6iggEtKlm2KRgIXzYCXfeh4nIoJJ5FIpVJ7b3v\
-# pdUDInX/k6DsT8FyEsIliCRUx489tAac2LtihRlyuEbeQa8MxpyAIbunZVvMxQE99vSRJai+1T8rPZwHAkTsmh2xtaYBgSYfmMDfXzeYSjLTy8xODUeHu\
-# EwgjM6Y7nZxCXagFdHd3f5KTKJV6S3YXu+4ePnLrzjQTW1ADEI3G9pEpr2lP3sCuKA5QyBXQ3hgKskgYebJj5konZ2olrn7FihVnahMT7bt357KuDx89C\
-# gAmFSCCRgNBYQ1mLi8xO8FPEUAEe0xhaem/yTqwdfHi89UPOxnOzlSc9/qoyhMf1kq9O7bmsr59M3/fkWKyCbYQ7AECBJWEfDWSJldYitJ4PB65jEgUiS\
-# CzGCRwwpTn1acDcZOdnXE52YuWUyvPSj+PWvM1K2ff4a3De1hTsYluI/NtpLtvfk0QK0rp4LwzelsgArtcpOj1QiitWd+cWgkz0gFgbXbb2irqPUm29Um\
-# Jq/T7fScubEzCCJPMNs8qtXD3zzMCBWAjoqwMBAgQc7c/80QolMpLH0Y5Uo2PO+POZEedX9e6tKfe+t7axKTrw9Vbq2pZL/wqbIdqvnCg204jgFvvJ5dj\
-# Q6ZULh64uiGuLRBBKJEnVlktWMrAOePWfVL19LJwydps6/fWSpKS3kz49Yvll1gklT+bOTuAZzJNQxAPOsjFAQqxQk4gpPadC0LwAECx6oq8t9IRPxnn3\
-# fPRWUnWkq51Ue+tkiQmvqr+LP/TrueslO2y7XLgt9wpHhx0cCBiUmBrwAxGhEIEyGrBw+WRduk4+5yEVZL1lavOLHZeJZEmvlp3vn/2qa9zWbOvXCsDgC\
-# dfOwz6OWgJZZallnS+j+eitqBABHTjvTWVTlTGH/5VIUZ4CClbAAAAAElFTkSuQmCC" />   David Tschumperlé</a>     and    
-#@gui : <a href="https://foureys.users.greyc.fr/"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAM\
-# AAACdt4HsAAAC/VBMVEW3xMQAAADUqJoDAwEICALFmozFqIwGBQG1jYA7O0EfICUdHiMPDAoODASth3svLzYFBQQoKS8LCQM1NTwaGx0SDg0bHSEHBgYJ\
-# DQTRpZfCmIpuVk4XFxh5XlU3N0C+lIemgnaif3OPcGZ2XFM/P0clJSoXHAoUFQfAloi4kINrVE0QFAgJCAece3BZRj9WQz03LCYODw8UFRjNo5WXdmuEa\
-# F6AY1plTkYpKysuJSEYGBwlHhsYFRELEAWotbWxin2ffXEyMzlPPjhMOzVHODMkJi4yJyILCQi0wcGTnp6CZlxPVVVDQ1VxWE9oUUopKzQsLTJDNC8iIy\
-# UrIh9nbm6LbWRZWGOGaWBJU15eS0IxMT0gJCkgGhYSEhUUEg8XFguyv7+Ejo7Ep4u7koWphHibeW6ZeG2VdGqJa2JzWlJERE00O0NSQjouMzkhGxkfJgo\
-# cFgkQEARBQUk3P0diU0ZBREQxNj4uLzoqMDZAMyoyKSY1PyEQERMcIQ8LCwwiGwgYEgYSDwSturqfqqrKoJOvlX2UfmpXW1tJSVFHR1BIT087O0hhTEVZ\
-# S0UiHxsoIA8nMA6wvLyMlpZ+iIh9YVhPT1hFT1h7aVc6QUlHR0c3OEVdRz86PDwxMzMpJyQnIR4qLxoeGBMcHAocIwjHnZDCpYpubXpvdnZvcnJkZG9XV\
-# myTc2leXWhWVWBOTk5LS0srKzA/Ni47LyovNRofIBQkKxEQGwq8oIVcYmJcXl5RUVtWV1dMS1VHPzgrKRSXoqJhY3iljHVbWnGbhG5naWVQW2WIc2BNTW\
-# BTUl0+P0xFSkk4OTZ6hIR4gYFze3ungHFQUGVjYmGDb1xoXlVdWVA+SFBAQFA9QEE4MjIuLy80Lyo5LRmFhJG6k4d1dIC0mX9vbm5UU2eNd2NJSVtGSi0\
-# 4RBYyPRQ6LQ+lsbGapaWAf4tsb4Z5eIVYY299aWlDSlN0Y1JvX09RSEBMQz5CPz4/SxinrKyVmZmNjIufeWF2Z12ObFYuJgeXgXY+PimhEuIiAAAMWklE\
-# QVRYw7yTX2hSURzHPZ57UeIqcvE2/IdOiZz5Z+OqUxRnc/iXDUrHGJhOlpuDMIN8mA+p0xJGU2a9jDlXIRgEjUYPG6PtZU+tFVHQ/hD0EKxeeqgoiIqu+\
-# 1Mrrce+cO49f+75nO/5/X6X9h808O/lMcvfVjKumjIZT3HsX4C3RRrN2eDYR7enNrjE1tbHucTG4rXJ0F995KouZ7XOxcraxw/laDlh8psD0Y1o28yZ23\
-# 8DHPGUxkJ/enT52ogNP4SEFygJwDFjDliyvMk0BAjX45bxT79fovgxYOZgsw6oNI4qIXaTg2EQlnIrDQEGD3fhczF0eOrN3GmHIOJ1MxX6qLHrqk5hw0x\
-# +AGYsjQHjuaXqo98cWB4qFWQky6PzeJJmhUqalbrJl60AxC2NAa9y48Xf9zsUZ3t5Ffq+Xko7SOrZa1YWnZb6hHnGF0vVMdehMPowQUXWjUoPALzs3ksV\
-# zQ08ri+J0NTdBd9YaPUnemWzhxSPnqWTJP0PWVcbVdTjtuq4J+OJHxTKpIGI8BQROr1Zsntuyy9Atmu1AeDFyczk5NuFjPMAIGwdtSp0tQjubrpDQX5aW\
-# GtQCty7S5MZn8+zvnIAGNX0yw8Zp8K3F4MKKdM8qg/i2sy19Zm7S4uPB/YBs9PRTt5hAG8vGJUIaRVw6zP5HBoMU9y5tYMYWPJGwka2qLL0OvE7JVt/An\
-# y055e4r0qbc679n9DlafLrjFKyIiLrAD32ygMK4Mw497+lkl+irT4vx59Oeaq1SeeAL795U0u6+3gkX7Vr//BltApFIrRwO3Qst1CdHHAVPZeowqCVVg2\
-# LL3IzPgpgcVXj5bI3q4tIVa1aZm1PM/uwhYr6jA84hADi5pnNo7OngXDFQ1szTJWE3IcLb9/QckueYlnozarYIjMw6/v6OujkvgPenb5aZkYuxQN5IlbY\
-# 3i4AvMAAwOygGcvxMnZm3VdcsVwz5F5wgDc7JOoSCLqvtzq8CrK3km05Zzun9tpPySlAk8GfD2zfYuDpGJ5kJHGHktYUJHAEaVMKuaeFTW2Y0pEYmieIU\
-# 10Jqa5HOMJDeb3XE8b3l7/NG9UUgPPgCwZYOzvpFJLGWTuxJItmBgDHY0kGUH6/ceOGn0jkmzp7ulVqAnb15LF+Se+dL1cmavpgktBHsGf3TIBRSMfArW\
-# QhCWMpQLOD4wAGWRAoX7++HyBknd3XO1qmNRrO1jNp74h/3mS6N/EuqmwavWgy2bTGAHSkYoVYGsdBOgVvAkCj2p5uvl7ehq3t04RdEtaEZecmnmkiNuZ\
-# gpJ1te/dudjpiPyuax6IExmDFGAA5j4DkDmRRAFATQvXMy4UglMkEmLq7Y1DhZrL1IzKvGB02Dl2fmNA163SivmbbVZGdEWQdh6kLt1iprxCnABACKh0Q\
-# AYXtWAz49e6AWn1V6pZq+eI+tUksVykEeiYTbRmShZvl7m6RLQU5QQAhA0my0pACpBCIBzngAtgV8eRJoF9uVQgEonBYpjGKmV2Doqtn+WK2VNRuZfcLh\
-# qNgXwiCfK1dgWrgxv0TjAPAtEOAarUoKrcyVWa7uOWcTDrUYu206SUSvs6mkAEIaoLwAkgjNQdBanSLFYMIYw9wyjSI8vkoynSjEuMwija3C6xsvlgsR9\
-# lhk1qur3llMBgsiOMQT1OAPLXt/vJyAUGOU732jlOz4kE+WhM/3MMcVqHtw2zm7jgik/Uz7YASC+5eASJpqpB+sFQ2IUqEYRyfl/eVmUCHYSt8UQcdrRl\
-# nRx0NP1piUFxxwVAwMxEqCb8SpMGFDrUNdSk6SAjZIaIvpSA2otbVW12KDtWlCIqIiKg9dIqgQ3TpHet3GIYXnv888/z/zwyacWCzVjtrQ9BKzwVkVZ4X\
-# MJl00O22MGrdMof1tDKCFdA2MAfSEk0UKKQhSYREdcFKhO2F4tFK/FrU7Y67k8XlYpzpX+P9Fj/pJzbstDZaVrKKCIDeAqDRuYWRDVCTrW+DgaTBmlSDg\
-# KzYzrzP39m3L1zOlxL5kvVEqcwKbJ6xMMEU0+onreTRBJpkyNbrIShRmqSL+tYWtiFAqEn2ht/h57vHPdalnSuZdNpZDW2UU4V4pxLzt6os6YDkEAEagg\
-# Uk2UCPAhCLhoIh+I+d9fvqFn89tJLrqDmejzqj+bjcXWowwXTscBb2SCmBXMjUEXFBGejKE2KANUCOFmjI5YjhQsoZVePxYW69HE9Z8jud6rrF4k62AxD\
-# UaKDR/6YooXM0oNBYMaSRSHMcGQ+EHLgZDVa8+X5TCPed/VKp0FrMqnJIIInwdlEPmOGh//tAxggoHSARYGIE0nVNH+NZoOBsMJmkW24W98VzsWFiI1Rg\
-# TIE6exhIpl+kXsEaNCXMV9BmmjLDioY1DWJzkmHWwWQc3mjQE1oOrKSvNRx1byxJglDeCfB870ww/ndHYaRhPJvNtKORCJ4ZSFRE35BJy6lKxuNgvd6kz\
-# DgYdZElM8gAhMF/FwDqQWhDCFEAcBo5VeDJy69cylQUp8al4w5vnlUTxfbGkA8XCkIydpptNBJ28A+MTZ3BVP9FIkTdIkwVZQIjr465ADD1Nh+32KjcZs\
-# LZ5cCyM7GeYCu8pameDq9IY4I+GG8NpoNfv6a6CEVqjfB1bbImGq4XR0j9Gdeex4+dAsmCp+KRfesCry42u4ybf37h/JufNzYREgfit2+SJo7GYm+MKQN\
-# CaEynhkE+ChC+2//g84Mdp085vUmhWiqwQaERdft9xTr/5cfShQ+rn+6u7lrdZud0BU0MGkqiQhlmCxOMUGTTRf57By+/DB3OJoqynBTasQRbDfssjlCx\
-# 8+VOeOnp+107rnzfdv/jvUNXIpGjoydPJkQAcByHJ2uTva+fXd2z48Dlt7//3M5mni+m2zmmwjc8cpPxpLtf7twJP6puX3149+HFQ9/v7vr+8eO967vRa\
-# C7wt6ayCW0aDsN4RCzm/xfTP4kpaA0eEhDxq0Fwxh2MGi8GEouWmFjBXoTUeGhr20npraVd1Yu0q1URD461tm47FWuFtqNrK6hzuokgzrGjil/gB17MBH\
-# /393ne530Or8uVvPHg0cQlsRi31HNXn/8Z3nS6PnN0+v7mzee3bVy36/zhx7MBR/3xi4M1b7nJ8SaLr0KW3+WzZ+3XduP9i0cTLx5xghGlw+jck9/7nWv\
-# uphztO8Ondq3fuP3QvgPDtn878msikc28/fguDzPVqm+8AbkpUP2IY7ceTg6h1wzo1xi6q8UvPdty89iZg18DgZnIhU0njl05Ox2Zvee4F7n9EOpUtWaa\
-# RSZcZHNsbnm5NRhkxrHjbpgh+zhrIXf8U7AIT04c2ToyMhZwBJaW0mPz6XTKYZN6+fMNIng2iVpdujColJTeoqCaZCOEsURTzTA0Ho2rYAHQweT1oZGRv\
-# XvvOQLz7bELewKOf/PTvyY5hrGPqHygmVxFknOyXFSrPuYjNi4KUBV8FKHQyHDdjtOj1717926YrQcCS/PtmVWBQGp68pIR7FUk2I9+HsC5FkBRXQZ4iD\
-# HLWI0RcC8xjnhe6vqHRqkSGL3+fWRDZEfd8Z/Uq8kbKEfKHbgTfYrmvKUWSBpSh1Y1/F0ZIxmzLzTIMmuAIE0kaDgHnpz7dvd0atV76XSkbuf/8cA1V4J\
-# zDFqrFTslmJPXUD2dgTWg9msYp2bjkunJQpcnGPYwxJSuJ0afnrw2vbpBfWa2PT8TGeL1SrArkoSzEPsAPSvyWkCQeeQjCZLF8q6MXQNu22tEMpGFMQU0\
-# p+DDB7vbY6tEvqYj1NTKSicXRAS91hYQhF6MJgS/iji7liZGSXiIoqNRCLUoT3hdJGMgnFtz8UL6y90NZ76mD1/DG6GerNe8Ccbr0oTlxVIlyQJfk8jbv\
-# fqqmCto1TjNWIiDoEYRIuFnOUjGPUn/cGQs/eXOxZ1ixvtZIX0myWQF65PSEphlvMHhoawPiawdwSTDMLxgRAsgXOAJXZY4WpQVxIeAy3V5WJEInGM/A1\
-# +ZdJMiwAuxFX+PMxEtIicNRESSGBJBtBi3V0gYQYHhdcMUqVJUkaBVXLCCMUlnGI4uNTiax1XCFlAkmcapAZ53rnGzXreFAcPSDAXGw0OEpWYggfwxmZc\
-# lq4AoIRyWlQrQKyLbcIfjRYvktDBoDZrqYg6nPHzflzU5DAF/AqeUboxPJCQ9V4LOWMW/KFmwKcbU7KKkzHWE/DjhmSpoCcLZ1fQO7uMId1VI+rM4zXr/\
-# AnoH9FcRhS6kAAAAAElFTkSuQmCC" />   Sébastien Fourey</a></center>")
-#@gui : url = link{"( IMAGE Team / GREYC Laboratory - CNRS UMR 6072 )","https://www.greyc.fr/?page_id=443&lang=en"}
-#@gui : note = note{"as well as many other friendly and wonderful project contributors you can meet on the \
-# <a href="https://discuss.pixls.us/c/software/gmic/">G'MIC forum</a>!"}
-#@gui : note = note{"\nIf you appreciate what we do on <b>G'MIC</b> and want to help us maintaining and \
-# developing this piece of software, please consider <a href="https://libreart.info/en/projects/gmic"> \
-# making a donation</a>!\n\n"}
-#@gui : note = note{<center><a href="https://libreart.info/en/projects/gmic"><img src="data:image/png;base64,iVBORw0K\
-# GgoAAAANSUhEUgAAALAAAAAwCAMAAACG2QC0AAAC+lBMVEV7e3uQkJAAAAAMDAyIiIhdXl68vr0rKytmZmZsbGy7vb0mJiZxcXF+fn6NjY17e3u1tbV0d\
-# HRzc3OEhISbm5u8vLy2t7Z4eHh6enp3d3eVlZWUlJSdnZ1vb2+4uLiamprOzs5XV1ezs7NpaWmHh4etra1eXl6Dg4NtbW2np6eDg4O9vb2YmJgrgnFwz7\
-# xqzbn6/fxlZWVsbGwvNjRtzrtuzrt00b5iy7Z0y7pky7b3/Ptxz7z2/Pr5/PtbyLI9ppFnzLd2zLtyy7lozLhz0L3z+/ny+vhmy7dvb2++6eBszbrB6uH\
-# a8+3W8ettzrr1+/nd8+/S8Orm9vN20b9SUlLo9/St49gqfGwuWVHj9fG5596G1sZcXFwyMjLw+fdopprk9fLP7+htxrRBkoLu+ffs+PbN7ufG7ORajIIs\
-# g3Lf9PC76N9+1MNpp5teo5VboZPU8Ouv5Nmr4te12tJ40r9ku6pmsaNZp5hNmInq9/W25tyZ3c+B1cR+tak4jn0thXRdXV1QUFDR7+mz5dup4tam4dWj4\
-# NSQ2suN2cp60sGZx79frJxlppljpZjY8ezK7OW649qb3dCU281808KFyrxqvq1NnY09k4Ivi3lOTk7E6+PI5+G43tag3tKk1cqK2MhPsp4+kIA4jHwzjH\
-# vE5d2t2tGp186MxbpWq5pWoZJAmIdFlYYyk383inpWV1fQ6eOx5dqo3dKd3tGw1s+oz8eYy8F20b5pzblvyLaDwbWDv7N5vLCIurBwr6Nrr6FFrplEqJR\
-# OopJSno81iXkrg3JaY2FDSEfV8eve7+ud2MyizcWSzcBtyLVfyrRww7NzvK50tahZtaJksaJol45EnItdj4VUioAziHdbdXArfW0qeGlTbmlkaGdiYmJg\
-# YGAmYVU3W1RQVFMoXFJIU1E+Pj7T6+aY1MiOz8KG0MGOzMCNy75owrB7s6hknZFBo5BEoY9DoY5UnI41mYVjgnxfgns9cWcnZ1o+X1k1TUg5QD4sPjsfP\
-# zgzMzMkKilq0aUXAAAALXRSTlMdvgAO0AmQAv33kAjy38w1MBPu1rJ4bibm5MS8uKqJdV9ZEv20nJORfGVUPh6rD+f7AAAHWUlEQVRo3mJgggJuhsEMBJ\
-# lgAOpgAQ1ZacZBDFTUtJSQHCwoKsyjbDiYAQenpIg2O9TB7PwinIZHvzg6EQcsqAYciQcXjhpyCIlxgx3MLi7C0XBbj6bA2gUFmJmZuegBSbwgGAJg3Lc\
-# 37vBocoMczCzHGXP7DB7baOR8M+JAMMzhwZfvCPODHMzP23BjqqkevYE1DBDrcrNtRznVuZkYuEU5Pk81oaODMZ2OHyC8FW/Ix8/EwCxz77KeqaneIAfW\
-# ZmbWO2IkFIEO5mu4agIFpkAwONxuHVxSYoae7s+E8IixMzCzwB2McPWAu7yjwC00OwdFyMVlR6MHFyvIwRleXiYowAsIQE4fOLcXuhkYuEVtQxVMavRgA\
-# zkYQE0Z7KYNBAH03o+BOdSsdu1dIRnbMiYlsQQSdoUaiYQq+BAQl9jcIAQujYBTK0X8QpRD8wk99dqf6E901osDjhWlx+QdGHZmdubZB3/+Wi7XFZkwJg\
-# 788+6fUrQir/V8zLKvs+wzAH4UHqTywkUy4SLF1v/sqReyL+7YHgPSudlnngm/NZIzJXzwxG9aeHLK0Jd/C9+J8PLWAMSK6+9D+FPQBIT7ia7rWlEYP2v\
-# VqimT1Wo1Depkqqj+qFDOyvtkvlmNUKFQxWC+NO7w1qoLEt5ygyC4Xy0xbSrh79kbptSRUIyV1TQYDIJ2UteuXW+kOc545LrXzs+Z67qe58YP2LYceh4e\
-# B9OEIk71po134vlGjlh7niwG92vN0YZ4R4JhrebX5LSy4yzbrnuHO6P5dOC68Wyx2++YSYeDMmaSq7iSpvPCKYSgiteyGGeG7df0E4AjndLJEcA5jU7Uj\
-# OZZQGl4rA6WP6LIrGMbDCunCxwxVcsMqzMv6x14YkhTxjjtpJyOYD8oXZz2mgynds/VfhrFHQaHcH9NkbwwQeQFonsWR12DcauSEyZSOC1Ad05wm+zinF\
-# +tCJ315B2GP40wFeZpH7+olC4M7Ep7jTYuQJQwUcIkvDTSIuPHqkxWNoc89pwgO+EPqfAfkrG8Qsmksr32LvWaFC4Rshc+N0OvB6wvhQ3vcdG3oRmQ7Rf\
-# O/XiR9A0s1QgKt8JS8gs3jQkyaYE1JIpM+JEQJXzXBeZtxzftfp8o7gx4Ru9hJ6zthUVGpYdai6gkkLoULguxwRW3YiyFhYgawG7FBIVdIUIfjIEY2WCP\
-# sP93A8DfiHsUjsjGBTjTBRKhcFs8oUthInAEqooHG1gcbh739dVzYd6YCDndNM2/O+F/1NNLaxNRFMDxT3TgrBQu9zKruSJNmRicagpOIpO0JDKpbakmC\
-# xOIrQXTxKBpUrTGJrHvqpRasK19F+wDrJZCv4BvxBe4905m2kqTxm39LwYuzJzzW8x9+lva720QkUYcZ+/eG5AG4gI8IEm9VxEfSB1xwV48/VBFmpZeO8\
-# Rz8UyXD+UhaZCyYK8k6mbIe6VWRF/rrSY/kssDkuiFC+W8dLjhqgAvSuYIkpYyfmSyq761+5RklzkKJlfEGNHS0tKPd9Y/fP4i7Bf9oKGIcef0qm6CdYC\
-# EWPEYrl9GdD9vdlHkW3BNbFsfuqMSps7Ac8Ke9YFohCINBRrQiqbm9kDU4UX5NhwUNsFPoDyiH5bTShnlq38DVjcqwI3fwO7CpQrwWm7YwZlJ9mcqwFbK\
-# lXFzmxUfzJXBE5Vg7+wq/BMcCw+6y2SW2jkGTIcmjgeL9vTsZDwiJtzXBdFpglOHYCK7G3Rzm3UIPowCbFKmzgFArI2h1mKC1fl+RD45VhUs7oJDgBecJ\
-# higqCcaUxoybesYsH94rQY4HJzRC6XSggvxTqGOYWQ0Gr0hDuky+AHYCTBtB7thH1OmCsXouIrMuWKCXS3gYOifj1UBj99nqIaj0VkVySC8PNdTiJaK0x\
-# ry6WPAkVmoBVZk59nuu00c6UZfRkZ0tHU6CSozNcAjzwjyeNdNNyLP52ywuE0YTFQBlz6KqfVtDUGC2hy8pNqr1ke3UgrzblcHM/d2TbCMVkrTd8jWKfu\
-# HQA0wzDuINZv3Z8EGP9mUkTT/qgTDaLNNUupAgNGKT05UB9P0bi1wrsvpkxnhwXwiBn3Xp7wyIdzbsAO1wLDQrHJCNedQFvbBsHKOoPypEiymtrvMqe7O\
-# BMBIo1ujjPocw8tQHcw/Qy1wbKwl2WN4ki25NRDpoR6Ppyc0FgMohgxDOKwKIcPzEw4KZMV74iMdQEgNI1kEWB31GMaoOOeShicMfzduTw0I/W4o6TH39\
-# YHdV/nIneutCj45LXfGIwwPe1864WCIxSY2Hq9zhRJCqBzMwEkHl8t+yU+1i/Idgf8D/GdIYIg7mGvUwbQE4X/ADuZb90B3aICbT4SAw63cqve+39IdEu\
-# BbCC9wQJtdgfPYfd0hAf5ySIsDJ2XEpRoeDIkgfvSQR54d6GBuBYl1P27qDnrw6BiHjA54JlRQjifm8W/dwQ3u/3p4V1gAOtcsKMrL0fD4p/EgBsfW3eW\
-# UEmCHz+YLyPIKcRoNYsAjyScPmc4HAHFPJOZJDzOgAAAAAElFTkSuQmCC"/></a></center>}
-#@gui : url = link("Go to the donation page","https://libreart.info/en/projects/gmic")
-#@gui : sep = separator()
-#@gui : note = note{"\n<b>G'MIC</b> officially collaborates with <b>LILA</b> (<i>"Libre comme l'Art"</i>),
-#@gui : a French non-profit organization, which promotes Arts and Artists as well as access to technics and
-#@gui : knowledge for everyone.\n
-#@gui : <span color="#EE5500"><b>LILA</b> collects donations to help developing <b>G'MIC</b></span>."}
-#@gui : note = note{"<a href="https://libreart.info/en/projects/gmic"><img src="data:image/png;base64,iVBORw0KGgoAAAA\
-# NSUhEUgAAAJYAAAAyCAMAAACJUtIoAAABd1BMVEX///8iHCSKb5H+/f7KyMrz8vTw7fGfiaWag6DNwdA5NDu8rMDm4OiOdJWgiqb8/P2hi6fv7+93c3i7\
-# ubx/fIAwKzL49/j18/U4Mzr7+/v39ffJvc36+fq0oriUfJvs6O0oIyrb2tzVy9hBPEPy7/Po4+mCf4Pp5evZ0NvHusrDtcbBs8WvnLPu6u/c1d7Ft8iRe\
-# JiPdpbj4uOwnrWrmLCmkauempuCfX1hW1s6MzPOw9G5qb23pru1pLpybW1DPT3l3+fi2+Tf2OHe1uDAsMO2pbuyoLaXlJTt7O3TydbQxdO3tbeppqichq\
-# JVUFZKREQsJi7v7PDa0t3DwcKjjqmIhIc0LzYkHiby8fLT0dO/vb6olK6WfZxaVVhMR0vYz9vGxca7q7+yr7KtmrI+OD8nISnr5uywnbSsqqyal5uYlZe\
-# McpONiYx0b3LY19iqlq+koqWhnqF1cXZpZGhjX2JdWF5RTE4yKysuJycmHh7Pzc6QjZHw7PF1dNCuAAAF40lEQVRYw+2Z+VfaQBDHh26JWKupWpPmABRR\
-# LgFRaAuoBUSqKNb7vm21rdr7bv/4zmysUgM+fMY+fuj3h52Z3XnJJ7uzZKPwX1fUvuMq8sE/UsOtq+guGJL9jFspFYyQVYrBbZEcfSI6xx0QI8FGFa06y\
-# kM2OktGbkS5yckBSS1GcyJ3IgzUXBlW870atXGOFXCEuW3SMvyuWj4TEQkvrmWH8oww8ums34uOe9C4f8sYdUtzocIcdfc4ee96KnuoAaX1e8DtLMNqYV\
-# CbGs+w9HVPiDvOoshtKGrYOby3UqJJsjco2J5jFVMJmTv+IDcGVjFEwCqlxQ9918XyR/WESo7gXM+RldOJbUYpAQAWpwrMHLJyLGVfTmlmrNAENgsCTwv\
-# v370eFus73C35DddX0rkVWqh2ttM4Wy00LbMLYjnWXceuc0ExYTVGceoxn9KYp3ARS1d5IEmMKZIq0RVFSVUVHGK6hFLKsYR1rzdSYDQngrtBorsKwkKY\
-# LpDY9gacvLb2Na9PPsPKe7ze/bsmLGFhVGjKMyNN7LuI9X6TB8cjTF2IHbnWMwATrqPmUkCEWYcLFSjH6sEyVxp1wKSxoaxRU2NzjK9mdCylGI8YcDYJ1\
-# DNBkCmEz/L19hk70+vhRgiNTYhwmvbLcwHr6TMePHrMZJfW40+47KA5RiOh5iALxzS/339whvVvZMaK4BM1Z0HDrcR2HWI41kND9YCVa/YRFpK46gbLGU\
-# 270iJhiXLiLS7icCgU1MuxJnt7e3+qYNJAL+rNabCH/jFcqpeY8p7ViHUvnojFZdBi6wnXhg/CsUQ83ieVY9232WwPWsGk2zZU+2nQhn7HpVQrM5jSOVD\
-# 7ItodedBcwaZmP4BpES3DemUjLbKascAZp0Vk6ZJ0c1hqN8daWqkZS25I85L3bgTYjWFN2gy9uwTr68jISNs4xxoMph0uYycyrV8Nx+LDw8Mh0Wos5dMp\
-# 1hepKlb7CMd6+Zrpob63g4FZgAiRSGNZ+5ATlbcc602nzbZMV7LdroZVi6zG6sXxzfHn2I6w+sEav4Pje2yRsgbqB+slDt+xQ1cn2lfVsfQeqjzxQKZIF\
-# UUVDTY89Lp1q7HEaeMnS/mMdkuqhiVGM14AVswFZIyiuVyAnz2VuEJhRrUaa5Vmqet01pZ3qmEpGgVMY9kM2pSmFdG4A9GgzI+2ktVYdIlpuvFKB3on1b\
-# CYFhGw9cxpKmH1+FJofFkP/4wKjAoWY9mXcHSK3/iE8sar1ZYi6JTklSjAhqyigCKiVb1W19YeDs4YLGs2IqyLncio0D8avn6Hr2c9YA0s4+DkabBIRd9\
-# VD1ivyy+w+gKjY1YJa36RB0UPFdYj/hyewtu+qADuYa4gsxBL38KxD38ikaJuvRLWwyc8GNzFZuf7FuX0lXadGxvug0Jh4ahQyFuJtUp5a2Vzh9q5BGss\
-# BMBGPn3/QVhDAF5HEw56+q1dREZv6ecrZ3HXDE0eq44VbARwJ29vPjrFgkL8BrDsdCxtO4/FTYyXWqtjuQWAqSfiVHLFwNLvpW8Aa95GGN3n6qCOvepYh\
-# P54EQ6+tSNWIhVI9PvAeqwPtkr6JF6GNfC1vbV184RBX3/DRiwD1mONP6iI1TFwGdbU92Qy+S3ZSosYdmnWYxmfFp1/6QX/1LgM6/HH+fn5vW9riIUg/Y\
-# L1WB+psla7yrVDXNOiGSs5OTnZLgP0fKXfE/blxCj5ButL3kcF3sagXArtxZkuE9ZUEvUEV7d9i7/XH36RhvJotx2I6i9ZiTVFSfMXOh9S52sTltRKEtF\
-# ZMY7QraKk82Mz9imqhVj88LCkV3p3b4nXf1Uvrd3+SxWxZv7OWRURoJPWsOLR/sWb62KZNFMBy6TndoD3aJfXKv+Z5Gc5VmlWqE1RC7D4tDxQzScw2ovd\
-# rAzrVnONOrIAixdRG5jECNe2eq3/+RzfMamb+n+QNw+GFs1J0zJMkd0Bs97RwKuzMNB0FQlAkuxm8cIlRwGoliQzo1cEsxQaUKGO9Rt9fgZfvm2LPQAAA\
-# ABJRU5ErkJggg=="/></a>"}
-#@gui : sep = separator()
-#@gui : note = note("<small>Author: <i>David Tschumperlé</i>.      Latest Update: <i>2019/03/13</i>.</small>")
-fx_support_us :
-  if $!>0 k[0] fi
-  gui_print_preview ""
-  l[] {
-    filename=${-path_tmp}gmic_donations.png
-    need_update:="Y = date(0); M = date(1); D = date(2); date_current = Y*365 + M*31 + D;
-                  Y = date(0,'"{/$filename}"'); M = date(1,'"{/$filename}"');
-                  D = date(2,'"{/$filename}"'); date_file = Y*365 + M*31 + D;
-                  date_current - date_file>=15"
-    if $need_update i https://gmic.eu/img/donations_latest_months.png o. $filename
-    else i $filename
-    fi
-    0 t. "Latest donations to the G'MIC project:",0,0,24,1,1 rows. 0,120% *. 255 channels. -3,0
-    rv a y,0.5 drgba 200 frame xy,4,200 frame xy,2,0 to_rgba
-    onfail rm
-  }
-  if w>w#0" || "h>h#0 rs. {-2,[w,h]} fi
-  j.. .,{([w#0,h#0]-[w,h])/2},0,0,0.85
-  rm.
-
 #@gui About G'MIC : _none_, _none_
 #@gui : note = note{"<center><a href="https://gmic.eu"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAA\
 # BXCAMAAACJMYjxAAAAXVBMVEX+/v4cO0s7OU4wPnEiJSju6+qiqrCMlZu3u8BufoHd3+FDY2JRLzljS2bLz9Lp9vrteR34lyZqHE3puI3S7/hbX6GUW4z\
@@ -42296,7 +42058,6 @@ fx_support_us :
 #@gui : If you appreciate <b>G'MIC</b>, you are welcome to send us a nice postcard from your place, at:\n\n
 #@gui : <small><samp>David Tschumperlé,\n Laboratoire GREYC (CNRS UMR 6072), Equipe Image,\n
 #@gui : 6 Bd du Maréchal Juin,\n 14050 Caen Cedex / France.</samp></small>"}
-#@gui : note = note{"You may also consider <a href="https://libreart.info/en/projects/gmic">making a donation</a>!"}
 
 #@gui Download External Data : gui_download_all_data, gui_no_preview(1)
 #@gui : note = note{"This filter will download all external data files used by some filters of the <i>G'MIC</i>
@@ -42408,7 +42169,7 @@ fx_gmicky_preview :
 #@gui : from the server logs: <i>IP address of the client; date and time of the request;</i>
 #@gui : as well as a short string, supplied through the HTTP protocol <i>"User Agent"</i> header
 #@gui : field, which describes the full plugin version as shown in the window title
-#@gui : (e.g. "<i>G'MIC-Qt for GIMP 2.10 - Linux 64 bits - 3.4.0</i>").\n\n
+#@gui : (e.g. "<i>G'MIC-Qt for GIMP 2.10 - Linux 64 bits - 3.4.2</i>").\n\n
 #@gui : Note that this information may solely be used for purely anonymous
 #@gui : statistical purposes.
 #@gui : "}
@@ -42436,12 +42197,13 @@ fx_gmicky_preview :
 #@gui : - <b>2022/04/06</b> : version <i>3.1.0</i>.\n
 #@gui : - <b>2023/01/16</b> : version <i>3.2.0</i>.\n
 #@gui : - <b>2023/09/04</b> : version <i>3.3.0</i>.\n
-#@gui : - <span foreground="purple"><b>2024/05/14</b> : version <i>3.3.6</i> (Current stable).</span>\n
-#@gui : - <b>2024/06/XX</b> : version <i>3.4.0_pre</i> (Current pre-release).</span>\n
+#@gui : - <b>2024/06/14</b> : version <i>3.4.0</i>.\n
+#@gui : - <span foreground="purple"><b>2024/09/04</b> : version <i>3.4.2</i> (Current stable).</span>\n
+##@gui : - <b>2024/XX/XX</b> : version <i>3.4.3</i> (Current pre-release).</span>\n
 #@gui : "}
 #@gui : sep = separator()
-#@gui : url = link{"View changelog for upcoming major version (3.4)","https://discuss.pixls.us/t/on-the-road-to-3-4"}
-#@gui : url = link{"View changelog for latest major version (3.3)","https://discuss.pixls.us/t/release-of-gmic-3-3"}
+##@gui : url = link{"View changelog for upcoming major version (3.4)","https://discuss.pixls.us/t/on-the-road-to-3-4"}
+#@gui : url = link{"View changelog for latest major version (3.4)","https://discuss.pixls.us/t/release-of-gmic-3-4"}
 
 #@gui What's New? : _none_,fx_whatsnew_preview
 #@gui : note = note("Here you'll find a list of filter additions and deletions in the plug-in, since your last visit.
@@ -53837,26 +53599,26 @@ fx_droste :
       x0,y0,x1,y1,x2,y2,x3,y3:=round([\
         $1*w/100,$2*h/100,$3*w/100,$4*h/100,\
         $5*w/100,$6*h/100,$7*w/100,$8*h/100])
-      100%,100%,1,2,-32767 polygon. 4,$x0,$y0,$x1,$y1,$x2,$y2,$x3,$y3,1,-65535
+      100%,100%,1,2,32767 polygon. 4,$x0,$y0,$x1,$y1,$x2,$y2,$x3,$y3,1,65535
       sh. 0
-      f. "i==-65535?(
+      f. "i==65535?(
             x03 = "$x0"+(y-"$y0")/("$y3"-"$y0")*("$x3"-"$x0");
             x12 = "$x1"+(y-"$y1")/("$y2"-"$y1")*("$x2"-"$x1");
-            (x-x03)/(x12-x03)*(w-1)):i"
+            (x - x03)/(x12 - x03)*(w - 1)):i"
       rm.
       sh. 1
-      f. "i==-65535?(
+      f. "i==65535?(
             y01 = "$y0"+(x-"$x0")/("$x1"-"$x0")*("$y1"-"$y0");
             y32 = "$y3"+(x-"$x3")/("$x2"-"$x3")*("$y2"-"$y3");
-            (y-y01)/(y32-y01)*(h-1)):i"
+            (y - y01)/(y32 - y01)*(h - 1)):i"
       rm.
       xshift,yshift,alpha:=w*$10/100,h*$11/100,-$12*pi/180
       ca,sa,w2,h2:=cos($alpha)/$13,sin($alpha)/$13,w/2,h/2
-      f. i==-32767?i:(X=i(x,y,0,0)-$w2;Y=i(x,y,0,1)-$h2;!c?$w2-$xshift+X*$ca-Y*$sa:$h2-$yshift+X*$sa+Y*$ca)
-      if !$14 sh. 0 f. i==-32767?x:i rm. sh. 1 f. i==-32767?y:i rm.
-      elif $14==1 sh. 0 f. i==-32767?x:w-1-i rm. sh. 1 f. i==-32767?y:i rm.
-      elif $14==2 sh. 0 f. i==-32767?x:i rm. sh. 1 f. i==-32767?y:h-1-i rm.
-      else sh. 0 f. i==-32767?x:w-1-i rm. sh. 1 f. i==-32767?y:h-1-i rm.
+      f. i==32767?i:(X=i(x,y,0,0)-$w2;Y=i(x,y,0,1)-$h2;!c?$w2-$xshift+X*$ca-Y*$sa:$h2-$yshift+X*$sa+Y*$ca)
+      if !$14 sh. 0 f. i==32767?x:i rm. sh. 1 f. i==32767?y:i rm.
+      elif $14==1 sh. 0 f. i==32767?x:w-1-i rm. sh. 1 f. i==32767?y:i rm.
+      elif $14==2 sh. 0 f. i==32767?x:i rm. sh. 1 f. i==32767?y:h-1-i rm.
+      else sh. 0 f. i==32767?x:w-1-i rm. sh. 1 f. i==32767?y:h-1-i rm.
       fi
       if $16<2 warp.. .,0,{!$16},$15 rm.
       else
@@ -54230,58 +53992,6 @@ fx_fourier_transform :
 fx_fourier_transform_preview :
   fx_fourier_transform $* k[0]
   if !$_preview_error gui_resize_preview fi
-
-#@gui Fourier Transform [Old] : fx_fourier_old,fx_fourier_old_preview(1)* : *
-#@gui :Magnitude / Phase=choice{0,"One Layer (Horizontal)","One Layer (Vertical)","Two Layers"}
-#@gui :Discard Transparency=bool(1)
-#@gui :_=separator()
-#@gui :_=note("<small><b>Note:</b> Apply this filter once to get the direct FFT, and once again to get the reverse \
-# transform.</small>")
-#@gui :_=link("Click here for a video tutorial","http://www.youtube.com/watch?v=3137dDa6P4s")
-#@gui :_=separator()
-#@gui : note = note("<small>Author: <i>David Tschumperlé</i>.      Latest Update: <i>2018/06/16</i>.</small>")
-fx_fourier_old : skip ${2=0}
-  if $2 remove_opacity fi
-  magic="GMICFFT" i=0
-  for $i<$! {
-    ni:=$i+1 nm={$i,n} is_ifft=0
-    +columns[$i] 100%
-    l. {
-      mag,m0,M0,m1,M1=${u\ {t}}
-      if ['$mag']=='$magic' is_ifft=1 fi
-      onfail
-    }
-    rm.
-    if !$is_ifft +rows[$i] 100% l. { mag,m0,M0,m1,M1=${u\ {t}} if ['$mag']=='$magic' is_ifft=2 fi onfail } rm. fi
-    if !$is_ifft
-      +rows[$i] 100% l. { mag,m0,M0=${u\ {t}} if ['$mag']=='$magic' is_ifft=3 fi onfail } rm.
-      if $is_ifft==3
-        is_ifft=0 +rows[$ni] 100%
-        l. { mag,m1,M1=${u\ {t}} if ['$mag']=='$magic' is_ifft=3 fi onfail } rm.
-      fi
-    fi
-    if !$is_ifft
-      l[$i] {
-        fftpolar +.. 1 log.. m0,M0,m1,M1:=im#0,iM#0,im#1,iM#1 n[-2,-1] 0,255
-        if !$1 ({'$magic,$m0,$M0,$m1,$M1'},0) y. a x
-        elif $1==1 ({'$magic,$m0,$M0,$m1,$M1'},0) a y
-        else ({'$magic,$m0,$M0'},0) a[-3,-1] y ({'$magic,$m1,$M1'},0) a[-2,-1] y
-        fi
-        => $nm
-      }
-    else
-      if $is_ifft==1 columns[$i] 0,{$i,w-2} s[$i] x,2
-      elif $is_ifft==2 rows[$i] 0,{$i,h-2} s[$i] y,2
-      else rows[$i,$ni] 0,{$i,h-2}
-      fi
-      l[$i,{$i+1}] { n[0] $m0,$M0 n[1] $m1,$M1 exp[0] -[0] 1 ifftpolar c 0,255 }
-    fi
-    i+=$1<2" || "$is_ifft>2?1:2
-  }
-
-fx_fourier_old_preview :
-  if $2 remove_opacity fi
-  dfft
 
 #@gui Fourier Watermark : fx_watermark_fourier, _none_
 #@gui : Text = text{"(c) G'MIC"}
@@ -54890,10 +54600,10 @@ _fx_burn :
   foreach {
     w,h={w},{h}
     +norm
-    fx_fourier_old. 2
+    fx_fourier_transform. 2
     +rows. 0,{$h-1} r. $2%,$2%,1,100%,0,0,0.5,0.5 b. $3%
     j.. .,{($w-w)/2},{($h-h)/2} rm.
-    fx_fourier_old[-2,-1] 2
+    fx_fourier_transform[-2,-1] 2
     blend overlay,$1
   }
 
@@ -55242,6 +54952,8 @@ __fx_illuminate_shape2d : # Input selection must contains a single image. Output
   normalize_illumination,\
   preview_interactive,\
   preview_mode=${1-31}
+  blending_mode=${arg0\ $blending_mode,normal,lighten,screen,dodge,add,darken,multiply,burn,overlay,\
+                  softlight,hardlight,grainmerge}
 
   # Generate 2D binary shape and corresponding bumpmap
   nm={n}
