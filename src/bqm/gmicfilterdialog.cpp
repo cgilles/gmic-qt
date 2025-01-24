@@ -59,6 +59,8 @@ public:
 
     Private() = default;
 
+public:
+
     bool                     edit            = false;   ///< True: editing mode ; false: adding mode.
     bool                     filter          = true;    ///< True: filtre       ; false: folder.
 
@@ -95,7 +97,7 @@ GmicFilterDialog::GmicFilterDialog(GmicFilterNode* const citem,
     QLabel* const frontLbl = new QLabel(this);
     frontLbl->setText(tr("This dialog allow to customize the G'MIC chained command strings corresponding "
                          "to this filter. "
-                         "Don't forget to assign at least a title and optionally a comment "
+                         "Do not forget to assign at least a title and optionally a comment "
                          "to describe the filter."));
     frontLbl->setTextFormat(Qt::PlainText);
     frontLbl->setWordWrap(true);
