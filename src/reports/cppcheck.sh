@@ -21,6 +21,19 @@ trap 'echo "FAILED COMMAND: $PREVIOUS_COMMAND"' ERR
 
 checksCPUCores
 
+if [ ! -f /opt/cppcheck/bin/cppcheck ] ; then
+
+    echo "Cppcheck static analyzer is not installed in /opt/cppcheck."
+    echo "Please install Cppcheck from https://github.com/danmar/cppcheck"
+    echo "Aborted..."
+    exit -1
+
+else
+
+    echo "Check Cppcheck static analyzer passed..."
+
+fi
+
 ORIG_WD="`pwd`"
 REPORT_DIR="${ORIG_WD}/report.cppcheck"
 
@@ -54,7 +67,8 @@ for INCLUDE_PATH in $HDIRS ; do
     INCLUDE_DIRS+="-I $INCLUDE_PATH/ "
 done
 
-cppcheck -j$CPU_CORES \
+/opt/cppcheck/bin/cppcheck \
+        -j$CPU_CORES \
          $CPPCHECK_DEFINES \
          --verbose \
          $CPPCHECK_OPTIONS \
@@ -67,7 +81,8 @@ cppcheck -j$CPU_CORES \
          $INCLUDE_DIRS \
          ../..
 
-cppcheck-htmlreport --file=report.cppcheck.xml \
+/opt/cppcheck/bin/cppcheck-htmlreport \
+                    --file=report.cppcheck.xml \
                     --report-dir=$REPORT_DIR \
                     --source-dir=. \
                     --title=$TITLE
