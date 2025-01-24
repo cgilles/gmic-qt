@@ -41,6 +41,8 @@ public:
 
     Private() = default;
 
+public:
+
     GmicFilterManager* manager   = nullptr;
     bool               endMacro  = false;
 };
@@ -188,7 +190,8 @@ QVariant GmicFilterModel::data(const QModelIndex& index, int role) const
                 tip += QString::number(commandNode->commands.count()) + cnt.cellEnd;
 
                 tip += cnt.cellBeg +  QObject::tr("Chained Filters:") + cnt.cellMid;
-                tip += cnt.breakString(commandNode->commands.keys().join(QLatin1String(", "))) + cnt.cellEnd;
+                const QStringList keys = commandNode->commands.keys();
+                tip += cnt.breakString(keys.join(QLatin1String(", "))) + cnt.cellEnd;
 
                 tip += cnt.cellBeg +  QObject::tr("Description:") + cnt.cellMid;
                 tip += cnt.breakString(commandNode->desc) + cnt.cellEnd;
