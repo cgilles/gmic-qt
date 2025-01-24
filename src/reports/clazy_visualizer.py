@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 # SPDX-FileCopyrightText: 2019      by Austin Hale, <ah at unc dot edu>
-# SPDX-FileCopyrightText: 2020-2024 by Gilles Caulier, <caulier dot gilles at gmail dot com>
+# SPDX-FileCopyrightText: 2020-2025 by Gilles Caulier, <caulier dot gilles at gmail dot com>
 #
 # Export Clazy static analyzer output to HTML reports.
 #
@@ -29,7 +29,10 @@ checks_list = ["[-Wclazy-assert-with-side-effects]",
                "[-Wclazy-qstring-varargs]",
                "[-Wclazy-qt-keywords]",
                "[-Wclazy-qt4-qstring-from-array]",
+               "[-Wclazy-qt6-deprecated-api-fixes]",
                "[-Wclazy-qt6-qhash-signature]",
+               "[-Wclazy-qt6-fwd-fixes]",
+               "[-Wclazy-qt6-header-fixes]",
                "[-Wclazy-qt6-qlatin1char-to-u]",
                "[-Wclazy-qt6-qlatin1string-to-u]",
                "[-Wclazy-qt6-qlatin1stringchar-to-u]",
@@ -89,6 +92,7 @@ checks_list = ["[-Wclazy-assert-with-side-effects]",
                "[-Wclazy-qstring-left]",
                "[-Wclazy-range-loop]",
                "[-Wclazy-range-loop-detach]",
+               "[-Wclazy-range-loop-reference]",
                "[-Wclazy-returning-data-from-temporary]",
                "[-Wclazy-rule-of-two-soft]",
                "[-Wclazy-skipped-base-method]",
@@ -107,7 +111,9 @@ checks_list = ["[-Wclazy-assert-with-side-effects]",
                "[-Wclazy-returning-void-expression]",
                "[-Wclazy-rule-of-three]",
                "[-Wclazy-static-pmf]",
+               "[-Wclazy-unexpected-flag-enumerator-value]",
                "[-Wclazy-virtual-call-ctor]",
+               "[-Wclazy-use-static-qregularexpression]",
 ]
 
 # Each check will have its own node of information.
