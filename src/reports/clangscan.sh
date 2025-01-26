@@ -20,6 +20,7 @@ trap 'echo "FAILED COMMAND: $PREVIOUS_COMMAND"' ERR
 . .scan-build
 
 checksCPUCores
+StartScript
 
 # Check run-time dependencies
 
@@ -117,3 +118,5 @@ echo "Clang Report $TITLE is located to $SCAN_BUILD_DIR"
 cd $ORIG_DIR
 
 rm -fr ../../build.scan
+
+TerminateScript

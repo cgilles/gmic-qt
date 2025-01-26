@@ -19,6 +19,7 @@ trap 'echo "FAILED COMMAND: $PREVIOUS_COMMAND"' ERR
 # Analyzer configuration.
 . .cppcheck
 
+StartScript
 checksCPUCores
 
 if [ ! -f /opt/cppcheck/bin/cppcheck ] ; then
@@ -36,13 +37,17 @@ fi
 
 ORIG_WD="`pwd`"
 REPORT_DIR="${ORIG_WD}/report.cppcheck"
+CPPCHECK_CACHE_DIR="$HOME/.cppcheck_cache/GmicQt"
 
 # Get active git branches to create report description string
 TITLE="GmicQt-$(parseGitBranch)$(parseGitHash)"
 echo "CppCheck Static Analyzer task name: $TITLE"
 
+if [ ! -d "$CPPCHECK_CACHE_DIR" ]; then
+    mkdir "$CPPCHECK_CACHE_DIR"
+fi
+
 rm -fr $REPORT_DIR
-rm -fr $WEBSITE_DIR
 
 # Print the skipped directories taken from the config file.
 
@@ -59,6 +64,7 @@ done
 echo "Cppcheck defines     : $CPPCHECK_DEFINES"
 echo "Cppcheck options     : $CPPCHECK_OPTIONS"
 echo "Cppcheck suppressions: $CPPCHECK_SUPPRESSIONS"
+echo "Cppcheck cache dir   : $CPPCHECK_CACHE_DIR"
 
 # List sub-dirs with headers to append as cppcheck includes paths
 HDIRS=$(find ../.. -name '*.h' -printf '%h\n' | sort -u)
@@ -73,13 +79,17 @@ done
          --verbose \
          $CPPCHECK_OPTIONS \
          --enable=all \
+         --inconclusive \
          --check-level=exhaustive \
+         --cppcheck-build-dir=$CPPCHECK_CACHE_DIR \
          $CPPCHECK_SUPPRESSIONS \
          --xml-version=2 \
          --output-file=report.cppcheck.xml \
          $IGNORE_DIRS \
          $INCLUDE_DIRS \
          ../..
+
+echo "Generating Cppcheck HTML reports..."
 
 /opt/cppcheck/bin/cppcheck-htmlreport \
                     --file=report.cppcheck.xml \
@@ -89,3 +99,4 @@ done
 
 cd $ORIG_DIR
 
+TerminateScript

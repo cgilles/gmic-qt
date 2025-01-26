@@ -21,6 +21,7 @@ trap 'echo "FAILED COMMAND: $PREVIOUS_COMMAND"' ERR
 
 . ./common.sh
 
+StartScript
 checksCPUCores
 
 # Check run-time dependencies
@@ -106,3 +107,5 @@ java -jar /opt/saxon/saxon9he.jar \
 cp ./krazy/style.css $REPORT_DIR/
 
 cd $ORIG_DIR
+
+TerminateScript

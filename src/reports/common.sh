@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# SPDX-FileCopyrightText: 2013-2024 by Gilles Caulier, <caulier dot gilles at gmail dot com>
+# SPDX-FileCopyrightText: 2013-2025 by Gilles Caulier, <caulier dot gilles at gmail dot com>
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -37,4 +37,24 @@ function checksCPUCores()
     fi
 
     echo "CPU Cores to use : $CPU_CORES"
+}
+
+########################################################################
+# For time execution measurement ; startup
+StartScript()
+{
+
+BEGIN_SCRIPT=$(date +"%s")
+
+}
+
+########################################################################
+# For time execution measurement : shutdown
+TerminateScript()
+{
+
+TERMIN_SCRIPT=$(date +"%s")
+difftimelps=$(($TERMIN_SCRIPT-$BEGIN_SCRIPT))
+echo "Elaspsed time for script execution : $(($difftimelps / 3600 )) hours $((($difftimelps % 3600) / 60)) minutes $(($difftimelps % 60)) seconds"
+
 }

@@ -35,6 +35,7 @@ else
 
 fi
 
+StartScript
 checksCPUCores
 
 ORIG_WD="`pwd`"
@@ -98,3 +99,5 @@ mv clazy.html $REPORT_DIR/index.html
 cd $ORIG_DIR
 
 rm -fr ../../build.clazy
+
+TerminateScript
