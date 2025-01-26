@@ -39,6 +39,8 @@ public:
 
     Private() = default;
 
+public:
+
     GmicFilterNode*        parent    = nullptr;
     Type                   type      = GmicFilterNode::Root;
     QList<GmicFilterNode*> children;

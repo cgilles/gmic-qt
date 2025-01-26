@@ -40,6 +40,8 @@ public:
 
     Private() = default;
 
+public:
+
     FilterThread*                   filterThread = nullptr;
     gmic_library::gmic_list<float>* gmicImages   = new gmic_library::gmic_list<gmic_pixel_type>;
 

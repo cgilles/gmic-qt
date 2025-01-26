@@ -52,6 +52,8 @@ public:
 
     Private() = default;
 
+public:
+
     QString         hostOrg     = QCoreApplication::organizationName();
     QString         hostDom     = QCoreApplication::organizationDomain();
     QString         hostName    = QCoreApplication::applicationName();

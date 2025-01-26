@@ -46,6 +46,8 @@ private:
     static unsigned char  float2ucharBounded(const float& in);
     static unsigned short float2ushortBounded(const float& in);
 
+private:
+
     // Disable
     GMicQtImageConverter()  = delete;
     ~GMicQtImageConverter() = delete;

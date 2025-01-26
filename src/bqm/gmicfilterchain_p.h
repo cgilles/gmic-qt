@@ -54,6 +54,8 @@ public:
 
     Private() = default;
 
+public:
+
     int                  index    = -1;
     QString              title;
     QString              command;
@@ -92,6 +94,8 @@ class Q_DECL_HIDDEN GmicFilterChain::Private
 public:
 
     Private() = default;
+
+public:
 
     CtrlButton*          editButton     = nullptr;
     CtrlButton*          moveUpButton   = nullptr;

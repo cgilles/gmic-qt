@@ -55,6 +55,8 @@ public:
 
     Private() = default;
 
+public:
+
     GmicFilterManager* manager   = nullptr;
     GmicFilterData     type      = Command;
     QVariant           oldValue;
@@ -69,6 +71,8 @@ class Q_DECL_HIDDEN GmicFilterManager::Private
 public:
 
     Private() = default;
+
+public:
 
     bool             loaded             = false;
     GmicFilterNode*  commandRootNode    = nullptr;

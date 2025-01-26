@@ -54,6 +54,8 @@ public:
 
     Private() = default;
 
+public:
+
     GmicFilterManager*    manager          = nullptr;
     GmicFilterModel*      commandsModel    = nullptr;
     TreeProxyModel*       proxyModel       = nullptr;
@@ -508,7 +510,7 @@ QString GmicFilterWidget::currentGmicChainedCommands() const
 
     if (!filters.isEmpty())
     {
-        const QList<QVariant> lst = filters.values();
+        const QList<QVariant> lst = filters.values();    // clazy:exclude=qt6-deprecated-api-fixes
 
         for (const QVariant& v : qAsConst(lst))
         {

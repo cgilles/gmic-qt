@@ -43,6 +43,8 @@ public:
 
     Private() = default;
 
+public:
+
     GmicFilterWidget* gmicWidget     = nullptr;
     GmicBqmProcessor* gmicProcessor  = nullptr;
 
