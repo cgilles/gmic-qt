@@ -2,7 +2,7 @@ Under a Linux Ubuntu 22.04 or later:
 
 Note: desired release tag must be the same for CImg, G'MIC, and C'MIC-Qt.
 
-1/  Checkout CImg at the desired release tag (https://github.com/GreycLab/gmic).
+1/  Checkout CImg at the desired release tag (https://github.com/GreycLab/CImg.git).
 2/  Checkout G'MIC at the desired release tag (https://github.com/GreycLab/gmic).
 3/  Checkout G'MIC-Qt at the same desired release tag (https://github.com/c-koi/gmic-qt).
 4/  Fix dependencies to complete the configuration of G'MIC-Qt source code.
