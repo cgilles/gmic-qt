@@ -14,6 +14,10 @@ IGNORE_DIRS+="-i ../patches/ "
 IGNORE_DIRS+="-i ../reports/ "
 IGNORE_DIRS+="-i ../../gmicqt/src/ "
 IGNORE_DIRS+="-i ../../gmicqt/gmic/src/ "
+IGNORE_DIRS+="-i ../../build.clazy/ "
+IGNORE_DIRS+="-i ../../build.scan/ "
+IGNORE_DIRS+="-i ../../build.qt6/ "
+IGNORE_DIRS+="-i ../../build/ "
 
 # --- Defines to use with static analysis.
 
