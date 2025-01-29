@@ -16,7 +16,7 @@ trap 'echo "FAILED COMMAND: $PREVIOUS_COMMAND"' ERR
 #export CXX=/usr/bin/clang++
 
 SOURCEDIR=$PWD
-export BUILD_WITH_QT6=0
+export BUILD_WITH_QT6=1
 
 if [[ $BUILD_WITH_QT6 == 1 ]] ; then
     QTPATHS="qtpaths6"

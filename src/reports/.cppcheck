@@ -43,6 +43,7 @@ CPPCHECK_SUPPRESSIONS="\
 --suppress=purgedConfiguration \
 --suppress=toomanyconfigs \
 --suppress=unknownMacro \
+--suppress=unusedFunction \
 --suppress=unmatchedSuppression \
 --suppress=ConfigurationNotChecked \
 --suppress=checkersReport \
