@@ -182,7 +182,7 @@ public:
     void removeEntry(GmicFilterNode* const node);
 
     void setTitle(GmicFilterNode* const node, const QString& newTitle);
-    void setCommand(GmicFilterNode* const node, const QString& newcommand);
+    void setCommand(GmicFilterNode* const node, const QString& newCommand);
     void setComment(GmicFilterNode* const node, const QString& newDesc);
     void changeExpanded();
 
