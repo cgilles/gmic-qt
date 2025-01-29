@@ -66,7 +66,7 @@ public:
 
     static QString execWindow(DPlugin* const tool,
                               HostType type,
-                              const QString& prm = QString());
+                              const QString& command = QString());
 
 protected:
 
