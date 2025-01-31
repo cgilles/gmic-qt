@@ -92,6 +92,7 @@ void FiltersPresenter::rebuildFilterViewWithSelection(const QList<QString> & key
   _filtersView->disableModel();
   for (const FiltersModel::Filter & filter : _filtersModel) {
     if (filter.absolutePathNoTags().contains("About")) continue;
+    if (filter.absolutePathNoTags().contains("New Version Available")) continue;
     if (filter.matchKeywords(keywords)) {
       _filtersView->addFilter(filter.name(), filter.hash(), filter.path(), filter.isWarning());
     }
