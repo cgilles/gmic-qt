@@ -226,23 +226,24 @@ void GMicQtImageConverter::convertCImgtoDImg(const cimg_library::CImg<float>& in
 void GMicQtImageConverter::convertDImgtoCImg(const DImg& in,
                                              cimg_library::CImg<float>& out)
 {
-    const int w = in.width();
-    const int h = in.height();
-    out.assign(w, h, 1, in.hasAlpha() ? 4 : 3);
+    const int w      = in.width();
+    const int h      = in.height();
+    const bool alpha = in.hasAlpha();
+    out.assign(w, h, 1, alpha ? 4 : 3);
 
     float* dstR = out.data(0, 0, 0, 0);
     float* dstG = out.data(0, 0, 0, 1);
     float* dstB = out.data(0, 0, 0, 2);
     float* dstA = nullptr;
 
-    if (in.hasAlpha())
+    if (alpha)
     {
         dstA = out.data(0, 0, 0, 3);
     }
 
     qCDebug(DIGIKAM_DPLUGIN_LOG) << "GMicQt: convert DImg to CImg:"
                                  << (in.sixteenBit() + 1) * 8 << "bits image"
-                                 << "with alpha channel:" << in.hasAlpha();
+                                 << "with alpha channel:" << alpha;
 
     for (int y = 0 ; y < h ; ++y)
     {
@@ -257,7 +258,7 @@ void GMicQtImageConverter::convertDImgtoCImg(const DImg& in,
                 *dstG++ = static_cast<float>(src[1] / 255.0);
                 *dstR++ = static_cast<float>(src[2] / 255.0);
 
-                if (in.hasAlpha())
+                if (alpha)
                 {
                     *dstA++ = static_cast<float>(src[3] / 255.0);
                 }
@@ -276,7 +277,7 @@ void GMicQtImageConverter::convertDImgtoCImg(const DImg& in,
                 *dstG++ = static_cast<float>(src[1]);
                 *dstR++ = static_cast<float>(src[2]);
 
-                if (in.hasAlpha())
+                if (alpha)
                 {
                     *dstA++ = static_cast<float>(src[3]);
                 }

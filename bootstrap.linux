@@ -12,8 +12,8 @@ trap 'PREVIOUS_COMMAND=$THIS_COMMAND; THIS_COMMAND=$BASH_COMMAND' DEBUG
 trap 'echo "FAILED COMMAND: $PREVIOUS_COMMAND"' ERR
 
 # Uncomment and adjust lines below to use Clang compiler instead GCC
-#export CC=/usr/bin/clang
-#export CXX=/usr/bin/clang++
+export CC=/usr/bin/clang
+export CXX=/usr/bin/clang++
 
 SOURCEDIR=$PWD
 export BUILD_WITH_QT6=1
